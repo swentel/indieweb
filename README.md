@@ -91,6 +91,11 @@ Classes added for minimum publication.
   $settings['indieweb_p_summary_fields'] = ['field_summary'];
   ```
 
+## Output
+
+A basic block is available to render webmentions per page.
+Needs a lot of updates on theming, but it gets the job done for now.
+
 ## Screenshot
 
 ![ScreenShot](https://realize.be/sites/default/files/2018-03/webmention-basic.png)
@@ -115,5 +120,6 @@ Classes added for minimum publication.
   - figure out rel="feed"
   - micropub ?
   - indieauth local site?
+  - inject all the things!
   - Add API to get backlinks for a certain URL from drupal
   - Add API to get backlinks (for a certain URL) from webmention.io and store them (again)
