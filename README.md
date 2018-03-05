@@ -93,7 +93,7 @@ Classes added for minimum publication.
 
 ## Screenshot
 
-![ScreenShot](https://realize.be/screenshot/webmention-basic.png)
+![ScreenShot](https://realize.be/screenshots/webmention-basic.png)
 
 ## TODO
 
