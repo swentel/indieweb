@@ -82,6 +82,18 @@ class WebmentionController extends ControllerBase {
         }
       }
 
+      // Text content.
+      foreach (['html', 'text'] as $key) {
+        if (!empty($mention['post']['content'][$key])) {
+          $values['content_' . $key] = ['value' => $mention['post']['content'][$key]];
+        }
+      }
+
+      // Private or not.
+      if (!empty($mention['post']['wm-private'])) {
+        $values['private'] = ['value' => TRUE];
+      }
+
       // Save the entity.
       $webmention = $this->entityTypeManager()->getStorage('webmention_entity')->create($values);
       $webmention->save();

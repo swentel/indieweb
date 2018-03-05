@@ -94,13 +94,17 @@ Classes added for minimum publication.
 ## TODO
 
   - Add API to get backlinks for a certain URL.
-  - Expose that data in a block.
+  - Expose webmentions in a block.
   - validate secret
   - enabled/disable publish to bridgy
   - make publishing plugins
   - configure publishing per node type
   - use proper queue
   - add publish webmentions snippets as simple extra fields
-  - add more channels to publish to
-  - store data from replies, as comments ?
+  - add more channels to publish to (so more plugins)
   - add social profile links to home (for indieauth.com)
+  - create comments from content?
+  - allow replying
+  - configure whether to create new 'conversations' when say target it / and type is 'mention-of' because that is
+    a mention on twitter
+  - send webmention to a url which starts a 'conversation' on local site

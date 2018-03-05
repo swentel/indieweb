@@ -211,6 +211,37 @@ class WebmentionEntity extends ContentEntityBase implements WebmentionEntityInte
       $weight++;
     }
 
+    // Long text fields.
+    foreach (['content_html' => 'HTML content', 'content_text' => 'Text content'] as $key => $label) {
+
+      $fields[$key] = BaseFieldDefinition::create('string_long')
+        ->setLabel(t($label))
+        ->setDisplayOptions('view', [
+          'label' => 'above',
+          'type' => 'basic_string',
+          'weight' => $weight,
+        ])
+        ->setDisplayOptions('form', [
+          'type' => 'string_textarea',
+          'weight' => $weight,
+        ])
+        ->setDisplayConfigurable('form', TRUE)
+        ->setDisplayConfigurable('view', TRUE)
+        ->setDefaultValue('')
+        ->setRequired(FALSE);
+
+      $weight++;
+
+    }
+
+    $fields['private'] = BaseFieldDefinition::create('boolean')
+      ->setLabel(t('Private'))
+      ->setDescription(t('A boolean indicating whether the Webmention was private or not.'))
+      ->setDefaultValue(FALSE)
+      ->setDisplayOptions('form', [
+        'type' => 'boolean_checkbox',
+        'weight' => 19,
+      ]);
 
     $fields['status'] = BaseFieldDefinition::create('boolean')
       ->setLabel(t('Publishing status'))
