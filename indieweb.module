@@ -1,0 +1,76 @@
+<?php
+
+/**
+ * @file
+ * Indieweb functionality.
+ */
+
+use Drupal\Core\Form\FormStateInterface;
+
+/**
+ * Implements hook_form_BASE_FORM_ID_alter() for \Drupal\node\NodeForm.
+ *
+ * Adds indieweb functionality to node forms.
+ */
+function indieweb_form_node_form_alter(&$form, FormStateInterface $form_state) {
+
+  // TODO configure per node type
+  $node = $form_state->getFormObject()->getEntity();
+  if ($node) {
+
+    $form['indieweb'] = [
+      '#type' => 'details',
+      '#title' => t('Indieweb'),
+      '#access' => \Drupal::currentUser()->hasPermission('send webmentions'),
+      '#group' => 'advanced',
+      '#weight' => 100,
+    ];
+
+    $form['indieweb']['send_to_bridgy'] = [
+      '#type' => 'checkbox',
+      '#title' => t('Send to brid.gy'),
+      '#default_value' => FALSE,
+    ];
+
+    foreach (array_keys($form['actions']) as $action) {
+      if ($action != 'preview' && isset($form['actions'][$action]['#type']) && $form['actions'][$action]['#type'] === 'submit') {
+        $form['actions'][$action]['#submit'][] = 'indieweb_form_node_form_submit';
+      }
+    }
+  }
+
+}
+
+/**
+ * Form submission handler for indieweb.
+ *
+ * @param $form
+ * @param \Drupal\Core\Form\FormStateInterface $form_state
+ *
+ * @see indieweb_form_node_form_alter()
+ */
+function indieweb_form_node_form_submit($form, FormStateInterface $form_state) {
+  /** @var \Drupal\node\NodeInterface $node */
+  $node = $form_state->getFormObject()->getEntity();
+  if (!$form_state->isValueEmpty('send_to_bridgy') && $node->isPublished()) {
+    $sourceURL = $node->toUrl()->setAbsolute(TRUE)->toString();
+    // TODO use queue for real and use plugins for publishing on bridgy
+    // e.g. publish_bridgy should be a plugin to publish too.
+    // TODO we should probably remember that this was send already, I guess
+    // we can add a field on nodes, although I'm not a big fan of it as it's
+    // a pain usually to uninstall then, so maybe a dedicated table is better.
+    \Drupal::database()->insert('queue')
+      ->fields(['name' => 'publish_bridgy', 'data' => serialize(['url' => $sourceURL])])
+      ->execute();
+  }
+}
+
+/**
+ * Implements hook_preprocess_image_style().
+ *
+ * @param $variables
+ */
+function indieweb_preprocess_image_style(&$variables) {
+  // Adds u-photo class to image styles.
+  $variables['image']['#attributes']['class'][] = 'u-photo';
+}

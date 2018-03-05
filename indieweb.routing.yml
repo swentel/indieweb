@@ -1,0 +1,7 @@
+webmention.notify:
+  path: '/webmention/notify'
+  defaults:
+    _controller: '\Drupal\indieweb\Controller\WebmentionController::endpoint'
+    _title: 'Pingback and Webmention endpoint'
+  requirements:
+    _access: 'TRUE'

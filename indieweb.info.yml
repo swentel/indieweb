@@ -1,0 +1,4 @@
+name: Indieweb
+type: module
+description: Indieweb functionality for your site.
+core: 8.x
