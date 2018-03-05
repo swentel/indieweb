@@ -91,11 +91,15 @@ Classes added for minimum publication.
   $settings['indieweb_p_summary_fields'] = ['field_summary'];
   ```
 
+## Screenshot
+
+![ScreenShot](https://realize.be/screenshot/webmention-basic.png)
+
 ## TODO
 
-  - Add API to get backlinks for a certain URL.
-  - Expose webmentions in a block.
-  - validate secret
+  - more flexible theming in block, and in general
+  - default avatar ?
+  - validate secret from webmention.io
   - enabled/disable publish to bridgy
   - make publishing plugins
   - configure publishing per node type
@@ -111,3 +115,5 @@ Classes added for minimum publication.
   - figure out rel="feed"
   - micropub ?
   - indieauth local site?
+  - Add API to get backlinks for a certain URL from drupal
+  - Add API to get backlinks (for a certain URL) from webmention.io and store them (again)
