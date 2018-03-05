@@ -30,6 +30,9 @@ both right :)
 Pingbacks and webmentions are stored in a simple entity type called webmentions as user 1. An overview of collected
 links is available at admin/content/webmentions.
 
+To create an account, you need to authenticate with https://indieauth.com/ which requires you to add the "rel=me"
+attribute on links to your social accounts. See https://indieauth.com/setup for full instructions.
+
 To configure:
 
 - Add the webmention header tags to html.html.twig (or use hooks to only add these head tags on certain pages).
@@ -100,3 +103,4 @@ Classes added for minimum publication.
   - add publish webmentions snippets as simple extra fields
   - add more channels to publish to
   - store data from replies, as comments ?
+  - add social profile links to home (for indieauth.com)
