@@ -24,8 +24,11 @@ module exposes an endpoint (/webmention/notify) to receive pingbacks and webment
 also validated to make sure that the source URL has a valid link to the target.
 
 You need an account for receiving the webhooks at https://webmention.io. As soon as one webmention is recorded, you can
-set the the webhook to http://your_domain/webmention/notify. Pingbacks can be done without an account, but you probably
-want both right :)
+set the webhook to http://your_domain/webmention/notify. Pingbacks can be done without an account, but you probably want
+both right :)
+
+Pingbacks and webmentions are stored in a simple entity type called webmentions as user 1. An overview of collected
+links is available at admin/content/webmentions.
 
 To configure:
 
@@ -35,9 +38,6 @@ To configure:
   <link rel="pingback" href="https://webmention.io/webmention?forward=http://your_domain/webmention/notify" />
   <link rel="webmention" href="https://webmention.io/your_domain/webmention" />
   ```
-
-- Pingbacks and webmentions are stored in a simple entity type called webmentions as user 1.
-  An overview of collected links is available at admin/content/webmentions.
 
 - Two settings can be configured by adding lines to settings.php
 
@@ -58,30 +58,45 @@ To configure:
 Brid.gy allows you to publish content on your social networks, as well as pulling back replies, likes etc. You need to
 allow brid.gy to post and retrieve them. You can also just allow to retrieve.
 
-A checkbox will be available on the node form for publishing your content. In case you want to publish, this is stored
-in the queue table and is currently handled by a drush command (proper queue integration coming soon).
+A checkbox will be available on the node form for publishing your content. When you toggle to publish, an entry is
+created in the queue table which is currently handled by a drush command (proper queue integration coming soon).
 
 drush command is 'indieweb-send-webmentions'
 
-Note that in case you want to publish, you need to make sure your content has proper microformat classes.
+In case you want to publish, you need to make sure your content has proper microformat classes and add following snippet
+to the page you want to publish to twitter.
+
+  ```
+  <a href="https://brid.gy/publish/twitter"></a>
+  ```
+
+This module currently exposes it on the full view mode of a node, see indieweb_node_view_alter().
+More info about this at https://brid.gy/about#webmentions
+
+Note that brid.gy prefers p-summary over e-content, see https://brid.gy/about#microformats.
 
 ## Microformats
 
-Minimum classes needed:
+Classes added for minimum publication.
 
-- h-entry
-- p-content or e-content
+- h-entry: added on node wrapper, see indieweb_preprocess_node().
+- e-content: added on default body field, see indieweb_preprocess_field().
+- u-photo: added on image styles, indieweb_preprocess_image_style().
+- p-summary: the field where you want this class to be added on can be configured via
 
-Note: these classes are not yet added by this module, coming soon.
-
-Optional classes:
-
-- u-photo: for pictures.
-
-Added by default on all images styles.
+  ```
+  $settings['indieweb_p_summary_fields'] = ['field_summary'];
+  ```
 
 ## TODO
 
   - Add API to get backlinks for a certain URL.
   - Expose that data in a block.
   - validate secret
+  - enabled/disable publish to bridgy
+  - make publishing plugins
+  - configure publishing per node type
+  - use proper queue
+  - add publish webmentions snippets as simple extra fields
+  - add more channels to publish to
+  - store data from replies, as comments ?
