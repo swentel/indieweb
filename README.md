@@ -108,3 +108,6 @@ Classes added for minimum publication.
   - configure whether to create new 'conversations' when say target it / and type is 'mention-of' because that is
     a mention on twitter
   - send webmention to a url which starts a 'conversation' on local site
+  - figure out rel="feed"
+  - micropub ?
+  - indieauth local site?
