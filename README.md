@@ -9,7 +9,7 @@ For more information see https://indieweb.org/.
 Current functionality:
 
 - Webmention.io integration
-- Brid.gy publishing for all nodes
+- Brid.gy publishing for nodes
 - microformats for content and images
 
 ## To install
@@ -77,6 +77,8 @@ This module currently exposes it on the full view mode of a node, see indieweb_n
 More info about this at https://brid.gy/about#webmentions
 
 Note that brid.gy prefers p-summary over e-content, see https://brid.gy/about#microformats.
+
+More channels coming soon.
 
 ## Microformats
 
