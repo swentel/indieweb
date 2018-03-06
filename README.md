@@ -11,6 +11,7 @@ Current functionality:
 - Webmention.io integration
 - Brid.gy publishing for nodes
 - microformats for content and images
+- Creating comments from 'in-reply-to'
 
 ## To install
 
