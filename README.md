@@ -155,27 +155,6 @@ Needs a lot of updates on theming, but it gets the job done for now.
 
 ![ScreenShot](https://realize.be/sites/default/files/2018-03/webmention-basic.png)
 
-## TODO
+## Want to help out ?
 
-  - more flexible theming in block, and in general
-  - default avatar ?
-  - make publishing plugins and allow to create on the fly
-  - enabled/disable publish to bridgy (when plugins are there)
-  - add more default channels to publish to (when plugins are in)
-  - configure publishing per node type
-  - use proper queue
-  - add social profile links to home (for indieauth.com)
-  - match author of comment with yourself on the site
-  - allow replying on comments which send a webmention then so a reply on that gets linked again
-  - allow liking comments which then send a webmention
-  - better configuration of comments (e.g. also author picture etc, better subject?)
-  - configure whether to create new 'conversations' when say target it / and type is 'mention-of' because that is
-    a mention on twitter
-  - send webmention to a url which starts a 'conversation' on local site
-  - figure out rel="feed"
-  - micropub ?
-  - indieauth local site?
-  - inject all the things!
-  - Add API to get backlinks for a certain URL from drupal
-  - Add API to get backlinks (for a certain URL) from webmention.io and store them (again)
-  - tests (sigh)
+Great! Check the issue queue at https://github.com/swentel/indieweb/issues
