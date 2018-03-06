@@ -42,7 +42,13 @@ To configure:
   <link rel="webmention" href="https://webmention.io/your_domain/webmention" />
   ```
 
-- Two settings can be configured by adding lines to settings.php
+- settings which can be configured by adding lines to settings.php
+
+  - Webmention.io secret, needed to validate webmentions send to the controller.
+
+  ```
+  $settings['indieweb_webmention_io_secret'] = 'your_secret';
+  ```
 
   - Logging the payload in watchdog:
 
@@ -106,7 +112,6 @@ Needs a lot of updates on theming, but it gets the job done for now.
 
   - more flexible theming in block, and in general
   - default avatar ?
-  - validate secret from webmention.io
   - enabled/disable publish to bridgy
   - make publishing plugins
   - configure publishing per node type
@@ -124,3 +129,4 @@ Needs a lot of updates on theming, but it gets the job done for now.
   - inject all the things!
   - Add API to get backlinks for a certain URL from drupal
   - Add API to get backlinks (for a certain URL) from webmention.io and store them (again)
+  - tests (sigh)

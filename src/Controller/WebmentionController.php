@@ -38,8 +38,10 @@ class WebmentionController extends ControllerBase {
       }
     }
     else {
-      // TODO validate secret
-      $valid = TRUE;
+      $secret = Settings::get('indieweb_webmention_io_secret', '');
+      if (!empty($mention['secret']) && $mention['secret'] == $secret) {
+        $valid = TRUE;
+      }
     }
 
     // Debug.
