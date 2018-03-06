@@ -46,7 +46,7 @@ class WebmentionEntitySettingsForm extends FormBase {
    *   Form definition array.
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
-    $form['webmentionentity_settings']['#markup'] = 'Settings form for Webmention entities. Manage field settings here.';
+    $form['webmentionentity_settings']['#markup'] = 'Settings form for Webmentions. No dedicated settings so far.';
     return $form;
   }
 
