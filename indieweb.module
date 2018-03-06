@@ -9,6 +9,8 @@ use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Site\Settings;
+use Drupal\node\Entity\NodeType;
+use Drupal\node\NodeInterface;
 
 /**
  * Implements hook_form_BASE_FORM_ID_alter() for \Drupal\node\NodeForm.
@@ -103,11 +105,29 @@ function indieweb_preprocess_image_style(&$variables) {
 }
 
 /**
- * Implements hook_entity_view_alter().
+ * Implements hook_entity_extra_field_info().
  */
-function indieweb_node_view_alter(array &$build, EntityInterface $entity, EntityViewDisplayInterface $display) {
-  if ($build['#view_mode'] == 'full') {
-    $build['bridgy_twitter'] = [
+function indieweb_entity_extra_field_info() {
+  $extra = [];
+
+  foreach (NodeType::loadMultiple() as $bundle) {
+
+    $extra['node'][$bundle->id()]['display']['indieweb_bridgy_publish_twitter'] = [
+      'label' => t('Brid.gy: publish twitter'),
+      'weight' => 0,
+      'visible' => FALSE,
+    ];
+  }
+
+  return $extra;
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_view() for node entities.
+ */
+function indieweb_node_view(array &$build, NodeInterface $account, EntityViewDisplayInterface $display) {
+  if ($display->getComponent('indieweb_bridgy_publish_twitter')) {
+    $build['indieweb_bridgy_publish_twitter'] = [
       '#markup' => '<span class="hidden"><a href="https://brid.gy/publish/twitter"></a></span>',
       '#weight' => 100,
     ];

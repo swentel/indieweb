@@ -73,8 +73,8 @@ to the page you want to publish to twitter.
   <a href="https://brid.gy/publish/twitter"></a>
   ```
 
-This module currently exposes it on the full view mode of a node, see indieweb_node_view_alter().
-More info about this at https://brid.gy/about#webmentions
+This module exposes an extra field which you can configure on the 'Manage Display' pages of each node. The content
+itself is added in indieweb_node_view(). More info about this at https://brid.gy/about#webmentions
 
 Note that brid.gy prefers p-summary over e-content, see https://brid.gy/about#microformats.
 
@@ -111,7 +111,6 @@ Needs a lot of updates on theming, but it gets the job done for now.
   - make publishing plugins
   - configure publishing per node type
   - use proper queue
-  - add publish webmentions snippets as simple extra fields
   - add more channels to publish to (so more plugins)
   - add social profile links to home (for indieauth.com)
   - create comments from content?
