@@ -167,6 +167,7 @@ Needs a lot of updates on theming, but it gets the job done for now.
   - add social profile links to home (for indieauth.com)
   - match author of comment with yourself on the site
   - allow replying on comments which send a webmention then so a reply on that gets linked again
+  - allow liking comments which then send a webmention
   - better configuration of comments (e.g. also author picture etc, better subject?)
   - configure whether to create new 'conversations' when say target it / and type is 'mention-of' because that is
     a mention on twitter
