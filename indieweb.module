@@ -5,10 +5,14 @@
  * Indieweb functionality.
  */
 
+use Drupal\comment\Entity\Comment;
+use Drupal\Component\Utility\Unicode;
 use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Site\Settings;
+use Drupal\Core\Url;
+use Drupal\indieweb\Entity\WebmentionEntityInterface;
 use Drupal\node\Entity\NodeType;
 use Drupal\node\NodeInterface;
 
@@ -131,4 +135,64 @@ function indieweb_node_view(array &$build, NodeInterface $account, EntityViewDis
       '#markup' => '<span class="hidden"><a href="https://brid.gy/publish/twitter"></a></span>',
     ];
   }
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_insert().
+ */
+function indieweb_webmention_entity_insert(WebmentionEntityInterface $webmention) {
+
+  if (
+    Settings::get('indieweb_webmention_create_comment', FALSE) &&
+    !empty(Settings::get('indieweb_comment_type', '')) &&
+    !empty(Settings::get('indieweb_comment_webmention_reference_field', '')) &&
+    !empty(Settings::get('indieweb_node_comment_field')) &&
+    $webmention->get('property')->value == 'in-reply-to' &&
+    !empty($webmention->get('content_text')->value)) {
+
+    // TODO - we have the same code in WebmentionController::clearCache to get
+    // an entity make a helper function/method.
+    $path = \Drupal::service('path.alias_manager')->getPathByAlias($webmention->get('target')->value);
+    try {
+      $params = Url::fromUri("internal:" . $path)->getRouteParameters();
+      if (!empty($params) && key($params) == 'node') {
+        $entity_type = key($params);
+
+        $storage = \Drupal::entityTypeManager()->getStorage($entity_type);
+        if ($storage) {
+
+          $comment_type = Settings::get('indieweb_comment_type', '');
+          $comment_comment_webmention_field_name = Settings::get('indieweb_comment_webmention_reference_field', '');
+          $comment_node_comment_field_name = Settings::get('indieweb_node_comment_field', '');
+
+          /** @var \Drupal\node\NodeInterface $node */
+          $node = $storage->load($params[$entity_type]);
+          if ($node && $node->hasField($comment_node_comment_field_name) && $node->{$comment_node_comment_field_name}->status == 2) {
+
+            $subject = 'Auto created comment from webmention';
+
+            $values = [
+              'name' => $webmention->get('author_name')->value,
+              'subject' => $subject,
+              'status' => Settings::get('indieweb_comment_status', 0),
+              'entity_id' => $node->id(),
+              'entity_type' => 'node',
+              'comment_type' => $comment_type,
+              'field_name' => $comment_node_comment_field_name,
+              $comment_comment_webmention_field_name => [
+                'target_id' => $webmention->id(),
+              ]
+            ];
+            $comment = Comment::create($values);
+            $comment->save();
+
+          }
+        }
+      }
+    }
+    catch (Exception $e) {
+      \Drupal::logger('indieweb')->notice('Failed to create a comment: @message', ['@message' => $e->getMessage()]);
+    }
+  }
+
 }

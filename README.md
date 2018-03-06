@@ -99,6 +99,51 @@ Classes added for minimum publication.
   $settings['indieweb_p_summary_fields'] = ['field_summary'];
   ```
 
+## Creating comments
+
+Warning: experimental, but fun :)
+
+When a webmention is saved and is of property 'in-reply-to', it is possible to create a comment. Currently,
+configuration is done by adding a field on comments and configuring lines in settings.php. (at some point, we'll move
+this to configuration when it's well tested). Following steps are needed:
+
+  - Create an entity reference field on your comment which points to a webmention. On the 'Manage display' page you can
+  set the formatter to 'Webmention'. Currently the format uses the textual version of the reply run through the
+  'restricted_html' content format which comes default with Drupal 8.
+
+  - enable the creation of the comment in settings.php.
+
+  ```
+  $settings['indieweb_webmention_create_comment'] = TRUE;
+  ```
+
+  - The name of the comment type to use in settings.php.
+
+  ```
+  $settings['indieweb_comment_type'] = 'comment';
+  ```
+
+  - The name of the webmention reference field in settings.php.
+
+  ```
+  $settings['indieweb_comment_webmention_reference_field'] = 'field_webmention';
+  ```
+
+  - The name of the comment field on the node type in settings.php.
+
+  ```
+  $settings['indieweb_node_comment_field'] = 'comment';
+  ```
+
+  - Status of the new comment (defaults to moderated) in settings.php. (1 is published)
+
+  ```
+  $settings['indieweb_comment_status'] = 1;
+  ```
+
+That's it. The module will check whether the node type has comments enabled and if the comment status is set to open.
+See indieweb_webmention_entity_insert().
+
 ## Output
 
 A basic block is available to render webmentions per page.
@@ -112,14 +157,14 @@ Needs a lot of updates on theming, but it gets the job done for now.
 
   - more flexible theming in block, and in general
   - default avatar ?
-  - enabled/disable publish to bridgy
-  - make publishing plugins
+  - make publishing plugins and allow to create on the fly
+  - enabled/disable publish to bridgy (when plugins are there)
+  - add more default channels to publish to (when plugins are in)
   - configure publishing per node type
   - use proper queue
-  - add more channels to publish to (so more plugins)
   - add social profile links to home (for indieauth.com)
-  - create comments from content?
-  - allow replying
+  - allow replying on comments which send a webmention then
+  - better configuration of comments (e.g. also author picture etc, better subject?)
   - configure whether to create new 'conversations' when say target it / and type is 'mention-of' because that is
     a mention on twitter
   - send webmention to a url which starts a 'conversation' on local site
