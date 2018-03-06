@@ -109,7 +109,8 @@ this to configuration when it's well tested). Following steps are needed:
 
   - Create an entity reference field on your comment which points to a webmention. On the 'Manage display' page you can
   set the formatter to 'Webmention'. Currently the format uses the textual version of the reply run through the
-  'restricted_html' content format which comes default with Drupal 8.
+  'restricted_html' content format which comes default with Drupal 8. Don't forget to set permissions to view
+  webmentions.
 
   - enable the creation of the comment in settings.php.
 
@@ -163,7 +164,8 @@ Needs a lot of updates on theming, but it gets the job done for now.
   - configure publishing per node type
   - use proper queue
   - add social profile links to home (for indieauth.com)
-  - allow replying on comments which send a webmention then
+  - match author of comment with yourself on the site
+  - allow replying on comments which send a webmention then so a reply on that gets linked again
   - better configuration of comments (e.g. also author picture etc, better subject?)
   - configure whether to create new 'conversations' when say target it / and type is 'mention-of' because that is
     a mention on twitter
