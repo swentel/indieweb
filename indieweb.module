@@ -129,7 +129,6 @@ function indieweb_node_view(array &$build, NodeInterface $account, EntityViewDis
   if ($display->getComponent('indieweb_bridgy_publish_twitter')) {
     $build['indieweb_bridgy_publish_twitter'] = [
       '#markup' => '<span class="hidden"><a href="https://brid.gy/publish/twitter"></a></span>',
-      '#weight' => 100,
     ];
   }
 }
