@@ -43,7 +43,7 @@ class WebmentionEntityHtmlRouteProvider extends AdminHtmlRouteProvider {
       $route = new Route("/admin/structure/{$entity_type->id()}/settings");
       $route
         ->setDefaults([
-          '_form' => 'Drupal\indieweb\Form\indiewebEntitySettingsForm',
+          '_form' => 'Drupal\indieweb\Form\WebmentionEntitySettingsForm',
           '_title' => "{$entity_type->getLabel()} settings",
         ])
         ->setRequirement('_permission', $entity_type->getAdminPermission())
