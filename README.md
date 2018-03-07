@@ -12,6 +12,7 @@ Current functionality:
 - Brid.gy publishing for nodes
 - microformats for content and images
 - Creating comments from 'in-reply-to'
+- Info about adding IndieAuth headers (see below)
 
 ## To install
 
@@ -32,13 +33,14 @@ Pingbacks and webmentions are stored in a simple entity type called webmentions 
 links is available at admin/content/webmentions.
 
 To create an account, you need to authenticate with https://indieauth.com/ which requires you to add the "rel=me"
-attribute on links to your social accounts. See https://indieauth.com/setup for full instructions.
+attribute on links to your social accounts. See https://indieauth.com/setup for full instructions. See also IndieAuth
+below.
 
 To configure:
 
 - Add the webmention header tags to html.html.twig (or use hooks to only add these head tags on certain pages).
 
- ```
+  ```
   <link rel="pingback" href="https://webmention.io/webmention?forward=http://your_domain/webmention/notify" />
   <link rel="webmention" href="https://webmention.io/your_domain/webmention" />
   ```
@@ -151,6 +153,42 @@ this to configuration when it's well tested). Following steps are needed:
 
 That's it. The module will check whether the node type has comments enabled and if the comment status is set to open.
 See indieweb_webmention_entity_insert().
+
+## IndieAuth support
+
+If you use apps like https://quill.p3k.io (Web) or Indigenous (iOS), the easiest way to let you login with your domain
+is by using indieauth.com. Less code to maintain right :)
+
+Add following headers to your html.html.twig file.
+
+  ```
+  <link rel="authorization_endpoint" href="https://indieauth.com/auth" />
+  <link rel="token_endpoint" href="https://tokens.indieauth.com/token" />
+  ```
+
+You need rel="me" links on your homepage which point to your own site and your social media accounts.
+e.g.
+
+  ```
+  <a class="h-card" rel="me">https://your_domain</a>
+  <a href="https://twitter.com/swentel" target="_blank" title="Twitter" rel="me">
+  ```
+
+## Micropub
+
+Warning: experimental, but fun :)
+
+Allow posting to your site, cool no ?
+
+Add following header to your html.html.twig file.
+
+  ```
+  <link rel="micropub" href="https://your_domain/indieweb/micropub">
+  ```
+
+  Note, the routing definition is commented out at this point as it's not safe yet to use!
+
+More configuration to come.
 
 ## Output
 

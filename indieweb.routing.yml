@@ -5,3 +5,12 @@ webmention.notify:
     _title: 'Pingback and Webmention endpoint'
   requirements:
     _access: 'TRUE'
+
+#micropub.endpoint:
+#  path: '/indieweb/micropub'
+#  defaults:
+#   _controller: '\Drupal\indieweb\Controller\MicropubController::endpoint'
+#   _title: 'Micropub endpoint'
+#  requirements:
+  # todo access validation can maybe handled in an access callback? (or something else)
+#   _access: 'TRUE'
