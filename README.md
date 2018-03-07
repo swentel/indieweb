@@ -137,10 +137,16 @@ this to configuration when it's well tested). Following steps are needed:
   $settings['indieweb_node_comment_field'] = 'comment';
   ```
 
-  - Status of the new comment (defaults to moderated) in settings.php. (1 is published)
+  - Status of the new comment (defaults to moderated) in settings.php. (1 is published) (optional)
 
   ```
   $settings['indieweb_comment_status'] = 1;
+  ```
+
+  - Match author names with uid's in settings.php. (optional)
+
+  ```
+  $settings['indieweb_comment_authors'] = ['Your name' => 3];
   ```
 
 That's it. The module will check whether the node type has comments enabled and if the comment status is set to open.

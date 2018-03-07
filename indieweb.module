@@ -172,7 +172,6 @@ function indieweb_webmention_entity_insert(WebmentionEntityInterface $webmention
             $subject = 'Auto created comment from webmention';
 
             $values = [
-              'name' => $webmention->get('author_name')->value,
               'subject' => $subject,
               'status' => Settings::get('indieweb_comment_status', 0),
               'entity_id' => $node->id(),
@@ -183,6 +182,15 @@ function indieweb_webmention_entity_insert(WebmentionEntityInterface $webmention
                 'target_id' => $webmention->id(),
               ]
             ];
+
+            // Match authors if possible.
+            $authors = Settings::get('indieweb_comment_authors', []);
+            $author_name = $webmention->get('author_name')->value;
+            $values['name'] = $author_name;
+            if (isset($authors[$author_name])) {
+              $values['uid'] = $authors[$author_name];
+            }
+
             $comment = Comment::create($values);
             $comment->save();
 
