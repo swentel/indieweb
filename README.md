@@ -190,6 +190,22 @@ Add following header to your html.html.twig file.
 
 More configuration to come.
 
+## Microsub
+
+Warning: experimental, but fun :)
+
+Allow your site to be 'read'.
+
+Add following header to your html.html.twig file.
+
+  ```
+  <link rel="microsub" href="https://your_domain/indieweb/microsub">
+  ```
+
+  Note, the routing definition is commented out at this point as it's not safe yet to use!
+
+More configuration to come.
+
 ## Output
 
 A basic block is available to render webmentions per page.

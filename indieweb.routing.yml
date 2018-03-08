@@ -14,3 +14,13 @@ webmention.notify:
 #  requirements:
   # todo access validation can maybe handled in an access callback? (or something else)
 #   _access: 'TRUE'
+
+#microsub.endpoint:
+#  path: '/indieweb/microsub'
+#  defaults:
+#   _controller: '\Drupal\indieweb\Controller\MicrosubController::endpoint'
+#   _title: 'Microsub endpoint'
+#  requirements:
+  # todo access validation can maybe handled in an access callback? (or something else)
+#   _access: 'TRUE'
+
