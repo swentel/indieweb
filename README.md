@@ -13,6 +13,7 @@ Current functionality:
 - microformats for content and images
 - Creating comments from 'in-reply-to'
 - Info about adding IndieAuth headers (see below)
+- micropub requests
 
 ## To install
 
@@ -179,32 +180,74 @@ e.g.
 Warning: experimental, but fun :)
 
 Allow posting to your site, cool no ?
+If you would send a micropub post request with the content parameter, it will create a node.
+You can configure the node type below, but we will make this more flexible in the near future.
+It will store the content into a field with machine name 'body' which  can be overridden too.
 
-Add following header to your html.html.twig file.
+  Add following header to your html.html.twig file.
 
   ```
   <link rel="micropub" href="https://your_domain/indieweb/micropub">
   ```
 
-  Note, the routing definition is commented out at this point as it's not safe yet to use!
+  Settings you can change in settings.php
 
-More configuration to come.
+  - allow micropub requests.
+
+  ```
+  $settings['indieweb_allow_micropub_posts'] = TRUE;
+  ```
+
+  - Set the 'me' value, this is your domain which you use to sign in with Indieauth. Note the trailing slash!
+
+  ```
+  $settings['indieweb_micropub_me'] = 'https://realize.be/';
+  ```
+
+  - Allow sending a webmention (currently hardcoded to bridgy twitter):
+
+  ```
+  $settings['indieweb_micropub_send_webmention'] = TRUE;
+  ```
+
+  - Assigning a node type for the post (defaults to 'note'):
+
+  ```
+  $settings['indieweb_micropub_node_type'] = 'micropub_note';
+  ```
+
+  - The field which will store the 'content' from the micropub post (defaults to 'body'):
+
+  ```
+  $settings['indieweb_micropub_content_field'] = 'my_body';
+  ```
+
+  - Assigning a different user id for the post (default to 1):
+
+  ```
+  $settings['indieweb_micropub_uid'] = 321;
+  ```
+
+  - Logging the payload in watchdog:
+
+  ```
+  $settings['indieweb_micropub_log_payload'] = TRUE;
+  ```
 
 ## Microsub
 
+Allow your site to be 'read'.
+
 Warning: experimental, but fun :)
 
-Allow your site to be 'read'.
+Note, the routing definition is commented out at this point as there's no dynamic content yet.
+More to come later.
 
 Add following header to your html.html.twig file.
 
   ```
   <link rel="microsub" href="https://your_domain/indieweb/microsub">
   ```
-
-  Note, the routing definition is commented out at this point as it's not safe yet to use!
-
-More configuration to come.
 
 ## Output
 

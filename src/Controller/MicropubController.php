@@ -28,25 +28,51 @@ class MicropubController extends ControllerBase {
       $input = $_POST;
     }
 
-    if (Settings::get('indieweb_micropub_log_payload', FALSE)) {
-      $this->getLogger('micropub')->notice('input: @input', ['@input' => print_r($input, 1)]);
-    }
+    if (Settings::get('indieweb_allow_micropub_posts', FALSE) && !empty($input)) {
 
-    // TODO verify header token.
-    if (Settings::get('indieweb_allow_micropub_posts', FALSE)) {
+      $valid_token = FALSE;
 
-      if (!empty($input['content'])) {
+      // TODO access token check should use a configurable authentication
+      // endpoint
+      $auth = \Drupal::request()->headers->get('Authorization');
+      if ($auth && preg_match('/Bearer\s(\S+)/', $auth, $matches)) {
+
+        // TODO we can probably store this token so we don't have to talk
+        // to indieauth all the time, should check with Aaron
+
+        $client = \Drupal::httpClient();
+        $headers = [
+          'Accept' => 'application/json',
+          'Authorization' => $auth,
+        ];
+        $response = $client->get('https://tokens.indieauth.com/token', ['headers' => $headers]);
+        $json = json_decode($response->getBody());
+        if (isset($json->me) && $json->me == Settings::get('indieweb_micropub_me', '')) {
+          $valid_token = TRUE;
+        }
+      }
+
+      if (Settings::get('indieweb_micropub_log_payload', FALSE)) {
+        $this->getLogger('micropub')->notice('input: @input', ['@input' => print_r($input, 1)]);
+      }
+
+      if (!empty($input['content']) && $valid_token) {
 
         $values = [
-          'uid' => 1,
+          'uid' => Settings::get('indieweb_micropub_uid', 1),
           'title' => 'Micropub post',
-          'type' => 'note',
-          'body' => [
-            'value' => $input['content'],
-          ],
+          'type' => Settings::get('indieweb_micropub_node_type', 'note'),
           'status' => 1,
         ];
+
+        /** @var \Drupal\node\NodeInterface $node */
         $node = Node::create($values);
+
+        $field_name = Settings::get('indieweb_micropub_content_field', 'body');
+        if ($node->hasField($field_name)) {
+          $node->set($field_name, $input['content']);
+        }
+
         $node->save();
         if ($node->id()) {
 

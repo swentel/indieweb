@@ -6,14 +6,14 @@ webmention.notify:
   requirements:
     _access: 'TRUE'
 
-#micropub.endpoint:
-#  path: '/indieweb/micropub'
-#  defaults:
-#   _controller: '\Drupal\indieweb\Controller\MicropubController::endpoint'
-#   _title: 'Micropub endpoint'
-#  requirements:
+micropub.endpoint:
+  path: '/indieweb/micropub'
+  defaults:
+   _controller: '\Drupal\indieweb\Controller\MicropubController::endpoint'
+   _title: 'Micropub endpoint'
+  requirements:
   # todo access validation can maybe handled in an access callback? (or something else)
-#   _access: 'TRUE'
+   _access: 'TRUE'
 
 #microsub.endpoint:
 #  path: '/indieweb/microsub'
