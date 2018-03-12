@@ -32,8 +32,6 @@ class MicropubController extends ControllerBase {
 
       $valid_token = FALSE;
 
-      // TODO access token check should use a configurable authentication
-      // endpoint
       $auth = \Drupal::request()->headers->get('Authorization');
       if ($auth && preg_match('/Bearer\s(\S+)/', $auth, $matches)) {
 
@@ -45,6 +43,8 @@ class MicropubController extends ControllerBase {
           'Accept' => 'application/json',
           'Authorization' => $auth,
         ];
+        // TODO access token check should use a configurable authentication
+        // endpoint
         $response = $client->get('https://tokens.indieauth.com/token', ['headers' => $headers]);
         $json = json_decode($response->getBody());
         if (isset($json->me) && $json->me == Settings::get('indieweb_micropub_me', '')) {
@@ -56,6 +56,7 @@ class MicropubController extends ControllerBase {
         $this->getLogger('micropub')->notice('input: @input', ['@input' => print_r($input, 1)]);
       }
 
+      // TODO validate on 'h-entry' type.
       if (!empty($input['content']) && $valid_token) {
 
         $values = [
@@ -63,6 +64,7 @@ class MicropubController extends ControllerBase {
           'title' => 'Micropub post',
           'type' => Settings::get('indieweb_micropub_node_type', 'note'),
           'status' => 1,
+          'is_micropub_post' => TRUE,
         ];
 
         /** @var \Drupal\node\NodeInterface $node */
