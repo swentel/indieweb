@@ -8,6 +8,16 @@ indieweb.admin.webmention_settings:
   route_name: indieweb.admin.webmention_settings
   base_route: indieweb.admin.dashboard
 
+indieweb.admin.publish_settings:
+  title: 'Publish'
+  route_name: indieweb.admin.publish_settings
+  base_route: indieweb.admin.dashboard
+
+indieweb.admin.microformats_settings:
+  title: 'Microformats'
+  route_name: indieweb.admin.microformats_settings
+  base_route: indieweb.admin.dashboard
+
 webmention_entity.list_tab:
   title: 'Webmentions'
   route_name: entity.webmention_entity.collection

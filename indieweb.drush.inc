@@ -1,7 +1,5 @@
 <?php
 
-use IndieWeb\MentionClient;
-
 /**
  * Implements hook_drush_commands().
  *
@@ -19,20 +17,7 @@ function indieweb_drush_command() {
  * Send webmentions in queue.
  */
 function drush_indieweb_send_webmentions() {
-
-  $query = 'SELECT * FROM queue WHERE name = :name';
-  $results = \Drupal::database()->query($query, [':name' => 'publish_bridgy']);
-  foreach ($results as $result) {
-
-    $data = unserialize($result->data);
-    if (!empty($data['url'])) {
-      $sourceURL = $data['url'];
-      $targetURL = 'https://brid.gy/publish/twitter';
-      $client = new MentionClient();
-      $client->sendWebmention($sourceURL, $targetURL);
-    }
-
-    \Drupal::database()->delete('queue')->condition('item_id', $result->item_id)->execute();
+  if (\Drupal::config('indieweb.publish')->get('publish_send_webmention_by') == 'drush') {
+    indieweb_handle_publish_queue();
   }
-
 }

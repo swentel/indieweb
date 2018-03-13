@@ -14,6 +14,22 @@ indieweb.admin.webmention_settings:
   requirements:
     _permission: 'administer indieweb'
 
+indieweb.admin.publish_settings:
+  path: '/admin/config/services/indieweb/publish'
+  defaults:
+    _form: '\Drupal\indieweb\Form\PublishSettingsForm'
+    _title: 'Publish'
+  requirements:
+    _permission: 'administer indieweb'
+
+indieweb.admin.microformats_settings:
+  path: '/admin/config/services/indieweb/microformats'
+  defaults:
+    _form: '\Drupal\indieweb\Form\MicroformatsSettingsForm'
+    _title: 'Microformats'
+  requirements:
+    _permission: 'administer indieweb'
+
 indieweb.webmention.notify:
   path: '/webmention/notify'
   defaults:

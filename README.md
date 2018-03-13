@@ -3,33 +3,41 @@
 ## About this module.
 
 Integrates the philosophy of Indieweb in your Drupal website in a minimal way.
-
-For more information see https://indieweb.org/.
+For more information about indieweb, see https://indieweb.org/.
 
 Current functionality:
 
-- Webmention.io integration
-- Brid.gy publishing for nodes
-- microformats for content and images
+- Receive webmentions and pingbacks via Webmention.io
+- Publish content, likes via bridg.y
+- Microformats for content and images
 - Creating comments from 'in-reply-to'
-- Info about adding IndieAuth headers (see below)
-- micropub requests
+- IndieAuth headers
+- Micropub (experimental)
+- Microsub (extremely experimental)
+
+This is only the top of the iceberg, much more to come.
+
+## IndieWebify.me
+
+You can use https://indiewebify.me/ to perform initial checks to see if your site is Indieweb ready. It will scan for
+certain markup, so after you've done  the configuration with this module (and optionally more yourself), use it to make
+sure everything is ok.
 
 ## To install
 
 - composer require indieweb/mention-client in the root of your Drupal installation.
-- go to admin/modules and toggle 'Indieweb'.
+- go to admin/modules and toggle 'Indieweb' to enable the module.
 
-## Webmention.io
+## Webmentions / Webmention.io
 
 Webmention.io is a hosted service created to easily handle webmentions (and legacy pingbacks) on any web page. The
 module exposes an endpoint (/webmention/notify) to receive pingbacks and webmentions via this service. Pingbacks are
 also validated to make sure that the source URL has a valid link to the target. Webmention.io is open source so you can
 also host this service yourself.
 
-You need an account for receiving the webhooks at https://webmention.io. As soon as one webmention is recorded, you can
-set the webhook to http://your_domain/webmention/notify. Pingbacks can be done without an account, but you probably want
-both right :)
+You need an account for receiving the webhooks at https://webmention.io. As soon as one webmention is recorded at that
+service, you can set the webhook to http://your_domain/webmention/notify and enter a secret. Pingbacks can be done
+without an account, but you probably want both right :)
 
 Pingbacks and webmentions are stored in a simple entity type called webmentions as user 1. An overview of collected
 links is available at admin/content/webmentions.
@@ -41,33 +49,55 @@ further below.
 - Configuration is at /admin/config/services/indieweb/webmention
 - Overview of all collected webmentions and pingbacks are at /admin/content/webmention
 
-## Brid.gy
+A basic block (Webmentions) is available to render like and repost webmentions per page.
 
-Brid.gy allows you to publish content on your social networks, as well as pulling back replies, likes etc. You need to
-allow brid.gy to post and retrieve them. You can also just allow to retrieve.
+![ScreenShot](https://realize.be/sites/default/files/2018-03/webmention-basic.png)
 
-A checkbox will be available on the node form for publishing your content. When you toggle to publish, an entry is
-created in the queue table which is currently handled by a drush command (proper queue integration coming soon).
+## Pulling and publishing content / Bridgy
 
-drush command is 'indieweb-send-webmentions'
+Bridgy pulls comments, likes, and reshares on social networks back to your web site. You can also use it to post to
+social networks - or comment, like, reshare, or even RSVP - from your own web site.
 
-In case you want to publish, you need to make sure your content has proper microformat classes and add following snippet
-to the page you want to publish to twitter.
+To receive content from those networks, bridgy will send a webmention, so you only need to enable the webmention
+endpoint and make sure rel="me" links with the url to your social networks are available on the homepage. e.g.
+
+  ```
+  <a href="https://twitter.com/swentel" target="_blank" title="Twitter" rel="me">Twitter</a>
+  ```
+
+These links can even be hidden on your page.
+
+For publishing, a checkbox will be available on the node form for publishing your content per channel (e.g. twitter,
+facebook etc). When you toggle to publish, an entry is created in the queue which you can either handle with drush or
+by cron. This will send a webmention to bridgy.
+
+The drush command is 'indieweb-send-webmentions'
+
+Your content needs to have proper microformat classes on your content, images etc and following snippet needs to
+available on the page you want to publish, e.g.
 
   ```
   <a href="https://brid.gy/publish/twitter"></a>
   ```
 
-This module exposes an extra field which you can configure on the 'Manage Display' pages of each node. The content
-itself is added in indieweb_node_view(). More info about this at https://brid.gy/about#webmentions
+Note that Bridgy prefers p-summary over e-content, see https://brid.gy/about#microformats. You can preview your posts
+on Bridgy to verify your markup is ok.
 
-Note that brid.gy prefers p-summary over e-content, see https://brid.gy/about#microformats.
+This module exposes per channel an extra field which you can configure on the 'Manage Display' pages of each node type.
+That field exposes that snippet. See indieweb_node_view(). More info about this at https://brid.gy/about#webmentions
 
-More channels coming soon.
+The module ships with default Twitter and Facebook channels. More channels and other configuration can be configured at
+/admin/config/services/indieweb/publish. These channels are also used for the q=syndicate-to request for micropub, see
+micropub for more information.
 
 ## Microformats
 
-Classes added for minimum publication.
+Microformats are extensions to HTML for marking up people, organizations, events, locations, blog posts, products,
+reviews, resumes, recipes etc. Sites use microformats to publish a standard API that is consumed and used by search
+engines, aggregators, and other tools. See https://indieweb.org/microformats for more info. You will want to enable this
+if you want to publish.
+
+Classes added for publication (or other functionality).
 
 - h-entry: added on node wrapper, see indieweb_preprocess_node().
 - e-content: added on default body field, see indieweb_preprocess_field().
@@ -78,13 +108,13 @@ Classes added for minimum publication.
   $settings['indieweb_p_summary_fields'] = ['field_summary'];
   ```
 
+You can configure this at /admin/config/services/indieweb/microformats
+
 ## Creating comments
 
-Warning: experimental, but fun :)
-
-When a webmention is saved and is of property 'in-reply-to', it is possible to create a comment. Currently,
-configuration is done by adding a field on comments and configuring lines in settings.php. (at some point, we'll move
-this to configuration when it's well tested). Following steps are needed:
+When a webmention is saved and is of property 'in-reply-to', it is possible to create a comment if the target of the
+webmention has comments enabled. Currently, configuration is done by adding a field on comments and configuring lines
+in settings.php. (at some point, we'll move this to configuration when it's well tested). Following steps are needed:
 
   - Create an entity reference field on your comment which points to a webmention. On the 'Manage display' page you can
   set the formatter to 'Webmention'. Currently the format uses the textual version of the reply run through the
@@ -132,8 +162,9 @@ See indieweb_webmention_entity_insert().
 
 ## IndieAuth support
 
-If you use apps like https://quill.p3k.io (Web) or Indigenous (iOS), the easiest way to let you login with your domain
-is by using indieauth.com. Less code to maintain right :)
+If you use apps like Quill (https://quill.p3k.io - web) or Indigenous (Beta iOS, Alpha Android) or other clients which
+can post via micropub or read via microsub, the easiest way to let those clients log you in with your domain is by using
+indieauth.com. Indieauth is open source so you can also host this service yourself.
 
 Add following headers to your html.html.twig file.
 
@@ -223,15 +254,6 @@ Add following header to your html.html.twig file.
   ```
   <link rel="microsub" href="https://your_domain/indieweb/microsub">
   ```
-
-## Output
-
-A basic block is available to render webmentions per page.
-Needs a lot of updates on theming, but it gets the job done for now.
-
-## Screenshot
-
-![ScreenShot](https://realize.be/sites/default/files/2018-03/webmention-basic.png)
 
 ## Want to help out ?
 

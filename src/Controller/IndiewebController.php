@@ -12,7 +12,7 @@ class IndiewebController extends ControllerBase {
    * @return array
    */
   public function dashboard() {
-    return ['#markup' => '<p>Dashboard</p>'];
+    return ['#markup' => '<p>More to come later!</p>'];
   }
 
 }

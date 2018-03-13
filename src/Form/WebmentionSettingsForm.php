@@ -32,7 +32,7 @@ class WebmentionSettingsForm extends ConfigFormBase {
     $config = $this->config('indieweb.webmention');
 
     $form['info'] = [
-      '#markup' => '<p>' . $this->t('The easiest way to start receiving webmentions and pingbacks for any page is by using <a href="https://webmention.io/" target="_blank">https://webmention.io</a>. <br />You have to create an account by signing in with your domain. For more information how to sign in with your domain, see the <a href=":link_dashboard">Indieweb</a> tab.<br />Webmention.io is open source, you can also host the service yourself.<br /><br />All collected webmentions and pingbacks can be viewed on the <a href=":link_overview">overview page.</a>',
+      '#markup' => '<p>' . $this->t('The easiest way to start receiving webmentions and pingbacks for any page is by using <a href="https://webmention.io/" target="_blank">https://webmention.io</a>. <br />You have to create an account by signing in with your domain. For more information how to sign in with your domain, see the <a href=":link_dashboard">Indieweb</a> tab.<br />Webmention.io is open source, you can also host the service yourself.<br /><br />All collected webmentions and pingbacks can be viewed on the <a href=":link_overview">overview page</a>.<br />A block (Webmentions) is available to put on any page to show the likes and reposts of that url.',
           [
             ':link_dashboard' => Url::fromRoute('indieweb.admin.dashboard')->toString(),
             ':link_overview' => Url::fromRoute('entity.webmention_entity.collection')->toString()

@@ -13,6 +13,7 @@ use Drupal\Core\Url;
 use Drupal\indieweb\Entity\WebmentionEntityInterface;
 use Drupal\node\Entity\NodeType;
 use Drupal\node\NodeInterface;
+use IndieWeb\MentionClient;
 
 /**
  * Implements hook_page_attachments_alter().
@@ -58,27 +59,31 @@ function indieweb_page_attachments_alter(array &$attachments) {
  */
 function indieweb_form_node_form_alter(&$form, FormStateInterface $form_state) {
 
-  // TODO configure per node type
+  // TODO configure per node type / entity type
   $node = $form_state->getFormObject()->getEntity();
   if ($node) {
 
-    $form['indieweb'] = [
-      '#type' => 'details',
-      '#title' => t('Indieweb'),
-      '#access' => \Drupal::currentUser()->hasPermission('send webmentions'),
-      '#group' => 'advanced',
-      '#weight' => 100,
-    ];
+    $channels = indieweb_get_publishing_channels();
+    if (!empty($channels)) {
 
-    $form['indieweb']['send_to_bridgy'] = [
-      '#type' => 'checkbox',
-      '#title' => t('Send to brid.gy'),
-      '#default_value' => FALSE,
-    ];
+      $form['indieweb'] = [
+        '#type' => 'details',
+        '#title' => t('Publish to'),
+        '#access' => \Drupal::currentUser()->hasPermission('send webmentions'),
+        '#group' => 'advanced',
+        '#weight' => 100,
+      ];
 
-    foreach (array_keys($form['actions']) as $action) {
-      if ($action != 'preview' && isset($form['actions'][$action]['#type']) && $form['actions'][$action]['#type'] === 'submit') {
-        $form['actions'][$action]['#submit'][] = 'indieweb_form_node_form_submit';
+      $form['indieweb']['indieweb_publish_channels'] = [
+        '#type' => 'checkboxes',
+        '#options' => indieweb_get_publishing_channels(),
+        '#default_value' => FALSE,
+      ];
+
+      foreach (array_keys($form['actions']) as $action) {
+        if ($action != 'preview' && isset($form['actions'][$action]['#type']) && $form['actions'][$action]['#type'] === 'submit') {
+          $form['actions'][$action]['#submit'][] = 'indieweb_form_node_form_submit';
+        }
       }
     }
   }
@@ -96,16 +101,19 @@ function indieweb_form_node_form_alter(&$form, FormStateInterface $form_state) {
 function indieweb_form_node_form_submit($form, FormStateInterface $form_state) {
   /** @var \Drupal\node\NodeInterface $node */
   $node = $form_state->getFormObject()->getEntity();
-  if (!$form_state->isValueEmpty('send_to_bridgy') && $node->isPublished()) {
+  if ($node->isPublished()) {
+
     $sourceURL = $node->toUrl()->setAbsolute(TRUE)->toString();
-    // TODO use queue for real and use plugins for publishing on bridgy
-    // e.g. publish_bridgy should be a plugin to publish too.
-    // TODO we should probably remember that this was send already, I guess
-    // we can add a field on nodes, although I'm not a big fan of it as it's
-    // a pain usually to uninstall then, so maybe a dedicated table is better.
-    \Drupal::database()->insert('queue')
-      ->fields(['name' => 'publish_bridgy', 'data' => serialize(['url' => $sourceURL])])
-      ->execute();
+    $publish_to = $form_state->getValue('indieweb_publish_channels');
+    if (!empty($publish_to)) {
+      foreach ($publish_to as $key => $value) {
+        if ($key === $value) {
+          \Drupal::database()->insert('queue')
+            ->fields(['name' => 'indieweb_publish', 'data' => serialize(['source_url' => $sourceURL, 'target_url' => $key])])
+            ->execute();
+        }
+      }
+    }
   }
 }
 
@@ -113,7 +121,7 @@ function indieweb_form_node_form_submit($form, FormStateInterface $form_state) {
  * Implements hook_preprocess_node().
  */
 function indieweb_preprocess_node(&$variables) {
-  if ($variables['view_mode'] == 'full' || $variables['view_mode'] == 'teaser') {
+  if (($variables['view_mode'] == 'full' || $variables['view_mode'] == 'teaser') && \Drupal::config('indieweb.microformats')->get('h_entry')) {
     $variables['attributes']['class'][] = 'h-entry';
   }
 }
@@ -124,12 +132,12 @@ function indieweb_preprocess_node(&$variables) {
 function indieweb_preprocess_field(&$variables) {
 
   // Put e-content on body.
-  if ($variables['field_name'] == 'body') {
+  if ($variables['field_name'] == 'body' && \Drupal::config('indieweb.microformats')->get('e_content')) {
     $variables['attributes']['class'][] = 'e-content';
   }
 
   // In case there's a p-summary.
-  if (in_array($variables['field_name'], Settings::get('indieweb_p_summary_fields', []))) {
+  if (in_array($variables['field_name'], indieweb_get_summary_fields())) {
     $variables['attributes']['class'][] = 'p-summary';
   }
 }
@@ -140,7 +148,9 @@ function indieweb_preprocess_field(&$variables) {
  * @param $variables
  */
 function indieweb_preprocess_image_style(&$variables) {
-  $variables['image']['#attributes']['class'][] = 'u-photo';
+  if (\Drupal::config('indieweb.microformats')->get('u_photo')) {
+    $variables['image']['#attributes']['class'][] = 'u-photo';
+  }
 }
 
 /**
@@ -149,13 +159,19 @@ function indieweb_preprocess_image_style(&$variables) {
 function indieweb_entity_extra_field_info() {
   $extra = [];
 
-  foreach (NodeType::loadMultiple() as $bundle) {
+  $channels = indieweb_get_publishing_channels();
+  if (!empty($channels)) {
+    foreach (NodeType::loadMultiple() as $bundle) {
+      foreach ($channels as $url => $name) {
+        $machine_name = indieweb_get_machine_name_from_url($url);
+        $extra['node'][$bundle->id()]['display'][$machine_name] = [
+          'label' => $name,
+          'weight' => 0,
+          'visible' => FALSE,
+        ];
+      }
 
-    $extra['node'][$bundle->id()]['display']['indieweb_bridgy_publish_twitter'] = [
-      'label' => t('Brid.gy: publish twitter'),
-      'weight' => 0,
-      'visible' => FALSE,
-    ];
+    }
   }
 
   return $extra;
@@ -165,10 +181,16 @@ function indieweb_entity_extra_field_info() {
  * Implements hook_ENTITY_TYPE_view() for node entities.
  */
 function indieweb_node_view(array &$build, NodeInterface $account, EntityViewDisplayInterface $display) {
-  if ($display->getComponent('indieweb_bridgy_publish_twitter')) {
-    $build['indieweb_bridgy_publish_twitter'] = [
-      '#markup' => '<span class="hidden"><a href="https://brid.gy/publish/twitter"></a></span>',
-    ];
+  $channels = indieweb_get_publishing_channels();
+  if (!empty($channels)) {
+    foreach ($channels as $url => $name) {
+      $machine_name = indieweb_get_machine_name_from_url($url);
+      if ($display->getComponent($machine_name)) {
+        $build[$machine_name] = [
+          '#markup' => '<span class="hidden"><a href="' . $url . '"></a></span>',
+        ];
+      }
+    }
   }
 }
 
@@ -238,4 +260,86 @@ function indieweb_webmention_entity_insert(WebmentionEntityInterface $webmention
     }
   }
 
+}
+
+/**
+ * Implements hook_cron().
+ */
+function indieweb_cron() {
+  if (\Drupal::config('indieweb.publish')->get('publish_send_webmention_by') == 'cron') {
+    indieweb_handle_publish_queue();
+  }
+}
+
+/**
+ * Returns the publishing channels.
+ *
+ * @return array
+ */
+function indieweb_get_publishing_channels() {
+  $channels = [];
+  $config = \Drupal::config('indieweb.publish')->get('channels');
+  if (!empty($config)) {
+    $lines = explode("\n", $config);
+    foreach ($lines as $line) {
+      $line = trim($line);
+      if (!empty($line)) {
+        $name_url = explode('|', $line);
+        if (!empty($name_url[0]) && !empty($name_url[1])) {
+          $channels[$name_url[1]] = $name_url[0];
+        }
+      }
+    }
+  }
+
+  return $channels;
+}
+
+/**
+ * Handles the publish queue.
+ */
+function indieweb_handle_publish_queue() {
+  $query = 'SELECT * FROM queue WHERE name = :name';
+  $results = \Drupal::database()->query($query, [':name' => 'indieweb_publish']);
+  foreach ($results as $result) {
+
+    $data = unserialize($result->data);
+    if (!empty($data['source_url']) && !empty($data['target_url'])) {
+      $sourceURL = $data['source_url'];
+      $targetURL = $data['target_url'];
+      $client = new MentionClient();
+      $client->sendWebmention($sourceURL, $targetURL);
+    }
+
+    // Remove the item.
+    \Drupal::database()->delete('queue')->condition('item_id', $result->item_id)->execute();
+  }
+}
+
+/**
+ * Sanitizes a url to use as a machine name.
+ *
+ * @param $url
+ *
+ * @return string
+ */
+function indieweb_get_machine_name_from_url($url) {
+  return 'indieweb_' . str_replace(['https://', 'http://', '/', '-', '.'], '', $url);
+}
+
+/**
+ * Get summary fields for microformats.
+ *
+ * @return array
+ */
+function indieweb_get_summary_fields() {
+  static $fields = [];
+  static $loaded = FALSE;
+
+  if (!$loaded) {
+    $loaded = TRUE;
+    $fields = explode("\n", \Drupal::config('indieweb.microformats')->get('p_summary'));
+  }
+
+  return $fields;
 }
