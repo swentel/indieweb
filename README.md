@@ -102,11 +102,7 @@ Classes added for publication (or other functionality).
 - h-entry: added on node wrapper, see indieweb_preprocess_node().
 - e-content: added on default body field, see indieweb_preprocess_field().
 - u-photo: added on image styles, indieweb_preprocess_image_style().
-- p-summary: the field where you want this class to be added on can be configured via
-
-  ```
-  $settings['indieweb_p_summary_fields'] = ['field_summary'];
-  ```
+- p-summary: see indieweb_preprocess_field().
 
 You can configure this at /admin/config/services/indieweb/microformats
 
