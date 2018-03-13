@@ -1,7 +1,10 @@
+indieweb.admin.dashboard:
+  title: 'Indieweb'
+  description: 'Configure Indieweb for your website'
+  route_name: indieweb.admin.dashboard
+  parent: system.admin_config_services
 
-# Webmention menu items definition
-
-webmention_entity.admin.structure.settings:
+indieweb.webmention_entity.admin.structure.settings:
   title: 'Webmention settings'
   description: 'Configure Webmention entities'
   route_name: webmention_entity.settings

@@ -29,7 +29,7 @@ interface WebmentionEntityInterface extends ContentEntityInterface, EntityChange
    * @param string $name
    *   The Webmention name.
    *
-   * @return \Drupal\indieweb\Entity\indiewebEntityInterface
+   * @return \Drupal\indieweb\Entity\WebmentionEntityInterface
    *   The called Webmention entity.
    */
   public function setName($name);
@@ -48,7 +48,7 @@ interface WebmentionEntityInterface extends ContentEntityInterface, EntityChange
    * @param int $timestamp
    *   The Webmention creation timestamp.
    *
-   * @return \Drupal\indieweb\Entity\indiewebEntityInterface
+   * @return \Drupal\indieweb\Entity\WebmentionEntityInterface
    *   The called Webmention entity.
    */
   public function setCreatedTime($timestamp);
@@ -69,7 +69,7 @@ interface WebmentionEntityInterface extends ContentEntityInterface, EntityChange
    * @param bool $published
    *   TRUE to set this Webmention to published, FALSE to set it to unpublished.
    *
-   * @return \Drupal\indieweb\Entity\indiewebEntityInterface
+   * @return \Drupal\indieweb\Entity\WebmentionEntityInterface
    *   The called Webmention entity.
    */
   public function setPublished($published);

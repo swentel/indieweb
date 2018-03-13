@@ -4,7 +4,6 @@ namespace Drupal\indieweb\Controller;
 
 use Drupal\Core\Cache\Cache;
 use Drupal\Core\Controller\ControllerBase;
-use Drupal\Core\Site\Settings;
 use Drupal\Core\Url;
 use Symfony\Component\HttpFoundation\JsonResponse;
 
@@ -16,6 +15,15 @@ class WebmentionController extends ControllerBase {
   public function endpoint() {
     $valid = FALSE;
 
+    $config = \Drupal::config('indieweb.webmention');
+    $webmentions_enabled = $config->get('webmention_enable');
+    $pingbacks_enabled = $config->get('pingback_enable');
+
+    // Early return when nothing is enabled.
+    if (!$webmentions_enabled && !$pingbacks_enabled) {
+      return new JsonResponse('', 404);
+    }
+
     // Default response code and message.
     $response_code = 400;
     $response_message = 'Bad request';
@@ -26,7 +34,7 @@ class WebmentionController extends ControllerBase {
     $mention = json_decode($input, TRUE);
 
     // Check if this is a forward pingback, which is a POST request.
-    if (empty($mention) && (!empty($_POST['source']) && !empty($_POST['target']))) {
+    if (empty($mention) && $pingbacks_enabled && (!empty($_POST['source']) && !empty($_POST['target']))) {
       if ($this->validateSource($_POST['source'], $_POST['target'])) {
         $valid = TRUE;
         $mention = [];
@@ -37,31 +45,26 @@ class WebmentionController extends ControllerBase {
         $mention['target'] = $_POST['target'];
       }
     }
-    else {
-      $secret = Settings::get('indieweb_webmention_io_secret', '');
+    elseif ($webmentions_enabled) {
+      $secret = $config->get('webmention_secret');
       if (!empty($mention['secret']) && $mention['secret'] == $secret) {
         $valid = TRUE;
       }
-    }
-
-    // Debug.
-    if (Settings::get('indieweb_webmention_log_payload', FALSE)) {
-      $this->getLogger('indieweb')->notice('input: @input', ['@input' => print_r($input, 1)]);
     }
 
     // We have a valid mention.
     if (!empty($mention) && $valid) {
 
       // Debug.
-      if (Settings::get('indieweb_webmention_log_payload', FALSE)) {
-        $this->getLogger('indieweb')->notice('object: @object', ['@object' => print_r($mention, 1)]);
+      if ($config->get('webmention_log_payload')) {
+        $this->getLogger('indieweb_webmention')->notice('object: @object', ['@object' => print_r($mention, 1)]);
       }
 
       $response_code = 202;
       $response_message = 'Webmention was successful';
 
       $values = [
-        'user_id' => Settings::get('indieweb_webmention_uid', 1),
+        'user_id' => $config->get('webmention_uid'),
         // Remove the base url.
         'target' => ['value' => str_replace(\Drupal::request()->getSchemeAndHttpHost(), '', $mention['target'])],
         'source' => ['value' => $mention['source']],
@@ -97,6 +100,7 @@ class WebmentionController extends ControllerBase {
       }
 
       // Save the entity.
+      // TODO we should probably try/catch this too to be sure.
       $webmention = $this->entityTypeManager()->getStorage('webmention_entity')->create($values);
       $webmention->save();
 
@@ -119,7 +123,7 @@ class WebmentionController extends ControllerBase {
   protected function validateSource($source, $target) {
     $valid = FALSE;
 
-    $content = file_get_contents($source, $target);
+    $content = file_get_contents($source);
     if ($content && strpos($content, $target) !== FALSE) {
       $valid = TRUE;
     }
@@ -152,7 +156,7 @@ class WebmentionController extends ControllerBase {
       }
     }
     catch (\Exception $e) {
-      $this->getLogger('indieweb')->notice('Error clearing cache for @target: @message', ['@target' => $target, '@message' => $e->getMessage()]);
+      $this->getLogger('indieweb_webmention')->notice('Error clearing cache for @target: @message', ['@target' => $target, '@message' => $e->getMessage()]);
     }
   }
 

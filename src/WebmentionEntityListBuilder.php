@@ -30,9 +30,9 @@ class WebmentionEntityListBuilder extends EntityListBuilder {
    * {@inheritdoc}
    */
   public function buildRow(EntityInterface $entity) {
-    /* @var $entity \Drupal\indieweb\Entity\indiewebEntity */
+    /* @var $entity \Drupal\indieweb\Entity\WebmentionEntityInterface */
     $row['source'] = $entity->get('source')->value;
-    $row['target'] = $entity->get('target')->value;
+    $row['target'] = ['data' => ['#markup' => '<a href="' . \Drupal::request()->getSchemeAndHttpHost() . $entity->get('target')->value . '">' . $entity->get('target')->value . '</a>', '#allowed_tags' => ['a']]];
     $row['type'] = $entity->get('type')->value;
     $row['property'] = $entity->get('property')->value;
     $row['author'] = $entity->get('author_name')->value ?: '/' ;

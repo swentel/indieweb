@@ -20,7 +20,7 @@ use Drupal\user\UserInterface;
  *   handlers = {
  *     "view_builder" = "Drupal\Core\Entity\EntityViewBuilder",
  *     "list_builder" = "Drupal\indieweb\WebmentionEntityListBuilder",
- *     "views_data" = "Drupal\indieweb\Entity\indiewebEntityViewsData",
+ *     "views_data" = "Drupal\indieweb\Entity\WebmentionEntityViewsData",
  *
  *     "form" = {
  *       "default" = "Drupal\indieweb\Form\WebmentionEntityForm",

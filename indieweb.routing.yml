@@ -1,4 +1,20 @@
-webmention.notify:
+indieweb.admin.dashboard:
+  path: '/admin/config/services/indieweb'
+  defaults:
+    _controller: '\Drupal\indieweb\Controller\IndiewebController::dashboard'
+    _title: 'Indieweb'
+  requirements:
+    _permission: 'administer indieweb'
+
+indieweb.admin.webmention_settings:
+  path: '/admin/config/services/indieweb/webmention'
+  defaults:
+    _form: '\Drupal\indieweb\Form\WebmentionSettingsForm'
+    _title: 'Webmention'
+  requirements:
+    _permission: 'administer indieweb'
+
+indieweb.webmention.notify:
   path: '/webmention/notify'
   defaults:
     _controller: '\Drupal\indieweb\Controller\WebmentionController::endpoint'
@@ -6,21 +22,19 @@ webmention.notify:
   requirements:
     _access: 'TRUE'
 
-micropub.endpoint:
+indieweb.micropub.endpoint:
   path: '/indieweb/micropub'
   defaults:
    _controller: '\Drupal\indieweb\Controller\MicropubController::endpoint'
    _title: 'Micropub endpoint'
   requirements:
-  # todo access validation can maybe handled in an access callback? (or something else)
    _access: 'TRUE'
 
-#microsub.endpoint:
+#indieweb.microsub.endpoint:
 #  path: '/indieweb/microsub'
 #  defaults:
 #   _controller: '\Drupal\indieweb\Controller\MicrosubController::endpoint'
 #   _title: 'Microsub endpoint'
 #  requirements:
-  # todo access validation can maybe handled in an access callback? (or something else)
 #   _access: 'TRUE'
 

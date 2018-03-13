@@ -1,3 +1,7 @@
+administer indieweb:
+  title: 'Administer Indieweb configuration'
+  description: 'Manage all Indieweb configuration including syndications, micropub, microsub and webmentions.'
+
 add webmention entities:
   title: 'Create new Webmention entities'
 

@@ -34,37 +34,11 @@ Pingbacks and webmentions are stored in a simple entity type called webmentions 
 links is available at admin/content/webmentions.
 
 To create an account, you need to authenticate with https://indieauth.com/ which requires you to add the "rel=me"
-attribute on links to your social accounts. See https://indieauth.com/setup for full instructions. See also IndieAuth
-below.
+attribute on links to your social accounts. See https://indieauth.com/setup for full instructions. See also Indieauth
+further below.
 
-To configure:
-
-- Add the webmention header tags to html.html.twig (or use hooks to only add these head tags on certain pages).
-
-  ```
-  <link rel="pingback" href="https://webmention.io/webmention?forward=http://your_domain/webmention/notify" />
-  <link rel="webmention" href="https://webmention.io/your_domain/webmention" />
-  ```
-
-- settings which can be configured by adding lines to settings.php
-
-  - Webmention.io secret, needed to validate webmentions send to the controller.
-
-  ```
-  $settings['indieweb_webmention_io_secret'] = 'your_secret';
-  ```
-
-  - Logging the payload in watchdog:
-
-  ```
-  $settings['indieweb_webmention_log_payload'] = TRUE;
-  ```
-
-  - Assigning a different user id for the webmention:
-
-  ```
-  $settings['indieweb_webmention_uid'] = 321;
-  ```
+- Configuration is at /admin/config/services/indieweb/webmention
+- Overview of all collected webmentions and pingbacks are at /admin/content/webmention
 
 ## Brid.gy
 

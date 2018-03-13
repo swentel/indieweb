@@ -6,15 +6,50 @@
  */
 
 use Drupal\comment\Entity\Comment;
-use Drupal\Component\Utility\Unicode;
 use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
-use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Site\Settings;
 use Drupal\Core\Url;
 use Drupal\indieweb\Entity\WebmentionEntityInterface;
 use Drupal\node\Entity\NodeType;
 use Drupal\node\NodeInterface;
+
+/**
+ * Implements hook_page_attachments_alter().
+ */
+function indieweb_page_attachments_alter(array &$attachments) {
+
+  // Add webmention and pingback rel links.
+  $route = \Drupal::routeMatch()->getRouteObject();
+  $is_admin = \Drupal::service('router.admin_context')->isAdminRoute($route);
+  if (!$is_admin) {
+
+    $config = \Drupal::config('indieweb.webmention');
+    if ($config->get('webmention_enable') && ($end_point = $config->get('webmention_endpoint'))) {
+      $description = [
+        '#tag' => 'link',
+        '#attributes' => [
+          'rel' => 'webmention',
+          'href' => $end_point,
+        ],
+      ];
+      $attachments['#attached']['html_head'][] = [$description, 'webmention'];
+    }
+
+    if ($config->get('pingback_enable') && ($end_point = $config->get('pingback_endpoint'))) {
+      $description = [
+        '#tag' => 'link',
+        '#attributes' => [
+          'rel' => 'pingback',
+          'href' => $end_point,
+        ],
+      ];
+      $attachments['#attached']['html_head'][] = [$description, 'pingback'];
+    }
+
+  }
+
+}
 
 /**
  * Implements hook_form_BASE_FORM_ID_alter() for \Drupal\node\NodeForm.

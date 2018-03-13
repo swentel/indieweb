@@ -13,7 +13,7 @@ use Symfony\Component\HttpFoundation\Response;
 class MicropubController extends ControllerBase {
 
   /**
-   * Routing callback: receive micropub posts.
+   * Routing callback: micropub endpoint.
    */
   public function endpoint() {
 
@@ -28,35 +28,36 @@ class MicropubController extends ControllerBase {
       $input = $_POST;
     }
 
+    // q=syndicate-to request.
+    if (Settings::get('indieweb_allow_micropub_posts', FALSE) && isset($_GET['q']) && $_GET['q'] == 'syndicate-to') {
+
+      if ($this->isValidToken()) {
+
+        // TODO fix this hardcodedness of course.
+        $response_code = 200;
+        $response_message = [
+          'syndicate-to' => [
+            [
+              'uid' => 'https://twitter.com/swentel',
+              'name' => 'twitter/swentel'
+            ]
+          ],
+        ];
+
+      }
+
+    }
+
     if (Settings::get('indieweb_allow_micropub_posts', FALSE) && !empty($input)) {
 
-      $valid_token = FALSE;
-
-      $auth = \Drupal::request()->headers->get('Authorization');
-      if ($auth && preg_match('/Bearer\s(\S+)/', $auth, $matches)) {
-
-        // TODO we can probably store this token so we don't have to talk
-        // to indieauth all the time, should check with Aaron
-
-        $client = \Drupal::httpClient();
-        $headers = [
-          'Accept' => 'application/json',
-          'Authorization' => $auth,
-        ];
-        // TODO access token check should use a configurable authentication
-        // endpoint
-        $response = $client->get('https://tokens.indieauth.com/token', ['headers' => $headers]);
-        $json = json_decode($response->getBody());
-        if (isset($json->me) && $json->me == Settings::get('indieweb_micropub_me', '')) {
-          $valid_token = TRUE;
-        }
-      }
+      $valid_token = $this->isValidToken();
 
       if (Settings::get('indieweb_micropub_log_payload', FALSE)) {
         $this->getLogger('micropub')->notice('input: @input', ['@input' => print_r($input, 1)]);
       }
 
-      // TODO validate on 'h-entry' type.
+      // TODO validate on 'h' = entry' type and start splitting up in different
+      // methods.
       if (!empty($input['content']) && $valid_token) {
 
         $values = [
@@ -79,6 +80,9 @@ class MicropubController extends ControllerBase {
         if ($node->id()) {
 
           // TODO Don't make this hardcoded of course
+          // also, should we just rely on mp-syndicate-to , should check
+          // whether this is part of the spec or not i.e. will every client
+          // to this or not.
           if (Settings::get('indieweb_micropub_send_webmention', FALSE)) {
             $sourceURL = $node->toUrl()->setAbsolute(TRUE)->toString();
             \Drupal::database()->insert('queue')
@@ -99,9 +103,37 @@ class MicropubController extends ControllerBase {
 
     }
 
-    // TODO doesn't have to be a json response
-    $response = ['result' => $response_message];
-    return new JsonResponse($response, $response_code);
+    return new JsonResponse($response_message, $response_code);
+  }
+
+  /**
+   * Check if there's a valid access token in the request.
+   *
+   * @return bool|string
+   */
+  protected function isValidToken() {
+    $valid_token = '';
+
+    // TODO we can probably store this token so we don't have to talk
+    // to indieauth all the time, should check with Aaron
+    $auth = \Drupal::request()->headers->get('Authorization');
+    if ($auth && preg_match('/Bearer\s(\S+)/', $auth, $matches)) {
+
+      $client = \Drupal::httpClient();
+      $headers = [
+        'Accept' => 'application/json',
+        'Authorization' => $auth,
+      ];
+      // TODO access token check should use a configurable authentication
+      // endpoint
+      $response = $client->get('https://tokens.indieauth.com/token', ['headers' => $headers]);
+      $json = json_decode($response->getBody());
+      if (isset($json->me) && $json->me == Settings::get('indieweb_micropub_me', '')) {
+        $valid_token = TRUE;
+      }
+    }
+
+    return $valid_token;
   }
 
 }

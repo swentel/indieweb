@@ -10,7 +10,7 @@ use Drupal\Core\Access\AccessResult;
 /**
  * Access controller for the Webmention entity.
  *
- * @see \Drupal\indieweb\Entity\indiewebEntity.
+ * @see \Drupal\indieweb\Entity\WebmentionEntityInterface.
  */
 class WebmentionEntityAccessControlHandler extends EntityAccessControlHandler {
 
@@ -18,7 +18,7 @@ class WebmentionEntityAccessControlHandler extends EntityAccessControlHandler {
    * {@inheritdoc}
    */
   protected function checkAccess(EntityInterface $entity, $operation, AccountInterface $account) {
-    /** @var \Drupal\indieweb\Entity\indiewebEntityInterface $entity */
+    /** @var \Drupal\indieweb\Entity\WebmentionEntityInterface $entity */
     switch ($operation) {
       case 'view':
         if (!$entity->isPublished()) {
