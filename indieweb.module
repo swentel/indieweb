@@ -128,7 +128,7 @@ function indieweb_form_node_form_alter(&$form, FormStateInterface $form_state) {
       $form['indieweb']['indieweb_publish_channels'] = [
         '#type' => 'checkboxes',
         '#options' => indieweb_get_publishing_channels(),
-        '#default_value' => FALSE,
+        '#default_value' => [],
       ];
 
       foreach (array_keys($form['actions']) as $action) {
