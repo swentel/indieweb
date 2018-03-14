@@ -17,6 +17,7 @@ Current functionality:
 This is only the tip of the iceberg and much more functionality will be added.
 
 Development happens on github: https://github.com/swentel/indieweb
+
 Releases are available on drupal.org: https://www.drupal.org/project/indieweb
 
 ## IndieWebify.me
