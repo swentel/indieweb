@@ -52,7 +52,7 @@ function indieweb_page_attachments_alter(array &$attachments) {
   if (\Drupal::service('path.matcher')->isFrontPage()) {
 
     // IndieAuth Authentication endpoints.
-    if (($config = \Drupal::config('indieweb.indieauth')) && ($config->get('enable'))) {
+    if (($config = \Drupal::config('indieweb.indieauth')) && ($config->get('enable')) && ($config->get('expose'))) {
 
       if ($end_point = $config->get('authorization_endpoint')) {
         $link = [

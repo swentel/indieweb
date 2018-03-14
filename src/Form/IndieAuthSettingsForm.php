@@ -37,12 +37,23 @@ class IndieAuthSettingsForm extends ConfigFormBase {
     $form['indieauth'] = [
       '#type' => 'fieldset',
       '#title' => $this->t('IndieAuth authentication API'),
-      '#description' => $this->t('If you use apps like Quill (https://quill.p3k.io - web) or Indigenous (Beta iOS, Alpha Android) or other clients which can post via micropub or read via microsub, the easiest way to let those clients log you in with your domain is by using indieauth.com too and exchange access tokens for further requests. Only expose those links if you want to use micropub or microsub.')];
+      '#description' => $this->t('If you use apps like Quill (https://quill.p3k.io - web) or Indigenous (Beta iOS, Alpha Android) or other clients which can post via micropub or read via microsub, the easiest way to let those clients log you in with your domain is by using indieauth.com too and exchange access tokens for further requests. Only expose those links if you want to use micropub or microsub. <br /><strong>Important: </strong> if you add the token endpoint manually, you still need to enter the URL here because it is used by the micropub endpoint.')];
 
     $form['indieauth']['enable'] = [
-      '#title' => $this->t('Expose authentication API head links'),
+      '#title' => $this->t('Enable endpoints'),
       '#type' => 'checkbox',
       '#default_value' => $config->get('enable'),
+    ];
+
+    $form['indieauth']['expose'] = [
+      '#title' => $this->t('Expose authentication API head links'),
+      '#type' => 'checkbox',
+      '#default_value' => $config->get('expose'),
+      '#states' => array(
+        'visible' => array(
+          ':input[name="enable"]' => array('checked' => TRUE),
+        ),
+      ),
     ];
 
     $form['indieauth']['authorization_endpoint'] = [
@@ -79,6 +90,7 @@ class IndieAuthSettingsForm extends ConfigFormBase {
 
     $this->config('indieweb.indieauth')
       ->set('enable', $form_state->getValue('enable'))
+      ->set('expose', $form_state->getValue('expose'))
       ->set('authorization_endpoint', $form_state->getValue('authorization_endpoint'))
       ->set('token_endpoint', $form_state->getValue('token_endpoint'))
       ->save();
