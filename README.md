@@ -208,6 +208,12 @@ Add following header to your html.html.twig file.
   <link rel="microsub" href="https://your_domain/indieweb/microsub">
   ```
 
+## Drush commands
+
+- indieweb-send-webmentions: handles the queue for sending webmentions
+- indieweb-get-webmentions-from-webmention-io (wgwwio): allows you to get webmentions for one url and optionally save
+  them if they do not exist yet.
+
 ## Want to help out ?
 
 Great! Check the issue queue at https://github.com/swentel/indieweb/issues

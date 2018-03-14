@@ -65,7 +65,7 @@ class WebmentionController extends ControllerBase {
 
       $values = [
         'user_id' => $config->get('webmention_uid'),
-        // Remove the base url.
+        // Remove the base url - TODO we should simply use parse_url :/
         'target' => ['value' => str_replace(\Drupal::request()->getSchemeAndHttpHost(), '', $mention['target'])],
         'source' => ['value' => $mention['source']],
         'type' => ['value' => $mention['post']['type']],
