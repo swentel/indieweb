@@ -59,13 +59,7 @@ Bridgy pulls comments, likes, and reshares on social networks back to your web s
 social networks - or comment, like, reshare, or even RSVP - from your own web site.
 
 To receive content from those networks, bridgy will send a webmention, so you only need to enable the webmention
-endpoint and make sure rel="me" links with the url to your social networks are available on the homepage. e.g.
-
-  ```
-  <a href="https://twitter.com/swentel" target="_blank" title="Twitter" rel="me">Twitter</a>
-  ```
-
-These links can even be hidden on your page.
+endpoint.
 
 For publishing, a checkbox will be available on the node form for publishing your content per channel (e.g. twitter,
 facebook etc). When you toggle to publish, an entry is created in the queue which you can either handle with drush or
