@@ -30,6 +30,14 @@ indieweb.admin.microformats_settings:
   requirements:
     _permission: 'administer indieweb'
 
+indieweb.admin.micropub_settings:
+  path: '/admin/config/services/indieweb/micropub'
+  defaults:
+    _form: '\Drupal\indieweb\Form\MicropubSettingsForm'
+    _title: 'Micropub'
+  requirements:
+    _permission: 'administer indieweb'
+
 indieweb.admin.indieauth_settings:
   path: '/admin/config/services/indieweb/indieauth'
   defaults:

@@ -1,0 +1,8 @@
+micropub_enable: 0
+micropub_add_header_link: 1
+micropub_me: ''
+micropub_log_payload: 0
+note_create_node: 0
+note_node_type: ''
+note_content_field: ''
+note_uid: '1'

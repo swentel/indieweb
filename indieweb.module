@@ -27,53 +27,78 @@ function indieweb_page_attachments_alter(array &$attachments) {
 
     $config = \Drupal::config('indieweb.webmention');
     if ($config->get('webmention_enable') && ($end_point = $config->get('webmention_endpoint'))) {
-      $description = [
+      $link = [
         '#tag' => 'link',
         '#attributes' => [
           'rel' => 'webmention',
           'href' => $end_point,
         ],
       ];
-      $attachments['#attached']['html_head'][] = [$description, 'webmention'];
+      $attachments['#attached']['html_head'][] = [$link, 'webmention'];
     }
 
     if ($config->get('pingback_enable') && ($end_point = $config->get('pingback_endpoint'))) {
-      $description = [
+      $link = [
         '#tag' => 'link',
         '#attributes' => [
           'rel' => 'pingback',
           'href' => $end_point,
         ],
       ];
-      $attachments['#attached']['html_head'][] = [$description, 'pingback'];
+      $attachments['#attached']['html_head'][] = [$link, 'pingback'];
     }
   }
 
-  // IndieAuth Authentication API.
-  if (\Drupal::service('path.matcher')->isFrontPage() && (($config = \Drupal::config('indieweb.indieauth')) && ($config->get('enable')))) {
+  if (\Drupal::service('path.matcher')->isFrontPage()) {
 
-    if ($end_point = $config->get('authorization_endpoint')) {
-      $description = [
-        '#tag' => 'link',
-        '#attributes' => [
-          'rel' => 'authorization_endpoint',
-          'href' => $end_point,
-        ],
-      ];
-      $attachments['#attached']['html_head'][] = [$description, 'authorization_endpoint'];
+    // IndieAuth Authentication endpoints.
+    if (($config = \Drupal::config('indieweb.indieauth')) && ($config->get('enable'))) {
+
+      if ($end_point = $config->get('authorization_endpoint')) {
+        $link = [
+          '#tag' => 'link',
+          '#attributes' => [
+            'rel' => 'authorization_endpoint',
+            'href' => $end_point,
+          ],
+        ];
+        $attachments['#attached']['html_head'][] = [
+          $link,
+          'authorization_endpoint'
+        ];
+      }
+
+      if ($end_point = $config->get('token_endpoint')) {
+        $link = [
+          '#tag' => 'link',
+          '#attributes' => [
+            'rel' => 'token_endpoint',
+            'href' => $end_point,
+          ],
+        ];
+        $attachments['#attached']['html_head'][] = [
+          $link,
+          'token_endpoint'
+        ];
+      }
     }
 
-    if ($end_point = $config->get('token_endpoint')) {
-      $description = [
+    // Micropub.
+    if (($config = \Drupal::config('indieweb.micropub')) && ($config->get('micropub_enable')) && $config->get('micropub_add_header_link')) {
+
+      $link = [
         '#tag' => 'link',
         '#attributes' => [
-          'rel' => 'token_endpoint',
-          'href' => $end_point,
+          'rel' => 'micropub',
+          'href' => Url::fromRoute('indieweb.micropub.endpoint', [], ['absolute' => TRUE])->toString(),
         ],
       ];
-      $attachments['#attached']['html_head'][] = [$description, 'token_endpoint'];
-    }
 
+      $attachments['#attached']['html_head'][] = [
+        $link,
+        'micropub_endpoint'
+      ];
+    }
   }
 
 }
@@ -129,14 +154,12 @@ function indieweb_form_node_form_submit($form, FormStateInterface $form_state) {
   $node = $form_state->getFormObject()->getEntity();
   if ($node->isPublished()) {
 
-    $sourceURL = $node->toUrl()->setAbsolute(TRUE)->toString();
+    $source_url = $node->toUrl()->setAbsolute(TRUE)->toString();
     $publish_to = $form_state->getValue('indieweb_publish_channels');
     if (!empty($publish_to)) {
       foreach ($publish_to as $key => $value) {
         if ($key === $value) {
-          \Drupal::database()->insert('queue')
-            ->fields(['name' => 'indieweb_publish', 'data' => serialize(['source_url' => $sourceURL, 'target_url' => $key])])
-            ->execute();
+          indieweb_publish_create_queue_item($source_url, $key);
         }
       }
     }
@@ -319,6 +342,20 @@ function indieweb_get_publishing_channels() {
   }
 
   return $channels;
+}
+
+/**
+ * Creates a publish queue item.
+ *
+ * @param $source_url
+ * @param $target_url
+ *
+ * @throws \Exception
+ */
+function indieweb_publish_create_queue_item($source_url, $target_url) {
+  \Drupal::database()->insert('queue')
+    ->fields(['name' => 'indieweb_publish', 'data' => serialize(['source_url' => $source_url, 'target_url' => $target_url])])
+    ->execute();
 }
 
 /**

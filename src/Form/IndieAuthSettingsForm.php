@@ -49,7 +49,7 @@ class IndieAuthSettingsForm extends ConfigFormBase {
       '#title' => $this->t('Authorization endpoint'),
       '#type' => 'textfield',
       '#default_value' => $config->get('authorization_endpoint'),
-      '#description' => $this->t('This link will be added on the front page. If you want to add this manually to html.html.twig:<br /><div class="indieweb-highlight-code">&lt;link rel="authorization_endpoint" href="https://indieauth.com/auth" /&gt;</div>'),
+      '#description' => $this->t('This link will be added on the front page. You can also add it yourself to html.html.twig:<br /><div class="indieweb-highlight-code">&lt;link rel="authorization_endpoint" href="https://indieauth.com/auth" /&gt;</div>'),
       '#states' => array(
         'visible' => array(
           ':input[name="enable"]' => array('checked' => TRUE),
@@ -61,7 +61,7 @@ class IndieAuthSettingsForm extends ConfigFormBase {
       '#title' => $this->t('Token endpoint'),
       '#type' => 'textfield',
       '#default_value' => $config->get('token_endpoint'),
-      '#description' => $this->t('This link will be added on the front page. If you want to add this manually to html.html.twig:<br /><div class="indieweb-highlight-code">&lt;link rel="token_endpoint" href="https://tokens.indieauth.com/token" /&gt;</div>'),
+      '#description' => $this->t('This link will be added on the front page. You can also add it yourself to html.html.twig:<br /><div class="indieweb-highlight-code">&lt;link rel="token_endpoint" href="https://tokens.indieauth.com/token" /&gt;</div>'),
       '#states' => array(
         'visible' => array(
           ':input[name="enable"]' => array('checked' => TRUE),

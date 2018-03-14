@@ -2,20 +2,22 @@
 
 ## About this module.
 
-Integrates the philosophy of Indieweb in your Drupal website in a minimal way.
+Integrates the philosophy of Indieweb in your Drupal website.
 For more information about indieweb, see https://indieweb.org/.
 
 Current functionality:
 
 - Receive webmentions and pingbacks via Webmention.io
-- Publish content, likes via bridg.y
+- Publish content, likes etc via bridg.y
 - Microformats for content and images
-- Creating comments from 'in-reply-to'
-- IndieAuth
-- Micropub (experimental)
-- Microsub (extremely experimental)
+- IndieAuth for Authentication API
+- Micropub for creating content, likes etc
+- Creating comments from 'in-reply-to' (experimental and no UI yet)
 
-This is only the top of the iceberg, much more to come.
+This is only the tip of the iceberg and much more functionality will be added.
+
+Development happens on github: https://github.com/swentel/indieweb
+Releases are available on drupal.org: https://www.drupal.org/project/indieweb
 
 ## IndieWebify.me
 
@@ -100,7 +102,47 @@ Classes added for publication (or other functionality).
 
 You can configure this at /admin/config/services/indieweb/microformats
 
+## IndieAuth: sign in with your domain name.
+
+IndieAuth is a way to use your own domain name to sign in to websites. It works by linking your website to one or more
+authentication providers such as Twitter or Google, then entering your domain name in the login form on websites that
+support IndieAuth. Indieauth.com is a hosted service that does this for you and also adds Authentication API.
+Indieauth.com is open source so you can also host the service yourself.
+
+The easy way is to add rel="me" links on your homepage which point to your social media accounts and on each of those
+services adding a link back to your home page. They can even be hidden.
+
+  ```
+  <a href="https://twitter.com/swentel" target="_blank" title="Twitter" rel="me"></a>
+  ```
+
+You can also use a PGP key if you don't want to use a third party service. See https://indieauth.com/setup for full
+details. This module does not expose any of these links or help you with the PGP setup, you will have to manage this
+yourself.
+
+If you use apps like Quill (https://quill.p3k.io - web) or Indigenous (Beta iOS, Alpha Android) or other clients which
+can post via micropub or read via microsub, the easiest way to let those clients log you in with your domain is by using
+indieauth.com too and exchange access tokens for further requests. Only expose these header links if you want to use
+micropub or microsub.
+
+## Micropub
+
+Allow posting to your site. Before you can post, you need to authenticate and enable the IndieAuth Authentication API.
+Every request will contain an access token which will be verified to make sure it is really you who is posting. See
+IndieAuth to configure. More information about micropub: https://indieweb.org/Micropub
+
+A very good client to test is https://quill.p3k.io. A full list is available at https://indieweb.org/Micropub/Clients.
+Indigenous (for iOS and Android) are in beta/alpha and are also microsub readers.
+
+Create a node when a 'note' is posted. A note request contains 'content', but no 'name' and the 'h' value is 'entry'.
+Think of it as a Tweet. The note can also contain a 'mp-syndicate-to' value which will contain the channel you want to
+publish to, see the Publish section to configure this.
+
+You can configure this at /admin/config/services/indieweb/micropub
+
 ## Creating comments
+
+This is currently experimental and has no UI configuration yet.
 
 When a webmention is saved and is of property 'in-reply-to', it is possible to create a comment if the target of the
 webmention has comments enabled. Currently, configuration is done by adding a field on comments and configuring lines
@@ -150,95 +192,13 @@ in settings.php. (at some point, we'll move this to configuration when it's well
 That's it. The module will check whether the node type has comments enabled and if the comment status is set to open.
 See indieweb_webmention_entity_insert().
 
-## IndieAuth: sign in with your domain name.
-
-IndieAuth is a way to use your own domain name to sign in to websites. It works by linking your website to one or more
-authentication providers such as Twitter or Google, then entering your domain name in the login form on websites that
-support IndieAuth. Indieauth.com is a hosted service that does this for you and also adds Authentication API.
-Indieauth.com is open source so you can also host the service yourself.
-
-The easy way is to add rel="me" links on your homepage which point to your social media accounts and on each of those
-services adding a link back to your home page. They can even be hidden.
-
-  ```
-  <a href="https://twitter.com/swentel" target="_blank" title="Twitter" rel="me"></a>
-  ```
-
-You can also use a PGP key if you don't want to use a third party service. See https://indieauth.com/setup for full
-details. This module does not expose any of these links or help you with the PGP setup, you will have to manage this
-yourself.
-
-If you use apps like Quill (https://quill.p3k.io - web) or Indigenous (Beta iOS, Alpha Android) or other clients which
-can post via micropub or read via microsub, the easiest way to let those clients log you in with your domain is by using
-indieauth.com too and exchange access tokens for further requests. Only expose these header links if you want to use
-micropub or microsub.
-
-## Micropub
-
-Warning: experimental, but fun :)
-
-Allow posting to your site, cool no ? Make sure the authorization and token endpoints are enabled. See IndieAuth.
-If you would send a micropub post request with the content parameter, it will create a node.
-You can configure the node type below, but we will make this more flexible in the near future.
-It will store the content into a field with machine name 'body' which  can be overridden too.
-
-  Add following header to your html.html.twig file.
-
-  ```
-  <link rel="micropub" href="https://your_domain/indieweb/micropub">
-  ```
-
-  Settings you can change in settings.php
-
-  - allow micropub requests.
-
-  ```
-  $settings['indieweb_allow_micropub_posts'] = TRUE;
-  ```
-
-  - Set the 'me' value, this is your domain which you use to sign in with Indieauth. Note the trailing slash!
-
-  ```
-  $settings['indieweb_micropub_me'] = 'https://realize.be/';
-  ```
-
-  - Allow sending a webmention (currently hardcoded to bridgy twitter):
-
-  ```
-  $settings['indieweb_micropub_send_webmention'] = TRUE;
-  ```
-
-  - Assigning a node type for the post (defaults to 'note'):
-
-  ```
-  $settings['indieweb_micropub_node_type'] = 'micropub_note';
-  ```
-
-  - The field which will store the 'content' from the micropub post (defaults to 'body'):
-
-  ```
-  $settings['indieweb_micropub_content_field'] = 'my_body';
-  ```
-
-  - Assigning a different user id for the post (default to 1):
-
-  ```
-  $settings['indieweb_micropub_uid'] = 321;
-  ```
-
-  - Logging the payload in watchdog:
-
-  ```
-  $settings['indieweb_micropub_log_payload'] = TRUE;
-  ```
-
 ## Microsub
 
 Allow your site to be 'read'.
 
-Warning: experimental, but fun :)
+Warning: experimental, no UI, don't use it yet.
 
-Note, the routing definition is commented out at this point as there's no dynamic content yet.
+The routing definition is commented out at this point as there's no dynamic content yet and hardcoded to my site.
 More to come later.
 
 Add following header to your html.html.twig file.

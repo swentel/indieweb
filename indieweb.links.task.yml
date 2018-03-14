@@ -18,6 +18,11 @@ indieweb.admin.microformats_settings:
   route_name: indieweb.admin.microformats_settings
   base_route: indieweb.admin.dashboard
 
+indieweb.admin.micropub_settings:
+  title: 'Micropub'
+  route_name: indieweb.admin.micropub_settings
+  base_route: indieweb.admin.dashboard
+
 indieweb.admin.indieauth_settings:
   title: 'IndieAuth'
   route_name: indieweb.admin.indieauth_settings
