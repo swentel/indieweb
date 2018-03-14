@@ -11,7 +11,7 @@ Current functionality:
 - Publish content, likes via bridg.y
 - Microformats for content and images
 - Creating comments from 'in-reply-to'
-- IndieAuth headers
+- IndieAuth
 - Micropub (experimental)
 - Microsub (extremely experimental)
 
@@ -19,9 +19,8 @@ This is only the top of the iceberg, much more to come.
 
 ## IndieWebify.me
 
-You can use https://indiewebify.me/ to perform initial checks to see if your site is Indieweb ready. It will scan for
-certain markup, so after you've done  the configuration with this module (and optionally more yourself), use it to make
-sure everything is ok.
+Use https://indiewebify.me/ to perform initial checks to see if your site is Indieweb ready. It can scan for certain
+markup after you've done the configuration with this module (and optionally more yourself).
 
 ## To install
 
@@ -33,7 +32,7 @@ sure everything is ok.
 Webmention.io is a hosted service created to easily handle webmentions (and legacy pingbacks) on any web page. The
 module exposes an endpoint (/webmention/notify) to receive pingbacks and webmentions via this service. Pingbacks are
 also validated to make sure that the source URL has a valid link to the target. Webmention.io is open source so you can
-also host this service yourself.
+also host the service yourself.
 
 You need an account for receiving the webhooks at https://webmention.io. As soon as one webmention is recorded at that
 service, you can set the webhook to http://your_domain/webmention/notify and enter a secret. Pingbacks can be done
@@ -56,7 +55,8 @@ A basic block (Webmentions) is available to render like and repost webmentions p
 ## Pulling and publishing content / Bridgy
 
 Bridgy pulls comments, likes, and reshares on social networks back to your web site. You can also use it to post to
-social networks - or comment, like, reshare, or even RSVP - from your own web site.
+social networks - or comment, like, reshare, or even RSVP - from your own web site. Bridgy is open source so you can
+also host the service yourself.
 
 To receive content from those networks, bridgy will send a webmention, so you only need to enable the webmention
 endpoint.
@@ -150,32 +150,34 @@ in settings.php. (at some point, we'll move this to configuration when it's well
 That's it. The module will check whether the node type has comments enabled and if the comment status is set to open.
 See indieweb_webmention_entity_insert().
 
-## IndieAuth support
+## IndieAuth: sign in with your domain name.
+
+IndieAuth is a way to use your own domain name to sign in to websites. It works by linking your website to one or more
+authentication providers such as Twitter or Google, then entering your domain name in the login form on websites that
+support IndieAuth. Indieauth.com is a hosted service that does this for you and also adds Authentication API.
+Indieauth.com is open source so you can also host the service yourself.
+
+The easy way is to add rel="me" links on your homepage which point to your social media accounts and on each of those
+services adding a link back to your home page. They can even be hidden.
+
+  ```
+  <a href="https://twitter.com/swentel" target="_blank" title="Twitter" rel="me"></a>
+  ```
+
+You can also use a PGP key if you don't want to use a third party service. See https://indieauth.com/setup for full
+details. This module does not expose any of these links or help you with the PGP setup, you will have to manage this
+yourself.
 
 If you use apps like Quill (https://quill.p3k.io - web) or Indigenous (Beta iOS, Alpha Android) or other clients which
 can post via micropub or read via microsub, the easiest way to let those clients log you in with your domain is by using
-indieauth.com. Indieauth is open source so you can also host this service yourself.
-
-Add following headers to your html.html.twig file.
-
-  ```
-  <link rel="authorization_endpoint" href="https://indieauth.com/auth" />
-  <link rel="token_endpoint" href="https://tokens.indieauth.com/token" />
-  ```
-
-You need rel="me" links on your homepage which point to your own site and your social media accounts.
-e.g.
-
-  ```
-  <a class="h-card" rel="me">https://your_domain</a>
-  <a href="https://twitter.com/swentel" target="_blank" title="Twitter" rel="me">
-  ```
+indieauth.com too and exchange access tokens for further requests. Only expose these header links if you want to use
+micropub or microsub.
 
 ## Micropub
 
 Warning: experimental, but fun :)
 
-Allow posting to your site, cool no ?
+Allow posting to your site, cool no ? Make sure the authorization and token endpoints are enabled. See IndieAuth.
 If you would send a micropub post request with the content parameter, it will create a node.
 You can configure the node type below, but we will make this more flexible in the near future.
 It will store the content into a field with machine name 'body' which  can be overridden too.

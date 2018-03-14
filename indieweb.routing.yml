@@ -30,6 +30,14 @@ indieweb.admin.microformats_settings:
   requirements:
     _permission: 'administer indieweb'
 
+indieweb.admin.indieauth_settings:
+  path: '/admin/config/services/indieweb/indieauth'
+  defaults:
+    _form: '\Drupal\indieweb\Form\IndieAuthSettingsForm'
+    _title: 'IndieAuth'
+  requirements:
+    _permission: 'administer indieweb'
+
 indieweb.webmention.notify:
   path: '/webmention/notify'
   defaults:

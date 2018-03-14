@@ -47,6 +47,32 @@ function indieweb_page_attachments_alter(array &$attachments) {
       ];
       $attachments['#attached']['html_head'][] = [$description, 'pingback'];
     }
+  }
+
+  // IndieAuth Authentication API.
+  if (\Drupal::service('path.matcher')->isFrontPage() && (($config = \Drupal::config('indieweb.indieauth')) && ($config->get('enable')))) {
+
+    if ($end_point = $config->get('authorization_endpoint')) {
+      $description = [
+        '#tag' => 'link',
+        '#attributes' => [
+          'rel' => 'authorization_endpoint',
+          'href' => $end_point,
+        ],
+      ];
+      $attachments['#attached']['html_head'][] = [$description, 'authorization_endpoint'];
+    }
+
+    if ($end_point = $config->get('token_endpoint')) {
+      $description = [
+        '#tag' => 'link',
+        '#attributes' => [
+          'rel' => 'token_endpoint',
+          'href' => $end_point,
+        ],
+      ];
+      $attachments['#attached']['html_head'][] = [$description, 'token_endpoint'];
+    }
 
   }
 

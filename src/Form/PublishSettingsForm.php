@@ -31,7 +31,7 @@ class PublishSettingsForm extends ConfigFormBase {
     $config = $this->config('indieweb.publish');
 
     $form['info'] = [
-      '#markup' => '<p>' . $this->t('The easiest way to start pulling back content or publish content on social networks is by using <a href="https://brid.gy/" target="_blank">https://brid.gy</a>. <br />You have to create an account by signing in with your preferred social network. Bridgy is open source, you can also host the service yourself.<br /><br />Publishing, which is nothing more than sending a webmention, can be done per node in the "Publish to" fieldset, which is protected with the "send webmentions" permission.<br />If no channels are configured, there is nothing to do.') . '</p>',
+      '#markup' => '<p>' . $this->t('The easiest way to start pulling back content or publish content on social networks is by using <a href="https://brid.gy/" target="_blank">https://brid.gy</a>. <br />You have to create an account by signing in with your preferred social network. Bridgy is open source so you can also host the service yourself.<br /><br />Publishing, which is nothing more than sending a webmention, can be done per node in the "Publish to" fieldset, which is protected with the "send webmentions" permission.<br />If no channels are configured, there is nothing to do.') . '</p>',
     ];
 
     $form['channels_wrapper'] = [
