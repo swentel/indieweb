@@ -74,15 +74,20 @@ class MicropubController extends ControllerBase {
           'title' => 'Micropub post',
           'type' => $this->config->get('note_node_type'),
           'status' => 1,
-          'is_micropub_post' => TRUE,
+          // Add complete payload on node, so developers can act on it.
+          // e.g. on hook_micropub_node_pre_create_alter().
+          'micropub_payload' => $input,
         ];
+
+        // Allow code to change the values.
+        \Drupal::moduleHandler()->alter('indieweb_micropub_node_pre_create', $values);
 
         /** @var \Drupal\node\NodeInterface $node */
         $node = Node::create($values);
 
         // Content.
         $content_field_name = $this->config->get('note_content_field');
-        if ($node->hasField($content_field_name)) {
+        if (!empty($input['content']) && $node->hasField($content_field_name)) {
           $node->set($content_field_name, $input['content']);
         }
 
