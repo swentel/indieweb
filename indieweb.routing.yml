@@ -46,6 +46,14 @@ indieweb.admin.indieauth_settings:
   requirements:
     _permission: 'administer indieweb'
 
+indieweb.admin.comment_settings:
+  path: '/admin/config/services/indieweb/comments'
+  defaults:
+    _form: '\Drupal\indieweb\Form\CommentSettingsForm'
+    _title: 'Comments'
+  requirements:
+    _permission: 'administer indieweb'
+
 indieweb.webmention.notify:
   path: '/webmention/notify'
   defaults:

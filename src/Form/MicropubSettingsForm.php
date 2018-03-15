@@ -19,7 +19,7 @@ class MicropubSettingsForm extends ConfigFormBase {
    * {@inheritdoc}
    */
   public function getFormId() {
-    return 'micropub_settings_form';
+    return 'indieweb_micropub_settings_form';
   }
 
   /**
@@ -35,7 +35,6 @@ class MicropubSettingsForm extends ConfigFormBase {
       '#markup' => '<p>' . $this->t("Allow posting to your site. Before you can post, you need to authenticate and enable the IndieAuth Authentication API.<br />See <a href=':link_indieauth'>IndieAuth</a> to configure. More information about micropub: see <a href='https://indieweb.org/Micropub' target='_blank'>https://indieweb.org/Micropub</a>.",
           [
             ':link_indieauth' => Url::fromRoute('indieweb.admin.indieauth_settings')->toString(),
-            ':link_publish' => Url::fromRoute('indieweb.admin.publish_settings')->toString(),
           ]) .
         '</p><p>' . $this->t("A very good client to test is <a href='https://quill.p3k.io' target='_blank'>https://quill.p3k.io</a>. A full list is available at <a href='https://indieweb.org/Micropub/Clients'>https://indieweb.org/Micropub/Clients</a>.<br />Indigenous (for iOS and Android) are in beta/alpha and are also microsub readers.") . '</p>',
     ];
@@ -80,7 +79,7 @@ class MicropubSettingsForm extends ConfigFormBase {
     $form['note'] = [
       '#type' => 'fieldset',
       '#title' => $this->t('Create a node when a micropub note is posted'),
-      '#description' => $this->t("Create a node when a 'note' is posted. A note request contains 'content', but no 'name' and the 'h' value is 'entry'. Think of it as a Tweet. The note can also contain a 'mp-syndicate-to' value which will contain the channel you want to publish to, see the <a href=':link_publish'>Publish section</a> to configure this."),
+      '#description' => $this->t("Create a node when a 'note' is posted. A note request contains 'content', but no 'name' and the 'h' value is 'entry'. Think of it as a Tweet. The note can also contain a 'mp-syndicate-to' value which will contain the channel you want to publish to, see the <a href=':link_publish'>Publish section</a> to configure this.", [            ':link_publish' => Url::fromRoute('indieweb.admin.publish_settings')->toString(),]),
       '#states' => array(
         'visible' => array(
           ':input[name="micropub_enable"]' => array('checked' => TRUE),
@@ -118,7 +117,7 @@ class MicropubSettingsForm extends ConfigFormBase {
       ),
     ];
 
-    // Gather fields.
+    // Collect fields.
     $text_fields = $upload_fields = [];
     $fields = \Drupal::service('entity_field.manager')->getFieldStorageDefinitions('node');
     /** @var \Drupal\Core\Field\FieldStorageDefinitionInterface $field */

@@ -141,57 +141,25 @@ publish to, see the Publish section to configure this.
 
 You can configure this at /admin/config/services/indieweb/micropub
 
-## Creating comments
-
-This is currently experimental and has no UI configuration yet.
+## Creating comments on nodes
 
 When a webmention is saved and is of property 'in-reply-to', it is possible to create a comment if the target of the
-webmention has comments enabled. Currently, configuration is done by adding a field on comments and configuring lines
-in settings.php. (at some point, we'll move this to configuration when it's well tested). Following steps are needed:
+webmention has comments enabled.
 
-  - Create an entity reference field on your comment which points to a webmention. On the 'Manage display' page you can
-  set the formatter to 'Webmention'. Currently the format uses the textual version of the reply run through the
-  'restricted_html' content format which comes default with Drupal 8. Don't forget to set permissions to view
-  webmentions.
+You have to create an entity reference field on your comment type which points to a webmention. On the 'Manage display'
+page of the comment you can set the formatter of that reference field to 'Webmention'. Currently the formatter uses the
+text content of the webmention, using the 'restricted_html' content format which comes default in Drupal 8. Also, don't
+forget to set permissions to view webmentions.
 
-  - enable the creation of the comment in settings.php.
+Configuration is at /admin/config/services/indieweb/comments
 
-  ```
-  $settings['indieweb_webmention_create_comment'] = TRUE;
-  ```
-
-  - The name of the comment type to use in settings.php.
-
-  ```
-  $settings['indieweb_comment_type'] = 'comment';
-  ```
-
-  - The name of the webmention reference field in settings.php.
-
-  ```
-  $settings['indieweb_comment_webmention_reference_field'] = 'field_webmention';
-  ```
-
-  - The name of the comment field on the node type in settings.php.
-
-  ```
-  $settings['indieweb_node_comment_field'] = 'comment';
-  ```
-
-  - Status of the new comment (defaults to moderated) in settings.php. (1 is published) (optional)
-
-  ```
-  $settings['indieweb_comment_status'] = 1;
-  ```
+Configuration still in settings.php
 
   - Match author names with uid's in settings.php. (optional)
 
   ```
   $settings['indieweb_comment_authors'] = ['Your name' => 3];
   ```
-
-That's it. The module will check whether the node type has comments enabled and if the comment status is set to open.
-See indieweb_webmention_entity_insert().
 
 ## Microsub
 

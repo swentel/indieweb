@@ -19,7 +19,7 @@ class IndieAuthSettingsForm extends ConfigFormBase {
    * {@inheritdoc}
    */
   public function getFormId() {
-    return 'indieauth_settings_form';
+    return 'indieweb_indieauth_settings_form';
   }
 
   /**

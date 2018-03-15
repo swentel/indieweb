@@ -18,7 +18,7 @@ class PublishSettingsForm extends ConfigFormBase {
    * {@inheritdoc}
    */
   public function getFormId() {
-    return 'publish_settings_form';
+    return 'indieweb_publish_settings_form';
   }
 
   /**

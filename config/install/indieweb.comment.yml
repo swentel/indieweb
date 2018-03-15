@@ -1,0 +1,5 @@
+comment_create_enable: 0
+comment_create_default_status: '0'
+comment_create_comment_type: ''
+comment_create_webmention_reference_field: ''
+comment_create_node_comment_field: ''

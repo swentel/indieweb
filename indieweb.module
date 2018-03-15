@@ -248,65 +248,73 @@ function indieweb_node_view(array &$build, NodeInterface $account, EntityViewDis
  */
 function indieweb_webmention_entity_insert(WebmentionEntityInterface $webmention) {
 
-  if (
-    Settings::get('indieweb_webmention_create_comment', FALSE) &&
-    !empty(Settings::get('indieweb_comment_type', '')) &&
-    !empty(Settings::get('indieweb_comment_webmention_reference_field', '')) &&
-    !empty(Settings::get('indieweb_node_comment_field')) &&
+  // Comment creation.
+  if (($config = \Drupal::config('indieweb.comment')) && $config->get('comment_create_enable')) {
+
+    // TODO we can probably remove the config checks underneath by adding
+    // validation on the configuration screen. If everything is fine, then
+    // comment is enabled and the if statement above is enough. webmention
+    // check needs to stay of course.
+    if (
+    !empty($config->get('comment_create_comment_type')) &&
+    !empty($config->get('comment_create_webmention_reference_field')) &&
+    !empty($config->get('comment_create_node_comment_field')) &&
     $webmention->get('property')->value == 'in-reply-to' &&
     !empty($webmention->get('content_text')->value)) {
 
-    // TODO - we have the same code in WebmentionController::clearCache to get
-    // an entity make a helper function/method.
-    $path = \Drupal::service('path.alias_manager')->getPathByAlias($webmention->get('target')->value);
-    try {
-      $params = Url::fromUri("internal:" . $path)->getRouteParameters();
-      if (!empty($params) && key($params) == 'node') {
-        $entity_type = key($params);
+      // TODO - we have the same code in WebmentionController::clearCache to get
+      // an entity make a helper function/method.
+      $path = \Drupal::service('path.alias_manager')->getPathByAlias($webmention->get('target')->value);
+      try {
+        $params = Url::fromUri("internal:" . $path)->getRouteParameters();
+        if (!empty($params) && key($params) == 'node') {
+          $entity_type = key($params);
 
-        $storage = \Drupal::entityTypeManager()->getStorage($entity_type);
-        if ($storage) {
+          $storage = \Drupal::entityTypeManager()->getStorage($entity_type);
+          if ($storage) {
 
-          $comment_type = Settings::get('indieweb_comment_type', '');
-          $comment_comment_webmention_field_name = Settings::get('indieweb_comment_webmention_reference_field', '');
-          $comment_node_comment_field_name = Settings::get('indieweb_node_comment_field', '');
+            $comment_type = $config->get('comment_create_comment_type');
+            $comment_comment_webmention_field_name = $config->get('comment_create_webmention_reference_field');
+            $comment_node_comment_field_name = $config->get('comment_create_node_comment_field');
 
-          /** @var \Drupal\node\NodeInterface $node */
-          $node = $storage->load($params[$entity_type]);
-          if ($node && $node->hasField($comment_node_comment_field_name) && $node->{$comment_node_comment_field_name}->status == 2) {
+            /** @var \Drupal\node\NodeInterface $node */
+            $node = $storage->load($params[$entity_type]);
+            if ($node && $node->hasField($comment_node_comment_field_name) && $node->{$comment_node_comment_field_name}->status == 2) {
 
-            $subject = 'Auto created comment from webmention';
+              $subject = 'Auto created comment from webmention';
 
-            $values = [
-              'subject' => $subject,
-              'status' => Settings::get('indieweb_comment_status', 0),
-              'entity_id' => $node->id(),
-              'entity_type' => 'node',
-              'comment_type' => $comment_type,
-              'field_name' => $comment_node_comment_field_name,
-              $comment_comment_webmention_field_name => [
-                'target_id' => $webmention->id(),
-              ]
-            ];
+              $values = [
+                'subject' => $subject,
+                'status' => $config->get('comment_create_default_status'),
+                'entity_id' => $node->id(),
+                'entity_type' => 'node',
+                'comment_type' => $comment_type,
+                'field_name' => $comment_node_comment_field_name,
+                $comment_comment_webmention_field_name => [
+                  'target_id' => $webmention->id(),
+                ]
+              ];
 
-            // Match authors if possible.
-            $authors = Settings::get('indieweb_comment_authors', []);
-            $author_name = $webmention->get('author_name')->value;
-            $values['name'] = $author_name;
-            if (isset($authors[$author_name])) {
-              $values['uid'] = $authors[$author_name];
+              // Match authors if possible.
+              $authors = Settings::get('indieweb_comment_authors', []);
+              $author_name = $webmention->get('author_name')->value;
+              $values['name'] = $author_name;
+              if (isset($authors[$author_name])) {
+                $values['uid'] = $authors[$author_name];
+              }
+
+              $comment = Comment::create($values);
+              $comment->save();
+
             }
-
-            $comment = Comment::create($values);
-            $comment->save();
-
           }
         }
       }
+      catch (Exception $e) {
+        \Drupal::logger('indieweb_comment')->notice('Failed to create a comment: @message', ['@message' => $e->getMessage()]);
+      }
     }
-    catch (Exception $e) {
-      \Drupal::logger('indieweb')->notice('Failed to create a comment: @message', ['@message' => $e->getMessage()]);
-    }
+
   }
 
 }

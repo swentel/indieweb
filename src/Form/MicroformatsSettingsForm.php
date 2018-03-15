@@ -19,15 +19,13 @@ class MicroformatsSettingsForm extends ConfigFormBase {
    * {@inheritdoc}
    */
   public function getFormId() {
-    return 'microformats_settings_form';
+    return 'indieweb_microformats_settings_form';
   }
 
   /**
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
-
-    $form['#attached']['library'][] = 'indieweb/admin';
 
     $config = $this->config('indieweb.microformats');
 
