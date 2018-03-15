@@ -123,9 +123,16 @@ class WebmentionController extends ControllerBase {
   protected function validateSource($source, $target) {
     $valid = FALSE;
 
-    $content = file_get_contents($source);
-    if ($content && strpos($content, $target) !== FALSE) {
-      $valid = TRUE;
+    try {
+      $client = \Drupal::httpClient();
+      $response = $client->get($source);
+      $content = $response->getBody();
+      if ($content && strpos($content, $target) !== FALSE) {
+        $valid = TRUE;
+      }
+    }
+    catch (\Exception $e) {
+      $this->getLogger('indieweb_webmention')->notice('Error validating pingback url: @message', ['@message' => $e->getMessage()]);
     }
 
     return $valid;
