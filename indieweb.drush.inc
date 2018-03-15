@@ -9,10 +9,11 @@ function indieweb_drush_command() {
   return [
     'indieweb-send-webmentions' => [
       'description' => 'Send webmentions',
+      'aliases' => ['isw'],
     ],
     'indieweb-get-webmentions-from-webmention-io' => [
       'description' => 'Gets webmentions from Webmention.io. Supports getting webmentions for a certain url and optionally saving them. More features will be added in the future.',
-      'aliases' => ['wgwwio'],
+      'aliases' => ['iwio'],
       'arguments' => [
         'target-url' => 'The url you want to get the webmentions for.',
         'base-url' => 'The base url of your site, so we can strip that from the target.'

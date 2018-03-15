@@ -210,8 +210,8 @@ Add following header to your html.html.twig file.
 
 ## Drush commands
 
-- indieweb-send-webmentions: handles the queue for sending webmentions
-- indieweb-get-webmentions-from-webmention-io (wgwwio): allows you to get webmentions for one url and optionally save
+- indieweb-send-webmentions (isw): handles the queue for sending webmentions
+- indieweb-get-webmentions-from-webmention-io (iwio): allows you to get webmentions for one url and optionally save
   them if they do not exist yet.
 
 ## Want to help out ?
