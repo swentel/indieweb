@@ -11,8 +11,8 @@ Current functionality:
 - Publish content, likes etc via bridg.y
 - Microformats for content and images
 - IndieAuth for Authentication API
-- Micropub for creating content, likes etc
-- Creating comments from 'in-reply-to' (experimental and no UI yet)
+- Micropub for creating content etc
+- Creating comments from 'in-reply-to'
 
 This is only the tip of the iceberg and much more functionality will be added.
 
