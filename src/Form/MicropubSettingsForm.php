@@ -118,21 +118,40 @@ class MicropubSettingsForm extends ConfigFormBase {
       ),
     ];
 
-    $text_fields = [];
+    // Gather fields.
+    $text_fields = $upload_fields = [];
     $fields = \Drupal::service('entity_field.manager')->getFieldStorageDefinitions('node');
     /** @var \Drupal\Core\Field\FieldStorageDefinitionInterface $field */
     foreach ($fields as $key => $field) {
       if (in_array($field->getType(), ['text_with_summary', 'text_long'])) {
         $text_fields[$key] = $field->getName();
       }
+      if (in_array($field->getType(), ['file', 'image'])) {
+        $upload_fields[$key] = $field->getName();
+      }
     }
 
+    // Content field.
     $form['note']['note_content_field'] = [
       '#type' => 'select',
       '#title' => $this->t('Content field'),
       '#description' => $this->t('Select the field which will be used to store the content. Make sure the field exists on the node type.'),
       '#options' => $text_fields,
       '#default_value' => $config->get('note_content_field'),
+      '#states' => array(
+        'visible' => array(
+          ':input[name="note_create_node"]' => array('checked' => TRUE),
+        ),
+      ),
+    ];
+
+    // Upload field.
+    $form['note']['note_upload_field'] = [
+      '#type' => 'select',
+      '#title' => $this->t('Upload field'),
+      '#description' => $this->t('Select the field which will be used to store files. Make sure the field exists on the node type.<br />Currently only supports saving 1 file in the "image" section of a micropub request.'),
+      '#options' => ['' => $this->t('Do not allow uploads')] + $upload_fields,
+      '#default_value' => $config->get('note_upload_field'),
       '#states' => array(
         'visible' => array(
           ':input[name="note_create_node"]' => array('checked' => TRUE),
@@ -157,6 +176,7 @@ class MicropubSettingsForm extends ConfigFormBase {
       ->set('note_uid', $form_state->getValue('note_uid'))
       ->set('note_node_type', $form_state->getValue('note_node_type'))
       ->set('note_content_field', $form_state->getValue('note_content_field'))
+      ->set('note_upload_field', $form_state->getValue('note_upload_field'))
       ->save();
 
     parent::submitForm($form, $form_state);

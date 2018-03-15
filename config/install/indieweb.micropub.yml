@@ -5,4 +5,5 @@ micropub_log_payload: 0
 note_create_node: 0
 note_node_type: ''
 note_content_field: ''
+note_upload_field: ''
 note_uid: '1'

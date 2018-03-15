@@ -80,9 +80,19 @@ class MicropubController extends ControllerBase {
         /** @var \Drupal\node\NodeInterface $node */
         $node = Node::create($values);
 
-        $field_name = $this->config->get('note_content_field');
-        if ($node->hasField($field_name)) {
-          $node->set($field_name, $input['content']);
+        // Content.
+        $content_field_name = $this->config->get('note_content_field');
+        if ($node->hasField($content_field_name)) {
+          $node->set($content_field_name, $input['content']);
+        }
+
+        // File (currently only image, limited to 1).
+        $file_field_name = $this->config->get('note_upload_field');
+        if ($file_field_name && $node->hasField($file_field_name)) {
+          $file = $this->saveUpload('photo');
+          if ($file) {
+            $node->set($file_field_name, $file->id());
+          }
         }
 
         $node->save();
@@ -140,6 +150,44 @@ class MicropubController extends ControllerBase {
     }
 
     return $valid_token;
+  }
+
+  /**
+   * Helper function to upload file(s).
+   * Currently limited to 1 file.
+   *
+   * @param $file_key
+   *   The key in the $_FILES variable to look for in upload.
+   *
+   * @return \Drupal\file\FileInterface $file|false.
+   */
+  protected function saveUpload($file_key) {
+    $file = FALSE;
+
+    // Return early if there are no uploads.
+    $files = \Drupal::request()->files->get($file_key);
+    if (empty($files)) {
+      return $file;
+    }
+
+    // Set files.
+    \Drupal::request()->files->set('files', [$file_key => $files]);
+
+    // Try to save the file.
+    try {
+      $file = file_save_upload($file_key, array(), "public://", 0);
+      $messages = drupal_get_messages();
+      if (!empty($messages)) {
+        foreach ($messages as $message) {
+          $this->getLogger('indieweb_micropub')->notice('Error saving file: @message', ['@message' => print_r($message, 1)]);
+        }
+      }
+    }
+    catch (\Exception $e) {
+      $this->getLogger('indieweb_micropub')->notice('Exception saving file: @message', ['@message' => $e->getMessage()]);
+    }
+
+    return $file;
   }
 
 }
