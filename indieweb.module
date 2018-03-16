@@ -379,7 +379,13 @@ function indieweb_handle_publish_queue() {
       $sourceURL = $data['source_url'];
       $targetURL = $data['target_url'];
       $client = new MentionClient();
-      $client->sendWebmention($sourceURL, $targetURL);
+      $response = $client->sendWebmention($sourceURL, $targetURL);
+      // Log the response. Expose in UI at some point. We will have to start
+      // storing this at some point for syndication.
+      // see https://github.com/swentel/indieweb/issues/31
+      if (Settings::get('indieweb_webmention_log_response', FALSE)) {
+        \Drupal::logger('indieweb_webmention_response')->notice('response: @response', ['@response' => print_r($response, 1)]);
+      }
     }
 
     // Remove the item.
