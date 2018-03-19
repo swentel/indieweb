@@ -182,6 +182,10 @@ Add following header to your html.html.twig file.
 - indieweb-get-webmentions-from-webmention-io (iwio): allows you to get webmentions for one url and optionally save
   them if they do not exist yet.
 
+## Hooks
+
+Several hooks are available, see indieweb.api.php
+
 ## Want to help out ?
 
 Great! Check the issue queue at https://github.com/swentel/indieweb/issues
