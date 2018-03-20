@@ -142,8 +142,7 @@ Indigenous (for iOS and Android) are in beta/alpha and are also microsub readers
 want to publish to, see the Publish section to configure this.
 - Article: Create a node when an 'article' is posted. An article request contains 'name', 'content' and the 'h' value is
 'entry'. Think of it as a blog post. The article can also contain a 'mp-syndicate-to' value which will contain the
-channel you want to publish to, see the Publish section to configure this. Currently only visible if you set
-'indieweb_show_article_config' to TRUE in settings.php as we're finalizing the code.
+channel you want to publish to, see the Publish section to configure this.
 
 You can configure this at /admin/config/services/indieweb/micropub
 

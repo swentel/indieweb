@@ -91,11 +91,9 @@ class MicropubSettingsForm extends ConfigFormBase {
     }
 
     $form['article'] = [
-      // Disable for not, doesn't seem to work
-      '#access' => Settings::get('indieweb_show_article_config', FALSE),
       '#type' => 'fieldset',
       '#title' => $this->t('Create a node when a micropub article is posted'),
-      '#description' => $this->t("Create a node when an 'article' is posted. An article request contains 'content', 'name' and the 'h' value is 'entry'. Think of it as a blog post. The article can also contain a 'mp-syndicate-to' value which will contain the channel you want to publish to, see the <a href=':link_publish'>Publish section</a> to configure this.", [            ':link_publish' => Url::fromRoute('indieweb.admin.publish_settings')->toString(),]),
+      '#description' => $this->t("Create a node when an 'article' is posted. An article request contains 'content', 'name' and the 'h' value is 'entry'. Think of it as a blog post. The article can also contain a 'mp-syndicate-to' value which will contain the channel you want to publish to, see the <a href=':link_publish'>Publish section</a> to configure this.<br /><strong>Important:</strong> might not work with clients who send json requests (e.g. quill), will be fixed when https://github.com/swentel/indieweb/issues/44 is done", [':link_publish' => Url::fromRoute('indieweb.admin.publish_settings')->toString(),]),
       '#states' => array(
         'visible' => array(
           ':input[name="micropub_enable"]' => array('checked' => TRUE),
@@ -164,7 +162,7 @@ class MicropubSettingsForm extends ConfigFormBase {
     $form['note'] = [
       '#type' => 'fieldset',
       '#title' => $this->t('Create a node when a micropub note is posted'),
-      '#description' => $this->t("Create a node when a 'note' is posted. A note request contains 'content', but no 'name' and the 'h' value is 'entry'. Think of it as a Tweet. The note can also contain a 'mp-syndicate-to' value which will contain the channel you want to publish to, see the <a href=':link_publish'>Publish section</a> to configure this.", [            ':link_publish' => Url::fromRoute('indieweb.admin.publish_settings')->toString(),]),
+      '#description' => $this->t("Create a node when a 'note' is posted. A note request contains 'content', but no 'name' and the 'h' value is 'entry'. Think of it as a Tweet. The note can also contain a 'mp-syndicate-to' value which will contain the channel you want to publish to, see the <a href=':link_publish'>Publish section</a> to configure this.", [':link_publish' => Url::fromRoute('indieweb.admin.publish_settings')->toString(),]),
       '#states' => array(
         'visible' => array(
           ':input[name="micropub_enable"]' => array('checked' => TRUE),
