@@ -4,6 +4,7 @@ namespace Drupal\indieweb\Controller;
 
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\node\Entity\Node;
+use Drupal\node\NodeInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -58,6 +59,21 @@ class MicropubController extends ControllerBase {
     if (!empty($_POST)) {
       $input = $_POST;
     }
+    else {
+      $php_input = file('php://input');
+      $php_input = is_array($php_input) ? array_shift($php_input) : '';
+      $input = json_decode($php_input, TRUE);
+
+      // TODO need to figure out why quill nests everything in 'properties'
+      // probably todo with the the format
+      if (isset($input['properties'])) {
+        $input += $input['properties'];
+      }
+
+      if ($this->config->get('micropub_log_payload')) {
+        $this->getLogger('indieweb_micropub')->notice('input: @input', ['@input' => print_r($input, 1)]);
+      }
+    }
     if (!empty($input)) {
 
       $valid_token = $this->isValidToken();
@@ -104,12 +120,58 @@ class MicropubController extends ControllerBase {
         if ($node->id()) {
 
           // Syndicate.
-          if (!empty($input['mp-syndicate-to'])) {
-            $source_url = $node->toUrl()->setAbsolute(TRUE)->toString();
-            foreach ($input['mp-syndicate-to'] as $target_url) {
-              indieweb_publish_create_queue_item($source_url, $target_url);
-            }
+          $this->syndicateTo($input, $node);
+
+          $response_code = 201;
+          $response_message = '';
+          header('Location: ' . $node->toUrl('canonical', ['absolute' => TRUE])->toString());
+          return new Response($response_message, $response_code);
+        }
+      }
+
+      // Article support.
+      if ($this->config->get('article_create_node') && !empty($input['content']['html']) && !empty($input['name']) && (!empty($input['h']) && $input['h'] == 'entry') && $valid_token) {
+
+        if ($this->config->get('micropub_log_payload')) {
+          $this->getLogger('indieweb_micropub')->notice('input: @input', ['@input' => print_r($input, 1)]);
+        }
+
+        $values = [
+          'uid' => $this->config->get('article_uid'),
+          'title' => $input['name'],
+          'type' => $this->config->get('article_node_type'),
+          'status' => 1,
+          // Add complete payload on node, so developers can act on it.
+          // e.g. on hook_micropub_node_pre_create_alter().
+          'micropub_payload' => $input,
+        ];
+
+        // Allow code to change the values.
+        \Drupal::moduleHandler()->alter('indieweb_micropub_node_pre_create', $values);
+
+        /** @var \Drupal\node\NodeInterface $node */
+        $node = Node::create($values);
+
+        // Content.
+        $content_field_name = $this->config->get('article_content_field');
+        if (!empty($input['content']) && $node->hasField($content_field_name)) {
+          $node->set($content_field_name, $input['content']['html']);
+        }
+
+        // File (currently only image, limited to 1).
+        $file_field_name = $this->config->get('article_upload_field');
+        if ($file_field_name && $node->hasField($file_field_name)) {
+          $file = $this->saveUpload('photo');
+          if ($file) {
+            $node->set($file_field_name, $file->id());
           }
+        }
+
+        $node->save();
+        if ($node->id()) {
+
+          // Syndicate.
+          $this->syndicateTo($input, $node);
 
           $response_code = 201;
           $response_message = '';
@@ -193,6 +255,21 @@ class MicropubController extends ControllerBase {
     }
 
     return $file;
+  }
+
+  /**
+   * Syndicate to other channels.
+   *
+   * @param $input
+   * @param \Drupal\node\NodeInterface $node
+   */
+  protected function syndicateTo($input, NodeInterface $node) {
+    if (!empty($input['mp-syndicate-to'])) {
+      $source_url = $node->toUrl()->setAbsolute(TRUE)->toString();
+      foreach ($input['mp-syndicate-to'] as $target_url) {
+        indieweb_publish_create_queue_item($source_url, $target_url);
+      }
+    }
   }
 
 }

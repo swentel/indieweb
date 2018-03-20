@@ -135,9 +135,15 @@ IndieAuth to configure. More information about micropub: https://indieweb.org/Mi
 A very good client to test is https://quill.p3k.io. A full list is available at https://indieweb.org/Micropub/Clients.
 Indigenous (for iOS and Android) are in beta/alpha and are also microsub readers.
 
-Create a node when a 'note' is posted. A note request contains 'content', but no 'name' and the 'h' value is 'entry'.
-Think of it as a Tweet. The note can also contain a 'mp-syndicate-to' value which will contain the channel you want to
-publish to, see the Publish section to configure this.
+# post types
+
+- Note: Create a node when a 'note' is posted. A note request contains 'content', but no 'name' and the 'h' value is
+'entry'. Think of it as a Tweet. The note can also contain a 'mp-syndicate-to' value which will contain the channel you
+want to publish to, see the Publish section to configure this.
+- Article: Create a node when an 'article' is posted. An article request contains 'name', 'content' and the 'h' value is
+'entry'. Think of it as a blog post. The article can also contain a 'mp-syndicate-to' value which will contain the
+channel you want to publish to, see the Publish section to configure this. Currently only visible if you set
+'indieweb_show_article_config' to TRUE in settings.php as we're finalizing the code.
 
 You can configure this at /admin/config/services/indieweb/micropub
 

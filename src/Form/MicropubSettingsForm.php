@@ -4,6 +4,7 @@ namespace Drupal\indieweb\Form;
 
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Site\Settings;
 use Drupal\Core\Url;
 
 class MicropubSettingsForm extends ConfigFormBase {
@@ -76,6 +77,90 @@ class MicropubSettingsForm extends ConfigFormBase {
       '#default_value' => $config->get('micropub_log_payload'),
     ];
 
+    // Collect fields.
+    $text_fields = $upload_fields = [];
+    $fields = \Drupal::service('entity_field.manager')->getFieldStorageDefinitions('node');
+    /** @var \Drupal\Core\Field\FieldStorageDefinitionInterface $field */
+    foreach ($fields as $key => $field) {
+      if (in_array($field->getType(), ['text_with_summary', 'text_long'])) {
+        $text_fields[$key] = $field->getName();
+      }
+      if (in_array($field->getType(), ['file', 'image'])) {
+        $upload_fields[$key] = $field->getName();
+      }
+    }
+
+    $form['article'] = [
+      // Disable for not, doesn't seem to work
+      '#access' => Settings::get('indieweb_show_article_config', FALSE),
+      '#type' => 'fieldset',
+      '#title' => $this->t('Create a node when a micropub article is posted'),
+      '#description' => $this->t("Create a node when an 'article' is posted. An article request contains 'content', 'name' and the 'h' value is 'entry'. Think of it as a blog post. The article can also contain a 'mp-syndicate-to' value which will contain the channel you want to publish to, see the <a href=':link_publish'>Publish section</a> to configure this.", [            ':link_publish' => Url::fromRoute('indieweb.admin.publish_settings')->toString(),]),
+      '#states' => array(
+        'visible' => array(
+          ':input[name="micropub_enable"]' => array('checked' => TRUE),
+        ),
+      ),
+    ];
+
+    $form['article']['article_create_node'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Enable'),
+      '#default_value' => $config->get('article_create_node'),
+    ];
+
+    $form['article']['article_uid'] = [
+      '#type' => 'number',
+      '#title' => $this->t('The user id which will own the created node'),
+      '#default_value' => $config->get('article_uid'),
+      '#states' => array(
+        'visible' => array(
+          ':input[name="article_create_node"]' => array('checked' => TRUE),
+        ),
+      ),
+    ];
+
+    $form['article']['article_node_type'] = [
+      '#type' => 'select',
+      '#title' => $this->t('Node type'),
+      '#description' => $this->t('Select the node type to use for creating a node'),
+      '#options' => node_type_get_names(),
+      '#default_value' => $config->get('article_node_type'),
+      '#states' => array(
+        'visible' => array(
+          ':input[name="article_create_node"]' => array('checked' => TRUE),
+        ),
+      ),
+    ];
+
+    // Content field.
+    $form['article']['article_content_field'] = [
+      '#type' => 'select',
+      '#title' => $this->t('Content field'),
+      '#description' => $this->t('Select the field which will be used to store the content. Make sure the field exists on the node type.'),
+      '#options' => $text_fields,
+      '#default_value' => $config->get('article_content_field'),
+      '#states' => array(
+        'visible' => array(
+          ':input[name="article_create_node"]' => array('checked' => TRUE),
+        ),
+      ),
+    ];
+
+    // Upload field.
+    $form['article']['article_upload_field'] = [
+      '#type' => 'select',
+      '#title' => $this->t('Upload field'),
+      '#description' => $this->t('Select the field which will be used to store files. Make sure the field exists on the node type.<br />Currently only supports saving 1 file in the "image" section of a micropub request.'),
+      '#options' => ['' => $this->t('Do not allow uploads')] + $upload_fields,
+      '#default_value' => $config->get('article_upload_field'),
+      '#states' => array(
+        'visible' => array(
+          ':input[name="article_create_node"]' => array('checked' => TRUE),
+        ),
+      ),
+    ];
+
     $form['note'] = [
       '#type' => 'fieldset',
       '#title' => $this->t('Create a node when a micropub note is posted'),
@@ -116,19 +201,6 @@ class MicropubSettingsForm extends ConfigFormBase {
         ),
       ),
     ];
-
-    // Collect fields.
-    $text_fields = $upload_fields = [];
-    $fields = \Drupal::service('entity_field.manager')->getFieldStorageDefinitions('node');
-    /** @var \Drupal\Core\Field\FieldStorageDefinitionInterface $field */
-    foreach ($fields as $key => $field) {
-      if (in_array($field->getType(), ['text_with_summary', 'text_long'])) {
-        $text_fields[$key] = $field->getName();
-      }
-      if (in_array($field->getType(), ['file', 'image'])) {
-        $upload_fields[$key] = $field->getName();
-      }
-    }
 
     // Content field.
     $form['note']['note_content_field'] = [
@@ -176,6 +248,11 @@ class MicropubSettingsForm extends ConfigFormBase {
       ->set('note_node_type', $form_state->getValue('note_node_type'))
       ->set('note_content_field', $form_state->getValue('note_content_field'))
       ->set('note_upload_field', $form_state->getValue('note_upload_field'))
+      ->set('article_create_node', $form_state->getValue('article_create_node'))
+      ->set('article_uid', $form_state->getValue('article_uid'))
+      ->set('article_node_type', $form_state->getValue('article_node_type'))
+      ->set('article_content_field', $form_state->getValue('article_content_field'))
+      ->set('article_upload_field', $form_state->getValue('article_upload_field'))
       ->save();
 
     parent::submitForm($form, $form_state);
