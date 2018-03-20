@@ -1,0 +1,19 @@
+{
+  "name": "drupal/indieweb",
+  "description": "Indieweb functionality for your site.",
+  "type": "drupal-module",
+  "homepage": "http://drupal.org/project/indieweb",
+  "authors": [
+    {
+      "name": "Kristof De Jaeger",
+      "email": "swentel@realize.be",
+      "homepage": "https://realize.be",
+      "role": "Maintainer"
+    }
+  ],
+  "license": "GPL-2.0+",
+  "minimum-stability": "dev",
+  "require": {
+    "indieweb/mention-client": "^1.1"
+  }
+}
