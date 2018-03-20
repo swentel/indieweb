@@ -130,7 +130,7 @@ class MicropubController extends ControllerBase {
       }
 
       // Article support.
-      if ($this->config->get('article_create_node') && !empty($input['content']['html']) && !empty($input['name']) && (!empty($input['h']) && $input['h'] == 'entry') && $valid_token) {
+      if ($this->config->get('article_create_node') && !empty($input['content']) && !empty($input['name']) && (!empty($input['h']) && $input['h'] == 'entry') && $valid_token) {
 
         if ($this->config->get('micropub_log_payload')) {
           $this->getLogger('indieweb_micropub')->notice('input: @input', ['@input' => print_r($input, 1)]);
