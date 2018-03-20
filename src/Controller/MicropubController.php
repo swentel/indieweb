@@ -155,7 +155,7 @@ class MicropubController extends ControllerBase {
         // Content.
         $content_field_name = $this->config->get('article_content_field');
         if (!empty($input['content']) && $node->hasField($content_field_name)) {
-          $node->set($content_field_name, $input['content']['html']);
+          $node->set($content_field_name, $input['content']);
         }
 
         // File (currently only image, limited to 1).
