@@ -135,7 +135,7 @@ IndieAuth to configure. More information about micropub: https://indieweb.org/Mi
 A very good client to test is https://quill.p3k.io. A full list is available at https://indieweb.org/Micropub/Clients.
 Indigenous (for iOS and Android) are in beta/alpha and are also microsub readers.
 
-# post types
+### post types
 
 - Note: Create a node when a 'note' is posted. A note request contains 'content', but no 'name' and the 'h' value is
 'entry'. Think of it as a Tweet. The note can also contain a 'mp-syndicate-to' value which will contain the channel you
