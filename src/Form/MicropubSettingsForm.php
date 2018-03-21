@@ -37,7 +37,7 @@ class MicropubSettingsForm extends ConfigFormBase {
           [
             ':link_indieauth' => Url::fromRoute('indieweb.admin.indieauth_settings')->toString(),
           ]) .
-        '</p><p>' . $this->t("A very good client to test is <a href='https://quill.p3k.io' target='_blank'>https://quill.p3k.io</a>. A full list is available at <a href='https://indieweb.org/Micropub/Clients'>https://indieweb.org/Micropub/Clients</a>.<br />Indigenous (for iOS and Android) are in beta/alpha and are also microsub readers.") . '</p>',
+        '</p><p>' . $this->t("A very good client to test is <a href='https://quill.p3k.io' target='_blank'>https://quill.p3k.io</a>. A full list is available at <a href='https://indieweb.org/Micropub/Clients'>https://indieweb.org/Micropub/Clients</a>.<br />Indigenous (iOS and Android) are are also microsub readers.") . '</p>',
     ];
 
     $form['micropub'] = [

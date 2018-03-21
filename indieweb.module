@@ -99,6 +99,24 @@ function indieweb_page_attachments_alter(array &$attachments) {
         'micropub_endpoint'
       ];
     }
+
+    // Microsub.
+    if (($config = \Drupal::config('indieweb.microsub')) && $config->get('enable')) {
+
+      $link = [
+        '#tag' => 'link',
+        '#attributes' => [
+          'rel' => 'microsub',
+          'href' => $config->get('microsub_endpoint'),
+        ],
+      ];
+
+      $attachments['#attached']['html_head'][] = [
+        $link,
+        'microsub_endpoint'
+      ];
+    }
+
   }
 
 }

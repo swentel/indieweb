@@ -13,6 +13,7 @@ Current functionality:
 - IndieAuth for Authentication API
 - Micropub for creating content etc
 - Creating comments from 'in-reply-to'
+- Microsub support
 
 This is only the tip of the iceberg and much more functionality will be added.
 
@@ -133,7 +134,7 @@ Every request will contain an access token which will be verified to make sure i
 IndieAuth to configure. More information about micropub: https://indieweb.org/Micropub
 
 A very good client to test is https://quill.p3k.io. A full list is available at https://indieweb.org/Micropub/Clients.
-Indigenous (for iOS and Android) are in beta/alpha and are also microsub readers.
+Indigenous (for iOS and Android) are also microsub readers.
 
 ### post types
 
@@ -168,18 +169,17 @@ Configuration still in settings.php
 
 ## Microsub
 
-Allow your site to be 'read'.
+Microsub is an early draft of a spec that provides a standardized way for clients to consume and interact with feeds
+collected by a server. Readers are Indigenous (iOS and Android), Monocle and Together and many others to come.
+Servers are Aperture.
 
-Warning: experimental, no UI, don't use it yet.
+For more information see
 
-The routing definition is commented out at this point as there's no dynamic content yet and hardcoded to my site.
-More to come later.
+- https://indieweb.org/Microsub-spec
+- https://indieweb.org/Microsub
 
-Add following header to your html.html.twig file.
-
-  ```
-  <link rel="microsub" href="https://your_domain/indieweb/microsub">
-  ```
+This modules does not expose itself as a microsub server, it mainly allows you to expose the microsub header link.
+Note that you also need feeds to be enabled, see the Feeds section.
 
 ## Drush commands
 

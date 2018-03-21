@@ -33,6 +33,11 @@ indieweb.admin.comment_settings:
   route_name: indieweb.admin.comment_settings
   base_route: indieweb.admin.dashboard
 
+indieweb.admin.microsub_settings:
+  title: 'Microsub'
+  route_name: indieweb.admin.microsub_settings
+  base_route: indieweb.admin.dashboard
+
 webmention_entity.list_tab:
   title: 'Webmentions'
   route_name: entity.webmention_entity.collection

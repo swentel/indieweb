@@ -54,6 +54,14 @@ indieweb.admin.comment_settings:
   requirements:
     _permission: 'administer indieweb'
 
+indieweb.admin.microsub_settings:
+  path: '/admin/config/services/indieweb/microsub'
+  defaults:
+    _form: '\Drupal\indieweb\Form\MicrosubSettingsForm'
+    _title: 'Microsub'
+  requirements:
+    _permission: 'administer indieweb'
+
 indieweb.webmention.notify:
   path: '/webmention/notify'
   defaults:
@@ -69,12 +77,3 @@ indieweb.micropub.endpoint:
    _title: 'Micropub endpoint'
   requirements:
    _access: 'TRUE'
-
-#indieweb.microsub.endpoint:
-#  path: '/indieweb/microsub'
-#  defaults:
-#   _controller: '\Drupal\indieweb\Controller\MicrosubController::endpoint'
-#   _title: 'Microsub endpoint'
-#  requirements:
-#   _access: 'TRUE'
-
