@@ -1,4 +1,4 @@
-h_entry: 1
-e_content: 1
-u_photo: 1
+h_entry: true
+e_content: true
+u_photo: true
 p_summary: ''

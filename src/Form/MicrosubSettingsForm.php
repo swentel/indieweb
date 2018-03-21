@@ -2,6 +2,7 @@
 
 namespace Drupal\indieweb\Form;
 
+use Drupal\Core\Cache\Cache;
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
@@ -70,6 +71,8 @@ class MicrosubSettingsForm extends ConfigFormBase {
       ->set('enable', $form_state->getValue('enable'))
       ->set('microsub_endpoint', $form_state->getValue('microsub_endpoint'))
       ->save();
+
+    Cache::invalidateTags(['rendered']);
 
     parent::submitForm($form, $form_state);
   }

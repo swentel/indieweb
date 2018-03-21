@@ -1,4 +1,4 @@
-enable: 0
-expose: 0
+enable: false
+expose: false
 authorization_endpoint: 'https://indieauth.com/auth'
 token_endpoint: 'https://tokens.indieauth.com/token'

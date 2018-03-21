@@ -3,5 +3,5 @@ webmention_secret: ''
 pingback_endpoint: ''
 webmention_enable: false
 pingback_enable: false
-webmention_uid: '1'
-webmention_log_payload: 1
+webmention_uid: 1
+webmention_log_payload: true

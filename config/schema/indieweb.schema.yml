@@ -1,0 +1,155 @@
+# schema for indieweb.comment
+indieweb.comment:
+  type: config_object
+  label: 'Indieweb comments'
+  mapping:
+    comment_create_enable:
+      type: boolean
+      label: 'Enable comment support'
+    comment_create_default_status:
+      type: integer
+      label: 'Default status of a new comment'
+    comment_create_comment_type:
+      type: string
+      label: 'The comment type'
+    comment_create_webmention_reference_field:
+      type: string
+      label: 'The webmention reference field on the comment type'
+    comment_create_node_comment_field:
+      type: string
+      label: 'The comment field on the node type'
+
+# schema for indieweb.indieauth
+indieweb.indieauth:
+  type: config_object
+  label: 'Indieweb indieauth'
+  mapping:
+    enable:
+      type: boolean
+      label: 'Enable IndieAuth support'
+    expose:
+      type: boolean
+      label: 'Expose IndieAuth headers'
+    authorization_endpoint:
+      type: string
+      label: 'IndieAuth authorization endpoint'
+    token_endpoint:
+      type: string
+      label: 'IndieAuth token endpoint'
+
+# schema for indieweb.microformats
+indieweb.microformats:
+  type: config_object
+  label: 'Indieweb microformats'
+  mapping:
+    h_entry:
+      type: boolean
+      label: 'Enable microformat h-entry class'
+    e_content:
+      type: boolean
+      label: 'Enable microformat e-content class'
+    u_photo:
+      type: boolean
+      label: 'Enable microformat u-photo class'
+    p_summary:
+      type: text
+      label: 'Microformat summary fields'
+
+# schema for indieweb.micropub
+indieweb.micropub:
+  type: config_object
+  label: 'Indieweb micropub'
+  mapping:
+    micropub_enable:
+      type: boolean
+      label: 'Enable micropub endpoint'
+    micropub_add_header_link:
+      type: boolean
+      label: 'Expose micropub header link'
+    micropub_me:
+      type: string
+      label: 'The url of your website'
+    micropub_log_payload:
+      type: boolean
+      label: 'Whether to log the payload'
+    note_create_node:
+      type: boolean
+      label: 'Enable note support'
+    note_node_type:
+      type: string
+      label: 'The node type for the note'
+    note_content_field:
+      type: string
+      label: 'The node content field for the note'
+    note_upload_field:
+      type: string
+      label: 'The node upload field for the note'
+    note_uid:
+      type: integer
+      label: 'The user id of the note'
+    article_create_node:
+      type: boolean
+      label: 'Enable article'
+    article_node_type:
+      type: string
+      label: 'The node type for the article'
+    article_content_field:
+      type: string
+      label: 'The node content field for the article'
+    article_upload_field:
+      type: string
+      label: 'The node upload field for the article'
+    article_uid:
+      type: integer
+      label: 'The user id of the article'
+
+# schema for indieweb.microsub
+indieweb.microsub:
+  type: config_object
+  label: 'Indieweb microsub'
+  mapping:
+    enable:
+      type: boolean
+      label: 'Expose microsub endpoint'
+    microsub_endpoint:
+      type: string
+      label: 'Microsub endpoint'
+
+# schema for indieweb.publish
+indieweb.publish:
+  type: config_object
+  label: 'Indieweb publish'
+  mapping:
+    channels:
+      type: text
+      label: 'Channels to publish to'
+    publish_send_webmention_by:
+      type: string
+      label: 'How to handle the webmention send queue'
+
+# schema for indieweb.webmention
+indieweb.webmention:
+  type: config_object
+  label: 'Indieweb webmention'
+  mapping:
+    webmention_endpoint:
+      type: string
+      label: 'Webmention endpoint'
+    webmention_secret:
+      type: string
+      label: 'Webmention secret'
+    pingback_endpoint:
+      type: string
+      label: 'Pingback endpoint'
+    webmention_enable:
+      type: boolean
+      label: 'Whether to allow webmentions'
+    pingback_enable:
+      type: boolean
+      label: 'Whether to allow pingbacks'
+    webmention_uid:
+      type: integer
+      label: 'The user id of the article'
+    webmention_log_payload:
+      type: boolean
+      label: 'Whether to log the payload'

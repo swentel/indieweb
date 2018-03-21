@@ -1,0 +1,7 @@
+indieweb_test.front:
+  path: '/indieweb-test-front'
+  defaults:
+    _controller: '\Drupal\indieweb_test\Controller\IndiewebTestController::front'
+    _title: 'Indieweb test front'
+  requirements:
+    _permission: 'access content'
