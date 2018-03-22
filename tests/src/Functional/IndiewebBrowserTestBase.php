@@ -28,29 +28,8 @@ abstract class IndiewebBrowserTestBase extends BrowserTestBase {
    */
   protected $adminUser;
 
-  /**
-   * The permissions of the admin user.
-   *
-   * @var string[]
-   */
-  protected $adminUserPermissions = [
-    'administer indieweb',
-    'administer webmention entities',
-  ];
-
-  /**
-   * A simple authenticated user.
-   *
-   * @var \Drupal\Core\Session\AccountInterface
-   */
-  protected $unauthorizedUser;
-
-  /**
-   * The anonymous user used for this test.
-   *
-   * @var \Drupal\Core\Session\AccountInterface
-   */
-  protected $anonymousUser;
+  // The name of the queue.
+  protected $queue_name = 'indieweb_publish';
 
   /**
    * {@inheritdoc}
@@ -58,9 +37,8 @@ abstract class IndiewebBrowserTestBase extends BrowserTestBase {
   public function setUp() {
     parent::setUp();
 
-    // Create the users used for the tests.
-    $this->adminUser = $this->drupalCreateUser($this->adminUserPermissions);
-    $this->anonymousUser = $this->drupalCreateUser();
+    // Use administrator role, less hassle for browsing around.
+    $this->adminUser = $this->drupalCreateUser([], NULL, TRUE);
 
     // Set front page to custom page instead of /user/login or /user/x
     \Drupal::configFactory()

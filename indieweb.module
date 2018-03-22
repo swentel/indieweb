@@ -388,7 +388,7 @@ function indieweb_publish_create_queue_item($source_url, $target_url) {
  * Handles the publish queue.
  */
 function indieweb_handle_publish_queue() {
-  $query = 'SELECT * FROM queue WHERE name = :name';
+  $query = 'SELECT * FROM {queue} WHERE name = :name';
   $results = \Drupal::database()->query($query, [':name' => 'indieweb_publish']);
   foreach ($results as $result) {
 
