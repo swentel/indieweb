@@ -4,7 +4,6 @@ namespace Drupal\indieweb\Form;
 
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\Site\Settings;
 use Drupal\Core\Url;
 
 class MicropubSettingsForm extends ConfigFormBase {

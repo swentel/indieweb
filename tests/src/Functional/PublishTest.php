@@ -1,6 +1,7 @@
 <?php
 
 namespace Drupal\Tests\indieweb\Functional;
+
 use Drupal\Core\Url;
 
 /**
@@ -10,17 +11,19 @@ use Drupal\Core\Url;
  */
 class PublishTest extends IndiewebBrowserTestBase {
 
-  // Use standard because we need a lot of functionality.
+  /**
+   * The profile to use. Use Standard as we need a lot.
+   *
+   * @var string
+   */
   protected $profile = 'standard';
 
-  // The channels used.
+  /**
+   * The channels used in this test.
+   *
+   * @var string
+   */
   protected $channels = "Twitter (bridgy)|https://brid.gy/publish/twitter\nFacebook (bridgy)|https://brid.gy/publish/facebook\nAnother channel|https://example.com/publish/test";
-
-  // Body text.
-  protected $body_text = 'A really nice article';
-
-  // Authenticated user which can only create articles.
-  protected $authUser;
 
   /**
    * {@inheritdoc}
@@ -106,8 +109,8 @@ class PublishTest extends IndiewebBrowserTestBase {
     //   - are not rendered in the markup.
     // and no queue item has been created.
     $edit = [
-      'title[0][value]' => 'Hello indieweb',
-      'body[0][value]' => 'A really nice article',
+      'title[0][value]' => $this->title_text,
+      'body[0][value]' => $this->body_text,
     ];
     $this->drupalGet('node/add/article');
     $this->assertChannelFieldsOnNodeForm($channels);

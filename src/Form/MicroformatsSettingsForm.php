@@ -2,9 +2,9 @@
 
 namespace Drupal\indieweb\Form;
 
+use Drupal\Core\Cache\Cache;
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\Url;
 
 class MicroformatsSettingsForm extends ConfigFormBase {
 
@@ -30,7 +30,7 @@ class MicroformatsSettingsForm extends ConfigFormBase {
     $config = $this->config('indieweb.microformats');
 
     $form['info'] = [
-      '#markup' => '<p>' . $this->t('Microformats are extensions to HTML for marking up people, organizations, events, locations, blog posts, products, reviews, resumes, recipes etc. Sites use microformats to publish a standard API that is consumed and used by search engines, aggregators, and other tools. See <a href="https://indieweb.org/microformats" target="_blank">https://indieweb.org/microformats</a> for more info. You will want to enable this if you want to publish. The module will add classes on content, images etc. You can also add it to the markup yourself.') . '</p>',
+      '#markup' => '<p>' . $this->t('Microformats are extensions to HTML for marking up people, organizations, events, locations, blog posts, products, reviews, resumes, recipes etc. Sites use microformats to publish a standard API that is consumed and used by search engines, aggregators, and other tools. See <a href="https://indieweb.org/microformats" target="_blank">https://indieweb.org/microformats</a> for more info. You will want to enable this if you want to publish or want other sites and readers to parse your content. The module will add classes on content, images etc. You can also add it to the markup yourself.') . '</p>',
     ];
 
     $form['classes'] = [
@@ -78,6 +78,8 @@ class MicroformatsSettingsForm extends ConfigFormBase {
       ->set('u_photo', $form_state->getValue('u_photo'))
       ->set('p_summary', trim($form_state->getValue('p_summary')))
       ->save();
+
+    Cache::invalidateTags(['rendered']);
 
     parent::submitForm($form, $form_state);
   }

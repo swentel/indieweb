@@ -5,7 +5,6 @@ namespace Drupal\indieweb\Form;
 use Drupal\Core\Cache\Cache;
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\Url;
 
 class IndieAuthSettingsForm extends ConfigFormBase {
 

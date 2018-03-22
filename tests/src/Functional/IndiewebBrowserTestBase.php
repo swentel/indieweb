@@ -22,14 +22,46 @@ abstract class IndiewebBrowserTestBase extends BrowserTestBase {
   ];
 
   /**
-   * An admin user used for this test.
+   * An admin user.
    *
    * @var \Drupal\Core\Session\AccountInterface
    */
   protected $adminUser;
 
-  // The name of the queue.
+  /**
+   * A simple authenticated user.
+   *
+   * @var
+   */
+  protected $authUser;
+
+  /**
+   * Name of the queue.
+   *
+   * @var string
+   */
   protected $queue_name = 'indieweb_publish';
+
+  /**
+   * Default title.
+   *
+   * @var string
+   */
+  protected $title_text = 'Hello indieweb';
+
+  /**
+   * Default body text.
+   *
+   * @var string
+   */
+  protected $body_text = 'A really nice article';
+
+  /**
+   * Default summary text.
+   *
+   * @var string
+   */
+  protected $summary_text = 'A summary';
 
   /**
    * {@inheritdoc}
