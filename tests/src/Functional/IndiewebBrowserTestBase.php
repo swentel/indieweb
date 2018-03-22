@@ -62,28 +62,25 @@ abstract class IndiewebBrowserTestBase extends BrowserTestBase {
     $this->adminUser = $this->drupalCreateUser($this->adminUserPermissions);
     $this->anonymousUser = $this->drupalCreateUser();
 
-    // Create an article node type, if not already present.
-    if (!NodeType::load('article')) {
-      $this->drupalCreateContentType([
-        'type' => 'article',
-        'name' => 'Article',
-      ]);
-    }
-
-    // Create a page node type, if not already present.
-    if (!NodeType::load('page')) {
-      $this->drupalCreateContentType([
-        'type' => 'page',
-        'name' => 'Page',
-      ]);
-    }
-
     // Set front page to custom page instead of /user/login or /user/x
     \Drupal::configFactory()
       ->getEditable('system.site')
       ->set('page.front', '/indieweb-test-front')
       ->save();
+  }
 
+  /**
+   * Create a node type.
+   *
+   * @param $node_type
+   */
+  protected function createNodeType($node_type) {
+    if (!NodeType::load($node_type)) {
+      $this->drupalCreateContentType([
+        'type' => $node_type,
+        'name' => $node_type,
+      ]);
+    }
   }
 
 }

@@ -2,6 +2,7 @@
 
 namespace Drupal\indieweb\Form;
 
+use Drupal\Core\Cache\Cache;
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
@@ -94,6 +95,8 @@ class IndieAuthSettingsForm extends ConfigFormBase {
       ->set('authorization_endpoint', $form_state->getValue('authorization_endpoint'))
       ->set('token_endpoint', $form_state->getValue('token_endpoint'))
       ->save();
+
+    Cache::invalidateTags(['rendered']);
 
     parent::submitForm($form, $form_state);
   }
