@@ -4,7 +4,7 @@ namespace Drupal\Tests\indieweb\Functional;
 use Drupal\Core\Url;
 
 /**
- * Tests integration of microsub.
+ * Tests integration of publishing.
  *
  * @group indieweb
  */
