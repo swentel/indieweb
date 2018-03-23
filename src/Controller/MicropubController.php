@@ -76,6 +76,7 @@ class MicropubController extends ControllerBase {
     }
     if (!empty($input)) {
 
+      $payload_original = $input;
       $valid_token = $this->isValidToken();
 
       // Note support.
@@ -90,13 +91,10 @@ class MicropubController extends ControllerBase {
           'title' => 'Micropub post',
           'type' => $this->config->get('note_node_type'),
           'status' => 1,
-          // Add complete payload on node, so developers can act on it.
-          // e.g. on hook_micropub_node_pre_create_alter().
-          'micropub_payload' => $input,
         ];
 
-        // Allow code to change the values.
-        \Drupal::moduleHandler()->alter('indieweb_micropub_node_pre_create', $values);
+        // Allow code to change the values and payload.
+        \Drupal::moduleHandler()->alter('indieweb_micropub_node_pre_create', $values, $input);
 
         /** @var \Drupal\node\NodeInterface $node */
         $node = Node::create($values);
@@ -122,6 +120,9 @@ class MicropubController extends ControllerBase {
           // Syndicate.
           $this->syndicateTo($input, $node);
 
+          // Allow code to react after the node is saved.
+          \Drupal::moduleHandler()->invokeAll('indieweb_micropub_node_saved', [$node, $values, $input, $payload_original]);
+
           $response_code = 201;
           $response_message = '';
           header('Location: ' . $node->toUrl('canonical', ['absolute' => TRUE])->toString());
@@ -141,13 +142,10 @@ class MicropubController extends ControllerBase {
           'title' => $input['name'],
           'type' => $this->config->get('article_node_type'),
           'status' => 1,
-          // Add complete payload on node, so developers can act on it.
-          // e.g. on hook_micropub_node_pre_create_alter().
-          'micropub_payload' => $input,
         ];
 
         // Allow code to change the values.
-        \Drupal::moduleHandler()->alter('indieweb_micropub_node_pre_create', $values);
+        \Drupal::moduleHandler()->alter('indieweb_micropub_node_pre_create', $values, $input);
 
         /** @var \Drupal\node\NodeInterface $node */
         $node = Node::create($values);
@@ -172,6 +170,9 @@ class MicropubController extends ControllerBase {
 
           // Syndicate.
           $this->syndicateTo($input, $node);
+
+          // Allow code to react after the node is saved.
+          \Drupal::moduleHandler()->invokeAll('indieweb_micropub_node_saved', [$node, $values, $input, $payload_original]);
 
           $response_code = 201;
           $response_message = '';
