@@ -2,6 +2,7 @@
 
 namespace Drupal\indieweb\Form;
 
+use Drupal\Core\Cache\Cache;
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
@@ -251,6 +252,8 @@ class MicropubSettingsForm extends ConfigFormBase {
       ->set('article_content_field', $form_state->getValue('article_content_field'))
       ->set('article_upload_field', $form_state->getValue('article_upload_field'))
       ->save();
+
+    Cache::invalidateTags(['rendered']);
 
     parent::submitForm($form, $form_state);
   }

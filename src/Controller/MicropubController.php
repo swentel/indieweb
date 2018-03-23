@@ -195,6 +195,7 @@ class MicropubController extends ControllerBase {
 
     // TODO we can probably store this token so we don't have to talk
     // to indieauth all the time.
+    // See https://github.com/swentel/indieweb/issues/79
     $auth = \Drupal::request()->headers->get('Authorization');
     if ($auth && preg_match('/Bearer\s(\S+)/', $auth, $matches)) {
 
