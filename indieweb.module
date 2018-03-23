@@ -262,6 +262,25 @@ function indieweb_node_view(array &$build, NodeInterface $account, EntityViewDis
 }
 
 /**
+ * Implements hook_form_FORM_BASE_ID_alter() for the comments form.
+ */
+function indieweb_form_comment_form_alter(&$form, FormStateInterface $form_state) {
+  // Check the comment webmention reference field.
+  $config = \Drupal::config('indieweb.comment');
+  if ($config->get('comment_create_enable') && ($reference_field = $config->get('comment_create_webmention_reference_field'))) {
+    if (isset($form[$reference_field]) && isset($form['comment_body'])) {
+      /** @var \Drupal\comment\CommentInterface $comment */
+      $comment = $form_state->getFormObject()->getEntity();
+      // Deny access to comment form if webmention is referenced and body is
+      // empty. Otherwise, you can not save this comment anymore.
+      if (!$comment->isNew() && !empty($comment->get($reference_field)->target_id) && empty($comment->get('comment_body')->value)) {
+        $form['comment_body']['#access'] = FALSE;
+      }
+    }
+  }
+}
+
+/**
  * Implements hook_ENTITY_TYPE_insert().
  */
 function indieweb_webmention_entity_insert(WebmentionEntityInterface $webmention) {
