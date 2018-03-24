@@ -78,11 +78,12 @@ available on the page you want to publish, e.g.
   <a href="https://brid.gy/publish/twitter"></a>
   ```
 
-Note that Bridgy prefers p-summary over e-content, see https://brid.gy/about#microformats. You can preview your posts
-on Bridgy to verify your markup is ok.
+Note that Bridgy prefers p-summary over e-content, but for original tweets p-name first. See
+https://brid.gy/about#microformats. You can preview your posts on Bridgy to verify your markup is ok.
 
 This module exposes per channel an extra field which you can configure on the 'Manage Display' pages of each node type.
 That field exposes that snippet. See indieweb_node_view(). More info about this at https://brid.gy/about#webmentions
+Currently this field will be printed, even if you do not publish to that channel, that will be altered later.
 
 The module ships with default Twitter and Facebook channels. More channels and other configuration can be configured at
 /admin/config/services/indieweb/publish. These channels are also used for the q=syndicate-to request for micropub, see
@@ -93,11 +94,16 @@ micropub for more information.
 Microformats are extensions to HTML for marking up people, organizations, events, locations, blog posts, products,
 reviews, resumes, recipes etc. Sites use microformats to publish a standard API that is consumed and used by search
 engines, aggregators, and other tools. See https://indieweb.org/microformats for more info. You will want to enable this
-if you want to publish.
+if you want to publish. Also read https://brid.gy/about#microformats for details how Bridgy decides what to publish if
+you are using that service.
+
+Your homepage should contain a h-card entry. This module does not expose this for you. An example:
+<p class="h-card">My name is <a class="u-url p-name" rel="me" href="http://example.com">Your name</a>
 
 Classes added for publication (or other functionality).
 
 - h-entry: added on node wrapper, see indieweb_preprocess_node().
+- dt-published, u-url and p-name in node metadata, see indieweb_preprocess_node().
 - e-content: added on default body field, see indieweb_preprocess_field().
 - u-photo: added on image styles, indieweb_preprocess_image_style().
 - p-summary: see indieweb_preprocess_field().

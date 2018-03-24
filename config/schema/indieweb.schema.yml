@@ -45,6 +45,9 @@ indieweb.microformats:
     h_entry:
       type: boolean
       label: 'Enable microformat h-entry class'
+    post_metadata:
+      type: boolean
+      label: 'Enable microformat metadata classes like dt-published and u-url'
     e_content:
       type: boolean
       label: 'Enable microformat e-content class'
@@ -54,6 +57,9 @@ indieweb.microformats:
     p_summary:
       type: text
       label: 'Microformat summary fields'
+    p_bridgy_twitter_content:
+      type: boolean
+      label: 'p-bridgy-twitter-content'
 
 # schema for indieweb.micropub
 indieweb.micropub:

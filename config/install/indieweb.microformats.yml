@@ -1,4 +1,6 @@
 h_entry: true
 e_content: true
 u_photo: true
+post_metadata: true
+p_bridgy_twitter_content: true
 p_summary: ''

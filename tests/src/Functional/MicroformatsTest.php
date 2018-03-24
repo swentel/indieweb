@@ -25,7 +25,7 @@ class MicroformatsTest extends IndiewebBrowserTestBase {
    *
    * @var array
    */
-  protected $microformats = ['h-entry', 'u-photo', 'e-content', 'p-summary'];
+  protected $microformats = ['h-entry', 'u-photo', 'e-content', 'p-summary', 'dt-published', 'u-url', 'p-name', 'p-bridgy-twitter-content'];
 
   /**
    * Tests microformats functionality.
@@ -62,7 +62,9 @@ class MicroformatsTest extends IndiewebBrowserTestBase {
       'h_entry' => 0,
       'u_photo' => 0,
       'e_content' => 0,
+      'post_metadata' => 0,
       'p_summary' => '',
+      'p_bridgy_twitter_content' => 0,
     ];
     $this->drupalPostForm('admin/config/services/indieweb/microformats', $edit, 'Save configuration');
     $this->drupalGet('node/1');

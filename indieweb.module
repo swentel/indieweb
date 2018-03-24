@@ -188,9 +188,35 @@ function indieweb_form_node_form_submit($form, FormStateInterface $form_state) {
  * Implements hook_preprocess_node().
  */
 function indieweb_preprocess_node(&$variables) {
-  if (($variables['view_mode'] == 'full' || $variables['view_mode'] == 'teaser') && \Drupal::config('indieweb.microformats')->get('h_entry')) {
-    $variables['attributes']['class'][] = 'h-entry';
+  if ($variables['view_mode'] == 'full' || $variables['view_mode'] == 'teaser') {
+
+    if (\Drupal::config('indieweb.microformats')->get('h_entry')) {
+      $variables['attributes']['class'][] = 'h-entry';
+    }
+
+    if (\Drupal::config('indieweb.microformats')->get('post_metadata')) {
+      $date = \Drupal::service('date.formatter')->format($variables['node']->getCreatedTime(), 'custom', 'c');
+      $metadata = '<span class="hidden">
+          <a href="' . $variables['node']->toUrl('canonical', ['absolute' => TRUE])->toString() . '" class="u-url">
+            <span class="p-name">' . $variables['node']->getTitle() . '</span>
+            <span class="dt-published">' . $date . '</span>
+          </a>
+        </span>';
+      /**
+       * Rdf module might have set this and already rendered it as a string so
+       * make sure we don't overwrite something.
+       *
+       * @see rdf_preprocess_node().
+       */
+      if (isset($variables['metadata'])) {
+        $variables['metadata'] .= $metadata;
+      }
+      else {
+        $variables['metadata'] = ['#markup' => $metadata];
+      }
+    }
   }
+
 }
 
 /**
@@ -201,12 +227,37 @@ function indieweb_preprocess_field(&$variables) {
   // Put e-content on body.
   if ($variables['field_name'] == 'body' && \Drupal::config('indieweb.microformats')->get('e_content')) {
     $variables['attributes']['class'][] = 'e-content';
+
+    // Check p-bridgy-twitter-content class. In case there is no summary field
+    // on this entity or the field is empty, then add it.
+    if (\Drupal::config('indieweb.microformats')->get('p_bridgy_twitter_content')) {
+
+      $add = TRUE;
+      /** @var \Drupal\Core\Entity\EntityInterface $entity */
+      $entity = $variables['element']['#object'];
+      $summary_fields = indieweb_get_summary_fields();
+      foreach ($summary_fields as $field) {
+        if ($entity->hasField($field) && $entity->get($field)->getValue()) {
+          $add = FALSE;
+        }
+      }
+
+      if ($add) {
+        $variables['attributes']['class'][] = 'p-bridgy-twitter-content';
+      }
+    }
+
   }
 
   // In case there's a p-summary.
   if (in_array($variables['field_name'], indieweb_get_summary_fields())) {
     $variables['attributes']['class'][] = 'p-summary';
+
+    if (\Drupal::config('indieweb.microformats')->get('p_bridgy_twitter_content')) {
+      $variables['attributes']['class'][] = 'p-bridgy-twitter-content';
+    }
   }
+
 }
 
 /**
@@ -247,7 +298,7 @@ function indieweb_entity_extra_field_info() {
 /**
  * Implements hook_ENTITY_TYPE_view() for node entities.
  */
-function indieweb_node_view(array &$build, NodeInterface $account, EntityViewDisplayInterface $display) {
+function indieweb_node_view(array &$build, NodeInterface $node, EntityViewDisplayInterface $display) {
   $channels = indieweb_get_publishing_channels();
   if (!empty($channels)) {
     foreach ($channels as $url => $name) {

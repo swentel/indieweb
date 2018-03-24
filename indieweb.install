@@ -1,0 +1,22 @@
+<?php
+
+/**
+ * @file
+ * Indieweb install file.
+ */
+
+define('INDIEWEB_MODULE_WEIGHT', 10);
+
+/**
+ * Implements hook_install().
+ */
+function indieweb_install() {
+  module_set_weight('indieweb', INDIEWEB_MODULE_WEIGHT);
+}
+
+/**
+ * Sets the module weight of indieweb to 10.
+ */
+function indieweb_update_8001() {
+  module_set_weight('indieweb', INDIEWEB_MODULE_WEIGHT);
+}
