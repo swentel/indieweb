@@ -45,7 +45,7 @@ class MicroformatsSettingsForm extends ConfigFormBase {
       '#type' => 'checkbox',
       '#title' => $this->t('<em>h-entry</em> on node wrappers.'),
       '#default_value' => $config->get('h_entry'),
-      '#description' => $this->t('This will be added on full and teaser view mode'),
+      '#description' => $this->t('This will be added on full, teaser and microformat view mode.'),
     ];
 
     $form['classes']['e_content'] = [

@@ -1,0 +1,9 @@
+langcode: en
+status: false
+dependencies:
+  module:
+    - node
+id: node.indieweb_microformat
+label: 'Microformat'
+targetEntityType: node
+cache: true
