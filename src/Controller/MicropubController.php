@@ -70,9 +70,6 @@ class MicropubController extends ControllerBase {
         $input += $input['properties'];
       }
 
-      if ($this->config->get('micropub_log_payload')) {
-        $this->getLogger('indieweb_micropub')->notice('input: @input', ['@input' => print_r($input, 1)]);
-      }
     }
     if (!empty($input)) {
 
@@ -83,7 +80,7 @@ class MicropubController extends ControllerBase {
       if ($this->config->get('note_create_node') && !empty($input['content']) && !isset($input['name']) && (!empty($input['h']) && $input['h'] == 'entry') && $valid_token) {
 
         if ($this->config->get('micropub_log_payload')) {
-          $this->getLogger('indieweb_micropub')->notice('input: @input', ['@input' => print_r($input, 1)]);
+          $this->getLogger('micropub_log_payload')->notice('input: @input', ['@input' => print_r($input, 1)]);
         }
 
         $values = [
@@ -134,7 +131,7 @@ class MicropubController extends ControllerBase {
       if ($this->config->get('article_create_node') && !empty($input['content']) && !empty($input['name']) && (!empty($input['h']) && $input['h'] == 'entry') && $valid_token) {
 
         if ($this->config->get('micropub_log_payload')) {
-          $this->getLogger('indieweb_micropub')->notice('input: @input', ['@input' => print_r($input, 1)]);
+          $this->getLogger('micropub_log_payload')->notice('input: @input', ['@input' => print_r($input, 1)]);
         }
 
         $values = [
@@ -269,7 +266,7 @@ class MicropubController extends ControllerBase {
     if (!empty($input['mp-syndicate-to'])) {
       $source_url = $node->toUrl()->setAbsolute(TRUE)->toString();
       foreach ($input['mp-syndicate-to'] as $target_url) {
-        indieweb_publish_create_queue_item($source_url, $target_url);
+        indieweb_publish_create_queue_item($source_url, $target_url, $node->id(), 'node');
       }
     }
   }

@@ -132,6 +132,9 @@ indieweb.publish:
     publish_send_webmention_by:
       type: string
       label: 'How to handle the webmention send queue'
+    publish_log_response:
+      type: boolean
+      label: 'Whether to log the response of the publish call'
 
 # schema for indieweb.webmention
 indieweb.webmention:

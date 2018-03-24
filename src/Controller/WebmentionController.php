@@ -57,7 +57,7 @@ class WebmentionController extends ControllerBase {
 
       // Debug.
       if ($config->get('webmention_log_payload')) {
-        $this->getLogger('indieweb_webmention')->notice('object: @object', ['@object' => print_r($mention, 1)]);
+        $this->getLogger('indieweb_webmention_payload')->notice('object: @object', ['@object' => print_r($mention, 1)]);
       }
 
       $response_code = 202;

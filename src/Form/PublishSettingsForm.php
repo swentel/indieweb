@@ -31,7 +31,7 @@ class PublishSettingsForm extends ConfigFormBase {
     $config = $this->config('indieweb.publish');
 
     $form['info'] = [
-      '#markup' => '<p>' . $this->t('The easiest way to start pulling back content or publish content on social networks is by using <a href="https://brid.gy/" target="_blank">https://brid.gy</a>. <br />You have to create an account by signing in with your preferred social network. Bridgy is open source so you can also host the service yourself.<br /><br />Publishing, which is nothing more than sending a webmention, can be done per node in the "Publish to" fieldset, which is protected with the "send webmentions" permission.<br />If no channels are configured, there is nothing to do.') . '</p>',
+      '#markup' => '<p>' . $this->t('The easiest way to start pulling back content or publish content on social networks is by using <a href="https://brid.gy/" target="_blank">https://brid.gy</a>. <br />You have to create an account by signing in with your preferred social network. Bridgy is open source so you can also host the service yourself.<br /><br />Publishing, which is nothing more than sending a webmention, can be done per node in the "Publish to" fieldset, which is protected with the "send webmentions" permission.<br />If no channels are configured, there is nothing to do. There is a syndication field on every node type available to render your syndications for POSSE-Post-Discovery, see <a href="https://indieweb.org/posse-post-discovery">https://indieweb.org/posse-post-discovery</a>.') . '</p>',
     ];
 
     $form['channels_wrapper'] = [
@@ -65,6 +65,12 @@ class PublishSettingsForm extends ConfigFormBase {
       '#description' => $this->t('Publications are not send immediately, but are stored in a queue when the content is published and when you toggled one or more channels to publish to.<br />The drush command is <strong>indieweb-send-webmentions</strong>')
     ];
 
+    $form['send_wrapper']['publish_log_response'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Log the response in watchdog when the publication is send.'),
+      '#default_value' => $config->get('publish_log_response'),
+    ];
+
     return parent::buildForm($form, $form_state);
   }
 
@@ -76,6 +82,7 @@ class PublishSettingsForm extends ConfigFormBase {
     $this->config('indieweb.publish')
       ->set('channels', $form_state->getValue('channels'))
       ->set('publish_send_webmention_by', $form_state->getValue('publish_send_webmention_by'))
+      ->set('publish_log_response', $form_state->getValue('publish_log_response'))
       ->save();
 
     parent::submitForm($form, $form_state);

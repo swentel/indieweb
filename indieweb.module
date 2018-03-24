@@ -6,7 +6,9 @@
  */
 
 use Drupal\comment\Entity\Comment;
+use Drupal\Core\Cache\Cache;
 use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
+use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Site\Settings;
 use Drupal\Core\Url;
@@ -177,11 +179,22 @@ function indieweb_form_node_form_submit($form, FormStateInterface $form_state) {
     if (!empty($publish_to)) {
       foreach ($publish_to as $key => $value) {
         if ($key === $value) {
-          indieweb_publish_create_queue_item($source_url, $key);
+          indieweb_publish_create_queue_item($source_url, $key, $node->id(), 'node');
         }
       }
     }
   }
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_delete() to remove syndications.
+ */
+function indieweb_entity_delete(EntityInterface $entity) {
+  \Drupal::database()
+    ->delete('webmention_syndication')
+    ->condition('entity_id', $entity->id())
+    ->condition('entity_type_id', $entity->getEntityTypeId())
+    ->execute();
 }
 
 /**
@@ -280,6 +293,8 @@ function indieweb_entity_extra_field_info() {
   $channels = indieweb_get_publishing_channels();
   if (!empty($channels)) {
     foreach (NodeType::loadMultiple() as $bundle) {
+
+      // Channel fields.
       foreach ($channels as $url => $name) {
         $machine_name = indieweb_get_machine_name_from_url($url);
         $extra['node'][$bundle->id()]['display'][$machine_name] = [
@@ -288,6 +303,13 @@ function indieweb_entity_extra_field_info() {
           'visible' => FALSE,
         ];
       }
+
+      // Syndication field.
+      $extra['node'][$bundle->id()]['display']['indieweb_syndication'] = [
+        'label' => t('Syndication'),
+        'weight' => 0,
+        'visible' => FALSE,
+      ];
 
     }
   }
@@ -299,6 +321,8 @@ function indieweb_entity_extra_field_info() {
  * Implements hook_ENTITY_TYPE_view() for node entities.
  */
 function indieweb_node_view(array &$build, NodeInterface $node, EntityViewDisplayInterface $display) {
+
+  // Channel fields.
   $channels = indieweb_get_publishing_channels();
   if (!empty($channels)) {
     foreach ($channels as $url => $name) {
@@ -310,6 +334,32 @@ function indieweb_node_view(array &$build, NodeInterface $node, EntityViewDispla
       }
     }
   }
+
+  // Syndication field.
+  if ($display->getComponent('indieweb_syndication')) {
+    $syndications = indieweb_get_syndications($node->id(), 'node');
+    if ($syndications) {
+      $items = [];
+
+      foreach ($syndications as $url) {
+        $items[] = [
+          '#type' => 'link',
+          '#url' => Url::fromUri($url),
+          '#title' => $url,
+          '#attributes' => [
+            'class' => ['u-syndication']
+          ]
+        ];
+      }
+
+      $build['indieweb_syndication'] = [
+        '#theme' => 'item_list',
+        '#items' => $items,
+        '#title' => t('Syndications'),
+      ];
+    }
+  }
+
 }
 
 /**
@@ -417,6 +467,25 @@ function indieweb_cron() {
 }
 
 /**
+ * Get the syndications for an entity.
+ *
+ * @param $entity_id
+ * @param $entity_type_id
+ *
+ * @return array
+ */
+function indieweb_get_syndications($entity_id, $entity_type_id) {
+  $syndications = [];
+
+  $records = \Drupal::database()->query('SELECT url FROM {webmention_syndication} WHERE entity_id = :entity_id AND entity_type_id = :entity_type_id', [':entity_id' => $entity_id, ':entity_type_id' => $entity_type_id]);
+  foreach ($records as $record) {
+    $syndications[] = $record->url;
+  }
+
+  return $syndications;
+}
+
+/**
  * Returns the publishing channels.
  *
  * @return array
@@ -445,12 +514,14 @@ function indieweb_get_publishing_channels() {
  *
  * @param $source_url
  * @param $target_url
+ * @param $entity_id
+ * @param $entity_type_id
  *
  * @throws \Exception
  */
-function indieweb_publish_create_queue_item($source_url, $target_url) {
+function indieweb_publish_create_queue_item($source_url, $target_url, $entity_id, $entity_type_id) {
   \Drupal::database()->insert('queue')
-    ->fields(['name' => 'indieweb_publish', 'data' => serialize(['source_url' => $source_url, 'target_url' => $target_url])])
+    ->fields(['name' => 'indieweb_publish', 'data' => serialize(['source_url' => $source_url, 'target_url' => $target_url, 'entity_id' => $entity_id, 'entity_type_id' => $entity_type_id])])
     ->execute();
 }
 
@@ -463,17 +534,45 @@ function indieweb_handle_publish_queue() {
   foreach ($results as $result) {
 
     $data = unserialize($result->data);
-    if (!empty($data['source_url']) && !empty($data['target_url'])) {
+    if (!empty($data['source_url']) && !empty($data['target_url']) && !empty($data['entity_id']) && !empty($data['entity_type_id'])) {
       $sourceURL = $data['source_url'];
       $targetURL = $data['target_url'];
       $client = new MentionClient();
-      $response = $client->sendWebmention($sourceURL, $targetURL);
-      // Log the response. Expose in UI at some point. We will have to start
-      // storing this at some point for syndication.
-      // see https://github.com/swentel/indieweb/issues/31
-      if (Settings::get('indieweb_webmention_log_response', FALSE)) {
-        \Drupal::logger('indieweb_webmention_response')->notice('response: @response', ['@response' => print_r($response, 1)]);
+
+      try {
+        $response = $client->sendWebmention($sourceURL, $targetURL);
+
+        // Store the syndication.
+        if (!empty($response) && $response['code'] == 201 && !empty($response['headers']['Location'])) {
+
+           $values = [
+             'entity_id' => $data['entity_id'],
+             'entity_type_id' => $data['entity_type_id'],
+             'url' => $response['headers']['Location']
+           ];
+
+          \Drupal::database()
+            ->insert('webmention_syndication')
+            ->fields($values)
+            ->execute();
+
+          Cache::invalidateTags([$data['entity_type_id'] . ':' . $data['entity_id']]);
+
+        }
+        else {
+          \Drupal::logger('indieweb_publish')->notice('No 201 or location received when publishing for @source to @target: @response', ['@response' => print_r($response, 1), '@source' => $sourceURL, '@target' => $targetURL]);
+        }
+
+        // Log the response if configured.
+        if (\Drupal::config('indieweb.publish')->get('publish_log_response')) {
+          \Drupal::logger('indieweb_publish_response')->notice('response for @source to @target: @response', ['@response' => print_r($response, 1), '@source' => $sourceURL, '@target' => $targetURL]);
+        }
       }
+      catch (Exception $e) {
+        \Drupal::logger('indieweb_publish')->notice('Error sending webmention for @source to @target: @message', ['@message' => $e->getMessage(), '@source' => $sourceURL, '@target' => $targetURL]);
+      }
+
+
     }
 
     // Remove the item.

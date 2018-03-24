@@ -8,6 +8,44 @@
 define('INDIEWEB_MODULE_WEIGHT', 10);
 
 /**
+ * Implements hook_schema().
+ */
+function indieweb_schema() {
+  $schema = [];
+
+  $schema['webmention_syndication'] = [
+    'description' => 'Stores the syndicated urls when a webmention is send.',
+    'fields' => [
+      'entity_id' => [
+        'description' => 'The id to which the syndication belongs.',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ],
+      'entity_type_id' => [
+        'description' => 'The entity type id.',
+        'type' => 'varchar',
+        'length' => 40,
+        'not null' => TRUE,
+        'default' => '',
+      ],
+      'url' => [
+        'description' => 'The syndication url.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ],
+    ],
+    'indexes' => [
+      'entity_id__entity_type_id' => ['entity_id', 'entity_type_id']
+    ],
+  ];
+
+  return $schema;
+}
+
+/**
  * Implements hook_install().
  */
 function indieweb_install() {
@@ -19,4 +57,14 @@ function indieweb_install() {
  */
 function indieweb_update_8001() {
   module_set_weight('indieweb', INDIEWEB_MODULE_WEIGHT);
+}
+
+/**
+ * Installs the {webmention_syndication} table.
+ */
+function indieweb_update_8002() {
+  if (!\Drupal::database()->schema()->tableExists('webmention_syndication')) {
+    $schema = indieweb_schema();
+    \Drupal::database()->schema()->createTable('webmention_syndication', $schema['webmention_syndication']);
+  }
 }
