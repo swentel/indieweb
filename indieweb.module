@@ -209,12 +209,22 @@ function indieweb_preprocess_node(&$variables) {
 
     if (\Drupal::config('indieweb.microformats')->get('post_metadata')) {
       $date = \Drupal::service('date.formatter')->format($variables['node']->getCreatedTime(), 'custom', 'c');
-      $metadata = '<span class="hidden">
+
+      if ($variables['node']->bundle() != 'note') {
+        $metadata = '<span class="hidden">
           <a href="' . $variables['node']->toUrl('canonical', ['absolute' => TRUE])->toString() . '" class="u-url">
             <span class="p-name">' . $variables['node']->getTitle() . '</span>
             <span class="dt-published">' . $date . '</span>
           </a>
         </span>';
+      }
+      else {
+        $metadata = '<span class="hidden">
+          <a href="' . $variables['node']->toUrl('canonical', ['absolute' => TRUE])->toString() . '" class="u-url">
+            <span class="dt-published">' . $date . '</span>
+          </a>
+        </span>';
+      }
       /**
        * Rdf module might have set this and already rendered it as a string so
        * make sure we don't overwrite something.

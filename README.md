@@ -8,12 +8,12 @@ For more information about indieweb, see https://indieweb.org/.
 Current functionality:
 
 - Receive webmentions and pingbacks via Webmention.io
-- Publish content, likes etc via bridg.y
+- Publish content, likes etc via bridg.y, store syndications
 - Microformats for content and images
 - IndieAuth for Authentication API
 - Micropub for creating content etc
 - Creating comments from 'in-reply-to'
-- Microsub support
+- Microsub link exposing
 
 This is only the tip of the iceberg and much more functionality will be added.
 
