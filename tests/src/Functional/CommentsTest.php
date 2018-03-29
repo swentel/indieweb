@@ -1,6 +1,7 @@
 <?php
 
 namespace Drupal\Tests\indieweb\Functional;
+
 use Drupal\Core\Url;
 
 /**
@@ -35,13 +36,13 @@ class CommentsTest extends IndiewebBrowserTestBase {
       'body[0][value]' => $this->body_text,
     ];
     $this->drupalPostForm('node/add/article', $edit, 'Save');
-    $target = Url::fromRoute('entity.node.canonical', ['node' => 1], ['absolute' => TRUE])->toString();
 
     // Send a webmention request, will not create a comment.
     $webmention = [
       'secret' => 'valid_secret',
       'source' => 'http://external.com',
-      'target' => $target,
+      // Testbot uses subdir, use hardcoded path here.
+      'target' => '/node/1',
       'post' => [
         'type' => 'entry',
         'wm-property' => 'in-reply-to',
