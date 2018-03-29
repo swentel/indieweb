@@ -51,7 +51,7 @@ class MicropubTest extends IndiewebBrowserTestBase {
 
     // Set IndieAuth token endpoint.
     $this->drupalLogin($this->adminUser);
-    $edit = ['enable' => '1', 'expose' => 1, 'token_endpoint' => Url::fromRoute('indieweb_test.token_endpoint', ['absolute' => TRUE])->toString()];
+    $edit = ['enable' => '1', 'expose' => 1, 'token_endpoint' => Url::fromRoute('indieweb_test.token_endpoint', [], ['absolute' => TRUE])->toString()];
     $this->drupalPostForm('admin/config/services/indieweb/indieauth', $edit, 'Save configuration');
 
     // Configure note, but set 'me' to invalid domain.
@@ -76,12 +76,12 @@ class MicropubTest extends IndiewebBrowserTestBase {
     $count = \Drupal::database()->query('SELECT count(nid) FROM {node} WHERE type = :type', [':type' => 'page'])->fetchField();
     self::assertEquals(0, $count);
     // With valid access token now.
+    // TODO test url from 201 header
     $code = $this->sendMicropubRequest($this->note);
     self::assertEquals(201, $code);
     $count = \Drupal::database()->query('SELECT count(nid) FROM {node} WHERE type = :type', [':type' => 'page'])->fetchField();
     self::assertEquals(1, $count);
-    // TODO test url from 201 header
-    $nid = \Drupal::database()->query('SELECT nid FROM {node} WHERE type = :type', [':type' => 'page']);
+    $nid = \Drupal::database()->query('SELECT nid FROM {node} WHERE type = :type', [':type' => 'page'])->fetchField();
     if ($nid) {
       /** @var \Drupal\node\NodeInterface $node */
       $node = \Drupal::entityTypeManager()->getStorage('node')->load($nid);

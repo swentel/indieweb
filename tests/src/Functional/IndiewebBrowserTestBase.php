@@ -87,10 +87,11 @@ abstract class IndiewebBrowserTestBase extends BrowserTestBase {
    * Sends a webmention request.
    *
    * @param $post
+   * @param $debug
    *
    * @return int $status_code
    */
-  protected function sendWebmentionRequest($post = []) {
+  protected function sendWebmentionRequest($post = [], $debug = FALSE) {
     $micropub_endpoint = Url::fromRoute('indieweb.webmention.notify', [], ['absolute' => TRUE])->toString();
 
     $client = \Drupal::httpClient();
@@ -103,6 +104,10 @@ abstract class IndiewebBrowserTestBase extends BrowserTestBase {
       if (strpos($e->getMessage(), '404 Not Found') !== FALSE) {
         $status_code = 404;
       }
+      // Use following line if you want to debug the exception in tests.
+      if ($debug) {
+        debug($e->getMessage());
+      }
     }
 
     return $status_code;
@@ -113,10 +118,11 @@ abstract class IndiewebBrowserTestBase extends BrowserTestBase {
    *
    * @param $post
    * @param $access_token
+   * @param $debug
    *
    * @return int $status_code
    */
-  protected function sendMicropubRequest($post, $access_token = 'this_is_a_valid_token') {
+  protected function sendMicropubRequest($post, $access_token = 'this_is_a_valid_token', $debug = FALSE) {
     $auth = 'Bearer ' . $access_token;
     $micropub_endpoint = Url::fromRoute('indieweb.micropub.endpoint', [], ['absolute' => TRUE])->toString();
 
@@ -132,6 +138,9 @@ abstract class IndiewebBrowserTestBase extends BrowserTestBase {
     catch (\Exception $e) {
       // Assume 400 on exception.
       $status_code = 400;
+      if ($debug) {
+        debug($e->getMessage());
+      }
     }
 
     return $status_code;
