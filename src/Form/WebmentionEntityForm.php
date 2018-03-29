@@ -15,18 +15,6 @@ class WebmentionEntityForm extends ContentEntityForm {
   /**
    * {@inheritdoc}
    */
-  public function buildForm(array $form, FormStateInterface $form_state) {
-    /* @var $entity \Drupal\indieweb\Entity\WebmentionEntityInterface */
-    $form = parent::buildForm($form, $form_state);
-
-    $entity = $this->entity;
-
-    return $form;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
   public function save(array $form, FormStateInterface $form_state) {
     $entity = $this->entity;
 
