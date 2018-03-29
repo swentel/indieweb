@@ -84,6 +84,20 @@ abstract class IndiewebBrowserTestBase extends BrowserTestBase {
   }
 
   /**
+   * Enable webmention functionality in the UI.
+   */
+  protected function enableWebmention() {
+    $edit = [
+      'webmention_enable' => 1,
+      'pingback_enable' => 1,
+      'webmention_secret' => 'valid_secret',
+      'webmention_endpoint' => 'https://webmention.io/example.com/webmention',
+      'pingback_endpoint' => 'https://webmention.io/webmention?forward=http://example.com/webmention/notify',
+    ];
+    $this->drupalPostForm('admin/config/services/indieweb/webmention', $edit, 'Save configuration');
+  }
+
+  /**
    * Sends a webmention request.
    *
    * @param $post

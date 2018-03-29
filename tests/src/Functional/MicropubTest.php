@@ -71,16 +71,14 @@ class MicropubTest extends IndiewebBrowserTestBase {
     // Send request, first with invalid token, then with valid, we should have
     // a note then.
     $this->drupalLogout();
-    $this->sendMicropubRequest($this->note, 'invalid_token');
+    $code = $this->sendMicropubRequest($this->note, 'invalid_token');
     self::assertEquals(400, $code);
-    $count = \Drupal::database()->query('SELECT count(nid) FROM {node} WHERE type = :type', [':type' => 'page'])->fetchField();
-    self::assertEquals(0, $count);
+    $this->assertNodeCount(0, 'page');
     // With valid access token now.
     // TODO test url from 201 header
     $code = $this->sendMicropubRequest($this->note);
     self::assertEquals(201, $code);
-    $count = \Drupal::database()->query('SELECT count(nid) FROM {node} WHERE type = :type', [':type' => 'page'])->fetchField();
-    self::assertEquals(1, $count);
+    $this->assertNodeCount(1, 'page');
     $nid = \Drupal::database()->query('SELECT nid FROM {node} WHERE type = :type', [':type' => 'page'])->fetchField();
     if ($nid) {
       /** @var \Drupal\node\NodeInterface $node */
@@ -92,6 +90,17 @@ class MicropubTest extends IndiewebBrowserTestBase {
       $this->assertTrue($nid, 'No node found');
     }
 
+  }
+
+  /**
+   * Assert node count.
+   *
+   * @param $count
+   * @param $type
+   */
+  protected function assertNodeCount($count, $type) {
+    $node_count = \Drupal::database()->query('SELECT count(nid) FROM {node} WHERE type = :type', [':type' => $type])->fetchField();
+    self::assertEquals($count, $node_count);
   }
 
 }

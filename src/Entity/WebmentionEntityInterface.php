@@ -13,27 +13,6 @@ use Drupal\user\EntityOwnerInterface;
  */
 interface WebmentionEntityInterface extends ContentEntityInterface, EntityChangedInterface, EntityOwnerInterface {
 
-  // Add get/set methods for your configuration properties here.
-
-  /**
-   * Gets the Webmention name.
-   *
-   * @return string
-   *   Name of the Webmention.
-   */
-  public function getName();
-
-  /**
-   * Sets the Webmention name.
-   *
-   * @param string $name
-   *   The Webmention name.
-   *
-   * @return \Drupal\indieweb\Entity\WebmentionEntityInterface
-   *   The called Webmention entity.
-   */
-  public function setName($name);
-
   /**
    * Gets the Webmention creation timestamp.
    *

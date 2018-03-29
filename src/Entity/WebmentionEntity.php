@@ -71,21 +71,6 @@ class WebmentionEntity extends ContentEntityBase implements WebmentionEntityInte
   /**
    * {@inheritdoc}
    */
-  public function getName() {
-    return $this->get('name')->value;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function setName($name) {
-    $this->set('name', $name);
-    return $this;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
   public function getCreatedTime() {
     return $this->get('created')->value;
   }

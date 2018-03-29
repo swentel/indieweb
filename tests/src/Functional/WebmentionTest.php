@@ -13,9 +13,9 @@ class WebmentionTest extends IndiewebBrowserTestBase {
   protected $pingback_endpoint = '<link rel="pingback" href="https://webmention.io/webmention?forward=http://example.com/webmention/notify" />';
 
   /**
-   * Tests indieauth functionality.
+   * Tests webmention functionality.
    */
-  public function testIndieAuth() {
+  public function testWebmention() {
 
     $this->drupalGet('<front>');
     $this->assertSession()->responseNotContains($this->webmention_endpoint);
@@ -28,14 +28,7 @@ class WebmentionTest extends IndiewebBrowserTestBase {
     self::assertEquals(404, $code);
 
     $this->drupalLogin($this->adminUser);
-    $edit = [
-      'webmention_enable' => 1,
-      'pingback_enable' => 1,
-      'webmention_secret' => 'valid_secret',
-      'webmention_endpoint' => 'https://webmention.io/example.com/webmention',
-      'pingback_endpoint' => 'https://webmention.io/webmention?forward=http://example.com/webmention/notify',
-    ];
-    $this->drupalPostForm('admin/config/services/indieweb/webmention', $edit, 'Save configuration');
+    $this->enableWebmention();
 
     $this->drupalGet('<front>');
     $this->assertSession()->responseContains($this->webmention_endpoint);
