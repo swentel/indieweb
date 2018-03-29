@@ -8,6 +8,16 @@ indieweb.admin.webmention_settings:
   route_name: indieweb.admin.webmention_settings
   base_route: indieweb.admin.dashboard
 
+indieweb.admin.webmention_settings_tab:
+  title: 'Webmention'
+  route_name: indieweb.admin.webmention_settings
+  parent_id: indieweb.admin.webmention_settings
+
+indieweb.admin.comment_settings:
+  title: 'Comments'
+  route_name: indieweb.admin.comment_settings
+  parent_id: indieweb.admin.webmention_settings
+
 indieweb.admin.publish_settings:
   title: 'Publish'
   route_name: indieweb.admin.publish_settings
@@ -28,11 +38,6 @@ indieweb.admin.indieauth_settings:
   route_name: indieweb.admin.indieauth_settings
   base_route: indieweb.admin.dashboard
 
-indieweb.admin.comment_settings:
-  title: 'Comments'
-  route_name: indieweb.admin.comment_settings
-  base_route: indieweb.admin.dashboard
-
 indieweb.admin.microsub_settings:
   title: 'Microsub'
   route_name: indieweb.admin.microsub_settings
@@ -42,11 +47,6 @@ webmention_entity.list_tab:
   title: 'Webmentions'
   route_name: entity.webmention_entity.collection
   base_route: system.admin_content
-
-webmention_entity.settings_tab:
-  title: 'Settings'
-  route_name: webmention_entity.settings
-  base_route: webmention_entity.settings
 
 entity.webmention_entity.canonical:
   title: 'View'

@@ -30,8 +30,9 @@ use Drupal\user\UserInterface;
  *     },
  *     "access" = "Drupal\indieweb\WebmentionEntityAccessControlHandler",
  *     "route_provider" = {
- *       "html" = "Drupal\indieweb\WebmentionEntityHtmlRouteProvider",
+ *      "html" = "Drupal\Core\Entity\Routing\AdminHtmlRouteProvider",
  *     },
+ *
  *   },
  *   base_table = "webmention_entity",
  *   admin_permission = "administer webmention entities",
@@ -50,7 +51,7 @@ use Drupal\user\UserInterface;
  *     "delete-form" = "/admin/content/webmention/{webmention_entity}/delete",
  *     "collection" = "/admin/content/webmention",
  *   },
- *   field_ui_base_route = "webmention_entity.settings"
+ *   field_ui_base_route = "indieweb.admin.dashboard"
  * )
  */
 class WebmentionEntity extends ContentEntityBase implements WebmentionEntityInterface {
