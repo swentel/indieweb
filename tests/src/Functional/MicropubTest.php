@@ -28,6 +28,17 @@ class MicropubTest extends IndiewebBrowserTestBase {
   ];
 
   /**
+   * Default article $_POST content.
+   *
+   * @var array
+   */
+  protected $article = [
+    'h' => 'entry',
+    'name' => 'An article',
+    'content' => 'An article content',
+  ];
+
+  /**
    * Tests micropub functionality.
    */
   public function testMicropub() {
@@ -87,7 +98,31 @@ class MicropubTest extends IndiewebBrowserTestBase {
     }
     else {
       // Explicit failure.
-      $this->assertTrue($nid, 'No node found');
+      $this->assertTrue($nid, 'No page node found');
+    }
+
+    // Try to send request with name in it, should be 400.
+    $code = $this->sendMicropubRequest($this->article);
+    self::assertEquals(400, $code);
+
+    // Enable and create article.
+    $this->drupalLogin($this->adminUser);
+    $edit = ['article_create_node' => 1, 'article_node_type' => 'article'];
+    $this->drupalPostForm('admin/config/services/indieweb/micropub', $edit, 'Save configuration');
+    $this->drupalLogout();
+    $code = $this->sendMicropubRequest($this->article);
+    self::assertEquals(201, $code);
+    $this->assertNodeCount(1, 'article');
+    $nid = \Drupal::database()->query('SELECT nid FROM {node} WHERE type = :type', [':type' => 'article'])->fetchField();
+    if ($nid) {
+      /** @var \Drupal\node\NodeInterface $node */
+      $node = \Drupal::entityTypeManager()->getStorage('node')->load($nid);
+      self::assertEquals($this->article['name'], $node->getTitle());
+      self::assertEquals($this->article['content'], $node->get('body')->value);
+    }
+    else {
+      // Explicit failure.
+      $this->assertTrue($nid, 'No article node found');
     }
 
   }

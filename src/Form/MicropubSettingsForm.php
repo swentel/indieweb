@@ -68,7 +68,7 @@ class MicropubSettingsForm extends ConfigFormBase {
       '#type' => 'textfield',
       '#title' => $this->t('Me'),
       '#default_value' => $config->get('micropub_me'),
-      '#description' => $this->t('Every request will contain an access token which will be verified to make sure it is really you who is posting.<br />The response of the access token check request also contains the "me" value which should match with your domain.<br />This is the value of your domain. Make sure there is a trailing slash, e.g. <strong>@domain/</strong>', ['@domain' => \Drupal::request()->getSchemeAndHttpHost()]),
+      '#description' => $this->t('Every request will contain an access token which will be verified to make sure it is really you who is posting.<br />The response of the access token check request contains the "me" value which should match with your domain.<br />This is the value of your domain. Make sure there is a trailing slash, e.g. <strong>@domain/</strong>', ['@domain' => \Drupal::request()->getSchemeAndHttpHost()]),
     ];
 
     $form['micropub']['micropub_log_payload'] = [
