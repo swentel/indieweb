@@ -105,4 +105,33 @@ abstract class IndiewebBrowserTestBase extends BrowserTestBase {
     return $status_code;
   }
 
+  /**
+   * Sends a micropub request.
+   *
+   * @param $post
+   * @param $access_token
+   *
+   * @return int $status_code
+   */
+  protected function sendMicropubRequest($post, $access_token = 'this_is_a_valid_token') {
+    $auth = 'Bearer ' . $access_token;
+    $micropub_endpoint = Url::fromRoute('indieweb.micropub.endpoint', [], ['absolute' => TRUE])->toString();
+
+    $client = \Drupal::httpClient();
+    $headers = [
+      'Accept' => 'application/json',
+      'Authorization' => $auth,
+    ];
+    try {
+      $response = $client->post($micropub_endpoint, ['form_params' => $post, 'headers' => $headers]);
+      $status_code = $response->getStatusCode();
+    }
+    catch (\Exception $e) {
+      // Assume 400 on exception.
+      $status_code = 400;
+    }
+
+    return $status_code;
+  }
+
 }

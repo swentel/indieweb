@@ -5,3 +5,11 @@ indieweb_test.front:
     _title: 'Indieweb test front'
   requirements:
     _permission: 'access content'
+
+indieweb_test.token_endpoint:
+  path: '/test-token-endpoint'
+  defaults:
+    _controller: '\Drupal\indieweb_test\Controller\IndiewebTestController::testTokenEndpoint'
+    _title: 'Indieweb test token endpoint'
+  requirements:
+    _access: 'TRUE'
