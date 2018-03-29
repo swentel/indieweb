@@ -2,6 +2,7 @@
 
 namespace Drupal\indieweb\Form;
 
+use Drupal\Core\Cache\Cache;
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
@@ -28,6 +29,8 @@ class WebmentionSettingsForm extends ConfigFormBase {
   public function buildForm(array $form, FormStateInterface $form_state) {
 
     $config = $this->config('indieweb.webmention');
+
+    $form['#attached']['library'][] = 'indieweb/admin';
 
     $form['info'] = [
       '#markup' => '<p>' . $this->t('The easiest way to start receiving webmentions and pingbacks for any page is by using <a href="https://webmention.io/" target="_blank">https://webmention.io</a>. <br />You have to create an account by signing in with your domain. For more information how to sign in with your domain, see the <a href=":link_indieauth">IndieAuth</a> tab.<br />Webmention.io is open source so you can also host the service yourself.<br /><br />All collected webmentions and pingbacks can be viewed on the <a href=":link_overview">overview page</a>.<br />A block (Webmentions) is available to put on any page to show the likes and reposts of that url.',
@@ -130,6 +133,8 @@ class WebmentionSettingsForm extends ConfigFormBase {
       ->set('pingback_enable', $form_state->getValue('pingback_enable'))
       ->set('pingback_endpoint', $form_state->getValue('pingback_endpoint'))
       ->save();
+
+    Cache::invalidateTags(['rendered']);
 
     parent::submitForm($form, $form_state);
   }

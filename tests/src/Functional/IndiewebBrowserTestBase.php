@@ -2,6 +2,7 @@
 
 namespace Drupal\Tests\indieweb\Functional;
 
+use Drupal\Core\Url;
 use Drupal\node\Entity\NodeType;
 use Drupal\Tests\BrowserTestBase;
 
@@ -80,17 +81,28 @@ abstract class IndiewebBrowserTestBase extends BrowserTestBase {
   }
 
   /**
-   * Create a node type.
+   * Sends a webmention request.
    *
-   * @param $node_type
+   * @param $post
+   *
+   * @return int $status_code
    */
-  protected function createNodeType($node_type) {
-    if (!NodeType::load($node_type)) {
-      $this->drupalCreateContentType([
-        'type' => $node_type,
-        'name' => $node_type,
-      ]);
+  protected function sendWebmentionRequest($post = []) {
+    $micropub_endpoint = Url::fromRoute('indieweb.webmention.notify', [], ['absolute' => TRUE])->toString();
+
+    $client = \Drupal::httpClient();
+    try {
+      $response = $client->post($micropub_endpoint, ['json' => $post]);
+      $status_code = $response->getStatusCode();
     }
+    catch (\Exception $e) {
+      $status_code = 400;
+      if (strpos($e->getMessage(), '404 Not Found') !== FALSE) {
+        $status_code = 404;
+      }
+    }
+
+    return $status_code;
   }
 
 }
