@@ -55,7 +55,7 @@ abstract class IndiewebBrowserTestBase extends BrowserTestBase {
    *
    * @var string
    */
-  protected $body_text = 'A really nice article';
+  protected $body_text = 'Getting on the Indieweb is easy. Just install this module!';
 
   /**
    * Default summary text.
@@ -78,6 +78,9 @@ abstract class IndiewebBrowserTestBase extends BrowserTestBase {
       ->getEditable('system.site')
       ->set('page.front', '/indieweb-test-front')
       ->save();
+
+    // Turn off rdf for now.
+    \Drupal::service('module_installer')->uninstall(['rdf']);
   }
 
   /**

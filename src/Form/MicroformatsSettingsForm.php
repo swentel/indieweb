@@ -38,7 +38,6 @@ class MicroformatsSettingsForm extends ConfigFormBase {
     $form['classes'] = [
       '#type' => 'fieldset',
       '#title' => $this->t('Classes to add on elements'),
-      '#description' => $this->t('You might need to clear all caches before markup is added or removed when saving this form.')
     ];
 
     $form['classes']['h_entry'] = [
@@ -63,8 +62,16 @@ class MicroformatsSettingsForm extends ConfigFormBase {
     $form['classes']['post_metadata'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('<em>dt-published</em>, <em>p-name</em> and <em>u-url</em> in a hidden span element.'),
-      '#description' => $this->t('This will be added on full and teaser view mode. Example:<br /><div class="indieweb-highlight-code">&lt;span class="hidden"&gt;&lt;a href="http://url" class="u-url"&gt;&lt;span class="p-name"&gt;title&lt;/span&gt;&lt;span class="dt-published"&gt;2018-01-31T20:38:25+01:00&lt;/span&gt;&lt;/a&gt;&lt;/span&gt;</div>'),
+      '#description' => $this->t('This will be added on full, teaser and microformat view mode. Make sure \'Display author and date information\' is enabled, or move {{ metadata }} in your node template. Example:<br /><div class="indieweb-highlight-code">&lt;span class="hidden"&gt;&lt;a href="http://url" class="u-url"&gt;&lt;span class="p-name"&gt;title&lt;/span&gt;&lt;span class="dt-published"&gt;2018-01-31T20:38:25+01:00&lt;/span&gt;&lt;/a&gt;&lt;/span&gt;</div>'),
       '#default_value' => $config->get('post_metadata'),
+    ];
+
+    $form['classes']['p_name_exclude_node_type'] = [
+      '#title' => $this->t('Exclude p-name'),
+      '#type' => 'select',
+      '#options' => ['' => 'None'] + node_type_get_names(),
+      '#default_value' => $config->get('p_name_exclude_node_type'),
+      '#description' => $this->t('The "p-name" class should not be printed on "notes". Think of it as a tweet, they do not have titles either. Your website can render a title, but microformat parsers should not discover it.'),
     ];
 
     $form['classes']['p_bridgy_twitter_content'] = [
@@ -92,6 +99,7 @@ class MicroformatsSettingsForm extends ConfigFormBase {
     $this->config('indieweb.microformats')
       ->set('h_entry', $form_state->getValue('h_entry'))
       ->set('post_metadata', $form_state->getValue('post_metadata'))
+      ->set('p_name_exclude_node_type', $form_state->getValue(['p_name_exclude_node_type']))
       ->set('e_content', $form_state->getValue('h_entry'))
       ->set('u_photo', $form_state->getValue('u_photo'))
       ->set('p_summary', trim($form_state->getValue('p_summary')))

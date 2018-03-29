@@ -48,6 +48,9 @@ indieweb.microformats:
     post_metadata:
       type: boolean
       label: 'Enable microformat metadata classes like dt-published and u-url'
+    p_name_exclude_node_type:
+      type: string
+      label: 'Node type on which p-name will not be printed'
     e_content:
       type: boolean
       label: 'Enable microformat e-content class'

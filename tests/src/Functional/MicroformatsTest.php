@@ -55,7 +55,7 @@ class MicroformatsTest extends IndiewebBrowserTestBase {
     $this->drupalPostForm(NULL, ['field_image[0][alt]' => 'Alternative'], 'Save');
     $this->assertSession()->statusCodeEquals(200);
     $this->assertSession()->pageTextContains($this->body_text);
-    $this->assertMicroFormats($this->microformats);
+    $this->assertMicroformats($this->microformats);
 
     // Turn them all off.
     $edit = [
@@ -68,16 +68,41 @@ class MicroformatsTest extends IndiewebBrowserTestBase {
     ];
     $this->drupalPostForm('admin/config/services/indieweb/microformats', $edit, 'Save configuration');
     $this->drupalGet('node/1');
-    $this->assertMicroFormats($this->microformats, FALSE);
+    $this->assertMicroformats($this->microformats, FALSE);
+
+    // Turn all on again, exclude node page for p-name.
+    $edit = [
+      'h_entry' => 1,
+      'u_photo' => 1,
+      'e_content' => 1,
+      'post_metadata' => 1,
+      'p_name_exclude_node_type' => 'page',
+      'p_bridgy_twitter_content' => 1,
+    ];
+    $this->drupalPostForm('admin/config/services/indieweb/microformats', $edit, 'Save configuration');
+
+    // Create a 'note', we use page for that. Assert p-name is not printed.
+    // Enable 'Display author and date information' first.
+    $edit = [
+      'display_submitted' => 1,
+    ];
+    $this->drupalPostForm('admin/structure/types/manage/page', $edit, 'Save content type');
+    $edit = [
+      'title[0][value]' => $this->title_text,
+      'body[0][value]' => $this->body_text,
+    ];
+    $this->drupalPostForm('node/add/page', $edit, 'Save');
+    $this->assertMicroformats(['p-name'], FALSE);
+
   }
 
   /**
-   * Assert micro formats.
+   * Assert microformats.
    *
    * @param $formats
    * @param $visible
    */
-  protected function assertMicroFormats($formats = [], $visible = TRUE) {
+  protected function assertMicroformats($formats = [], $visible = TRUE) {
     foreach ($formats as $class) {
       if ($visible) {
         $this->assertSession()->responseContains($class);
