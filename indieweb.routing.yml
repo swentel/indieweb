@@ -77,3 +77,11 @@ indieweb.micropub.endpoint:
    _title: 'Micropub endpoint'
   requirements:
    _access: 'TRUE'
+
+indieweb.syndications_list:
+  path: '/admin/content/syndication'
+  defaults:
+    _controller: '\Drupal\indieweb\Controller\SyndicationController::adminOverview'
+    _title: 'Syndications'
+  requirements:
+    _permission: 'administer indieweb syndications'

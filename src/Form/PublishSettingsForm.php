@@ -4,6 +4,7 @@ namespace Drupal\indieweb\Form;
 
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Url;
 
 class PublishSettingsForm extends ConfigFormBase {
 
@@ -31,7 +32,7 @@ class PublishSettingsForm extends ConfigFormBase {
     $config = $this->config('indieweb.publish');
 
     $form['info'] = [
-      '#markup' => '<p>' . $this->t('The easiest way to start pulling back content or publish content on social networks is by using <a href="https://brid.gy/" target="_blank">https://brid.gy</a>. <br />You have to create an account by signing in with your preferred social network. Bridgy is open source so you can also host the service yourself.<br /><br />Publishing, which is nothing more than sending a webmention, can be done per node in the "Publish to" fieldset, which is protected with the "send webmentions" permission.<br />If no channels are configured, there is nothing to do. There is a syndication field on every node type available to render your syndications for POSSE-Post-Discovery, see <a href="https://indieweb.org/posse-post-discovery">https://indieweb.org/posse-post-discovery</a>.') . '</p>',
+      '#markup' => '<p>' . $this->t('The easiest way to start pulling back content or publish content on social networks is by using <a href="https://brid.gy/" target="_blank">https://brid.gy</a>. <br />You have to create an account by signing in with your preferred social network. Bridgy is open source so you can also host the service yourself.<br /><br />Publishing, which is nothing more than sending a webmention, can be done per node in the "Publish to" fieldset, which is protected with the "send webmentions" permission.<br />If no channels are configured, there is nothing to do. There is a syndication field on every node type available to render your <a href=":syndication_link">syndications</a> for <a href="https://indieweb.org/posse-post-discovery" target="_blank">POSSE-Post-Discovery</a>.', [':syndication_link' => Url::fromRoute('indieweb.syndications_list')->toString()]) . '</p>',
     ];
 
     $form['channels_wrapper'] = [

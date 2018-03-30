@@ -67,8 +67,9 @@ endpoint.
 
 For publishing, a checkbox will be available on the node form for publishing your content per channel (e.g. twitter,
 facebook etc). There is also a syndication field available to render your syndications for POSSE-Post-Discovery, see
-https://indieweb.org/posse-post-discovery. When you toggle to publish, an entry is created in the queue which you can
-either handle with drush or by cron. This will send a webmention to bridgy for instance.
+https://indieweb.org/posse-post-discovery. The full list of syndications is available at admin/content/syndication.
+When you toggle to publish, an entry is created in the queue which you can either handle with drush or by cron. This
+will send a webmention to bridgy for instance.
 
 The drush command is 'indieweb-send-webmentions'
 

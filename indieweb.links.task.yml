@@ -48,6 +48,11 @@ webmention_entity.list_tab:
   route_name: entity.webmention_entity.collection
   base_route: system.admin_content
 
+indieweb_syndications.list_tab:
+  title: 'Syndications'
+  route_name: indieweb.syndications_list
+  base_route: system.admin_content
+
 entity.webmention_entity.canonical:
   title: 'View'
   route_name: entity.webmention_entity.canonical
