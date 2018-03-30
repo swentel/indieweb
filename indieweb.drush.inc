@@ -76,7 +76,7 @@ function drush_indieweb_get_webmentions_from_webmention_io($target_url = '', $ba
 
           $values = [
             'user_id' => $config->get('webmention_uid'),
-            // Remove the base url - TODO we should simply use parse_url() :/
+            // Remove the base url
             'target' => ['value' => str_replace($base_url, '', $target_url)],
             'source' => ['value' => $mention['source']],
             'type' => ['value' => $type],
@@ -115,7 +115,6 @@ function drush_indieweb_get_webmentions_from_webmention_io($target_url = '', $ba
 
           // Save the entity.
           if (drush_confirm('Do you want to save this mention ?')) {
-            // TODO we should probably try/catch this too to be sure.
             $webmention = \Drupal::entityTypeManager()->getStorage('webmention_entity')->create($values);
             $webmention->save();
           }

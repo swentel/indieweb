@@ -86,7 +86,7 @@ class MicropubTest extends IndiewebBrowserTestBase {
     self::assertEquals(400, $code);
     $this->assertNodeCount(0, 'page');
     // With valid access token now.
-    // TODO test url from 201 header
+    // TEST: url from 201 header
     $code = $this->sendMicropubRequest($this->note);
     self::assertEquals(201, $code);
     $this->assertNodeCount(1, 'page');

@@ -10,7 +10,6 @@ use Symfony\Component\HttpFoundation\Response;
 
 class MicropubController extends ControllerBase {
 
-  // TODO inject
   /** @var  \Drupal\Core\Config\Config */
   protected $config;
 
@@ -55,7 +54,6 @@ class MicropubController extends ControllerBase {
     }
 
     $input = NULL;
-    // TODO use request
     if (!empty($_POST)) {
       $input = $_POST;
     }
@@ -64,7 +62,7 @@ class MicropubController extends ControllerBase {
       $php_input = is_array($php_input) ? array_shift($php_input) : '';
       $input = json_decode($php_input, TRUE);
 
-      // TODO need to figure out why quill nests everything in 'properties'
+      // Need to figure out why quill nests everything in 'properties'
       // probably todo with the the format
       if (isset($input['properties'])) {
         $input += $input['properties'];

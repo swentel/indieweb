@@ -130,7 +130,6 @@ function indieweb_page_attachments_alter(array &$attachments) {
  */
 function indieweb_form_node_form_alter(&$form, FormStateInterface $form_state) {
 
-  // TODO configure per node type / entity type
   $node = $form_state->getFormObject()->getEntity();
   if ($node) {
 
@@ -400,10 +399,7 @@ function indieweb_webmention_entity_insert(WebmentionEntityInterface $webmention
   // Comment creation.
   if (($config = \Drupal::config('indieweb.comment')) && $config->get('comment_create_enable')) {
 
-    // TODO we can probably remove the config checks underneath by adding
-    // validation on the configuration screen. If everything is fine, then
-    // comment is enabled and the if statement above is enough. webmention
-    // check needs to stay of course.
+    // This can be simplified when config validation is ok
     if (
     !empty($config->get('comment_create_comment_type')) &&
     !empty($config->get('comment_create_webmention_reference_field')) &&
@@ -411,8 +407,6 @@ function indieweb_webmention_entity_insert(WebmentionEntityInterface $webmention
     $webmention->get('property')->value == 'in-reply-to' &&
     !empty($webmention->get('content_text')->value)) {
 
-      // TODO - we have the same code in WebmentionController::clearCache to get
-      // an entity make a helper function/method.
       $path = \Drupal::service('path.alias_manager')->getPathByAlias($webmention->get('target')->value);
       try {
         $params = Url::fromUri("internal:" . $path)->getRouteParameters();

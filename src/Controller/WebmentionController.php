@@ -65,7 +65,7 @@ class WebmentionController extends ControllerBase {
 
       $values = [
         'user_id' => $config->get('webmention_uid'),
-        // Remove the base url - TODO we should simply use parse_url :/
+        // Remove the base url
         'target' => ['value' => str_replace(\Drupal::request()->getSchemeAndHttpHost(), '', $mention['target'])],
         'source' => ['value' => $mention['source']],
         'type' => ['value' => $mention['post']['type']],
@@ -100,7 +100,6 @@ class WebmentionController extends ControllerBase {
       }
 
       // Save the entity.
-      // TODO we should probably try/catch this too to be sure.
       $webmention = $this->entityTypeManager()->getStorage('webmention_entity')->create($values);
       $webmention->save();
 

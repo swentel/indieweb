@@ -31,8 +31,6 @@ class PublishTest extends IndiewebBrowserTestBase {
   public function setUp() {
     parent::setUp();
 
-    // TODO remove this
-    // @see https://github.com/swentel/indieweb/issues/77
     $schema = [
       'description' => 'Stores items in queues.',
       'fields' => [

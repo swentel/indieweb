@@ -150,7 +150,6 @@ class WebmentionBlock extends BlockBase {
    * {@inheritdoc}
    */
   public function getCacheMaxAge() {
-    // TODO cache per URL is probably better.
     return 0;
   }
 
