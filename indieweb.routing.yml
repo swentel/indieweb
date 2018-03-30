@@ -84,4 +84,4 @@ indieweb.syndications_list:
     _controller: '\Drupal\indieweb\Controller\SyndicationController::adminOverview'
     _title: 'Syndications'
   requirements:
-    _permission: 'administer indieweb syndications'
+    _permission: 'view indieweb syndications'
