@@ -130,6 +130,14 @@ class PublishTest extends IndiewebBrowserTestBase {
     $this->drupalGet('node/1');
     $this->assertChannelFieldsOnNodeView($channels);
 
+    // Configure the back link.
+    $this->drupalPostForm('admin/config/services/indieweb/publish', ['back_link' => 'never'], 'Save configuration');
+    $this->drupalGet('node/1');
+    $this->assertChannelFieldsOnNodeView($channels, TRUE, 'never');
+    $this->drupalPostForm('admin/config/services/indieweb/publish', ['back_link' => 'maybe'], 'Save configuration');
+    $this->drupalGet('node/1');
+    $this->assertChannelFieldsOnNodeView($channels, TRUE, 'maybe');
+
     // Verify that an authenticated user does not see the publish section.
     $this->drupalLogout();
     $this->drupalLogin($this->authUser);
@@ -206,12 +214,25 @@ class PublishTest extends IndiewebBrowserTestBase {
    *
    * @param $channels
    * @param bool $visible
+   * @param $add_back_link
    */
-  protected function assertChannelFieldsOnNodeView($channels, $visible = TRUE) {
+  protected function assertChannelFieldsOnNodeView($channels, $visible = TRUE, $add_back_link = 'always') {
 
     foreach ($channels as $url => $name) {
       if ($visible) {
         $this->assertSession()->responseContains($url);
+
+        if ($add_back_link == 'never') {
+          $this->assertSession()->responseContains('class="p-bridgy-omit-link" value="true"');
+        }
+        elseif ($add_back_link == 'maybe') {
+          $this->assertSession()->responseContains('class="p-bridgy-omit-link" value="maybe"');
+        }
+        else {
+          $this->assertSession()->responseNotContains('class="p-bridgy-omit-link" value="true"');
+          $this->assertSession()->responseNotContains('class="p-bridgy-omit-link" value="maybe"');
+        }
+
       }
       else {
         $this->assertSession()->responseNotContains($url);

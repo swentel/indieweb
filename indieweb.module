@@ -335,11 +335,19 @@ function indieweb_node_view(array &$build, NodeInterface $node, EntityViewDispla
   // Channel fields.
   $channels = indieweb_get_publishing_channels();
   if (!empty($channels)) {
+    $back_link = '';
+    $add_back_link = \Drupal::config('indieweb.publish')->get('back_link');
+    if ($add_back_link == 'never') {
+      $back_link = ' class="p-bridgy-omit-link" value="true"';
+    }
+    elseif ($add_back_link == 'maybe') {
+      $back_link = ' class="p-bridgy-omit-link" value="maybe"';
+    }
     foreach ($channels as $url => $name) {
       $machine_name = indieweb_get_machine_name_from_url($url);
       if ($display->getComponent($machine_name)) {
         $build[$machine_name] = [
-          '#markup' => '<span class="hidden"><a href="' . $url . '"></a></span>',
+          '#markup' => '<span class="hidden"><a href="' . $url . '"'. $back_link .'></a></span>',
         ];
       }
     }

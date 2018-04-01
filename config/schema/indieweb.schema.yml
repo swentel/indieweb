@@ -138,6 +138,9 @@ indieweb.publish:
     channels:
       type: text
       label: 'Channels to publish to'
+    back_link:
+      type: string
+      label: 'How to handle Bridgy back links'
     publish_send_webmention_by:
       type: string
       label: 'How to handle the webmention send queue'

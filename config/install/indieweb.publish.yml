@@ -1,3 +1,4 @@
 channels: "Twitter (bridgy)|https://brid.gy/publish/twitter\r\nFacebook (bridgy)|https://brid.gy/publish/facebook"
+back_link: always
 publish_send_webmention_by: disabled
 publish_log_response: false

@@ -2,6 +2,7 @@
 
 namespace Drupal\indieweb\Form;
 
+use Drupal\Core\Cache\Cache;
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
@@ -48,6 +49,18 @@ class PublishSettingsForm extends ConfigFormBase {
       '#description' => $this->t('Enter every channel line by line if you want to publish content, in following format:<br /><br />Name|webmention_url<br />Twitter (bridgy)|https://brid.gy/publish/twitter<br /><br />When you add or remove channels, extra fields will be enabled on the manage display screens of every node type (you will have to clear cache to see them showing up).<br />These need to be added on the page (usually on the "full" view mode) because bridgy will check for the url in the markup, along with the proper microformat classes.<br />The field will print them hidden in your markup, even if you do not publish to that channel, that will be altered later.<br />You can also add them yourself:<br /><div class="indieweb-highlight-code">&lt;a href="https://brid.gy/publish/twitter"&gt;&lt;/a&gt;</div><br />These channels are also used for the syndicate-to request if you are using micropub.')
     ];
 
+    $form['channels_wrapper']['back_link'] = [
+      '#title' => $this->t('Bridgy back link'),
+      '#type' => 'radios',
+      '#default_value' => $config->get('back_link'),
+      '#options' => [
+        'always' => $this->t('Always'),
+        'never' => $this->t('Never'),
+        'maybe' => $this->t('Add when the content is ellipsized (truncated) to fit the post'),
+      ],
+      '#description' => $this->t('By default, Bridgy includes a link back to your post, configure the behavior here.<br /><strong>Important</strong>: make sure that the syndications are printed in your posts if you select "never" or "maybe".'),
+    ];
+
     $form['send_wrapper'] = [
       '#type' => 'fieldset',
       '#title' => $this->t('Sending publications')
@@ -82,9 +95,12 @@ class PublishSettingsForm extends ConfigFormBase {
 
     $this->config('indieweb.publish')
       ->set('channels', $form_state->getValue('channels'))
+      ->set('back_link', $form_state->getValue('back_link'))
       ->set('publish_send_webmention_by', $form_state->getValue('publish_send_webmention_by'))
       ->set('publish_log_response', $form_state->getValue('publish_log_response'))
       ->save();
+
+    Cache::invalidateTags(['rendered']);
 
     parent::submitForm($form, $form_state);
   }
