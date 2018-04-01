@@ -73,11 +73,11 @@ class WebmentionController extends ControllerBase {
       ];
 
       // Set created to published or wm-received if available.
-      if (!empty($mention['post']['wm-received'])) {
-        $values['created'] = strtotime($mention['post']['wm-received']);
-      }
-      elseif (!empty($mention['post']['published'])) {
+      if (!empty($mention['post']['published'])) {
         $values['created'] = strtotime($mention['post']['published']);
+      }
+      elseif (!empty($mention['post']['wm-received'])) {
+        $values['created'] = strtotime($mention['post']['wm-received']);
       }
 
       // Author info.
