@@ -178,7 +178,7 @@ function indieweb_form_node_form_submit($form, FormStateInterface $form_state) {
     if (!empty($publish_to)) {
       foreach ($publish_to as $key => $value) {
         if ($key === $value) {
-          indieweb_publish_create_queue_item($source_url, $key, $node->id(), 'node');
+          indieweb_webmention_create_queue_item($source_url, $key, $node->id(), 'node');
         }
       }
     }
@@ -490,7 +490,7 @@ function indieweb_webmention_entity_insert(WebmentionEntityInterface $webmention
  */
 function indieweb_cron() {
   if (\Drupal::config('indieweb.publish')->get('publish_send_webmention_by') == 'cron') {
-    indieweb_handle_publish_queue();
+    indieweb_handle_webmention_queue();
   }
 }
 
@@ -538,7 +538,7 @@ function indieweb_get_publishing_channels() {
 }
 
 /**
- * Creates a publish queue item.
+ * Creates a webmention queue item.
  *
  * @param $source_url
  * @param $target_url
@@ -547,22 +547,22 @@ function indieweb_get_publishing_channels() {
  *
  * @throws \Exception
  */
-function indieweb_publish_create_queue_item($source_url, $target_url, $entity_id, $entity_type_id) {
+function indieweb_webmention_create_queue_item($source_url, $target_url, $entity_id = '', $entity_type_id = '') {
   \Drupal::database()->insert('queue')
-    ->fields(['name' => 'indieweb_publish', 'data' => serialize(['source_url' => $source_url, 'target_url' => $target_url, 'entity_id' => $entity_id, 'entity_type_id' => $entity_type_id])])
+    ->fields(['name' => 'indieweb_webmention', 'data' => serialize(['source_url' => $source_url, 'target_url' => $target_url, 'entity_id' => $entity_id, 'entity_type_id' => $entity_type_id])])
     ->execute();
 }
 
 /**
- * Handles the publish queue.
+ * Handles the webmention queue.
  */
-function indieweb_handle_publish_queue() {
+function indieweb_handle_webmention_queue() {
   $query = 'SELECT * FROM {queue} WHERE name = :name';
-  $results = \Drupal::database()->query($query, [':name' => 'indieweb_publish']);
+  $results = \Drupal::database()->query($query, [':name' => 'indieweb_webmention']);
   foreach ($results as $result) {
 
     $data = unserialize($result->data);
-    if (!empty($data['source_url']) && !empty($data['target_url']) && !empty($data['entity_id']) && !empty($data['entity_type_id'])) {
+    if (!empty($data['source_url']) && !empty($data['target_url'])) {
       $sourceURL = $data['source_url'];
       $targetURL = $data['target_url'];
       $client = new MentionClient();
@@ -570,21 +570,23 @@ function indieweb_handle_publish_queue() {
       try {
         $response = $client->sendWebmention($sourceURL, $targetURL);
 
-        // Store the syndication.
+        // Store the syndication, if any.
         if (!empty($response) && $response['code'] == 201 && !empty($response['headers']['Location'])) {
 
-           $values = [
-             'entity_id' => $data['entity_id'],
-             'entity_type_id' => $data['entity_type_id'],
-             'url' => $response['headers']['Location']
-           ];
+          if (!empty($data['entity_id']) && !empty($data['entity_type_id'])) {
+            $values = [
+              'entity_id' => $data['entity_id'],
+              'entity_type_id' => $data['entity_type_id'],
+              'url' => $response['headers']['Location']
+            ];
 
-          \Drupal::database()
-            ->insert('webmention_syndication')
-            ->fields($values)
-            ->execute();
+            \Drupal::database()
+              ->insert('webmention_syndication')
+              ->fields($values)
+              ->execute();
 
-          Cache::invalidateTags([$data['entity_type_id'] . ':' . $data['entity_id']]);
+            Cache::invalidateTags([$data['entity_type_id'] . ':' . $data['entity_id']]);
+          }
 
         }
         else {

@@ -53,6 +53,7 @@ further below.
 - Overview of all collected webmentions and pingbacks are at /admin/content/webmention
 
 A basic block (Webmentions) is available to render like and repost webmentions per page.
+There is also a block (Webmention notify form) to let people submit a URL if the current page is mentioned there.
 
 ![ScreenShot](https://realize.be/sites/default/files/2018-03/webmention-basic.png)
 

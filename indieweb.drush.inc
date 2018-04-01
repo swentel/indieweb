@@ -31,7 +31,7 @@ function indieweb_drush_command() {
  */
 function drush_indieweb_send_webmentions() {
   if (\Drupal::config('indieweb.publish')->get('publish_send_webmention_by') == 'drush') {
-    indieweb_handle_publish_queue();
+    indieweb_handle_webmention_queue();
   }
 }
 

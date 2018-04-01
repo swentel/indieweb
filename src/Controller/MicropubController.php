@@ -262,7 +262,7 @@ class MicropubController extends ControllerBase {
     if (!empty($input['mp-syndicate-to'])) {
       $source_url = $node->toUrl()->setAbsolute(TRUE)->toString();
       foreach ($input['mp-syndicate-to'] as $target_url) {
-        indieweb_publish_create_queue_item($source_url, $target_url, $node->id(), 'node');
+        indieweb_webmention_create_queue_item($source_url, $target_url, $node->id(), 'node');
       }
     }
   }
