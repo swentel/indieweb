@@ -78,9 +78,6 @@ abstract class IndiewebBrowserTestBase extends BrowserTestBase {
       ->getEditable('system.site')
       ->set('page.front', '/indieweb-test-front')
       ->save();
-
-    // Turn off rdf for now.
-    \Drupal::service('module_installer')->uninstall(['rdf']);
   }
 
   /**

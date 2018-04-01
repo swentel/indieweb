@@ -105,6 +105,12 @@ class MicroformatsTest extends IndiewebBrowserTestBase {
   protected function assertMicroformats($formats = [], $visible = TRUE) {
     foreach ($formats as $class) {
       if ($visible) {
+
+        // Make sure the HTML is not escaped.
+        if ($class == 'p-name') {
+          $this->assertSession()->responseContains('<span class="p-name">');
+        }
+
         $this->assertSession()->responseContains($class);
       }
       else {

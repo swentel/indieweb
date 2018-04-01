@@ -62,7 +62,7 @@ class MicroformatsSettingsForm extends ConfigFormBase {
     $form['classes']['post_metadata'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('<em>dt-published</em>, <em>p-name</em> and <em>u-url</em> in a hidden span element.'),
-      '#description' => $this->t('This will be added on full, teaser and microformat view mode. Make sure \'Display author and date information\' is enabled, or move {{ metadata }} in your node template. Example:<br /><div class="indieweb-highlight-code">&lt;span class="hidden"&gt;&lt;a href="http://url" class="u-url"&gt;&lt;span class="p-name"&gt;title&lt;/span&gt;&lt;span class="dt-published"&gt;2018-01-31T20:38:25+01:00&lt;/span&gt;&lt;/a&gt;&lt;/span&gt;</div>'),
+      '#description' => $this->t('This will be added on full, teaser and microformat view mode. Make sure \'Display author and date information\' is enabled, or put {{ metadata }} in your node template. Example:<br /><div class="indieweb-highlight-code">&lt;span class="hidden"&gt;&lt;a href="http://url" class="u-url"&gt;&lt;span class="p-name"&gt;title&lt;/span&gt;&lt;span class="dt-published"&gt;2018-01-31T20:38:25+01:00&lt;/span&gt;&lt;/a&gt;&lt;/span&gt;</div>'),
       '#default_value' => $config->get('post_metadata'),
     ];
 

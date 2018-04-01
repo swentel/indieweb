@@ -225,14 +225,29 @@ function indieweb_preprocess_node(&$variables) {
           </a>
         </span>';
       }
+
       /**
-       * Rdf module might have set this and already rendered it as a string, so
-       * make sure we don't overwrite something.
+       * Rdf module might have set the 'metadata' key.
+       *
+       * Depending whether a patch is applied, or is in core, we need to make
+       * sure we don't crash and/or overwrite this key.
        *
        * @see rdf_preprocess_node().
+       * @see https://www.drupal.org/project/drupal/issues/2819695
        */
       if (isset($variables['metadata'])) {
-        $variables['metadata'] .= $metadata;
+        $other = $variables['metadata'];
+        $variables['metadata'] = [];
+        // Patch applied, or core has been updated already.
+        if (is_array($other)) {
+          $variables['metadata']['other'] = $other;
+          $variables['metadata']['indieweb'] = ['#markup' => $metadata];
+        }
+        // The metadata has been rendered.
+        else {
+          $variables['metadata']['#markup'] = $other;
+          $variables['metadata']['indieweb'] = ['#markup' => $metadata];
+        }
       }
       else {
         $variables['metadata'] = ['#markup' => $metadata];
