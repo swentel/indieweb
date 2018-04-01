@@ -88,6 +88,12 @@ class MicroformatsSettingsForm extends ConfigFormBase {
       '#description' => $this->t('This class is handy to limit the text to publish on social networks. Twitter has a limit of 280 chars, so by having a summary field, you can have better experience, especially for blog posts.<br />Enter the machine names of the fields line per line you want to use as summary fields.')
     ];
 
+    $form['classes']['other'] = [
+      '#type' => 'item',
+      '#title' => $this->t('Formatters'),
+      '#description' => 'To add "p-category" classes on tags, you can use the "Label link with p-category class" formatter. Go to the "Manage display" pages and select that formatter if you want to use it.',
+    ];
+
     return parent::buildForm($form, $form_state);
   }
 
