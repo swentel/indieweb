@@ -3,11 +3,13 @@ micropub_add_header_link: true
 micropub_me: ''
 micropub_log_payload: false
 note_create_node: true
+note_status: 1
 note_node_type: ''
 note_content_field: ''
 note_upload_field: ''
 note_uid: 1
 article_create_node: false
+article_status: 1
 article_node_type: ''
 article_content_field: ''
 article_upload_field: ''

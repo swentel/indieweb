@@ -85,7 +85,7 @@ class MicropubController extends ControllerBase {
           'uid' => $this->config->get('note_uid'),
           'title' => 'Micropub post',
           'type' => $this->config->get('note_node_type'),
-          'status' => 1,
+          'status' => $this->config->get('note_status'),
         ];
 
         // Allow code to change the values and payload.
@@ -136,7 +136,7 @@ class MicropubController extends ControllerBase {
           'uid' => $this->config->get('article_uid'),
           'title' => $input['name'],
           'type' => $this->config->get('article_node_type'),
-          'status' => 1,
+          'status' => $this->config->get('article_status'),
         ];
 
         // Allow code to change the values.

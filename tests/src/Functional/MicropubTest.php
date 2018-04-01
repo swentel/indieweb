@@ -90,7 +90,7 @@ class MicropubTest extends IndiewebBrowserTestBase {
     $code = $this->sendMicropubRequest($this->note);
     self::assertEquals(201, $code);
     $this->assertNodeCount(1, 'page');
-    $nid = \Drupal::database()->query('SELECT nid FROM {node} WHERE type = :type', [':type' => 'page'])->fetchField();
+    $nid = $this->getLastNid('page');
     if ($nid) {
       /** @var \Drupal\node\NodeInterface $node */
       $node = \Drupal::entityTypeManager()->getStorage('node')->load($nid);
@@ -113,10 +113,11 @@ class MicropubTest extends IndiewebBrowserTestBase {
     $code = $this->sendMicropubRequest($this->article);
     self::assertEquals(201, $code);
     $this->assertNodeCount(1, 'article');
-    $nid = \Drupal::database()->query('SELECT nid FROM {node} WHERE type = :type', [':type' => 'article'])->fetchField();
+    $nid = $this->getLastNid('article');
     if ($nid) {
       /** @var \Drupal\node\NodeInterface $node */
       $node = \Drupal::entityTypeManager()->getStorage('node')->load($nid);
+      self::assertEquals(TRUE, $node->isPublished());
       self::assertEquals($this->article['name'], $node->getTitle());
       self::assertEquals($this->article['content'], $node->get('body')->value);
     }
@@ -125,17 +126,46 @@ class MicropubTest extends IndiewebBrowserTestBase {
       $this->assertTrue($nid, 'No article node found');
     }
 
-  }
+    // Set default status to unpublished for both post types.
+    $this->drupalLogin($this->adminUser);
+    $edit = ['note_status' => 0, 'article_status' => 0];
+    $this->drupalPostForm('admin/config/services/indieweb/micropub', $edit, 'Save configuration');
+    $this->drupalLogout();
 
-  /**
-   * Assert node count.
-   *
-   * @param $count
-   * @param $type
-   */
-  protected function assertNodeCount($count, $type) {
-    $node_count = \Drupal::database()->query('SELECT count(nid) FROM {node} WHERE type = :type', [':type' => $type])->fetchField();
-    self::assertEquals($count, $node_count);
+    $post = $this->note;
+    $post['content'] = 'Unpublished note';
+    $code = $this->sendMicropubRequest($post);
+    self::assertEquals(201, $code);
+    $this->assertNodeCount(2, 'page');
+    $nid = $this->getLastNid('page');
+    if ($nid) {
+      /** @var \Drupal\node\NodeInterface $node */
+      $node = \Drupal::entityTypeManager()->getStorage('node')->load($nid);
+      self::assertEquals(FALSE, $node->isPublished());
+      self::assertEquals($post['content'], $node->get('body')->value);
+    }
+    else {
+      // Explicit failure.
+      $this->assertTrue($nid, 'No second page node found');
+    }
+
+    $post = $this->article;
+    $post['name'] = 'Unpublished article';
+    $code = $this->sendMicropubRequest($post);
+    self::assertEquals(201, $code);
+    $this->assertNodeCount(2, 'article');
+    $nid = $this->getLastNid('article');
+    if ($nid) {
+      /** @var \Drupal\node\NodeInterface $node */
+      $node = \Drupal::entityTypeManager()->getStorage('node')->load($nid);
+      self::assertEquals(FALSE, $node->isPublished());
+      self::assertEquals($post['name'], $node->getTitle());
+    }
+    else {
+      // Explicit failure.
+      $this->assertTrue($nid, 'No second article node found');
+    }
+
   }
 
 }

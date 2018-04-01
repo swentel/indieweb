@@ -160,4 +160,26 @@ abstract class IndiewebBrowserTestBase extends BrowserTestBase {
     return $status_code;
   }
 
+  /**
+   * Assert node count.
+   *
+   * @param $count
+   * @param $type
+   */
+  protected function assertNodeCount($count, $type) {
+    $node_count = \Drupal::database()->query('SELECT count(nid) FROM {node} WHERE type = :type', [':type' => $type])->fetchField();
+    self::assertEquals($count, $node_count);
+  }
+
+  /**
+   * Get the last nid for a node type.
+   *
+   * @param $type
+   *
+   * @return mixed
+   */
+  protected function getLastNid($type) {
+    return \Drupal::database()->query('SELECT nid FROM {node} WHERE type = :type ORDER by nid DESC LIMIT 1', [':type' => $type])->fetchField();
+  }
+
 }

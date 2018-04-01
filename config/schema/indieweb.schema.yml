@@ -84,6 +84,9 @@ indieweb.micropub:
     note_create_node:
       type: boolean
       label: 'Enable note support'
+    note_status:
+      type: integer
+      label: 'Whether the note is published or not'
     note_node_type:
       type: string
       label: 'The node type for the note'
@@ -99,6 +102,9 @@ indieweb.micropub:
     article_create_node:
       type: boolean
       label: 'Enable article'
+    article_status:
+      type: integer
+      label: 'Whether the article is published or not'
     article_node_type:
       type: string
       label: 'The node type for the article'

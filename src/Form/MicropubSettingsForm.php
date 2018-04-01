@@ -107,6 +107,21 @@ class MicropubSettingsForm extends ConfigFormBase {
       '#default_value' => $config->get('article_create_node'),
     ];
 
+    $form['article']['article_status'] = [
+      '#type' => 'radios',
+      '#title' => $this->t('Status'),
+      '#options' => [
+        0 => $this->t('Unpublished'),
+        1 => $this->t('Published'),
+      ],
+      '#default_value' => $config->get('article_status'),
+      '#states' => array(
+        'visible' => array(
+          ':input[name="article_create_node"]' => array('checked' => TRUE),
+        ),
+      ),
+    ];
+
     $form['article']['article_uid'] = [
       '#type' => 'number',
       '#title' => $this->t('The user id which will own the created node'),
@@ -176,6 +191,21 @@ class MicropubSettingsForm extends ConfigFormBase {
       '#default_value' => $config->get('note_create_node'),
     ];
 
+    $form['note']['note_status'] = [
+      '#type' => 'radios',
+      '#title' => $this->t('Status'),
+      '#options' => [
+        0 => $this->t('Unpublished'),
+        1 => $this->t('Published'),
+      ],
+      '#default_value' => $config->get('note_status'),
+      '#states' => array(
+        'visible' => array(
+          ':input[name="note_create_node"]' => array('checked' => TRUE),
+        ),
+      ),
+    ];
+
     $form['note']['note_uid'] = [
       '#type' => 'number',
       '#title' => $this->t('The user id which will own the created node'),
@@ -242,12 +272,14 @@ class MicropubSettingsForm extends ConfigFormBase {
       ->set('micropub_me', $form_state->getValue('micropub_me'))
       ->set('micropub_log_payload', $form_state->getValue('micropub_log_payload'))
       ->set('note_create_node', $form_state->getValue('note_create_node'))
+      ->set('note_status', $form_state->getValue('note_status'))
       ->set('note_uid', $form_state->getValue('note_uid'))
       ->set('note_node_type', $form_state->getValue('note_node_type'))
       ->set('note_content_field', $form_state->getValue('note_content_field'))
       ->set('note_upload_field', $form_state->getValue('note_upload_field'))
       ->set('article_create_node', $form_state->getValue('article_create_node'))
       ->set('article_uid', $form_state->getValue('article_uid'))
+      ->set('article_status', $form_state->getValue('article_status'))
       ->set('article_node_type', $form_state->getValue('article_node_type'))
       ->set('article_content_field', $form_state->getValue('article_content_field'))
       ->set('article_upload_field', $form_state->getValue('article_upload_field'))

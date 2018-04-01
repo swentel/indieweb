@@ -2,8 +2,6 @@
 
 namespace Drupal\Tests\indieweb\Functional;
 
-use Drupal\Core\Url;
-
 /**
  * Tests integration of Comment creation on webmention with 'in-reply-to'.
  *
