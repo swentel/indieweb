@@ -169,11 +169,11 @@ class PublishTest extends IndiewebBrowserTestBase {
   protected function assertQueueItems($channels = [], $nid = NULL) {
     if ($channels) {
       $query = 'SELECT count(item_id) FROM {queue} WHERE name = :name';
-      $count = \Drupal::database()->query($query, [':name' => $this->queue_name])->fetchField();
+      $count = \Drupal::database()->query($query, [':name' => WEBMENTION_QUEUE_NAME])->fetchField();
       $this->assertTrue($count == count($channels));
 
       $query = 'SELECT * FROM {queue} WHERE name = :name';
-      $records = \Drupal::database()->query($query, [':name' => $this->queue_name]);
+      $records = \Drupal::database()->query($query, [':name' => WEBMENTION_QUEUE_NAME]);
       foreach ($records as $record) {
         $data = unserialize($record->data);
         if (!empty($data['source_url']) && !empty($data['target_url'])) {
@@ -184,7 +184,7 @@ class PublishTest extends IndiewebBrowserTestBase {
     }
     else {
       $query = 'SELECT count(item_id) FROM {queue} WHERE name = :name';
-      $count = \Drupal::database()->query($query, [':name' => $this->queue_name])->fetchField();
+      $count = \Drupal::database()->query($query, [':name' => WEBMENTION_QUEUE_NAME])->fetchField();
       $this->assertFalse($count);
     }
   }

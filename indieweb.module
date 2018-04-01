@@ -17,6 +17,8 @@ use Drupal\node\Entity\NodeType;
 use Drupal\node\NodeInterface;
 use IndieWeb\MentionClient;
 
+define('WEBMENTION_QUEUE_NAME', 'indieweb_webmention');
+
 /**
  * Implements hook_page_attachments_alter().
  */
@@ -549,7 +551,7 @@ function indieweb_get_publishing_channels() {
  */
 function indieweb_webmention_create_queue_item($source_url, $target_url, $entity_id = '', $entity_type_id = '') {
   \Drupal::database()->insert('queue')
-    ->fields(['name' => 'indieweb_webmention', 'data' => serialize(['source_url' => $source_url, 'target_url' => $target_url, 'entity_id' => $entity_id, 'entity_type_id' => $entity_type_id])])
+    ->fields(['name' => WEBMENTION_QUEUE_NAME, 'data' => serialize(['source_url' => $source_url, 'target_url' => $target_url, 'entity_id' => $entity_id, 'entity_type_id' => $entity_type_id])])
     ->execute();
 }
 
@@ -558,7 +560,7 @@ function indieweb_webmention_create_queue_item($source_url, $target_url, $entity
  */
 function indieweb_handle_webmention_queue() {
   $query = 'SELECT * FROM {queue} WHERE name = :name';
-  $results = \Drupal::database()->query($query, [':name' => 'indieweb_webmention']);
+  $results = \Drupal::database()->query($query, [':name' => WEBMENTION_QUEUE_NAME]);
   foreach ($results as $result) {
 
     $data = unserialize($result->data);

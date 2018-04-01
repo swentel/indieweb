@@ -37,13 +37,6 @@ abstract class IndiewebBrowserTestBase extends BrowserTestBase {
   protected $authUser;
 
   /**
-   * Name of the queue.
-   *
-   * @var string
-   */
-  protected $queue_name = 'indieweb_publish';
-
-  /**
    * Default title.
    *
    * @var string
