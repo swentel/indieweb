@@ -39,6 +39,29 @@ class MicropubTest extends IndiewebBrowserTestBase {
     'content' => 'An article content',
   ];
 
+  protected $like = [
+    'h' => 'entry',
+    'like-of' => 'https://example.com/what-a-page'
+  ];
+
+  /**
+   * {@inheritdoc}
+   */
+  function setUp() {
+    parent::setUp();
+
+    $this->drupalLogin($this->adminUser);
+    $edit = ['name' => 'like', 'type' => 'like'];
+    $this->drupalPostForm('admin/structure/types/add', $edit, 'Save and manage fields');
+    $edit = ['new_storage_type' => 'link', 'label' => 'Link', 'field_name' => 'link'];
+    $this->drupalPostForm('admin/structure/types/manage/like/fields/add-field', $edit, 'Save and continue');
+    $this->drupalPostForm(NULL, [], 'Save field settings');
+    $this->drupalPostForm(NULL, [], 'Save settings');
+    $edit = ['fields[field_link][type]' => 'link_microformat'];
+    $this->drupalPostForm('admin/structure/types/manage/like/display', $edit, 'Save');
+    drupal_flush_all_caches();
+  }
+
   /**
    * Tests micropub functionality.
    */
@@ -86,6 +109,8 @@ class MicropubTest extends IndiewebBrowserTestBase {
     $code = $this->sendMicropubRequest($this->note, 'invalid_token');
     self::assertEquals(400, $code);
     $this->assertNodeCount(0, 'page');
+    $this->assertNodeCount(0, 'like');
+    $this->assertNodeCount(0, 'article');
     // With valid access token now.
     // TEST: url from 201 header
     $code = $this->sendMicropubRequest($this->note);
@@ -102,11 +127,14 @@ class MicropubTest extends IndiewebBrowserTestBase {
       $this->assertTrue($nid, 'No page node found');
     }
 
-    // Try to send request with name in it, should be 400.
+    // Try to send article, should be 400.
     $code = $this->sendMicropubRequest($this->article);
     self::assertEquals(400, $code);
+    // Try to send like, should be 400.
+    $code = $this->sendMicropubRequest($this->like);
+    self::assertEquals(400, $code);
 
-    // Enable and create article.
+    // Test articles.
     $this->drupalLogin($this->adminUser);
     $edit = ['article_create_node' => 1, 'article_node_type' => 'article'];
     $this->drupalPostForm('admin/config/services/indieweb/micropub', $edit, 'Save configuration');
@@ -127,9 +155,39 @@ class MicropubTest extends IndiewebBrowserTestBase {
       $this->assertTrue($nid, 'No article node found');
     }
 
-    // Set default status to unpublished for both post types.
+    // Test likes.
+    $code = $this->sendMicropubRequest($this->like);
+    self::assertEquals(400, $code);
+    $this->assertNodeCount(0, 'like');
+
     $this->drupalLogin($this->adminUser);
-    $edit = ['note_status' => 0, 'article_status' => 0];
+    $edit = ['like_create_node' => 1, 'like_node_type' => 'like', 'like_link_field' => 'field_link', 'like_content_field' => 'body'];
+    $this->drupalPostForm('admin/config/services/indieweb/micropub', $edit, 'Save configuration');
+    $this->drupalLogout();
+    $code = $this->sendMicropubRequest($this->like);
+    self::assertEquals(201, $code);
+    $this->assertNodeCount(1, 'like');
+    $nid = $this->getLastNid('like');
+    if ($nid) {
+      /** @var \Drupal\node\NodeInterface $node */
+      $node = \Drupal::entityTypeManager()->getStorage('node')->load($nid);
+      self::assertEquals(TRUE, $node->isPublished());
+      self::assertEquals('like', $node->bundle());
+      self::assertEquals('Like of ' . $this->like['like-of'], $node->getTitle());
+      self::assertEquals($this->like['like-of'], $node->get('field_link')->uri);
+
+      // Check 'u-like-of' class.
+      $this->drupalGet('node/' . $nid);
+      $this->assertSession()->responseContains('href="' . $this->like['like-of'] . '" class="u-like-of"');
+    }
+    else {
+      // Explicit failure.
+      $this->assertTrue($nid, 'No like node found');
+    }
+
+    // Set default status to unpublished for all post types.
+    $this->drupalLogin($this->adminUser);
+    $edit = ['note_status' => 0, 'article_status' => 0, 'like_status' => 0];
     $this->drupalPostForm('admin/config/services/indieweb/micropub', $edit, 'Save configuration');
     $this->drupalLogout();
 
@@ -165,6 +223,24 @@ class MicropubTest extends IndiewebBrowserTestBase {
     else {
       // Explicit failure.
       $this->assertTrue($nid, 'No second article node found');
+    }
+
+    // Add content to the like too.
+    $post = $this->like;
+    $post['content'] = 'That is a nice site!';
+    $code = $this->sendMicropubRequest($post);
+    self::assertEquals(201, $code);
+    $this->assertNodeCount(2, 'like');
+    $nid = $this->getLastNid('like');
+    if ($nid) {
+      /** @var \Drupal\node\NodeInterface $node */
+      $node = \Drupal::entityTypeManager()->getStorage('node')->load($nid);
+      self::assertEquals(FALSE, $node->isPublished());
+      self::assertEquals($post['content'], $node->get('body')->value);
+    }
+    else {
+      // Explicit failure.
+      $this->assertTrue($nid, 'No like node found');
     }
 
   }

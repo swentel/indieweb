@@ -117,6 +117,33 @@ indieweb.micropub:
     article_uid:
       type: integer
       label: 'The user id of the article'
+    like_create_node:
+      type: boolean
+      label: 'Enable like'
+    like_status:
+      type: integer
+      label: 'Whether the like is published or not'
+    like_node_type:
+      type: string
+      label: 'The node type for the like'
+    like_content_field:
+      type: string
+      label: 'The node content field for the like'
+    like_link_field:
+      type: string
+      label: 'The node link field for the like'
+    like_uid:
+      type: integer
+      label: 'The user id of the article'
+
+field.formatter.settings.link_microformat:
+  type: field.formatter.settings.link
+  label: 'Link microformat format settings'
+  mapping:
+    microformat_class:
+      type: string
+      label: 'The microformat class for the link'
+
 
 # schema for indieweb.microsub
 indieweb.microsub:

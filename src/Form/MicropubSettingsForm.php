@@ -78,7 +78,7 @@ class MicropubSettingsForm extends ConfigFormBase {
     ];
 
     // Collect fields.
-    $text_fields = $upload_fields = [];
+    $text_fields = $upload_fields = $link_fields = [];
     $fields = \Drupal::service('entity_field.manager')->getFieldStorageDefinitions('node');
     /** @var \Drupal\Core\Field\FieldStorageDefinitionInterface $field */
     foreach ($fields as $key => $field) {
@@ -88,12 +88,15 @@ class MicropubSettingsForm extends ConfigFormBase {
       if (in_array($field->getType(), ['file', 'image'])) {
         $upload_fields[$key] = $field->getName();
       }
+      if (in_array($field->getType(), ['link'])) {
+        $link_fields[$key] = $field->getName();
+      }
     }
 
     $form['article'] = [
       '#type' => 'fieldset',
       '#title' => $this->t('Create a node when a micropub article is posted'),
-      '#description' => $this->t("Create a node when an 'article' is posted. An article request contains 'content', 'name' and the 'h' value is 'entry'. Think of it as a blog post. The article can also contain a 'mp-syndicate-to' value which will contain the channel you want to publish to, see the <a href=':link_publish'>Publish section</a> to configure this.<br /><strong>Important:</strong> might not work with clients who send json requests (e.g. quill), will be fixed when https://github.com/swentel/indieweb/issues/44 is done", [':link_publish' => Url::fromRoute('indieweb.admin.publish_settings')->toString(),]),
+      '#description' => $this->t("An article request contains 'content', 'name' and the 'h' value is 'entry'. Think of it as a blog post. The article can also contain a 'mp-syndicate-to' value which will contain the channel you want to publish to, see the <a href=':link_publish'>Publish section</a> to configure this.<br /><strong>Important:</strong> might not work with clients who send json requests (e.g. quill), will be fixed when https://github.com/swentel/indieweb/issues/44 is done", [':link_publish' => Url::fromRoute('indieweb.admin.publish_settings')->toString(),]),
       '#states' => array(
         'visible' => array(
           ':input[name="micropub_enable"]' => array('checked' => TRUE),
@@ -177,7 +180,7 @@ class MicropubSettingsForm extends ConfigFormBase {
     $form['note'] = [
       '#type' => 'fieldset',
       '#title' => $this->t('Create a node when a micropub note is posted'),
-      '#description' => $this->t("Create a node when a 'note' is posted. A note request contains 'content', but no 'name' and the 'h' value is 'entry'. Think of it as a Tweet. The note can also contain a 'mp-syndicate-to' value which will contain the channel you want to publish to, see the <a href=':link_publish'>Publish section</a> to configure this.", [':link_publish' => Url::fromRoute('indieweb.admin.publish_settings')->toString(),]),
+      '#description' => $this->t("A note request contains 'content', but no 'name' and the 'h' value is 'entry'. Think of it as a Tweet. The note can also contain a 'mp-syndicate-to' value which will contain the channel you want to publish to, see the <a href=':link_publish'>Publish section</a> to configure this.", [':link_publish' => Url::fromRoute('indieweb.admin.publish_settings')->toString(),]),
       '#states' => array(
         'visible' => array(
           ':input[name="micropub_enable"]' => array('checked' => TRUE),
@@ -258,6 +261,90 @@ class MicropubSettingsForm extends ConfigFormBase {
       ),
     ];
 
+    $form['like'] = [
+      '#type' => 'fieldset',
+      '#title' => $this->t('Create a node when a micropub like is posted'),
+      '#description' => $this->t("A like request contains a URL in 'like-of' and 'h' value is 'entry'. The like can also contain a 'mp-syndicate-to' value which will contain the channel you want to publish to, see the <a href=':link_publish'>Publish section</a> to configure this."),
+      '#states' => array(
+        'visible' => array(
+          ':input[name="micropub_enable"]' => array('checked' => TRUE),
+        ),
+      ),
+    ];
+
+    $form['like']['like_create_node'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Enable'),
+      '#default_value' => $config->get('like_create_node'),
+    ];
+
+    $form['like']['like_status'] = [
+      '#type' => 'radios',
+      '#title' => $this->t('Status'),
+      '#options' => [
+        0 => $this->t('Unpublished'),
+        1 => $this->t('Published'),
+      ],
+      '#default_value' => $config->get('like_status'),
+      '#states' => array(
+        'visible' => array(
+          ':input[name="like_create_node"]' => array('checked' => TRUE),
+        ),
+      ),
+    ];
+
+    $form['like']['like_uid'] = [
+      '#type' => 'number',
+      '#title' => $this->t('The user id which will own the created node'),
+      '#default_value' => $config->get('like_uid'),
+      '#states' => array(
+        'visible' => array(
+          ':input[name="like_create_node"]' => array('checked' => TRUE),
+        ),
+      ),
+    ];
+
+    $form['like']['like_node_type'] = [
+      '#type' => 'select',
+      '#title' => $this->t('Node type'),
+      '#description' => $this->t('Select the node type to use for creating a node'),
+      '#options' => node_type_get_names(),
+      '#default_value' => $config->get('like_node_type'),
+      '#states' => array(
+        'visible' => array(
+          ':input[name="like_create_node"]' => array('checked' => TRUE),
+        ),
+      ),
+    ];
+
+    // Link field.
+    $form['like']['like_link_field'] = [
+      '#type' => 'select',
+      '#title' => $this->t('Link field'),
+      '#description' => $this->t('Select the field which will be used to store the link. Make sure the field exists on the node type.'),
+      '#options' => $link_fields,
+      '#default_value' => $config->get('like_link_field'),
+      '#states' => array(
+        'visible' => array(
+          ':input[name="like_create_node"]' => array('checked' => TRUE),
+        ),
+      ),
+    ];
+
+    // Content field.
+    $form['like']['like_content_field'] = [
+      '#type' => 'select',
+      '#title' => $this->t('Content field') . ' (' . $this->t('optional') .')',
+      '#description' => $this->t('Select the field which will be used to store the content. Make sure the field exists on the node type.'),
+      '#options' => ['' => $this->t('Do not store content')] + $text_fields,
+      '#default_value' => $config->get('like_content_field'),
+      '#states' => array(
+        'visible' => array(
+          ':input[name="like_create_node"]' => array('checked' => TRUE),
+        ),
+      ),
+    ];
+
     return parent::buildForm($form, $form_state);
   }
 
@@ -283,6 +370,12 @@ class MicropubSettingsForm extends ConfigFormBase {
       ->set('article_node_type', $form_state->getValue('article_node_type'))
       ->set('article_content_field', $form_state->getValue('article_content_field'))
       ->set('article_upload_field', $form_state->getValue('article_upload_field'))
+      ->set('like_create_node', $form_state->getValue('like_create_node'))
+      ->set('like_uid', $form_state->getValue('like_uid'))
+      ->set('like_status', $form_state->getValue('like_status'))
+      ->set('like_node_type', $form_state->getValue('like_node_type'))
+      ->set('like_content_field', $form_state->getValue('like_content_field'))
+      ->set('like_link_field', $form_state->getValue('like_link_field'))
       ->save();
 
     Cache::invalidateTags(['rendered']);

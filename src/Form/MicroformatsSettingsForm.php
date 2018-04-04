@@ -91,7 +91,8 @@ class MicroformatsSettingsForm extends ConfigFormBase {
     $form['classes']['other'] = [
       '#type' => 'item',
       '#title' => $this->t('Formatters'),
-      '#description' => 'To add "p-category" classes on tags, you can use the "Label link with p-category class" formatter. Go to the "Manage display" pages and select that formatter if you want to use it.',
+      '#markup' => 'To add "p-category" classes on tags, you can use the "Label link with p-category class" formatter.<br />To add "u-like-of" or "u-bookmark-of" on links, use the "Microformat link" formatter.',
+      '#description' => 'Go to the "Manage display" pages and select the formatter you want to use.',
     ];
 
     return parent::buildForm($form, $form_state);
