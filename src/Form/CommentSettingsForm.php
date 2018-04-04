@@ -74,7 +74,10 @@ class CommentSettingsForm extends ConfigFormBase {
     /** @var \Drupal\Core\Field\FieldStorageDefinitionInterface $field */
     foreach ($comment_fields as $key => $field) {
       if (in_array($field->getType(), ['entity_reference'])) {
-        $reference_fields[$key] = $field->getName();
+        $settings = $field->getSettings();
+        if (isset($settings['target_type']) && $settings['target_type'] == 'webmention_entity') {
+          $reference_fields[$key] = $field->getName();
+        }
       }
     }
 
