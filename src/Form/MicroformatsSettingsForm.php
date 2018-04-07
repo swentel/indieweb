@@ -106,7 +106,7 @@ class MicroformatsSettingsForm extends ConfigFormBase {
     $this->config('indieweb.microformats')
       ->set('h_entry', $form_state->getValue('h_entry'))
       ->set('post_metadata', $form_state->getValue('post_metadata'))
-      ->set('p_name_exclude_node_type', $form_state->getValue(['p_name_exclude_node_type']))
+      ->set('p_name_exclude_node_type', $form_state->getValue('p_name_exclude_node_type'))
       ->set('e_content', $form_state->getValue('h_entry'))
       ->set('u_photo', $form_state->getValue('u_photo'))
       ->set('p_summary', trim($form_state->getValue('p_summary')))

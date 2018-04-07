@@ -61,6 +61,38 @@ class PublishSettingsForm extends ConfigFormBase {
       '#description' => $this->t('By default, Bridgy includes a link back to your post, configure the behavior here.<br /><strong>Important</strong>: make sure that the syndications are printed in your posts if you select "never" or "maybe".'),
     ];
 
+    $form['custom_wrapper'] = [
+      '#type' => 'fieldset',
+      '#title' => $this->t('Custom publishing'),
+      '#description' => $this->t('The "Publish to" fieldset can contain two additional ways to publish content: a textfield to enter a custom URL or a select which listens to a "link" field on your content.'),
+    ];
+
+    // Collect fields.
+    $link_fields = [];
+    $fields = \Drupal::service('entity_field.manager')->getFieldStorageDefinitions('node');
+    /** @var \Drupal\Core\Field\FieldStorageDefinitionInterface $field */
+    foreach ($fields as $key => $field) {
+      if (in_array($field->getType(), ['link'])) {
+        $link_fields[$key] = $field->getName();
+      }
+    }
+
+    $form['custom_wrapper']['publish_custom_url'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Expose textfield'),
+      '#description' => $this->t('Add a textfield to enter a custom URL to send a webmention.'),
+      '#default_value' => $config->get('publish_custom_url'),
+    ];
+
+    $form['custom_wrapper']['publish_link_fields'] = [
+      '#type' => 'select',
+      '#multiple' => TRUE,
+      '#title' => $this->t('Link fields'),
+      '#options' => $link_fields,
+      '#default_value' => explode('|', $config->get('publish_link_fields')),
+      '#description' => $this->t('Do not select a field if you do not want to use this feature.'),
+    ];
+
     $form['send_wrapper'] = [
       '#type' => 'fieldset',
       '#title' => $this->t('Sending publications')
@@ -93,11 +125,26 @@ class PublishSettingsForm extends ConfigFormBase {
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
 
+    // Store publish_dynamic_fields as a simple string.
+    $link_fields_string = '';
+    $link_fields_to_implode = [];
+    $link_fields = $form_state->getValue('publish_link_fields');
+    foreach ($link_fields as $key => $value) {
+      if ($key === $value) {
+        $link_fields_to_implode[] = $key;
+      }
+    }
+    if (!empty($link_fields_to_implode)) {
+      $link_fields_string = implode("|", $link_fields_to_implode);
+    }
+
     $this->config('indieweb.publish')
       ->set('channels', $form_state->getValue('channels'))
       ->set('back_link', $form_state->getValue('back_link'))
       ->set('publish_send_webmention_by', $form_state->getValue('publish_send_webmention_by'))
       ->set('publish_log_response', $form_state->getValue('publish_log_response'))
+      ->set('publish_custom_url', $form_state->getValue('publish_custom_url'))
+      ->set('publish_link_fields', $link_fields_string)
       ->save();
 
     Cache::invalidateTags(['rendered']);

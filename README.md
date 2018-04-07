@@ -88,6 +88,8 @@ This module exposes per channel an extra field which you can configure on the 'M
 That field exposes that snippet. See indieweb_node_view(). More info about this at https://brid.gy/about#webmentions
 Currently this field will be printed, even if you do not publish to that channel, that will be altered later.
 
+You can also configure to just enter a custom URL, or use a "link" field to publish to.
+
 The module ships with default Twitter and Facebook channels. More channels and other configuration can be configured at
 /admin/config/services/indieweb/publish. These channels are also used for the q=syndicate-to request for micropub, see
 micropub for more information.

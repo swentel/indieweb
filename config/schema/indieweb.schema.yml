@@ -168,6 +168,12 @@ indieweb.publish:
     back_link:
       type: string
       label: 'How to handle Bridgy back links'
+    publish_custom_url:
+      type: boolean
+      label: 'Expose dynamic URL textfield'
+    publish_link_fields:
+      type: string
+      label: 'Fields to use'
     publish_send_webmention_by:
       type: string
       label: 'How to handle the webmention send queue'

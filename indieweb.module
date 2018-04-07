@@ -134,28 +134,48 @@ function indieweb_form_node_form_alter(&$form, FormStateInterface $form_state) {
 
   $node = $form_state->getFormObject()->getEntity();
   if ($node) {
+    $form['indieweb'] = [
+      '#type' => 'details',
+      '#title' => t('Publish to'),
+      '#access' => \Drupal::currentUser()->hasPermission('send webmentions'),
+      '#group' => 'advanced',
+      '#weight' => 100,
+    ];
 
     $channels = indieweb_get_publishing_channels();
-    if (!empty($channels)) {
+    $form['indieweb']['indieweb_publish_channels'] = [
+      '#type' => 'checkboxes',
+      '#options' => indieweb_get_publishing_channels(),
+      '#default_value' => [],
+      '#access' => !empty($channels),
+    ];
 
-      $form['indieweb'] = [
-        '#type' => 'details',
-        '#title' => t('Publish to'),
-        '#access' => \Drupal::currentUser()->hasPermission('send webmentions'),
-        '#group' => 'advanced',
-        '#weight' => 100,
+    $options = [];
+    $link_fields = explode('|', \Drupal::config('indieweb.publish')->get('publish_link_fields'));
+    if (!empty($link_fields)) {
+
+      foreach ($link_fields as $field) {
+        $options[$field] = t('Use @field', ['@field' => $field]);
+      }
+
+      $form['indieweb']['indieweb_publish_link_field'] = [
+        '#title' => t('Link field'),
+        '#type' => 'select',
+        '#options' => ['' => ''] + $options,
+        '#description' => t('Use the link from a field on this node.'),
       ];
+    }
 
-      $form['indieweb']['indieweb_publish_channels'] = [
-        '#type' => 'checkboxes',
-        '#options' => indieweb_get_publishing_channels(),
-        '#default_value' => [],
+    if (\Drupal::config('indieweb.publish')->get('publish_custom_url')) {
+      $form['indieweb']['indieweb_publish_custom_url'] = [
+        '#type' => 'textfield',
+        '#description' => t('Enter a custom URL'),
       ];
+    }
 
-      foreach (array_keys($form['actions']) as $action) {
-        if ($action != 'preview' && isset($form['actions'][$action]['#type']) && $form['actions'][$action]['#type'] === 'submit') {
-          $form['actions'][$action]['#submit'][] = 'indieweb_form_node_form_submit';
-        }
+    foreach (array_keys($form['actions']) as $action) {
+      if ($action != 'preview' && isset($form['actions'][$action]['#type']) && $form['actions'][$action]['#type'] === 'submit') {
+        $form['actions'][$action]['#submit'][] = 'indieweb_form_node_form_submit';
       }
     }
   }
@@ -184,6 +204,24 @@ function indieweb_form_node_form_submit($form, FormStateInterface $form_state) {
         }
       }
     }
+
+    // Link fields.
+    $link_field = $form_state->getValue('indieweb_publish_link_field');
+    if (!empty($link_field)) {
+      if ($node->hasField($link_field)) {
+        $values = $node->get($link_field)->getValue();
+        if (!empty($values[0]['uri'])) {
+          indieweb_webmention_create_queue_item($source_url, $values[0]['uri'], $node->id(), 'node');
+        }
+      }
+    }
+
+    // Custom URL.
+    $custom_url = $form_state->getValue('indieweb_publish_custom_url');
+    if (!empty($custom_url)) {
+      indieweb_webmention_create_queue_item($source_url, $custom_url, $node->id(), 'node');
+    }
+
   }
 }
 
@@ -603,7 +641,6 @@ function indieweb_handle_webmention_queue() {
       catch (Exception $e) {
         \Drupal::logger('indieweb_publish')->notice('Error sending webmention for @source to @target: @message', ['@message' => $e->getMessage(), '@source' => $sourceURL, '@target' => $targetURL]);
       }
-
 
     }
 
