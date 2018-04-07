@@ -345,6 +345,90 @@ class MicropubSettingsForm extends ConfigFormBase {
       ),
     ];
 
+    $form['reply'] = [
+      '#type' => 'fieldset',
+      '#title' => $this->t('Create a node when a micropub reply is posted'),
+      '#description' => $this->t("A reply request contains a URL in 'in-reply-to', has content and 'h' value is 'entry'. The reply can also contain a 'mp-syndicate-to' value which will contain the channel you want to publish to, see the <a href=':link_publish'>Publish section</a> to configure this."),
+      '#states' => array(
+        'visible' => array(
+          ':input[name="micropub_enable"]' => array('checked' => TRUE),
+        ),
+      ),
+    ];
+
+    $form['reply']['reply_create_node'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Enable'),
+      '#default_value' => $config->get('reply_create_node'),
+    ];
+
+    $form['reply']['reply_status'] = [
+      '#type' => 'radios',
+      '#title' => $this->t('Status'),
+      '#options' => [
+        0 => $this->t('Unpublished'),
+        1 => $this->t('Published'),
+      ],
+      '#default_value' => $config->get('reply_status'),
+      '#states' => array(
+        'visible' => array(
+          ':input[name="reply_create_node"]' => array('checked' => TRUE),
+        ),
+      ),
+    ];
+
+    $form['reply']['reply_uid'] = [
+      '#type' => 'number',
+      '#title' => $this->t('The user id which will own the created node'),
+      '#default_value' => $config->get('reply_uid'),
+      '#states' => array(
+        'visible' => array(
+          ':input[name="reply_create_node"]' => array('checked' => TRUE),
+        ),
+      ),
+    ];
+
+    $form['reply']['reply_node_type'] = [
+      '#type' => 'select',
+      '#title' => $this->t('Node type'),
+      '#description' => $this->t('Select the node type to use for creating a node'),
+      '#options' => node_type_get_names(),
+      '#default_value' => $config->get('reply_node_type'),
+      '#states' => array(
+        'visible' => array(
+          ':input[name="reply_create_node"]' => array('checked' => TRUE),
+        ),
+      ),
+    ];
+
+    // Link field.
+    $form['reply']['reply_link_field'] = [
+      '#type' => 'select',
+      '#title' => $this->t('Link field'),
+      '#description' => $this->t('Select the field which will be used to store the reply link. Make sure the field exists on the node type.'),
+      '#options' => $link_fields,
+      '#default_value' => $config->get('reply_link_field'),
+      '#states' => array(
+        'visible' => array(
+          ':input[name="reply_create_node"]' => array('checked' => TRUE),
+        ),
+      ),
+    ];
+
+    // Content field.
+    $form['reply']['reply_content_field'] = [
+      '#type' => 'select',
+      '#title' => $this->t('Content field'),
+      '#description' => $this->t('Select the field which will be used to store the content. Make sure the field exists on the node type.'),
+      '#options' => $text_fields,
+      '#default_value' => $config->get('reply_content_field'),
+      '#states' => array(
+        'visible' => array(
+          ':input[name="reply_create_node"]' => array('checked' => TRUE),
+        ),
+      ),
+    ];
+
     return parent::buildForm($form, $form_state);
   }
 
@@ -376,6 +460,12 @@ class MicropubSettingsForm extends ConfigFormBase {
       ->set('like_node_type', $form_state->getValue('like_node_type'))
       ->set('like_content_field', $form_state->getValue('like_content_field'))
       ->set('like_link_field', $form_state->getValue('like_link_field'))
+      ->set('reply_create_node', $form_state->getValue('reply_create_node'))
+      ->set('reply_uid', $form_state->getValue('reply_uid'))
+      ->set('reply_status', $form_state->getValue('reply_status'))
+      ->set('reply_node_type', $form_state->getValue('reply_node_type'))
+      ->set('reply_content_field', $form_state->getValue('reply_content_field'))
+      ->set('reply_link_field', $form_state->getValue('reply_link_field'))
       ->save();
 
     Cache::invalidateTags(['rendered']);

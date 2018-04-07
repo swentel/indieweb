@@ -20,3 +20,9 @@ like_node_type: ''
 like_content_field: ''
 like_link_field: ''
 like_uid: 1
+reply_create_node: false
+reply_status: 1
+reply_node_type: ''
+reply_content_field: ''
+reply_link_field: ''
+reply_uid: 1

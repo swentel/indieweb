@@ -134,7 +134,25 @@ indieweb.micropub:
       label: 'The node link field for the like'
     like_uid:
       type: integer
-      label: 'The user id of the article'
+      label: 'The user id of the like'
+    reply_create_node:
+      type: boolean
+      label: 'Enable reply'
+    reply_status:
+      type: integer
+      label: 'Whether the reply is published or not'
+    reply_node_type:
+      type: string
+      label: 'The node type for the reply'
+    reply_content_field:
+      type: string
+      label: 'The node content field for the reply'
+    reply_link_field:
+      type: string
+      label: 'The node link field for the reply'
+    reply_uid:
+      type: integer
+      label: 'The user id of the reply'
 
 field.formatter.settings.link_microformat:
   type: field.formatter.settings.link
