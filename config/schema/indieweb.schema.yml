@@ -153,6 +153,24 @@ indieweb.micropub:
     reply_uid:
       type: integer
       label: 'The user id of the reply'
+    repost_create_node:
+      type: boolean
+      label: 'Enable repost'
+    repost_status:
+      type: integer
+      label: 'Whether the repost is published or not'
+    repost_node_type:
+      type: string
+      label: 'The node type for the repost'
+    repost_content_field:
+      type: string
+      label: 'The node content field for the repost'
+    repost_link_field:
+      type: string
+      label: 'The node link field for the repost'
+    repost_uid:
+      type: integer
+      label: 'The user id of the repost'
 
 field.formatter.settings.link_microformat:
   type: field.formatter.settings.link

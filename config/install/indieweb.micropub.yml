@@ -26,3 +26,9 @@ reply_node_type: ''
 reply_content_field: ''
 reply_link_field: ''
 reply_uid: 1
+repost_create_node: false
+repost_status: 1
+repost_node_type: ''
+repost_content_field: ''
+repost_link_field: ''
+repost_uid: 1

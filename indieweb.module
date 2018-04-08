@@ -151,8 +151,9 @@ function indieweb_form_node_form_alter(&$form, FormStateInterface $form_state) {
     ];
 
     $options = [];
-    $link_fields = explode('|', \Drupal::config('indieweb.publish')->get('publish_link_fields'));
-    if (!empty($link_fields)) {
+    $link_fields_string = \Drupal::config('indieweb.publish')->get('publish_link_fields');
+    if (!empty($link_fields_string)) {
+      $link_fields = explode('|', $link_fields_string);
 
       foreach ($link_fields as $field) {
         $options[$field] = t('Use @field', ['@field' => $field]);

@@ -429,6 +429,90 @@ class MicropubSettingsForm extends ConfigFormBase {
       ),
     ];
 
+    $form['repost'] = [
+      '#type' => 'fieldset',
+      '#title' => $this->t('Create a node when a micropub repost is posted'),
+      '#description' => $this->t("A repost request contains a URL in 'repost-of' and 'h' value is 'entry'. The repost can also contain a 'mp-syndicate-to' value which will contain the channel you want to publish to, see the <a href=':link_publish'>Publish section</a> to configure this."),
+      '#states' => array(
+        'visible' => array(
+          ':input[name="micropub_enable"]' => array('checked' => TRUE),
+        ),
+      ),
+    ];
+
+    $form['repost']['repost_create_node'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Enable'),
+      '#default_value' => $config->get('repost_create_node'),
+    ];
+
+    $form['repost']['repost_status'] = [
+      '#type' => 'radios',
+      '#title' => $this->t('Status'),
+      '#options' => [
+        0 => $this->t('Unpublished'),
+        1 => $this->t('Published'),
+      ],
+      '#default_value' => $config->get('repost_status'),
+      '#states' => array(
+        'visible' => array(
+          ':input[name="repost_create_node"]' => array('checked' => TRUE),
+        ),
+      ),
+    ];
+
+    $form['repost']['repost_uid'] = [
+      '#type' => 'number',
+      '#title' => $this->t('The user id which will own the created node'),
+      '#default_value' => $config->get('repost_uid'),
+      '#states' => array(
+        'visible' => array(
+          ':input[name="repost_create_node"]' => array('checked' => TRUE),
+        ),
+      ),
+    ];
+
+    $form['repost']['repost_node_type'] = [
+      '#type' => 'select',
+      '#title' => $this->t('Node type'),
+      '#description' => $this->t('Select the node type to use for creating a node'),
+      '#options' => node_type_get_names(),
+      '#default_value' => $config->get('repost_node_type'),
+      '#states' => array(
+        'visible' => array(
+          ':input[name="repost_create_node"]' => array('checked' => TRUE),
+        ),
+      ),
+    ];
+
+    // Link field.
+    $form['repost']['repost_link_field'] = [
+      '#type' => 'select',
+      '#title' => $this->t('Link field'),
+      '#description' => $this->t('Select the field which will be used to store the link. Make sure the field exists on the node type.'),
+      '#options' => $link_fields,
+      '#default_value' => $config->get('repost_link_field'),
+      '#states' => array(
+        'visible' => array(
+          ':input[name="repost_create_node"]' => array('checked' => TRUE),
+        ),
+      ),
+    ];
+
+    // Content field.
+    $form['repost']['repost_content_field'] = [
+      '#type' => 'select',
+      '#title' => $this->t('Content field') . ' (' . $this->t('optional') .')',
+      '#description' => $this->t('Select the field which will be used to store the content. Make sure the field exists on the node type.'),
+      '#options' => ['' => $this->t('Do not store content')] + $text_fields,
+      '#default_value' => $config->get('repost_content_field'),
+      '#states' => array(
+        'visible' => array(
+          ':input[name="repost_create_node"]' => array('checked' => TRUE),
+        ),
+      ),
+    ];
+
     return parent::buildForm($form, $form_state);
   }
 
@@ -466,6 +550,12 @@ class MicropubSettingsForm extends ConfigFormBase {
       ->set('reply_node_type', $form_state->getValue('reply_node_type'))
       ->set('reply_content_field', $form_state->getValue('reply_content_field'))
       ->set('reply_link_field', $form_state->getValue('reply_link_field'))
+      ->set('repost_create_node', $form_state->getValue('repost_create_node'))
+      ->set('repost_uid', $form_state->getValue('repost_uid'))
+      ->set('repost_status', $form_state->getValue('repost_status'))
+      ->set('repost_node_type', $form_state->getValue('repost_node_type'))
+      ->set('repost_content_field', $form_state->getValue('repost_content_field'))
+      ->set('repost_link_field', $form_state->getValue('repost_link_field'))
       ->save();
 
     Cache::invalidateTags(['rendered']);
