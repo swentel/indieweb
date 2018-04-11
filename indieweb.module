@@ -256,7 +256,9 @@ function indieweb_preprocess_node(&$variables) {
           <a href="' . $variables['node']->toUrl('canonical', ['absolute' => TRUE])->toString() . '" class="u-url">
             <span class="dt-published">' . $date . '</span>
           </a>
-        </span>';
+          <a href="/" class="u-author"></a>
+        </span>
+        ';
       }
       else {
         $metadata = '<span class="hidden">
@@ -264,6 +266,7 @@ function indieweb_preprocess_node(&$variables) {
             <span class="p-name">' . $variables['node']->getTitle() . '</span>
             <span class="dt-published">' . $date . '</span>
           </a>
+          <a href="/" class="u-author"></a>
         </span>';
       }
 
@@ -429,6 +432,9 @@ function indieweb_node_view(array &$build, NodeInterface $node, EntityViewDispla
       $build['indieweb_syndication'] = [
         '#theme' => 'item_list',
         '#items' => $items,
+        '#wrapper_attributes' => [
+          'class' => ['indieweb-syndication-list'],
+        ],
         '#title' => t('Syndications'),
       ];
     }

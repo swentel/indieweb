@@ -21,10 +21,12 @@ Development happens on github: https://github.com/swentel/indieweb
 
 Releases are available on drupal.org: https://www.drupal.org/project/indieweb
 
-## IndieWebify.me
+## IndieWebify.me / https://sturdy-backbone.glitch.me / http://xray.p3k.io
 
 Use https://indiewebify.me/ to perform initial checks to see if your site is Indieweb ready. It can scan for certain
 markup after you've done the configuration with this module (and optionally more yourself).
+Note that author discovery doesn't fully work 100% on IndieWebify for posts, use https://sturdy-backbone.glitch.me.
+Another good service is http://xray.p3k.io, which returns a json response.
 
 ## To install
 
@@ -103,7 +105,7 @@ if you want to publish. Also read https://brid.gy/about#microformats for details
 you are using that service.
 
 Your homepage should contain a h-card entry. This module does not expose this for you. An example:
-<p class="h-card">My name is <a class="u-url p-name" rel="me" href="http://example.com">Your name</a>
+<p class="h-card">My name is <a class="u-url p-name" rel="me" href="/">Your name</a>
 
 Classes added for publication (or other functionality).
 

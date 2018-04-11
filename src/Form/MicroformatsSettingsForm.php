@@ -32,7 +32,8 @@ class MicroformatsSettingsForm extends ConfigFormBase {
     $form['#attached']['library'][] = 'indieweb/admin';
 
     $form['info'] = [
-      '#markup' => '<p>' . $this->t('Microformats are extensions to HTML for marking up people, organizations, events, locations, blog posts, products, reviews, resumes, recipes etc. Sites use microformats to publish a standard API that is consumed and used by search engines, aggregators, and other tools. See <a href="https://indieweb.org/microformats" target="_blank">https://indieweb.org/microformats</a> for more info. You will want to enable this if you want to publish or want other sites and readers to parse your content. The module will add classes on content, images etc. You can also add it to the markup yourself. Also read <a href="https://brid.gy/about#microformats">https://brid.gy/about#microformats</a> for details how Bridgy decides what to publish if you are using that service.') . '</p>',
+      '#markup' => '<p>' . $this->t('Microformats are extensions to HTML for marking up people, organizations, events, locations, blog posts, products, reviews, resumes, recipes etc. Sites use microformats to publish a standard API that is consumed and used by search engines, aggregators, and other tools. See <a href="https://indieweb.org/microformats" target="_blank">https://indieweb.org/microformats</a> for more info. You will want to enable this if you want to publish or want other sites and readers to parse your content. The module will add classes on content, images etc. You can also add it to the markup yourself. Also read <a href="https://brid.gy/about#microformats">https://brid.gy/about#microformats</a> for details how Bridgy decides what to publish if you are using that service.<br /><br />Your homepage should also contain a h-card entry. This module does not expose this for you. An example:<br />
+        <div class="indieweb-highlight-code">&lt;div class="h-card"&gt;My name is &lt;a class="u-url p-name" rel="me" href="/"&gt;Your name&lt;/a&gt;&lt;/div&gt;</div>') . '</p>',
     ];
 
     $form['classes'] = [
@@ -61,8 +62,8 @@ class MicroformatsSettingsForm extends ConfigFormBase {
 
     $form['classes']['post_metadata'] = [
       '#type' => 'checkbox',
-      '#title' => $this->t('<em>dt-published</em>, <em>p-name</em> and <em>u-url</em> in a hidden span element.'),
-      '#description' => $this->t('This will be added on full, teaser and microformat view mode. Make sure \'Display author and date information\' is enabled, or put {{ metadata }} in your node template. Example:<br /><div class="indieweb-highlight-code">&lt;span class="hidden"&gt;&lt;a href="http://url" class="u-url"&gt;&lt;span class="p-name"&gt;title&lt;/span&gt;&lt;span class="dt-published"&gt;2018-01-31T20:38:25+01:00&lt;/span&gt;&lt;/a&gt;&lt;/span&gt;</div>'),
+      '#title' => $this->t('<em>dt-published</em>, <em>p-name</em>, <em>u-author</em> and <em>u-url</em> in a hidden span element.'),
+      '#description' => $this->t('This will be added on full, teaser and microformat view mode. Make sure \'Display author and date information\' is enabled, or put {{ metadata }} in your node template. Example:<br /><div class="indieweb-highlight-code">&lt;span class="hidden"&gt;&lt;a href="http://url" class="u-url"&gt;&lt;span class="p-name"&gt;title&lt;/span&gt;&lt;span class="dt-published"&gt;2018-01-31T20:38:25+01:00&lt;/span&gt;&lt;/a&gt;&lt;a class="u-author" href="/"&gt;&lt;/a&gt;&lt;/span&gt;</div>'),
       '#default_value' => $config->get('post_metadata'),
     ];
 
