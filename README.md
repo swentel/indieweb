@@ -105,7 +105,10 @@ if you want to publish. Also read https://brid.gy/about#microformats for details
 you are using that service.
 
 Your homepage should contain a h-card entry. This module does not expose this for you. An example:
-<p class="h-card">My name is <a class="u-url p-name" rel="me" href="/">Your name</a>
+
+  ```
+  <p class="h-card">My name is <a class="u-url p-name" rel="me" href="/">Your name</a>
+  ```
 
 Classes added for publication (or other functionality).
 
