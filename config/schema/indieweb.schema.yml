@@ -171,6 +171,24 @@ indieweb.micropub:
     repost_uid:
       type: integer
       label: 'The user id of the repost'
+    bookmark_create_node:
+      type: boolean
+      label: 'Enable bookmark'
+    bookmark_status:
+      type: integer
+      label: 'Whether the bookmark is published or not'
+    bookmark_node_type:
+      type: string
+      label: 'The node type for the bookmark'
+    bookmark_content_field:
+      type: string
+      label: 'The node content field for the bookmark'
+    bookmark_link_field:
+      type: string
+      label: 'The node link field for the repost'
+    bookmark_uid:
+      type: integer
+      label: 'The user id of the bookmark'
 
 field.formatter.settings.link_microformat:
   type: field.formatter.settings.link

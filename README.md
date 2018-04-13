@@ -11,8 +11,8 @@ Current functionality:
 - Publish content, likes etc via bridg.y, store syndications
 - Microformats for content and images
 - IndieAuth for Authentication API
-- Micropub for creating content etc
-- Creating comments from 'in-reply-to'
+- Create content via Micropub endpoint
+- Create comments from 'in-reply-to'
 - Microsub link exposing
 
 This is only the tip of the iceberg and much more functionality will be added.
@@ -21,7 +21,7 @@ Development happens on github: https://github.com/swentel/indieweb
 
 Releases are available on drupal.org: https://www.drupal.org/project/indieweb
 
-## IndieWebify.me / https://sturdy-backbone.glitch.me / http://xray.p3k.io
+## IndieWebify.me / sturdy-backbone.glitch.me / xray.p3k.io
 
 Use https://indiewebify.me/ to perform initial checks to see if your site is Indieweb ready. It can scan for certain
 markup after you've done the configuration with this module (and optionally more yourself).
@@ -117,6 +117,8 @@ Classes added for publication (or other functionality).
 - e-content: added on default body field, see indieweb_preprocess_field().
 - u-photo: added on image styles, indieweb_preprocess_image_style().
 - p-summary: see indieweb_preprocess_field().
+
+Some field formatters are also available.
 
 You can configure this at /admin/config/services/indieweb/microformats
 

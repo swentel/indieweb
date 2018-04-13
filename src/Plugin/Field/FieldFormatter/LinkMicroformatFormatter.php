@@ -47,6 +47,7 @@ class LinkMicroformatFormatter extends LinkFormatter {
       '#options' =>[
         'u-like-of' => $this->t('Like'),
         'u-bookmark-of' => $this->t('Bookmark'),
+        'u-bookmark-of h-cite' => $this->t('Bookmark and cite'),
         'u-in-reply-to' => $this->t('In reply to'),
         'u-repost-of' => $this->t('Repost of')
       ],

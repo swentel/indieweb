@@ -116,6 +116,52 @@ class MicropubController extends ControllerBase {
         }
       }
 
+      // Bookmark support.
+      if ($this->config->get('bookmark_create_node') && !empty($input['bookmark-of']) && (!empty($input['h']) && $input['h'] == 'entry') && $valid_token) {
+
+        $values = [
+          'uid' => $this->config->get('bookmark_uid'),
+          'title' => 'Bookmark of ' . $input['bookmark-of'],
+          'type' => $this->config->get('bookmark_node_type'),
+          'status' => $this->config->get('bookmark_status'),
+        ];
+
+        if (!empty($input['name'])) {
+          $values['title'] = $input['name'];
+        }
+
+        // Allow code to change the values and payload.
+        \Drupal::moduleHandler()->alter('indieweb_micropub_node_pre_create', $values, $input);
+
+        /** @var \Drupal\node\NodeInterface $node */
+        $node = Node::create($values);
+
+        // Link field.
+        $bookmark_link_field = $this->config->get('bookmark_link_field');
+        $node->set($bookmark_link_field, ['uri' => $input['bookmark-of'], 'title' => '']);
+
+        // Content.
+        $content_field_name = $this->config->get('bookmark_content_field');
+        if (!empty($input['content']) && $content_field_name && $node->hasField($content_field_name)) {
+          $node->set($content_field_name, $input['content']);
+        }
+
+        $node->save();
+        if ($node->id()) {
+
+          // Syndicate.
+          $this->syndicateTo($input, $node);
+
+          // Allow code to react after the node is saved.
+          \Drupal::moduleHandler()->invokeAll('indieweb_micropub_node_saved', [$node, $values, $input, $payload_original]);
+
+          $response_code = 201;
+          $response_message = '';
+          header('Location: ' . $node->toUrl('canonical', ['absolute' => TRUE])->toString());
+          return new Response($response_message, $response_code);
+        }
+      }
+
       // Like support.
       if ($this->config->get('like_create_node') && !empty($input['like-of']) && (!empty($input['h']) && $input['h'] == 'entry') && $valid_token) {
 

@@ -513,6 +513,90 @@ class MicropubSettingsForm extends ConfigFormBase {
       ),
     ];
 
+    $form['bookmark'] = [
+      '#type' => 'fieldset',
+      '#title' => $this->t('Create a node when a micropub bookmark is posted'),
+      '#description' => $this->t("A bookmark request contains a URL in 'bookmark-of' and 'h' value is 'entry'. The bookmark can also contain a 'mp-syndicate-to' value which will contain the channel you want to publish to, see the <a href=':link_publish'>Publish section</a> to configure this."),
+      '#states' => array(
+        'visible' => array(
+          ':input[name="micropub_enable"]' => array('checked' => TRUE),
+        ),
+      ),
+    ];
+
+    $form['bookmark']['bookmark_create_node'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Enable'),
+      '#default_value' => $config->get('bookmark_create_node'),
+    ];
+
+    $form['bookmark']['bookmark_status'] = [
+      '#type' => 'radios',
+      '#title' => $this->t('Status'),
+      '#options' => [
+        0 => $this->t('Unpublished'),
+        1 => $this->t('Published'),
+      ],
+      '#default_value' => $config->get('bookmark_status'),
+      '#states' => array(
+        'visible' => array(
+          ':input[name="bookmark_create_node"]' => array('checked' => TRUE),
+        ),
+      ),
+    ];
+
+    $form['bookmark']['bookmark_uid'] = [
+      '#type' => 'number',
+      '#title' => $this->t('The user id which will own the created node'),
+      '#default_value' => $config->get('bookmark_uid'),
+      '#states' => array(
+        'visible' => array(
+          ':input[name="bookmark_create_node"]' => array('checked' => TRUE),
+        ),
+      ),
+    ];
+
+    $form['bookmark']['bookmark_node_type'] = [
+      '#type' => 'select',
+      '#title' => $this->t('Node type'),
+      '#description' => $this->t('Select the node type to use for creating a node'),
+      '#options' => node_type_get_names(),
+      '#default_value' => $config->get('bookmark_node_type'),
+      '#states' => array(
+        'visible' => array(
+          ':input[name="bookmark_create_node"]' => array('checked' => TRUE),
+        ),
+      ),
+    ];
+
+    // Link field.
+    $form['bookmark']['bookmark_link_field'] = [
+      '#type' => 'select',
+      '#title' => $this->t('Link field'),
+      '#description' => $this->t('Select the field which will be used to store the link. Make sure the field exists on the node type.'),
+      '#options' => $link_fields,
+      '#default_value' => $config->get('bookmark_link_field'),
+      '#states' => array(
+        'visible' => array(
+          ':input[name="bookmark_create_node"]' => array('checked' => TRUE),
+        ),
+      ),
+    ];
+
+    // Content field.
+    $form['bookmark']['bookmark_content_field'] = [
+      '#type' => 'select',
+      '#title' => $this->t('Content field') . ' (' . $this->t('optional') .')',
+      '#description' => $this->t('Select the field which will be used to store the content. Make sure the field exists on the node type.'),
+      '#options' => ['' => $this->t('Do not store content')] + $text_fields,
+      '#default_value' => $config->get('bookmark_content_field'),
+      '#states' => array(
+        'visible' => array(
+          ':input[name="bookmark_create_node"]' => array('checked' => TRUE),
+        ),
+      ),
+    ];
+
     return parent::buildForm($form, $form_state);
   }
 
@@ -556,6 +640,12 @@ class MicropubSettingsForm extends ConfigFormBase {
       ->set('repost_node_type', $form_state->getValue('repost_node_type'))
       ->set('repost_content_field', $form_state->getValue('repost_content_field'))
       ->set('repost_link_field', $form_state->getValue('repost_link_field'))
+      ->set('bookmark_create_node', $form_state->getValue('bookmark_create_node'))
+      ->set('bookmark_uid', $form_state->getValue('bookmark_uid'))
+      ->set('bookmark_status', $form_state->getValue('bookmark_status'))
+      ->set('bookmark_node_type', $form_state->getValue('bookmark_node_type'))
+      ->set('bookmark_content_field', $form_state->getValue('bookmark_content_field'))
+      ->set('bookmark_link_field', $form_state->getValue('bookmark_link_field'))
       ->save();
 
     Cache::invalidateTags(['rendered']);

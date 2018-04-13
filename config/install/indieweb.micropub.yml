@@ -32,3 +32,9 @@ repost_node_type: ''
 repost_content_field: ''
 repost_link_field: ''
 repost_uid: 1
+bookmark_create_node: false
+bookmark_status: 1
+bookmark_node_type: ''
+bookmark_content_field: ''
+bookmark_link_field: ''
+bookmark_uid: 1
