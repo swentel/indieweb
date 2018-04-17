@@ -1,4 +1,4 @@
-comment_create_enable: true
+comment_create_enable: false
 comment_create_default_status: 0
 comment_create_comment_type: ''
 comment_create_webmention_reference_field: ''

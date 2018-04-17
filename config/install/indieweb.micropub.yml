@@ -2,7 +2,7 @@ micropub_enable: false
 micropub_add_header_link: true
 micropub_me: ''
 micropub_log_payload: false
-note_create_node: true
+note_create_node: false
 note_status: 1
 note_node_type: ''
 note_content_field: ''

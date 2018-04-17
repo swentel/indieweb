@@ -7,7 +7,7 @@ For more information about indieweb, see https://indieweb.org/.
 
 Current functionality:
 
-- Receive webmentions and pingbacks via Webmention.io
+- Send and receive webmentions and pingbacks via Webmention.io
 - Publish content, likes etc via bridg.y, store syndications
 - Microformats for content and images
 - IndieAuth for Authentication API
@@ -154,14 +154,14 @@ IndieAuth to configure. More information about micropub: https://indieweb.org/Mi
 A very good client to test is https://quill.p3k.io. A full list is available at https://indieweb.org/Micropub/Clients.
 Indigenous (for iOS and Android) are also microsub readers.
 
-### post types
+### Supported post types
 
-- Note: Create a node when a 'note' is posted. A note request contains 'content', but no 'name' and the 'h' value is
-'entry'. Think of it as a Tweet. The note can also contain a 'mp-syndicate-to' value which will contain the channel you
-want to publish to, see the Publish section to configure this.
-- Article: Create a node when an 'article' is posted. An article request contains 'name', 'content' and the 'h' value is
-'entry'. Think of it as a blog post. The article can also contain a 'mp-syndicate-to' value which will contain the
-channel you want to publish to, see the Publish section to configure this.
+- Article: a blog post
+- Note: a small post, think of it as a tweet
+- Reply: reply on a URL
+- Repost: repost a URL
+- Like: like a URL
+- Bookmark: bookmark a URL
 
 You can configure this at /admin/config/services/indieweb/micropub
 

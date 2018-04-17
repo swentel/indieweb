@@ -57,6 +57,9 @@ indieweb.microformats:
     u_photo:
       type: boolean
       label: 'Enable microformat u-photo class'
+    u_video:
+      type: boolean
+      label: 'Enable microformat u-video class'
     p_summary:
       type: text
       label: 'Microformat summary fields'

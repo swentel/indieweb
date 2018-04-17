@@ -354,6 +354,25 @@ function indieweb_preprocess_image_style(&$variables) {
 }
 
 /**
+ * Implements hook_preprocess_file_video().
+ */
+function indieweb_preprocess_file_video(&$variables) {
+  if (\Drupal::config('indieweb.microformats')->get('u_video')) {
+    $variables['attributes']->addClass('u-video');
+  }
+}
+
+/**
+ * Implements hook_preprocess_file_entity_video().
+ */
+function indieweb_preprocess_file_entity_video(&$variables) {
+  if (\Drupal::config('indieweb.microformats')->get('u_video')) {
+    $variables['attributes']->addClass('u-video');
+  }
+}
+
+
+/**
  * Implements hook_entity_extra_field_info().
  */
 function indieweb_entity_extra_field_info() {

@@ -67,6 +67,12 @@ class MicroformatsSettingsForm extends ConfigFormBase {
       '#default_value' => $config->get('post_metadata'),
     ];
 
+    $form['classes']['u_video'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('<em>u-video</em> on all videos.'),
+      '#default_value' => $config->get('u_video'),
+    ];
+
     $form['classes']['p_name_exclude_node_type'] = [
       '#title' => $this->t('Exclude p-name'),
       '#type' => 'select',
@@ -110,6 +116,7 @@ class MicroformatsSettingsForm extends ConfigFormBase {
       ->set('p_name_exclude_node_type', $form_state->getValue('p_name_exclude_node_type'))
       ->set('e_content', $form_state->getValue('h_entry'))
       ->set('u_photo', $form_state->getValue('u_photo'))
+      ->set('u_video', $form_state->getValue('u_video'))
       ->set('p_summary', trim($form_state->getValue('p_summary')))
       ->set('p_bridgy_twitter_content', $form_state->getValue('p_bridgy_twitter_content'))
       ->save();
