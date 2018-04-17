@@ -84,6 +84,14 @@ class MicropubController extends ControllerBase {
           'status' => $this->config->get('repost_status'),
         ];
 
+        // Add url to syndicate to.
+        if (isset($input['mp-syndicate-to'])) {
+          $input['mp-syndicate-to'][] = $input['repost-of'];
+        }
+        else {
+          $input['mp-syndicate-to'] = [$input['repost-of']];
+        }
+
         // Allow code to change the values and payload.
         \Drupal::moduleHandler()->alter('indieweb_micropub_node_pre_create', $values, $input);
 
@@ -130,6 +138,14 @@ class MicropubController extends ControllerBase {
           $values['title'] = $input['name'];
         }
 
+        // Add url to syndicate to.
+        if (isset($input['mp-syndicate-to'])) {
+          $input['mp-syndicate-to'][] = $input['bookmark-of'];
+        }
+        else {
+          $input['mp-syndicate-to'] = [$input['bookmark-of']];
+        }
+
         // Allow code to change the values and payload.
         \Drupal::moduleHandler()->alter('indieweb_micropub_node_pre_create', $values, $input);
 
@@ -172,6 +188,14 @@ class MicropubController extends ControllerBase {
           'status' => $this->config->get('like_status'),
         ];
 
+        // Add url to syndicate to.
+        if (isset($input['mp-syndicate-to'])) {
+          $input['mp-syndicate-to'][] = $input['like-of'];
+        }
+        else {
+          $input['mp-syndicate-to'] = [$input['like-of']];
+        }
+
         // Allow code to change the values and payload.
         \Drupal::moduleHandler()->alter('indieweb_micropub_node_pre_create', $values, $input);
 
@@ -213,6 +237,14 @@ class MicropubController extends ControllerBase {
           'type' => $this->config->get('reply_node_type'),
           'status' => $this->config->get('reply_status'),
         ];
+
+        // Add url to syndicate to.
+        if (isset($input['mp-syndicate-to'])) {
+          $input['mp-syndicate-to'][] = $input['in-reply-to'];
+        }
+        else {
+          $input['mp-syndicate-to'] = [$input['in-reply-to']];
+        }
 
         // Allow code to change the values and payload.
         \Drupal::moduleHandler()->alter('indieweb_micropub_node_pre_create', $values, $input);
