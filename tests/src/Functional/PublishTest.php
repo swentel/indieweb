@@ -2,8 +2,6 @@
 
 namespace Drupal\Tests\indieweb\Functional;
 
-use Drupal\Core\Url;
-
 /**
  * Tests integration of publishing.
  *
@@ -158,35 +156,6 @@ class PublishTest extends IndiewebBrowserTestBase {
     }
     $this->drupalPostForm('node/1/edit', $edit, 'Save');
     $this->assertQueueItems($channels_queued, 1);
-  }
-
-  /**
-   * Assert queue items.
-   *
-   * @param array $channels
-   * @param $nid
-   */
-  protected function assertQueueItems($channels = [], $nid = NULL) {
-    if ($channels) {
-      $query = 'SELECT count(item_id) FROM {queue} WHERE name = :name';
-      $count = \Drupal::database()->query($query, [':name' => WEBMENTION_QUEUE_NAME])->fetchField();
-      $this->assertTrue($count == count($channels));
-
-      $query = 'SELECT * FROM {queue} WHERE name = :name';
-      $records = \Drupal::database()->query($query, [':name' => WEBMENTION_QUEUE_NAME]);
-      foreach ($records as $record) {
-        $data = unserialize($record->data);
-        if (!empty($data['source_url']) && !empty($data['target_url'])) {
-          $this->assertTrue(in_array($data['target_url'], $channels));
-          $this->assertEquals($data['source_url'], Url::fromRoute('entity.node.canonical', ['node' => $nid], ['absolute' => TRUE])->toString());
-        }
-      }
-    }
-    else {
-      $query = 'SELECT count(item_id) FROM {queue} WHERE name = :name';
-      $count = \Drupal::database()->query($query, [':name' => WEBMENTION_QUEUE_NAME])->fetchField();
-      $this->assertFalse($count);
-    }
   }
 
   /**

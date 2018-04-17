@@ -50,6 +50,50 @@ class MicropubTest extends IndiewebBrowserTestBase {
   function setUp() {
     parent::setUp();
 
+    $schema = [
+      'description' => 'Stores items in queues.',
+      'fields' => [
+        'item_id' => [
+          'type' => 'serial',
+          'unsigned' => TRUE,
+          'not null' => TRUE,
+          'description' => 'Primary Key: Unique item ID.',
+        ],
+        'name' => [
+          'type' => 'varchar_ascii',
+          'length' => 255,
+          'not null' => TRUE,
+          'default' => '',
+          'description' => 'The queue name.',
+        ],
+        'data' => [
+          'type' => 'blob',
+          'not null' => FALSE,
+          'size' => 'big',
+          'serialize' => TRUE,
+          'description' => 'The arbitrary data for the item.',
+        ],
+        'expire' => [
+          'type' => 'int',
+          'not null' => TRUE,
+          'default' => 0,
+          'description' => 'Timestamp when the claim lease expires on the item.',
+        ],
+        'created' => [
+          'type' => 'int',
+          'not null' => TRUE,
+          'default' => 0,
+          'description' => 'Timestamp when the item was created.',
+        ],
+      ],
+      'primary key' => ['item_id'],
+      'indexes' => [
+        'name_created' => ['name', 'created'],
+        'expire' => ['expire'],
+      ],
+    ];
+    \Drupal::database()->schema()->createTable('queue', $schema);
+
     $this->drupalLogin($this->adminUser);
     $edit = ['name' => 'like', 'type' => 'like'];
     $this->drupalPostForm('admin/structure/types/add', $edit, 'Save and manage fields');
@@ -168,6 +212,7 @@ class MicropubTest extends IndiewebBrowserTestBase {
     self::assertEquals(201, $code);
     $this->assertNodeCount(1, 'like');
     $nid = $this->getLastNid('like');
+    $this->assertQueueItems([$this->like['like-of']], $nid);
     if ($nid) {
       /** @var \Drupal\node\NodeInterface $node */
       $node = \Drupal::entityTypeManager()->getStorage('node')->load($nid);
