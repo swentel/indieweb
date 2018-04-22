@@ -633,21 +633,18 @@ function indieweb_get_publishing_channels() {
  * @throws \Exception
  */
 function indieweb_webmention_create_queue_item($source_url, $target_url, $entity_id = '', $entity_type_id = '') {
-  \Drupal::database()->insert('queue')
-    ->fields(['name' => WEBMENTION_QUEUE_NAME, 'data' => serialize(['source_url' => $source_url, 'target_url' => $target_url, 'entity_id' => $entity_id, 'entity_type_id' => $entity_type_id])])
-    ->execute();
+  $data = ['source_url' => $source_url, 'target_url' => $target_url, 'entity_id' => $entity_id, 'entity_type_id' => $entity_type_id];
+  \Drupal::queue(WEBMENTION_QUEUE_NAME)->createItem($data);
 }
 
 /**
  * Handles the webmention queue.
  */
 function indieweb_handle_webmention_queue() {
+  $end = time() + 15;
   $channels = indieweb_get_publishing_channels();
-  $query = 'SELECT * FROM {queue} WHERE name = :name';
-  $results = \Drupal::database()->query($query, [':name' => WEBMENTION_QUEUE_NAME]);
-  foreach ($results as $result) {
-
-    $data = unserialize($result->data);
+  while (time() < $end && ($item = \Drupal::queue(WEBMENTION_QUEUE_NAME)->claimItem())) {
+    $data = $item->data;
     if (!empty($data['source_url']) && !empty($data['target_url'])) {
       $sourceURL = $data['source_url'];
       $targetURL = $data['target_url'];
@@ -693,8 +690,8 @@ function indieweb_handle_webmention_queue() {
 
     }
 
-    // Remove the item.
-    \Drupal::database()->delete('queue')->condition('item_id', $result->item_id)->execute();
+    // Remove the item - always.
+    \Drupal::queue(WEBMENTION_QUEUE_NAME)->deleteItem($item);
   }
 }
 

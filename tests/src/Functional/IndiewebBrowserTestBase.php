@@ -180,23 +180,27 @@ abstract class IndiewebBrowserTestBase extends BrowserTestBase {
    */
   protected function assertQueueItems($channels = [], $nid = NULL) {
     if ($channels) {
-      $query = 'SELECT count(item_id) FROM {queue} WHERE name = :name';
-      $count = \Drupal::database()->query($query, [':name' => WEBMENTION_QUEUE_NAME])->fetchField();
+      $count = \Drupal::queue(WEBMENTION_QUEUE_NAME)->numberOfItems();
       $this->assertTrue($count == count($channels));
 
-      $query = 'SELECT * FROM {queue} WHERE name = :name';
-      $records = \Drupal::database()->query($query, [':name' => WEBMENTION_QUEUE_NAME]);
-      foreach ($records as $record) {
-        $data = unserialize($record->data);
-        if (!empty($data['source_url']) && !empty($data['target_url'])) {
-          $this->assertTrue(in_array($data['target_url'], $channels));
-          $this->assertEquals($data['source_url'], Url::fromRoute('entity.node.canonical', ['node' => $nid], ['absolute' => TRUE])->toString());
+      // We use a query here, don't want to use a while loop. When there's
+      // nothing in the queue yet, the table won't exist, so the query will
+      // fail. When the first item is inserted, we'll be fine.
+      try {
+        $query = 'SELECT * FROM {queue} WHERE name = :name';
+        $records = \Drupal::database()->query($query, [':name' => WEBMENTION_QUEUE_NAME]);
+        foreach ($records as $record) {
+          $data = unserialize($record->data);
+          if (!empty($data['source_url']) && !empty($data['target_url'])) {
+            $this->assertTrue(in_array($data['target_url'], $channels));
+            $this->assertEquals($data['source_url'], Url::fromRoute('entity.node.canonical', ['node' => $nid], ['absolute' => TRUE])->toString());
+          }
         }
       }
+      catch (\Exception $ignored) {}
     }
     else {
-      $query = 'SELECT count(item_id) FROM {queue} WHERE name = :name';
-      $count = \Drupal::database()->query($query, [':name' => WEBMENTION_QUEUE_NAME])->fetchField();
+      $count = \Drupal::queue(WEBMENTION_QUEUE_NAME)->numberOfItems();
       $this->assertFalse($count);
     }
   }

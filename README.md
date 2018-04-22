@@ -224,6 +224,6 @@ Great! Check the issue queue at https://github.com/swentel/indieweb/issues
 
 ## Sites using the module
 
-- https://realize.be (all functionality)
+- https://realize.be
 
 Want to be on this list too ? Let me know!
