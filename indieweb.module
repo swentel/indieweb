@@ -642,6 +642,7 @@ function indieweb_webmention_create_queue_item($source_url, $target_url, $entity
  * Handles the webmention queue.
  */
 function indieweb_handle_webmention_queue() {
+  $channels = indieweb_get_publishing_channels();
   $query = 'SELECT * FROM {queue} WHERE name = :name';
   $results = \Drupal::database()->query($query, [':name' => WEBMENTION_QUEUE_NAME]);
   foreach ($results as $result) {
@@ -655,33 +656,36 @@ function indieweb_handle_webmention_queue() {
       try {
         $response = $client->sendWebmention($sourceURL, $targetURL);
 
-        // Store the syndication, if any.
-        if (!empty($response) && $response['code'] == 201 && !empty($response['headers']['Location'])) {
+        // Store the syndication when the targetUrl is in the channels.
+        if (isset($channels[$targetURL])) {
+          if (!empty($response) && $response['code'] == 201 && !empty($response['headers']['Location'])) {
 
-          if (!empty($data['entity_id']) && !empty($data['entity_type_id'])) {
-            $values = [
-              'entity_id' => $data['entity_id'],
-              'entity_type_id' => $data['entity_type_id'],
-              'url' => $response['headers']['Location']
-            ];
+            if (!empty($data['entity_id']) && !empty($data['entity_type_id'])) {
+              $values = [
+                'entity_id' => $data['entity_id'],
+                'entity_type_id' => $data['entity_type_id'],
+                'url' => $response['headers']['Location']
+              ];
 
-            \Drupal::database()
-              ->insert('webmention_syndication')
-              ->fields($values)
-              ->execute();
+              \Drupal::database()
+                ->insert('webmention_syndication')
+                ->fields($values)
+                ->execute();
 
-            Cache::invalidateTags([$data['entity_type_id'] . ':' . $data['entity_id']]);
+              Cache::invalidateTags([$data['entity_type_id'] . ':' . $data['entity_id']]);
+            }
+
+          }
+          else {
+            \Drupal::logger('indieweb_publish')->notice('No 201 or location received when publishing for @source to @target: @response', ['@response' => print_r($response, 1), '@source' => $sourceURL, '@target' => $targetURL]);
           }
 
-        }
-        else {
-          \Drupal::logger('indieweb_publish')->notice('No 201 or location received when publishing for @source to @target: @response', ['@response' => print_r($response, 1), '@source' => $sourceURL, '@target' => $targetURL]);
+          // Log the response if configured.
+          if (\Drupal::config('indieweb.publish')->get('publish_log_response')) {
+            \Drupal::logger('indieweb_publish_response')->notice('response for @source to @target: @response', ['@response' => print_r($response, 1), '@source' => $sourceURL, '@target' => $targetURL]);
+          }
         }
 
-        // Log the response if configured.
-        if (\Drupal::config('indieweb.publish')->get('publish_log_response')) {
-          \Drupal::logger('indieweb_publish_response')->notice('response for @source to @target: @response', ['@response' => print_r($response, 1), '@source' => $sourceURL, '@target' => $targetURL]);
-        }
       }
       catch (Exception $e) {
         \Drupal::logger('indieweb_publish')->notice('Error sending webmention for @source to @target: @message', ['@message' => $e->getMessage(), '@source' => $sourceURL, '@target' => $targetURL]);
