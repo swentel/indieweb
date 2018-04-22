@@ -37,7 +37,7 @@ class MicropubSettingsForm extends ConfigFormBase {
           [
             ':link_indieauth' => Url::fromRoute('indieweb.admin.indieauth_settings')->toString(),
           ]) .
-        '</p><p>' . $this->t("A very good client to test is <a href='https://quill.p3k.io' target='_blank'>https://quill.p3k.io</a>. A full list is available at <a href='https://indieweb.org/Micropub/Clients'>https://indieweb.org/Micropub/Clients</a>.<br />Indigenous (iOS and Android) are also microsub readers.") . '</p>',
+        '</p><p>' . $this->t("A very good client to test is <a href='https://quill.p3k.io' target='_blank'>https://quill.p3k.io</a>. A full list is available at <a href='https://indieweb.org/Micropub/Clients'>https://indieweb.org/Micropub/Clients</a>.<br />Indigenous (iOS and Android) are also microsub readers.") . '</p><p>Even if you do not decide to use the micropub endpoint, this screen gives you a good overview what kind of content types and fields you can create which can be used for sending webmentions or read by microformat parsers.</p>',
     ];
 
     $form['micropub'] = [
@@ -78,7 +78,7 @@ class MicropubSettingsForm extends ConfigFormBase {
     ];
 
     // Collect fields.
-    $text_fields = $upload_fields = $link_fields = [];
+    $text_fields = $upload_fields = $link_fields = $date_range_fields = $option_fields = [];
     $fields = \Drupal::service('entity_field.manager')->getFieldStorageDefinitions('node');
     /** @var \Drupal\Core\Field\FieldStorageDefinitionInterface $field */
     foreach ($fields as $key => $field) {
@@ -90,6 +90,12 @@ class MicropubSettingsForm extends ConfigFormBase {
       }
       if (in_array($field->getType(), ['link'])) {
         $link_fields[$key] = $field->getName();
+      }
+      if (in_array($field->getType(), ['daterange'])) {
+        $date_range_fields[$key] = $field->getName();
+      }
+      if (in_array($field->getType(), ['list_string'])) {
+        $option_fields[$key] = $field->getName();
       }
     }
 
@@ -597,6 +603,189 @@ class MicropubSettingsForm extends ConfigFormBase {
       ),
     ];
 
+    $form['event'] = [
+      '#type' => 'fieldset',
+      '#title' => $this->t('Create a node when a micropub event is posted'),
+      '#description' => $this->t("An event request contains a start and end date and the 'h' value is 'event'. The event can also contain a 'mp-syndicate-to' value which will contain the channel you want to publish to, see the <a href=':link_publish'>Publish section</a> to configure this."),
+      '#states' => array(
+        'visible' => array(
+          ':input[name="micropub_enable"]' => array('checked' => TRUE),
+        ),
+      ),
+    ];
+
+    $form['event']['event_create_node'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Enable'),
+      '#default_value' => $config->get('event_create_node'),
+    ];
+
+    $form['event']['event_status'] = [
+      '#type' => 'radios',
+      '#title' => $this->t('Status'),
+      '#options' => [
+        0 => $this->t('Unpublished'),
+        1 => $this->t('Published'),
+      ],
+      '#default_value' => $config->get('event_status'),
+      '#states' => array(
+        'visible' => array(
+          ':input[name="event_create_node"]' => array('checked' => TRUE),
+        ),
+      ),
+    ];
+
+    $form['event']['event_uid'] = [
+      '#type' => 'number',
+      '#title' => $this->t('The user id which will own the created node'),
+      '#default_value' => $config->get('event_uid'),
+      '#states' => array(
+        'visible' => array(
+          ':input[name="event_create_node"]' => array('checked' => TRUE),
+        ),
+      ),
+    ];
+
+    $form['event']['event_node_type'] = [
+      '#type' => 'select',
+      '#title' => $this->t('Node type'),
+      '#description' => $this->t('Select the node type to use for creating a node'),
+      '#options' => node_type_get_names(),
+      '#default_value' => $config->get('event_node_type'),
+      '#states' => array(
+        'visible' => array(
+          ':input[name="event_create_node"]' => array('checked' => TRUE),
+        ),
+      ),
+    ];
+
+    // Date field.
+    $form['event']['event_date_field'] = [
+      '#type' => 'select',
+      '#title' => $this->t('Date field'),
+      '#description' => $this->t('Select the field which will be used to store the date. Make sure the field exists on the node type.<br />This can only be a date range field.'),
+      '#options' => $date_range_fields,
+      '#default_value' => $config->get('event_date_field'),
+      '#states' => array(
+        'visible' => array(
+          ':input[name="event_create_node"]' => array('checked' => TRUE),
+        ),
+      ),
+    ];
+
+    // Content field.
+    $form['event']['event_content_field'] = [
+      '#type' => 'select',
+      '#title' => $this->t('Content field') . ' (' . $this->t('optional') .')',
+      '#description' => $this->t('Select the field which will be used to store the content. Make sure the field exists on the node type.'),
+      '#options' => ['' => $this->t('Do not store content')] + $text_fields,
+      '#default_value' => $config->get('event_content_field'),
+      '#states' => array(
+        'visible' => array(
+          ':input[name="event_create_node"]' => array('checked' => TRUE),
+        ),
+      ),
+    ];
+
+
+    $form['rsvp'] = [
+      '#type' => 'fieldset',
+      '#title' => $this->t('Create a node when a micropub rsvp is posted'),
+      '#description' => $this->t("An rsvp request contains an rsvp field. The rsvp can also contain a 'mp-syndicate-to' value which will contain the channel you want to publish to, see the <a href=':link_publish'>Publish section</a> to configure this."),
+      '#states' => array(
+        'visible' => array(
+          ':input[name="micropub_enable"]' => array('checked' => TRUE),
+        ),
+      ),
+    ];
+
+    $form['rsvp']['rsvp_create_node'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Enable'),
+      '#default_value' => $config->get('rsvp_create_node'),
+    ];
+
+    $form['rsvp']['rsvp_status'] = [
+      '#type' => 'radios',
+      '#title' => $this->t('Status'),
+      '#options' => [
+        0 => $this->t('Unpublished'),
+        1 => $this->t('Published'),
+      ],
+      '#default_value' => $config->get('rsvp_status'),
+      '#states' => array(
+        'visible' => array(
+          ':input[name="rsvp_create_node"]' => array('checked' => TRUE),
+        ),
+      ),
+    ];
+
+    $form['rsvp']['rsvp_uid'] = [
+      '#type' => 'number',
+      '#title' => $this->t('The user id which will own the created node'),
+      '#default_value' => $config->get('rsvp_uid'),
+      '#states' => array(
+        'visible' => array(
+          ':input[name="rsvp_create_node"]' => array('checked' => TRUE),
+        ),
+      ),
+    ];
+
+    $form['rsvp']['rsvp_node_type'] = [
+      '#type' => 'select',
+      '#title' => $this->t('Node type'),
+      '#description' => $this->t('Select the node type to use for creating a node'),
+      '#options' => node_type_get_names(),
+      '#default_value' => $config->get('rsvp_node_type'),
+      '#states' => array(
+        'visible' => array(
+          ':input[name="rsvp_create_node"]' => array('checked' => TRUE),
+        ),
+      ),
+    ];
+
+    // RSVP field.
+    $form['rsvp']['rsvp_rsvp_field'] = [
+      '#type' => 'select',
+      '#title' => $this->t('RSVP field'),
+      '#description' => $this->t('Select the field which will be used to store the RSVP value. Make sure the field exists on the node type.<br />This can only be a list option field with following values:<br />yes|I am going!<br />no|I am not going<br />maybe|I might attend<br />interested|I am interested'),
+      '#options' => $option_fields,
+      '#default_value' => $config->get('rsvp_rsvp_field'),
+      '#states' => array(
+        'visible' => array(
+          ':input[name="rsvp_create_node"]' => array('checked' => TRUE),
+        ),
+      ),
+    ];
+
+    // Link field.
+    $form['rsvp']['rsvp_link_field'] = [
+      '#type' => 'select',
+      '#title' => $this->t('Link field'),
+      '#description' => $this->t('Select the field which will be used to store the event link. Make sure the field exists on the node type.'),
+      '#options' => $link_fields,
+      '#default_value' => $config->get('rsvp_link_field'),
+      '#states' => array(
+        'visible' => array(
+          ':input[name="rsvp_create_node"]' => array('checked' => TRUE),
+        ),
+      ),
+    ];
+
+    // Content field.
+    $form['rsvp']['rsvp_content_field'] = [
+      '#type' => 'select',
+      '#title' => $this->t('Content field') . ' (' . $this->t('optional') .')',
+      '#description' => $this->t('Select the field which will be used to store the content. Make sure the field exists on the node type.'),
+      '#options' => ['' => $this->t('Do not store content')] + $text_fields,
+      '#default_value' => $config->get('rsvp_content_field'),
+      '#states' => array(
+        'visible' => array(
+          ':input[name="rsvp_create_node"]' => array('checked' => TRUE),
+        ),
+      ),
+    ];
+
     return parent::buildForm($form, $form_state);
   }
 
@@ -646,6 +835,20 @@ class MicropubSettingsForm extends ConfigFormBase {
       ->set('bookmark_node_type', $form_state->getValue('bookmark_node_type'))
       ->set('bookmark_content_field', $form_state->getValue('bookmark_content_field'))
       ->set('bookmark_link_field', $form_state->getValue('bookmark_link_field'))
+      ->set('event_create_node', $form_state->getValue('event_create_node'))
+      ->set('event_uid', $form_state->getValue('event_uid'))
+      ->set('event_status', $form_state->getValue('event_status'))
+      ->set('event_node_type', $form_state->getValue('event_node_type'))
+      ->set('event_content_field', $form_state->getValue('event_content_field'))
+      ->set('event_date_field', $form_state->getValue('event_date_field'))
+      ->set('rsvp_create_node', $form_state->getValue('rsvp_create_node'))
+      ->set('rsvp_uid', $form_state->getValue('rsvp_uid'))
+      ->set('rsvp_status', $form_state->getValue('rsvp_status'))
+      ->set('rsvp_node_type', $form_state->getValue('rsvp_node_type'))
+      ->set('rsvp_content_field', $form_state->getValue('rsvp_content_field'))
+      ->set('rsvp_link_field', $form_state->getValue('rsvp_link_field'))
+      ->set('rsvp_rsvp_field', $form_state->getValue('rsvp_rsvp_field'))
+
       ->save();
 
     Cache::invalidateTags(['rendered']);

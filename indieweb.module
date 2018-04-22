@@ -243,7 +243,16 @@ function indieweb_entity_delete(EntityInterface $entity) {
 function indieweb_preprocess_node(&$variables) {
   if ($variables['view_mode'] == 'full' || $variables['view_mode'] == 'teaser' || $variables['view_mode'] == 'indieweb_microformat') {
 
+    // Add h-entry or h-event.
+    $h_entry = FALSE;
     if (\Drupal::config('indieweb.microformats')->get('h_entry')) {
+      $h_entry = TRUE;
+    }
+    if (($h_event = \Drupal::config('indieweb.microformats')->get('h_event')) && $variables['node']->bundle() == $h_event) {
+      $h_entry = FALSE;
+      $variables['attributes']['class'][] = 'h-event';
+    }
+    if ($h_entry) {
       $variables['attributes']['class'][] = 'h-entry';
     }
 
@@ -328,7 +337,20 @@ function indieweb_preprocess_field(&$variables) {
         $variables['attributes']['class'][] = 'p-bridgy-twitter-content';
       }
     }
+  }
 
+  // Date range fields.
+  if ($h_event = \Drupal::config('indieweb.microformats')->get('h_event')) {
+    if ($variables['element']['#field_type'] == 'daterange' && $variables['element']['#object']->bundle() == $h_event && !empty($variables['items'][0]['content'])) {
+      foreach ($variables['items'] as $key => $item) {
+        if (isset($item['content']['start_date'])) {
+          $variables['items'][$key]['content']['start_date']['#attributes']['class'][] = 'dt-start';
+        }
+        if (isset($item['content']['end_date'])) {
+          $variables['items'][$key]['content']['end_date']['#attributes']['class'][] = 'dt-end';
+        }
+      }
+    }
   }
 
   // In case there's a p-summary.
@@ -371,7 +393,6 @@ function indieweb_preprocess_file_entity_video(&$variables) {
   }
 }
 
-
 /**
  * Implements hook_entity_extra_field_info().
  */
@@ -381,7 +402,6 @@ function indieweb_entity_extra_field_info() {
   $channels = indieweb_get_publishing_channels();
   if (!empty($channels)) {
     foreach (NodeType::loadMultiple() as $bundle) {
-
       // Channel fields.
       foreach ($channels as $url => $name) {
         $machine_name = indieweb_get_machine_name_from_url($url);
@@ -398,7 +418,6 @@ function indieweb_entity_extra_field_info() {
         'weight' => 0,
         'visible' => FALSE,
       ];
-
     }
   }
 

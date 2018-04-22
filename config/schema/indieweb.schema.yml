@@ -45,6 +45,9 @@ indieweb.microformats:
     h_entry:
       type: boolean
       label: 'Enable microformat h-entry class'
+    h_event:
+      type: string
+      label: 'Enable microformat h-event class for a node type'
     post_metadata:
       type: boolean
       label: 'Enable microformat metadata classes like dt-published and u-url'
@@ -192,6 +195,45 @@ indieweb.micropub:
     bookmark_uid:
       type: integer
       label: 'The user id of the bookmark'
+    event_create_node:
+      type: boolean
+      label: 'Enable event'
+    event_status:
+      type: integer
+      label: 'Whether the event is published or not'
+    event_node_type:
+      type: string
+      label: 'The node type for the event'
+    event_content_field:
+      type: string
+      label: 'The node content field for the event'
+    event_date_field:
+      type: string
+      label: 'The node link field for the event'
+    event_uid:
+      type: integer
+      label: 'The user id of the event'
+    rsvp_create_node:
+      type: boolean
+      label: 'Enable RSVP'
+    rsvp_status:
+      type: integer
+      label: 'Whether the RSVP is published or not'
+    rsvp_node_type:
+      type: string
+      label: 'The node type for the RSVP'
+    rsvp_content_field:
+      type: string
+      label: 'The node content field for the RSVP'
+    rsvp_link_field:
+      type: string
+      label: 'The node link field for the RSVP'
+    rsvp_rsvp_field:
+      type: string
+      label: 'The node RSVP field for the RSVP'
+    rsvp_uid:
+      type: integer
+      label: 'The user id of the RSVP'
 
 field.formatter.settings.link_microformat:
   type: field.formatter.settings.link

@@ -167,17 +167,22 @@ class WebmentionEntity extends ContentEntityBase implements WebmentionEntityInte
       'author_name' => 'Author name',
       'author_photo' => 'Author avatar',
       'author_url' => 'Author URL',
+      'rsvp' => 'RSVP',
     ];
 
     $weight = 0;
     foreach ($additional_fields as $key => $label) {
 
       $required = $weight < 4;
+      $max_length = 255;
+      if ($key == 'rsvp') {
+        $max_length = 20;
+      }
 
       $fields[$key] = BaseFieldDefinition::create('string')
         ->setLabel(t($label))
         ->setSettings([
-          'max_length' => 255,
+          'max_length' => $max_length,
           'text_processing' => 0,
         ])
         ->setDisplayOptions('view', [

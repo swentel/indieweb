@@ -48,6 +48,14 @@ class MicroformatsSettingsForm extends ConfigFormBase {
       '#description' => $this->t('This will be added on full, teaser and microformat view mode.'),
     ];
 
+    $form['classes']['h_event'] = [
+      '#type' => 'select',
+      '#title' => $this->t('<em>h-event</em> on node wrappers.'),
+      '#default_value' => $config->get('h_event'),
+      '#options' => ['' => $this->t('No event')] + node_type_get_names(),
+      '#description' => $this->t('h-event for an event node type. This will be added on full, teaser and microformat view mode.<br />This will also add dt-start and dt-end classes on the date range fields. (date fields are not supported)'),
+    ];
+
     $form['classes']['e_content'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('<em>e-content</em> on standard body fields.'),
@@ -56,7 +64,7 @@ class MicroformatsSettingsForm extends ConfigFormBase {
 
     $form['classes']['u_photo'] = [
       '#type' => 'checkbox',
-      '#title' => $this->t('<em>u-photo</em> on all image style links.'),
+      '#title' => $this->t('<em>u-photo</em> on image styles.'),
       '#default_value' => $config->get('u_photo'),
     ];
 
@@ -98,8 +106,8 @@ class MicroformatsSettingsForm extends ConfigFormBase {
     $form['classes']['other'] = [
       '#type' => 'item',
       '#title' => $this->t('Formatters'),
-      '#markup' => 'To add "p-category" classes on tags, you can use the "Label link with p-category class" formatter.<br />To add "u-like-of", "u-bookmark-of", "u-in-reply-to" or "u-repost-of" on links, use the "Microformat link" formatter.',
-      '#description' => 'Go to the "Manage display" pages and select the formatter you want to use.',
+      '#markup' => 'To add "p-category" classes on tags, you can use the "Label link with p-category class" formatter.<br />To add "u-like-of", "u-bookmark-of", "u-in-reply-to" (use in reply, rsvp)  or "u-repost-of" on links, use the "Microformat link" formatter.<br />To add the "p-rsvp" class, use the "Microformat RSVP" formatter. For more information about RSVP, go to the Micropub configuration screen for RSVP so you know what kind of field you need to create.',
+      '#description' => 'Go to the "Manage display" pages and select the formatter you want to use. ',
     ];
 
     return parent::buildForm($form, $form_state);
@@ -112,6 +120,7 @@ class MicroformatsSettingsForm extends ConfigFormBase {
 
     $this->config('indieweb.microformats')
       ->set('h_entry', $form_state->getValue('h_entry'))
+      ->set('h_event', $form_state->getValue('h_event'))
       ->set('post_metadata', $form_state->getValue('post_metadata'))
       ->set('p_name_exclude_node_type', $form_state->getValue('p_name_exclude_node_type'))
       ->set('e_content', $form_state->getValue('h_entry'))

@@ -11,24 +11,22 @@ use Drupal\Core\Url;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
- * Provides a block to display 'Webmentions'.
+ * Provides a block to display 'RSVP's'.
  *
  * @Block(
- *   id = "indieweb_webmention",
- *   admin_label = @Translation("Webmentions"),
+ *   id = "indieweb_rsvp",
+ *   admin_label = @Translation("RSVP"),
  * )
  */
-class WebmentionBlock extends BlockBase {
+class RSVPBlock extends BlockBase {
 
   /**
    * {@inheritdoc}
    */
   public function defaultConfiguration() {
     return [
-      'show_likes' => TRUE,
-      'show_reposts' => FALSE,
+      'show_counter' => TRUE,
       'show_avatar' => TRUE,
-      'number_of_posts' => 10,
     ];
   }
 
@@ -37,32 +35,14 @@ class WebmentionBlock extends BlockBase {
    */
   public function blockForm($form, FormStateInterface $form_state) {
 
-    $form['webmentions'] = [
+    $form['rsvp'] = [
       '#type' => 'fieldset',
       '#title' => $this->t('Configuration'),
     ];
-    $form['webmentions']['show_likes'] = [
-      '#type' => 'checkbox',
-      '#title' => $this->t('Likes'),
-      '#default_value' => $this->configuration['show_likes'],
-    ];
-
-    $form['webmentions']['show_reposts'] = [
-      '#type' => 'checkbox',
-      '#title' => $this->t('Reposts'),
-      '#default_value' => $this->configuration['show_reposts'],
-    ];
-
-    $form['webmentions']['show_avatar'] = [
+    $form['rsvp']['show_avatar'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('Whether to show the avatar or not'),
       '#default_value' => $this->configuration['show_avatar'],
-    ];
-
-    $form['webmentions']['number_of_posts'] = [
-      '#type' => 'number',
-      '#title' => $this->t('Number of mentions to show'),
-      '#default_value' => $this->configuration['number_of_posts'],
     ];
 
     return $form;
@@ -72,11 +52,8 @@ class WebmentionBlock extends BlockBase {
    * {@inheritdoc}
    */
   public function blockSubmit($form, FormStateInterface $form_state) {
-    $values = $form_state->getValue('webmentions');
-    $this->configuration['show_likes'] = $values['show_likes'];
-    $this->configuration['show_reposts'] = $values['show_reposts'];
+    $values = $form_state->getValue('rsvp');
     $this->configuration['show_avatar'] = $values['show_avatar'];
-    $this->configuration['number_of_posts'] = $values['number_of_posts'];
   }
 
   /**
@@ -86,33 +63,23 @@ class WebmentionBlock extends BlockBase {
     $build = [];
 
     $types = [
-      'like-of' => 'like-of',
-      'repost-of' => 'repost-of',
+      'rsvp' => 'rsvp',
     ];
-    if (!$this->configuration['show_likes']) {
-      unset($types['like-of']);
-    }
-    if (!$this->configuration['show_reposts']) {
-      unset($types['repost-of']);
-    }
-
-    // Return early if no types selected.
-    if (empty($types)) {
-      return $build;
-    }
 
     // Get mentions.
     $query = \Drupal::entityQuery('webmention_entity')
       ->condition('target', \Drupal::request()->getPathInfo())
-      ->condition('property', $types, 'IN')
-      ->range(0, $this->configuration['number_of_posts']);
-
+      ->condition('property', $types, 'IN');
     $ids = $query->execute();
+
+    $values = [
+      0 => 'yes', 1 => 'maybe', 2 => 'interested', 3 => 'no',
+    ];
+    $values_array = [];
 
     if (!empty($ids)) {
 
       $show_avatar = $this->configuration['show_avatar'];
-      $items = [];
 
       /** @var \Drupal\indieweb\Entity\WebmentionEntityInterface $mention */
       $mentions = \Drupal::entityTypeManager()->getStorage('webmention_entity')->loadMultiple($ids);
@@ -123,22 +90,26 @@ class WebmentionBlock extends BlockBase {
           $image = '<img width="40" src="' . $mention->get('author_photo')->value . '" />&nbsp;';
         }
 
-        $type = 'Liked by ';
-        if ($mention->get('property')->value == 'repost-of') {
-          $type = 'Reposted by ';
-        }
+        $rsvp = $mention->get('rsvp')->value;
 
-        $items[] = [
-          '#markup' => $image . $type . $mention->get('author_name')->value,
+        $values_array[$rsvp][] = [
+          '#markup' => $image . $mention->get('author_name')->value,
           '#allowed_tags' => ['img']
         ];
 
       }
 
-      $build['webmentions'] = [
-        '#theme' => 'item_list',
-        '#items' => $items,
-      ];
+      foreach ($values as $weight => $value) {
+        if (!empty($values_array[$value])) {
+          $build[$value] = [
+            '#title' => ucfirst($value),
+            '#weight' => $weight,
+            '#theme' => 'item_list',
+            '#items' => $values_array[$value],
+          ];
+        }
+      }
+
 
     }
 

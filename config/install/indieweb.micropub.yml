@@ -38,3 +38,16 @@ bookmark_node_type: ''
 bookmark_content_field: ''
 bookmark_link_field: ''
 bookmark_uid: 1
+event_create_node: false
+event_status: 1
+event_node_type: ''
+event_content_field: ''
+event_date_field: ''
+event_uid: 1
+rsvp_create_node: false
+rsvp_status: 1
+rsvp_node_type: ''
+rsvp_content_field: ''
+rsvp_link_field: ''
+rsvp_rsvp_field: ''
+rsvp_uid: 1

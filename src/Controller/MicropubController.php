@@ -3,6 +3,7 @@
 namespace Drupal\indieweb\Controller;
 
 use Drupal\Core\Controller\ControllerBase;
+use Drupal\datetime\Plugin\Field\FieldType\DateTimeItemInterface;
 use Drupal\node\Entity\Node;
 use Drupal\node\NodeInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -73,6 +74,110 @@ class MicropubController extends ControllerBase {
 
       $payload_original = $input;
       $valid_token = $this->isValidToken();
+
+      if ($this->config->get('micropub_log_payload')) {
+        $this->getLogger('indieweb_micropub_payload')->notice('input: @input', ['@input' => print_r($input, 1)]);
+      }
+
+      // Event support.
+      if ($this->config->get('event_create_node') && !empty($input['start']) && !empty($input['end']) && !empty($input['name']) && (!empty($input['h']) && $input['h'] == 'event') && $valid_token) {
+
+        $values = [
+          'uid' => $this->config->get('event_uid'),
+          'title' => $input['name'],
+          'type' => $this->config->get('event_node_type'),
+          'status' => $this->config->get('event_status'),
+        ];
+
+        // Allow code to change the values and payload.
+        \Drupal::moduleHandler()->alter('indieweb_micropub_node_pre_create', $values, $input);
+
+        /** @var \Drupal\node\NodeInterface $node */
+        $node = Node::create($values);
+
+        // Content.
+        $content_field_name = $this->config->get('event_content_field');
+        if (!empty($input['content']) && $content_field_name && $node->hasField($content_field_name)) {
+          $node->set($content_field_name, $input['content']);
+        }
+
+        // Date.
+        $date_field_name = $this->config->get('event_date_field');
+        if ($date_field_name && $node->hasField($date_field_name)) {
+          $node->set($date_field_name, ['value' => gmdate(DateTimeItemInterface::DATETIME_STORAGE_FORMAT, strtotime($input['start'])), 'end_value' => gmdate(DateTimeItemInterface::DATETIME_STORAGE_FORMAT, strtotime($input['end']))]);
+        }
+
+        $node->save();
+        if ($node->id()) {
+
+          // Syndicate.
+          $this->syndicateTo($input, $node);
+
+          // Allow code to react after the node is saved.
+          \Drupal::moduleHandler()->invokeAll('indieweb_micropub_node_saved', [$node, $values, $input, $payload_original]);
+
+          $response_code = 201;
+          $response_message = '';
+          header('Location: ' . $node->toUrl('canonical', ['absolute' => TRUE])->toString());
+          return new Response($response_message, $response_code);
+        }
+      }
+
+      // RSVP support.
+      if ($this->config->get('rsvp_create_node') && !empty($input['in-reply-to']) && !empty($input['rsvp']) && (!empty($input['h']) && $input['h'] == 'entry') && $valid_token) {
+
+        $values = [
+          'uid' => $this->config->get('rsvp_uid'),
+          'title' => 'RSVP on ' . $input['in-reply-to'],
+          'type' => $this->config->get('rsvp_node_type'),
+          'status' => $this->config->get('rsvp_status'),
+        ];
+
+        // Add url to syndicate to.
+        if (isset($input['mp-syndicate-to'])) {
+          $input['mp-syndicate-to'][] = $input['in-reply-to'];
+        }
+        else {
+          $input['mp-syndicate-to'] = [$input['in-reply-to']];
+        }
+
+        // Allow code to change the values and payload.
+        \Drupal::moduleHandler()->alter('indieweb_micropub_node_pre_create', $values, $input);
+
+        /** @var \Drupal\node\NodeInterface $node */
+        $node = Node::create($values);
+
+        // Link field.
+        $rsvp_link_field = $this->config->get('rsvp_link_field');
+        $node->set($rsvp_link_field, ['uri' => $input['in-reply-to'], 'title' => '']);
+
+        // Content.
+        $content_field_name = $this->config->get('rsvp_content_field');
+        if (!empty($input['content']) && $content_field_name && $node->hasField($content_field_name)) {
+          $node->set($content_field_name, $input['content']);
+        }
+
+        // RSVP.
+        $rsvp_field_name = $this->config->get('rsvp_rsvp_field');
+        if ($rsvp_field_name && $node->hasField($rsvp_field_name)) {
+          $node->set($rsvp_field_name, $input['rsvp']);
+        }
+
+        $node->save();
+        if ($node->id()) {
+
+          // Syndicate.
+          $this->syndicateTo($input, $node);
+
+          // Allow code to react after the node is saved.
+          \Drupal::moduleHandler()->invokeAll('indieweb_micropub_node_saved', [$node, $values, $input, $payload_original]);
+
+          $response_code = 201;
+          $response_message = '';
+          header('Location: ' . $node->toUrl('canonical', ['absolute' => TRUE])->toString());
+          return new Response($response_message, $response_code);
+        }
+      }
 
       // Repost support.
       if ($this->config->get('repost_create_node') && !empty($input['repost-of']) && (!empty($input['h']) && $input['h'] == 'entry') && $valid_token) {
@@ -281,10 +386,6 @@ class MicropubController extends ControllerBase {
       // Note support.
       if ($this->config->get('note_create_node') && !empty($input['content']) && !isset($input['name']) && (!empty($input['h']) && $input['h'] == 'entry') && $valid_token) {
 
-        if ($this->config->get('micropub_log_payload')) {
-          $this->getLogger('micropub_log_payload')->notice('input: @input', ['@input' => print_r($input, 1)]);
-        }
-
         $values = [
           'uid' => $this->config->get('note_uid'),
           'title' => 'Micropub post',
@@ -331,10 +432,6 @@ class MicropubController extends ControllerBase {
 
       // Article support.
       if ($this->config->get('article_create_node') && !empty($input['content']) && !empty($input['name']) && (!empty($input['h']) && $input['h'] == 'entry') && $valid_token) {
-
-        if ($this->config->get('micropub_log_payload')) {
-          $this->getLogger('micropub_log_payload')->notice('input: @input', ['@input' => print_r($input, 1)]);
-        }
 
         $values = [
           'uid' => $this->config->get('article_uid'),

@@ -99,6 +99,11 @@ class WebmentionController extends ControllerBase {
         $values['private'] = ['value' => TRUE];
       }
 
+      // Rsvp.
+      if (!empty($mention['post']['rsvp'])) {
+        $values['rsvp'] = $mention['post']['rsvp'];
+      }
+
       // Save the entity.
       $webmention = $this->entityTypeManager()->getStorage('webmention_entity')->create($values);
       $webmention->save();

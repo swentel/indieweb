@@ -26,7 +26,7 @@ Releases are available on drupal.org: https://www.drupal.org/project/indieweb
 Use https://indiewebify.me/ to perform initial checks to see if your site is Indieweb ready. It can scan for certain
 markup after you've done the configuration with this module (and optionally more yourself).
 Note that author discovery doesn't fully work 100% on IndieWebify for posts, use https://sturdy-backbone.glitch.me.
-Another good service is http://xray.p3k.io, which returns a json response.
+Another good tool is http://xray.p3k.io, which displays the results in JSON.
 
 ## To install
 
@@ -54,8 +54,10 @@ further below.
 - Configuration is at /admin/config/services/indieweb/webmention
 - Overview of all collected webmentions and pingbacks are at /admin/content/webmention
 
-A basic block (Webmentions) is available to render like and repost webmentions per page.
-There is also a block (Webmention notify form) to let people submit a URL if the current page is mentioned there.
+Blocks
+- Webmentions: render like and repost webmentions per page
+- Webmention notify form: let people submit a URL if the current page is mentioned there
+- RSVP: shows people attending, interested for an event
 
 ![ScreenShot](https://realize.be/sites/default/files/2018-03/webmention-basic.png)
 
@@ -104,7 +106,7 @@ engines, aggregators, and other tools. See https://indieweb.org/microformats for
 if you want to publish. Also read https://brid.gy/about#microformats for details how Bridgy decides what to publish if
 you are using that service.
 
-Your homepage should contain a h-card entry. This module does not expose this for you. An example:
+Your homepage should contain a h-card entry. This module does not expose this for you (yet). An example:
 
   ```
   <p class="h-card">My name is <a class="u-url p-name" rel="me" href="/">Your name</a>
@@ -113,12 +115,14 @@ Your homepage should contain a h-card entry. This module does not expose this fo
 Classes added for publication (or other functionality).
 
 - h-entry: added on node wrapper, see indieweb_preprocess_node().
+- h-event: added on node wrapper for an event, see indieweb_preprocess_node().
 - dt-published, u-url and p-name in node metadata, see indieweb_preprocess_node().
 - e-content: added on default body field, see indieweb_preprocess_field().
 - u-photo: added on image styles, indieweb_preprocess_image_style().
 - p-summary: see indieweb_preprocess_field().
+- u-video: see indieweb_preprocess_file_video() and indieweb_preprocess_file_entity_video().
 
-Some field formatters are also available.
+Several field formatters are also available.
 
 You can configure this at /admin/config/services/indieweb/microformats
 
@@ -154,6 +158,9 @@ IndieAuth to configure. More information about micropub: https://indieweb.org/Mi
 A very good client to test is https://quill.p3k.io. A full list is available at https://indieweb.org/Micropub/Clients.
 Indigenous (for iOS and Android) are also microsub readers.
 
+Even if you do not decide to use the micropub endpoint, the configuration screen gives you a good overview what kind of
+content types and fields you can create which can be used for sending webmentions or read by microformat parsers.
+
 ### Supported post types
 
 - Article: a blog post
@@ -162,6 +169,8 @@ Indigenous (for iOS and Android) are also microsub readers.
 - Repost: repost a URL
 - Like: like a URL
 - Bookmark: bookmark a URL
+- Event: create an event
+- RSVP: create an rsvp
 
 You can configure this at /admin/config/services/indieweb/micropub
 
