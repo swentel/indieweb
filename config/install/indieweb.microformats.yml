@@ -1,9 +1,9 @@
-h_entry: true
+h_entry: false
 h_event: ''
-e_content: true
-u_photo: true
-u_video: true
-post_metadata: true
+e_content: false
+u_photo: false
+u_video: false
+post_metadata: false
 p_name_exclude_node_type: ''
-p_bridgy_twitter_content: true
+p_bridgy_twitter_content: false
 p_summary: ''

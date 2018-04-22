@@ -39,8 +39,17 @@ class MicroformatsTest extends IndiewebBrowserTestBase {
     $this->drupalPostForm(NULL, [], 'Save field settings');
     $this->drupalPostForm(NULL, [], 'Save settings');
 
-    // Configure that field on the microformats settings page.
-    $this->drupalPostForm('admin/config/services/indieweb/microformats', ['p_summary' => 'field_summary'], 'Save configuration');
+    // Configure that field and all microformats on the settings page.
+    $edit = [
+      'h_entry' => 1,
+      'u_photo' => 1,
+      'e_content' => 1,
+      'post_metadata' => 1,
+      'p_name_exclude_node_type' => 'page',
+      'p_bridgy_twitter_content' => 1,
+      'p_summary' => 'field_summary',
+    ];
+    $this->drupalPostForm('admin/config/services/indieweb/microformats', $edit, 'Save configuration');
 
     // Create a node and verify all default microformats are printed.
     $image = current($this->getTestFiles('image'));
