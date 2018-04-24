@@ -37,8 +37,14 @@ class MicropubTest extends IndiewebBrowserTestBase {
     'h' => 'entry',
     'name' => 'An article',
     'content' => 'An article content',
+    'category' => ['tag 1', 'tag 2'],
   ];
 
+  /**
+   * Default like $_POST content.
+   *
+   * @var array
+   */
   protected $like = [
     'h' => 'entry',
     'like-of' => 'https://example.com/what-a-page'
@@ -136,10 +142,10 @@ class MicropubTest extends IndiewebBrowserTestBase {
 
     // Test articles.
     $this->drupalLogin($this->adminUser);
-    $edit = ['article_create_node' => 1, 'article_node_type' => 'article'];
+    $edit = ['article_create_node' => 1, 'article_node_type' => 'article', 'article_tags_field' => 'field_tags'];
     $this->drupalPostForm('admin/config/services/indieweb/micropub', $edit, 'Save configuration');
     $this->drupalLogout();
-    $code = $this->sendMicropubRequest($this->article);
+    $code = $this->sendMicropubRequest($this->article, 'this_is_a_valid_token', TRUE);
     self::assertEquals(201, $code);
     $this->assertNodeCount(1, 'article');
     $nid = $this->getLastNid('article');

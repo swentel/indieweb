@@ -102,6 +102,9 @@ indieweb.micropub:
     note_upload_field:
       type: string
       label: 'The node upload field for the note'
+    note_tags_field:
+      type: string
+      label: 'The node tags field for the note'
     note_uid:
       type: integer
       label: 'The user id of the note'
@@ -120,6 +123,9 @@ indieweb.micropub:
     article_upload_field:
       type: string
       label: 'The node upload field for the article'
+    article_tags_field:
+      type: string
+      label: 'The node tags field for the article'
     article_uid:
       type: integer
       label: 'The user id of the article'
@@ -138,6 +144,9 @@ indieweb.micropub:
     like_link_field:
       type: string
       label: 'The node link field for the like'
+    like_tags_field:
+      type: string
+      label: 'The node tags field for the like'
     like_uid:
       type: integer
       label: 'The user id of the like'
@@ -156,6 +165,9 @@ indieweb.micropub:
     reply_link_field:
       type: string
       label: 'The node link field for the reply'
+    reply_tags_field:
+      type: string
+      label: 'The node tags field for the reply'
     reply_uid:
       type: integer
       label: 'The user id of the reply'
@@ -174,6 +186,9 @@ indieweb.micropub:
     repost_link_field:
       type: string
       label: 'The node link field for the repost'
+    repost_tags_field:
+      type: string
+      label: 'The node tags field for the repost'
     repost_uid:
       type: integer
       label: 'The user id of the repost'
@@ -192,6 +207,9 @@ indieweb.micropub:
     bookmark_link_field:
       type: string
       label: 'The node link field for the repost'
+    bookmark_tags_field:
+      type: string
+      label: 'The node tags field for the bookmark'
     bookmark_uid:
       type: integer
       label: 'The user id of the bookmark'
@@ -210,6 +228,9 @@ indieweb.micropub:
     event_date_field:
       type: string
       label: 'The node link field for the event'
+    event_tags_field:
+      type: string
+      label: 'The node tags field for the event'
     event_uid:
       type: integer
       label: 'The user id of the event'
@@ -231,6 +252,9 @@ indieweb.micropub:
     rsvp_rsvp_field:
       type: string
       label: 'The node RSVP field for the RSVP'
+    rsvp_tags_field:
+      type: string
+      label: 'The node tags field for the rsvp'
     rsvp_uid:
       type: integer
       label: 'The user id of the RSVP'

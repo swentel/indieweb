@@ -3,9 +3,11 @@
 namespace Drupal\indieweb\Controller;
 
 use Drupal\Core\Controller\ControllerBase;
+use Drupal\Core\Language\LanguageInterface;
 use Drupal\datetime\Plugin\Field\FieldType\DateTimeItemInterface;
 use Drupal\node\Entity\Node;
 use Drupal\node\NodeInterface;
+use Drupal\taxonomy\Entity\Term;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -107,6 +109,9 @@ class MicropubController extends ControllerBase {
           $node->set($date_field_name, ['value' => gmdate(DateTimeItemInterface::DATETIME_STORAGE_FORMAT, strtotime($input['start'])), 'end_value' => gmdate(DateTimeItemInterface::DATETIME_STORAGE_FORMAT, strtotime($input['end']))]);
         }
 
+        // Categories.
+        $this->handleCategories($input, $node, 'event_tags_field');
+
         $node->save();
         if ($node->id()) {
 
@@ -163,6 +168,9 @@ class MicropubController extends ControllerBase {
           $node->set($rsvp_field_name, $input['rsvp']);
         }
 
+        // Categories.
+        $this->handleCategories($input, $node, 'rsvp_tags_field');
+
         $node->save();
         if ($node->id()) {
 
@@ -212,6 +220,9 @@ class MicropubController extends ControllerBase {
         if (!empty($input['content']) && $content_field_name && $node->hasField($content_field_name)) {
           $node->set($content_field_name, $input['content']);
         }
+
+        // Categories.
+        $this->handleCategories($input, $node, 'repost_tags_field');
 
         $node->save();
         if ($node->id()) {
@@ -267,6 +278,9 @@ class MicropubController extends ControllerBase {
           $node->set($content_field_name, $input['content']);
         }
 
+        // Categories.
+        $this->handleCategories($input, $node, 'bookmark_tags_field');
+
         $node->save();
         if ($node->id()) {
 
@@ -316,6 +330,9 @@ class MicropubController extends ControllerBase {
         if (!empty($input['content']) && $content_field_name && $node->hasField($content_field_name)) {
           $node->set($content_field_name, $input['content']);
         }
+
+        // Categories.
+        $this->handleCategories($input, $node, 'like_tags_field');
 
         $node->save();
         if ($node->id()) {
@@ -367,6 +384,9 @@ class MicropubController extends ControllerBase {
           $node->set($content_field_name, $input['content']);
         }
 
+        // Categories.
+        $this->handleCategories($input, $node, 'reply_tags_field');
+
         $node->save();
         if ($node->id()) {
 
@@ -414,6 +434,9 @@ class MicropubController extends ControllerBase {
           }
         }
 
+        // Categories.
+        $this->handleCategories($input, $node, 'note_tags_field');
+
         $node->save();
         if ($node->id()) {
 
@@ -460,6 +483,9 @@ class MicropubController extends ControllerBase {
             $node->set($file_field_name, $file->id());
           }
         }
+
+        // Categories.
+        $this->handleCategories($input, $node, 'article_tags_field');
 
         $node->save();
         if ($node->id()) {
@@ -551,6 +577,78 @@ class MicropubController extends ControllerBase {
     }
 
     return $file;
+  }
+
+  /**
+   * Handle and set categories.
+   *
+   * @param $input
+   *   The input from the request.
+   * @param \Drupal\node\NodeInterface $node
+   *   The current node which is going to be created.
+   * @param $config_key
+   *   The config key for the tags field.
+   */
+  protected function handleCategories($input, NodeInterface $node, $config_key) {
+    $tags_field_name = $this->config->get($config_key);
+
+    if ($tags_field_name && $node->hasField($tags_field_name) && !empty($input['category'])) {
+      $values = $bundles = [];
+      $auto_create = FALSE;
+
+      // Check field definition settings of the field.
+      $field_settings = $node->getFieldDefinition($tags_field_name)->getSettings();
+      if (!empty($field_settings['handler_settings']['auto_create'])) {
+        $auto_create = TRUE;
+      }
+      if (!empty($field_settings['handler_settings']['target_bundles'])) {
+        $bundles = $field_settings['handler_settings']['target_bundles'];
+      }
+
+      // Only go further if we have bundles, should be as it's a required
+      // property.
+      if (!empty($bundles)) {
+
+        // Take the first bundle, there should only be one, but you never know.
+        $vocabulary = array_shift($bundles);
+
+        // Get any ids that match with the incoming categories.
+        $existing_categories = [];
+        $existing_category_ids = \Drupal::entityQuery('taxonomy_term')
+          ->condition('name', $input['category'], 'IN')
+          ->execute();
+
+        // Get the actual terms.
+        if (!empty($existing_category_ids)) {
+          $existing_categories_loaded = \Drupal::entityTypeManager()->getStorage('taxonomy_term')->loadMultiple($existing_category_ids);
+          foreach ($existing_categories_loaded as $loaded_term) {
+            $existing_categories[$loaded_term->label()] = $loaded_term;
+          }
+        }
+
+        // Now loop over incoming categories.
+        foreach ($input['category'] as $category) {
+
+          // Auto create and not existing term.
+          if ($auto_create && !isset($existing_categories[$category])) {
+            $term = Term::create([
+              'name' => $category,
+              'vid' => $vocabulary,
+              'langcode' => LanguageInterface::LANGCODE_NOT_SPECIFIED,
+            ]);
+            $values[] = ['entity' => $term];
+          }
+          // Existing term.
+          elseif (isset($existing_categories[$category])) {
+            $values[] = ['entity' => $existing_categories[$category]];
+          }
+        }
+
+        if (!empty($values)) {
+          $node->set($tags_field_name, $values);
+        }
+      }
+    }
   }
 
   /**

@@ -78,7 +78,7 @@ class MicropubSettingsForm extends ConfigFormBase {
     ];
 
     // Collect fields.
-    $text_fields = $upload_fields = $link_fields = $date_range_fields = $option_fields = [];
+    $text_fields = $upload_fields = $link_fields = $date_range_fields = $option_fields = $tag_fields = [];
     $fields = \Drupal::service('entity_field.manager')->getFieldStorageDefinitions('node');
     /** @var \Drupal\Core\Field\FieldStorageDefinitionInterface $field */
     foreach ($fields as $key => $field) {
@@ -97,6 +97,13 @@ class MicropubSettingsForm extends ConfigFormBase {
       if (in_array($field->getType(), ['list_string'])) {
         $option_fields[$key] = $field->getName();
       }
+      if (in_array($field->getType(), ['entity_reference'])) {
+        $settings = $field->getSettings();
+        if (isset($settings['target_type']) && $settings['target_type'] == 'taxonomy_term') {
+          $tag_fields[$key] = $field->getName();
+        }
+      }
+
     }
 
     $form['article'] = [
@@ -176,6 +183,20 @@ class MicropubSettingsForm extends ConfigFormBase {
       '#description' => $this->t('Select the field which will be used to store files. Make sure the field exists on the node type.<br />Currently only supports saving 1 file in the "image" section of a micropub request.'),
       '#options' => ['' => $this->t('Do not allow uploads')] + $upload_fields,
       '#default_value' => $config->get('article_upload_field'),
+      '#states' => array(
+        'visible' => array(
+          ':input[name="article_create_node"]' => array('checked' => TRUE),
+        ),
+      ),
+    ];
+
+    // Tags field.
+    $form['article']['article_tags_field'] = [
+      '#type' => 'select',
+      '#title' => $this->t('Tags field'),
+      '#description' => $this->t('Select the field which will be used to store tags. Make sure the field exists on the node type.<br />Field can only be a reference field targeting a taxonomy vocabulary and should only have one target bundle.'),
+      '#options' => ['' => $this->t('Do not store tags')] + $tag_fields,
+      '#default_value' => $config->get('article_tags_field'),
       '#states' => array(
         'visible' => array(
           ':input[name="article_create_node"]' => array('checked' => TRUE),
@@ -267,6 +288,20 @@ class MicropubSettingsForm extends ConfigFormBase {
       ),
     ];
 
+    // Upload field.
+    $form['note']['note_tags_field'] = [
+      '#type' => 'select',
+      '#title' => $this->t('Tags field'),
+      '#description' => $this->t('Select the field which will be used to store tags. Make sure the field exists on the node type.<br />Field can only be a reference field targeting a taxonomy vocabulary and should only have one target bundle.'),
+      '#options' => ['' => $this->t('Do not store tags')] + $tag_fields,
+      '#default_value' => $config->get('note_tags_field'),
+      '#states' => array(
+        'visible' => array(
+          ':input[name="note_create_node"]' => array('checked' => TRUE),
+        ),
+      ),
+    ];
+
     $form['like'] = [
       '#type' => 'fieldset',
       '#title' => $this->t('Create a node when a micropub like is posted'),
@@ -344,6 +379,20 @@ class MicropubSettingsForm extends ConfigFormBase {
       '#description' => $this->t('Select the field which will be used to store the content. Make sure the field exists on the node type.'),
       '#options' => ['' => $this->t('Do not store content')] + $text_fields,
       '#default_value' => $config->get('like_content_field'),
+      '#states' => array(
+        'visible' => array(
+          ':input[name="like_create_node"]' => array('checked' => TRUE),
+        ),
+      ),
+    ];
+
+    // Tags field.
+    $form['like']['like_tags_field'] = [
+      '#type' => 'select',
+      '#title' => $this->t('Tags field'),
+      '#description' => $this->t('Select the field which will be used to store tags. Make sure the field exists on the node type.<br />Field can only be a reference field targeting a taxonomy vocabulary and should only have one target bundle.'),
+      '#options' => ['' => $this->t('Do not store tags')] + $tag_fields,
+      '#default_value' => $config->get('like_tags_field'),
       '#states' => array(
         'visible' => array(
           ':input[name="like_create_node"]' => array('checked' => TRUE),
@@ -435,6 +484,20 @@ class MicropubSettingsForm extends ConfigFormBase {
       ),
     ];
 
+    // Tags field.
+    $form['reply']['reply_tags_field'] = [
+      '#type' => 'select',
+      '#title' => $this->t('Tags field'),
+      '#description' => $this->t('Select the field which will be used to store tags. Make sure the field exists on the node type.<br />Field can only be a reference field targeting a taxonomy vocabulary and should only have one target bundle.'),
+      '#options' => ['' => $this->t('Do not store tags')] + $tag_fields,
+      '#default_value' => $config->get('reply_tags_field'),
+      '#states' => array(
+        'visible' => array(
+          ':input[name="reply_create_node"]' => array('checked' => TRUE),
+        ),
+      ),
+    ];
+
     $form['repost'] = [
       '#type' => 'fieldset',
       '#title' => $this->t('Create a node when a micropub repost is posted'),
@@ -512,6 +575,20 @@ class MicropubSettingsForm extends ConfigFormBase {
       '#description' => $this->t('Select the field which will be used to store the content. Make sure the field exists on the node type.'),
       '#options' => ['' => $this->t('Do not store content')] + $text_fields,
       '#default_value' => $config->get('repost_content_field'),
+      '#states' => array(
+        'visible' => array(
+          ':input[name="repost_create_node"]' => array('checked' => TRUE),
+        ),
+      ),
+    ];
+
+    // Tags field.
+    $form['repost']['repost_tags_field'] = [
+      '#type' => 'select',
+      '#title' => $this->t('Tags field'),
+      '#description' => $this->t('Select the field which will be used to store tags. Make sure the field exists on the node type.<br />Field can only be a reference field targeting a taxonomy vocabulary and should only have one target bundle.'),
+      '#options' => ['' => $this->t('Do not store tags')] + $tag_fields,
+      '#default_value' => $config->get('repost_tags_field'),
       '#states' => array(
         'visible' => array(
           ':input[name="repost_create_node"]' => array('checked' => TRUE),
@@ -603,6 +680,20 @@ class MicropubSettingsForm extends ConfigFormBase {
       ),
     ];
 
+    // Tags field.
+    $form['bookmark']['bookmark_tags_field'] = [
+      '#type' => 'select',
+      '#title' => $this->t('Tags field'),
+      '#description' => $this->t('Select the field which will be used to store tags. Make sure the field exists on the node type.<br />Field can only be a reference field targeting a taxonomy vocabulary and should only have one target bundle.'),
+      '#options' => ['' => $this->t('Do not store tags')] + $tag_fields,
+      '#default_value' => $config->get('bookmark_tags_field'),
+      '#states' => array(
+        'visible' => array(
+          ':input[name="bookmark_create_node"]' => array('checked' => TRUE),
+        ),
+      ),
+    ];
+
     $form['event'] = [
       '#type' => 'fieldset',
       '#title' => $this->t('Create a node when a micropub event is posted'),
@@ -687,6 +778,19 @@ class MicropubSettingsForm extends ConfigFormBase {
       ),
     ];
 
+    // Tags field.
+    $form['event']['event_tags_field'] = [
+      '#type' => 'select',
+      '#title' => $this->t('Tags field'),
+      '#description' => $this->t('Select the field which will be used to store tags. Make sure the field exists on the node type.<br />Field can only be a reference field targeting a taxonomy vocabulary and should only have one target bundle.'),
+      '#options' => ['' => $this->t('Do not store tags')] + $tag_fields,
+      '#default_value' => $config->get('event_tags_field'),
+      '#states' => array(
+        'visible' => array(
+          ':input[name="event_create_node"]' => array('checked' => TRUE),
+        ),
+      ),
+    ];
 
     $form['rsvp'] = [
       '#type' => 'fieldset',
@@ -786,6 +890,20 @@ class MicropubSettingsForm extends ConfigFormBase {
       ),
     ];
 
+    // Tags field.
+    $form['rsvp']['rsvp_tags_field'] = [
+      '#type' => 'select',
+      '#title' => $this->t('Tags field'),
+      '#description' => $this->t('Select the field which will be used to store tags. Make sure the field exists on the node type.<br />Field can only be a reference field targeting a taxonomy vocabulary and should only have one target bundle.'),
+      '#options' => ['' => $this->t('Do not store tags')] + $tag_fields,
+      '#default_value' => $config->get('rsvp_tags_field'),
+      '#states' => array(
+        'visible' => array(
+          ':input[name="rsvp_create_node"]' => array('checked' => TRUE),
+        ),
+      ),
+    ];
+
     return parent::buildForm($form, $form_state);
   }
 
@@ -805,42 +923,49 @@ class MicropubSettingsForm extends ConfigFormBase {
       ->set('note_node_type', $form_state->getValue('note_node_type'))
       ->set('note_content_field', $form_state->getValue('note_content_field'))
       ->set('note_upload_field', $form_state->getValue('note_upload_field'))
+      ->set('note_tags_field', $form_state->getValue('note_tags_field'))
       ->set('article_create_node', $form_state->getValue('article_create_node'))
       ->set('article_uid', $form_state->getValue('article_uid'))
       ->set('article_status', $form_state->getValue('article_status'))
       ->set('article_node_type', $form_state->getValue('article_node_type'))
       ->set('article_content_field', $form_state->getValue('article_content_field'))
       ->set('article_upload_field', $form_state->getValue('article_upload_field'))
+      ->set('article_tags_field', $form_state->getValue('article_tags_field'))
       ->set('like_create_node', $form_state->getValue('like_create_node'))
       ->set('like_uid', $form_state->getValue('like_uid'))
       ->set('like_status', $form_state->getValue('like_status'))
       ->set('like_node_type', $form_state->getValue('like_node_type'))
       ->set('like_content_field', $form_state->getValue('like_content_field'))
       ->set('like_link_field', $form_state->getValue('like_link_field'))
+      ->set('like_tags_field', $form_state->getValue('like_tags_field'))
       ->set('reply_create_node', $form_state->getValue('reply_create_node'))
       ->set('reply_uid', $form_state->getValue('reply_uid'))
       ->set('reply_status', $form_state->getValue('reply_status'))
       ->set('reply_node_type', $form_state->getValue('reply_node_type'))
       ->set('reply_content_field', $form_state->getValue('reply_content_field'))
       ->set('reply_link_field', $form_state->getValue('reply_link_field'))
+      ->set('reply_tags_field', $form_state->getValue('reply_tags_field'))
       ->set('repost_create_node', $form_state->getValue('repost_create_node'))
       ->set('repost_uid', $form_state->getValue('repost_uid'))
       ->set('repost_status', $form_state->getValue('repost_status'))
       ->set('repost_node_type', $form_state->getValue('repost_node_type'))
       ->set('repost_content_field', $form_state->getValue('repost_content_field'))
       ->set('repost_link_field', $form_state->getValue('repost_link_field'))
+      ->set('repost_tags_field', $form_state->getValue('repost_tags_field'))
       ->set('bookmark_create_node', $form_state->getValue('bookmark_create_node'))
       ->set('bookmark_uid', $form_state->getValue('bookmark_uid'))
       ->set('bookmark_status', $form_state->getValue('bookmark_status'))
       ->set('bookmark_node_type', $form_state->getValue('bookmark_node_type'))
       ->set('bookmark_content_field', $form_state->getValue('bookmark_content_field'))
       ->set('bookmark_link_field', $form_state->getValue('bookmark_link_field'))
+      ->set('bookmark_tags_field', $form_state->getValue('bookmark_tags_field'))
       ->set('event_create_node', $form_state->getValue('event_create_node'))
       ->set('event_uid', $form_state->getValue('event_uid'))
       ->set('event_status', $form_state->getValue('event_status'))
       ->set('event_node_type', $form_state->getValue('event_node_type'))
       ->set('event_content_field', $form_state->getValue('event_content_field'))
       ->set('event_date_field', $form_state->getValue('event_date_field'))
+      ->set('event_tags_field', $form_state->getValue('event_tags_field'))
       ->set('rsvp_create_node', $form_state->getValue('rsvp_create_node'))
       ->set('rsvp_uid', $form_state->getValue('rsvp_uid'))
       ->set('rsvp_status', $form_state->getValue('rsvp_status'))
@@ -848,6 +973,7 @@ class MicropubSettingsForm extends ConfigFormBase {
       ->set('rsvp_content_field', $form_state->getValue('rsvp_content_field'))
       ->set('rsvp_link_field', $form_state->getValue('rsvp_link_field'))
       ->set('rsvp_rsvp_field', $form_state->getValue('rsvp_rsvp_field'))
+      ->set('rsvp_tags_field', $form_state->getValue('rsvp_tags_field'))
 
       ->save();
 
