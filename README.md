@@ -61,7 +61,7 @@ Blocks
 
 ![ScreenShot](https://realize.be/sites/default/files/2018-03/webmention-basic.png)
 
-## Pulling and publishing content / Bridgy
+## Sending webmentions and pulling and publishing content with Bridgy
 
 Bridgy pulls comments, likes, and reshares on social networks back to your web site. You can also use it to post to
 social networks - or comment, like, reshare, or even RSVP - from your own web site. Bridgy is open source so you can

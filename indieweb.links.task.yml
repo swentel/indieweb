@@ -9,19 +9,19 @@ indieweb.admin.webmention_settings:
   base_route: indieweb.admin.dashboard
 
 indieweb.admin.webmention_settings_tab:
-  title: 'Webmention'
+  title: 'Receiving'
   route_name: indieweb.admin.webmention_settings
+  parent_id: indieweb.admin.webmention_settings
+
+indieweb.admin.publish_settings:
+  title: 'Sending'
+  route_name: indieweb.admin.publish_settings
   parent_id: indieweb.admin.webmention_settings
 
 indieweb.admin.comment_settings:
   title: 'Comments'
   route_name: indieweb.admin.comment_settings
   parent_id: indieweb.admin.webmention_settings
-
-indieweb.admin.publish_settings:
-  title: 'Publish'
-  route_name: indieweb.admin.publish_settings
-  base_route: indieweb.admin.dashboard
 
 indieweb.admin.microformats_settings:
   title: 'Microformats'

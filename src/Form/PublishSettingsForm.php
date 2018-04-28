@@ -33,7 +33,7 @@ class PublishSettingsForm extends ConfigFormBase {
     $config = $this->config('indieweb.publish');
 
     $form['info'] = [
-      '#markup' => '<p>' . $this->t('The easiest way to start pulling back content or publish content on social networks is by using <a href="https://brid.gy/" target="_blank">https://brid.gy</a>. <br />You have to create an account by signing in with your preferred social network. Bridgy is open source so you can also host the service yourself.<br /><br />Publishing, which is nothing more than sending a webmention, can be done per node in the "Publish to" fieldset, which is protected with the "send webmentions" permission.<br />If no channels are configured, there is nothing to do. There is a syndication field on every node type available to render your <a href=":syndication_link">syndications</a> for <a href="https://indieweb.org/posse-post-discovery" target="_blank">POSSE-Post-Discovery</a>.', [':syndication_link' => Url::fromRoute('indieweb.syndications_list')->toString()]) . '</p>',
+      '#markup' => '<p>' . $this->t('The easiest way to publish content on social networks is by using <a href="https://brid.gy/" target="_blank">https://brid.gy</a>. <br />You have to create an account by signing in with your preferred social network. Bridgy is open source so you can also host the service yourself.<br /><br />Publishing, which is nothing more than sending a webmention, can be done per node in the "Publish to" fieldset, which is protected with the "send webmentions" permission.<br />If no channels are configured, there is nothing to do. There is a syndication field on every node type available to render your <a href=":syndication_link">syndications</a> for <a href="https://indieweb.org/posse-post-discovery" target="_blank">POSSE-Post-Discovery</a>.', [':syndication_link' => Url::fromRoute('indieweb.syndications_list')->toString()]) . '</p>',
     ];
 
     $form['channels_wrapper'] = [
@@ -63,8 +63,8 @@ class PublishSettingsForm extends ConfigFormBase {
 
     $form['custom_wrapper'] = [
       '#type' => 'fieldset',
-      '#title' => $this->t('Custom publishing'),
-      '#description' => $this->t('The "Publish to" fieldset can contain two additional ways to publish content: a textfield to enter a custom URL or a select which listens to a "link" field on your content.'),
+      '#title' => $this->t('Custom URL\'s for content'),
+      '#description' => $this->t('The "Publish to" fieldset on content can contain two additional ways to send webmentions to other sites: a textfield to enter a custom URL or a select which listens to a "link" field on node types.'),
     ];
 
     // Collect fields.
@@ -87,15 +87,15 @@ class PublishSettingsForm extends ConfigFormBase {
     $form['custom_wrapper']['publish_link_fields'] = [
       '#type' => 'select',
       '#multiple' => TRUE,
-      '#title' => $this->t('Link fields'),
+      '#title' => $this->t('Link fields on content'),
       '#options' => $link_fields,
       '#default_value' => explode('|', $config->get('publish_link_fields')),
-      '#description' => $this->t('Do not select a field if you do not want to use this feature.'),
+      '#description' => $this->t('When you have a "Reply" post type, or reply on a comment, add a link field to which you are replying too. This URL will be used then to send the webmention to.<br />You can also just use the custom field above of course. Do not select a field if you do not want to use this feature.'),
     ];
 
     $form['send_wrapper'] = [
       '#type' => 'fieldset',
-      '#title' => $this->t('Sending publications')
+      '#title' => $this->t('Sending webmentions')
     ];
 
     $form['send_wrapper']['publish_send_webmention_by'] = [
@@ -108,12 +108,12 @@ class PublishSettingsForm extends ConfigFormBase {
         'drush' => $this->t('With drush'),
       ],
       '#default_value' => $config->get('publish_send_webmention_by'),
-      '#description' => $this->t('Publications are not send immediately, but are stored in a queue when the content is published and when you toggled one or more channels to publish to.<br />The drush command is <strong>indieweb-send-webmentions</strong>')
+      '#description' => $this->t('Webmentions are not send immediately, but are stored in a queue when the content is published.<br />The drush command is <strong>indieweb-send-webmentions</strong>')
     ];
 
     $form['send_wrapper']['publish_log_response'] = [
       '#type' => 'checkbox',
-      '#title' => $this->t('Log the response in watchdog when the publication is send.'),
+      '#title' => $this->t('Log the response in watchdog when the webmention is send.'),
       '#default_value' => $config->get('publish_log_response'),
     ];
 
