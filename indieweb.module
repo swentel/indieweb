@@ -653,6 +653,9 @@ function indieweb_handle_webmention_queue() {
       try {
         $response = $client->sendWebmention($sourceURL, $targetURL);
 
+        // Log success.
+        \Drupal::logger('indieweb_publish')->notice('Success sending webmention for @source to @target', ['@source' => $sourceURL, '@target' => $targetURL]);
+
         // Store the syndication when the targetUrl is in the channels.
         if (isset($channels[$targetURL])) {
           if (!empty($response) && $response['code'] == 201 && !empty($response['headers']['Location'])) {
