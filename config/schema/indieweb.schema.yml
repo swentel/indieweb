@@ -18,7 +18,7 @@ indieweb.comment:
     comment_create_node_comment_field:
       type: string
       label: 'The comment field on the node type'
-    comment_create_send_mail_notification:
+    comment_create_mail_notification:
       type: email
       label: 'Send mail notification'
 
