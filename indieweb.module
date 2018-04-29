@@ -557,6 +557,17 @@ function indieweb_webmention_entity_insert(WebmentionEntityInterface $webmention
               $comment = Comment::create($values);
               $comment->save();
 
+              // Send mail notification.
+              if ($config->get('comment_create_mail_notification')) {
+                $mailManager = \Drupal::service('plugin.manager.mail');
+                $module =  'indieweb';
+                $key = 'webmention_comment_created';
+                $to = $config->get('comment_create_mail_notification');
+                $params['comment'] = $comment;
+                $params['comment_webmention_body'] = $webmention->get('content_text')->value;
+                $langcode = \Drupal::currentUser()->getPreferredLangcode();
+                $mailManager->mail($module, $key, $to, $langcode, $params, NULL);
+              }
             }
           }
         }
@@ -569,6 +580,34 @@ function indieweb_webmention_entity_insert(WebmentionEntityInterface $webmention
   }
 
 }
+
+/**
+ * Implements hook_mail.
+ *
+ * @param $key
+ * @param $message
+ * @param $params
+ */
+function indieweb_mail($key, &$message, $params) {
+
+  $options = array(
+    'langcode' => $message['langcode'],
+  );
+
+  switch ($key) {
+    case 'webmention_comment_created':
+      /** @var \Drupal\comment\CommentInterface $comment */
+      $comment = $params['comment'];
+      $message['from'] = \Drupal::config('system.site')->get('mail');
+      $message['subject'] = t('Comment created on "@title" via webmention', array('@title' => $comment->getCommentedEntity()->label()), $options);
+      $message['body'][] = $params['comment_webmention_body'];
+      if (!$comment->isPublished()) {
+        $message['body'][] = "---------------------\n" . t('The comment is unpublished, so check the approval queue at @url', ['@url' => Url::fromRoute('comment.admin_approval', [], ['absolute' => TRUE])->toString()]);
+      }
+      break;
+  }
+}
+
 
 /**
  * Implements hook_cron().

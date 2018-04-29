@@ -123,6 +123,18 @@ class CommentSettingsForm extends ConfigFormBase {
       ),
     ];
 
+    $form['comment_create']['comment_create_mail_notification'] = [
+      '#type' => 'email',
+      '#title' => $this->t('Mail notification'),
+      '#description' => $this->t('Send a notification to the email address entered here. Leave empty to disable mail notifications'),
+      '#default_value' => $config->get('comment_create_mail_notification'),
+      '#states' => array(
+        'visible' => array(
+          ':input[name="comment_create_enable"]' => array('checked' => TRUE),
+        ),
+      ),
+    ];
+
     return parent::buildForm($form, $form_state);
   }
 
@@ -137,6 +149,7 @@ class CommentSettingsForm extends ConfigFormBase {
       ->set('comment_create_comment_type', $form_state->getValue('comment_create_comment_type'))
       ->set('comment_create_webmention_reference_field', $form_state->getValue('comment_create_webmention_reference_field'))
       ->set('comment_create_node_comment_field', $form_state->getValue('comment_create_node_comment_field'))
+      ->set('comment_create_mail_notification', $form_state->getValue('comment_create_mail_notification'))
       ->save();
 
     parent::submitForm($form, $form_state);
