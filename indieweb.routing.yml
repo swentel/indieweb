@@ -85,3 +85,12 @@ indieweb.syndications_list:
     _title: 'Syndications'
   requirements:
     _permission: 'view indieweb syndications'
+
+indieweb.comment.canonical:
+  path: '/comment/indieweb/{comment}'
+  defaults:
+    _title_callback: '\Drupal\indieweb\Controller\CommentController::commentPermalinkTitle'
+    _controller: '\Drupal\indieweb\Controller\CommentController::commentPermalink'
+  requirements:
+    _entity_access: 'comment.view'
+    comment: \d+
