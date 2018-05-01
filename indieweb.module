@@ -380,7 +380,11 @@ function indieweb_preprocess_image_style(&$variables) {
  */
 function indieweb_preprocess_file_video(&$variables) {
   if (\Drupal::config('indieweb.microformats')->get('u_video')) {
-    $variables['attributes']->addClass('u-video');
+    if (!empty($variables['files'])) {
+      foreach ($variables['files'] as $file) {
+        $file['source_attributes']->addClass('u-video');
+      }
+    }
   }
 }
 
@@ -389,7 +393,11 @@ function indieweb_preprocess_file_video(&$variables) {
  */
 function indieweb_preprocess_file_entity_video(&$variables) {
   if (\Drupal::config('indieweb.microformats')->get('u_video')) {
-    $variables['attributes']->addClass('u-video');
+    if (!empty($variables['files'])) {
+      foreach ($variables['files'] as $file) {
+        $file['source_attributes']->addClass('u-video');
+      }
+    }
   }
 }
 
