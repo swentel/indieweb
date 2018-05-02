@@ -118,6 +118,9 @@ class PublishTest extends IndiewebBrowserTestBase {
    *
    * @param $channels
    * @param bool $visible
+   *
+   * @throws \Behat\Mink\Exception\ExpectationException
+   * @throws \Behat\Mink\Exception\ResponseTextException
    */
   protected function assertChannelFieldsOnNodeForm($channels, $visible = TRUE) {
 
@@ -139,6 +142,8 @@ class PublishTest extends IndiewebBrowserTestBase {
    * @param $channels
    * @param bool $visible
    * @param $add_back_link
+   *
+   * @throws \Behat\Mink\Exception\ExpectationException
    */
   protected function assertChannelFieldsOnNodeView($channels, $visible = TRUE, $add_back_link = 'always') {
 
@@ -159,7 +164,7 @@ class PublishTest extends IndiewebBrowserTestBase {
 
       }
       else {
-        $this->assertSession()->responseNotContains($url);
+        $this->assertSession()->responseNotContains('<a href="' . $url);
       }
     }
   }
