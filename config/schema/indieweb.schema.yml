@@ -47,13 +47,19 @@ indieweb.microformats:
   mapping:
     h_entry:
       type: boolean
-      label: 'Enable microformat h-entry class'
+      label: 'Enable microformat h-entry class for nodes'
+    h_entry_comment:
+      type: boolean
+      label: 'Enable microformat h-entry class for comments'
     h_event:
       type: string
       label: 'Enable microformat h-event class for a node type'
     post_metadata:
       type: boolean
-      label: 'Enable microformat metadata classes like dt-published and u-url'
+      label: 'Enable microformat metadata classes like dt-published and u-url for nodes'
+    post_metadata_comment:
+      type: boolean
+      label: 'Enable microformat metadata classes like dt-published and u-url for comments'
     p_name_exclude_node_type:
       type: string
       label: 'Node type on which p-name will not be printed'
