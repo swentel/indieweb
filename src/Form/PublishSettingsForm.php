@@ -33,7 +33,7 @@ class PublishSettingsForm extends ConfigFormBase {
     $config = $this->config('indieweb.publish');
 
     $form['info'] = [
-      '#markup' => '<p>' . $this->t('The easiest way to publish content on social networks is by using <a href="https://brid.gy/" target="_blank">https://brid.gy</a>. <br />You have to create an account by signing in with your preferred social network. Bridgy is open source so you can also host the service yourself.<br /><br />Publishing, which is nothing more than sending a webmention, can be done per node in the "Publish to" fieldset, which is protected with the "send webmentions" permission.<br />If no channels are configured, there is nothing to do. There is a syndication field on every node type available to render your <a href=":syndication_link">syndications</a> for <a href="https://indieweb.org/posse-post-discovery" target="_blank">POSSE-Post-Discovery</a>.', [':syndication_link' => Url::fromRoute('indieweb.syndications_list')->toString()]) . '</p>',
+      '#markup' => '<p>' . $this->t('The easiest way to publish content on social networks is by using <a href="https://brid.gy/" target="_blank">https://brid.gy</a>. <br />You have to create an account by signing in with your preferred social network. Bridgy is open source so you can also host the service yourself.<br /><br />Publishing, which is nothing more than sending a webmention, can be done per node in the "Publish to" fieldset, which is protected with the "send webmentions" permission.<br />If no channels are configured, there is nothing to do. There is a syndication field on every node and comment type available to render your <a href=":syndication_link">syndications</a> for <a href="https://indieweb.org/posse-post-discovery" target="_blank">POSSE-Post-Discovery</a>.<br />If comments are enabled, put those fields only on the microformat view mode. The comment itself is available on comment/indieweb/id and it is this URL that will be used for sending webmentions.', [':syndication_link' => Url::fromRoute('indieweb.syndications_list')->toString()]) . '</p>',
     ];
 
     $form['channels_wrapper'] = [
@@ -68,12 +68,27 @@ class PublishSettingsForm extends ConfigFormBase {
     ];
 
     // Collect fields.
-    $link_fields = [];
+    $link_fields = $reference_fields = [];
     $fields = \Drupal::service('entity_field.manager')->getFieldStorageDefinitions('node');
+    $fields += \Drupal::service('entity_field.manager')->getFieldStorageDefinitions('comment');
     /** @var \Drupal\Core\Field\FieldStorageDefinitionInterface $field */
     foreach ($fields as $key => $field) {
       if (in_array($field->getType(), ['link'])) {
-        $link_fields[$key] = $field->getName();
+        $link_fields[$key] = $field->getName() . ' (' . $field->getTargetEntityTypeId() . ')';
+      }
+    }
+
+    $comment_enabled = \Drupal::moduleHandler()->moduleExists('comment');
+    if ($comment_enabled) {
+      $comment_fields = \Drupal::service('entity_field.manager')->getFieldStorageDefinitions('comment');
+      /** @var \Drupal\Core\Field\FieldStorageDefinitionInterface $field */
+      foreach ($comment_fields as $key => $field) {
+        if (in_array($field->getType(), ['entity_reference'])) {
+          $settings = $field->getSettings();
+          if (isset($settings['target_type']) && $settings['target_type'] == 'webmention_entity') {
+            $reference_fields[$key] = $field->getName();
+          }
+        }
       }
     }
 
@@ -91,6 +106,23 @@ class PublishSettingsForm extends ConfigFormBase {
       '#options' => $link_fields,
       '#default_value' => explode('|', $config->get('publish_link_fields')),
       '#description' => $this->t('When you have a "Reply" post type, or reply on a comment, add a link field to which you are replying too. This URL will be used then to send the webmention to.<br />You can also just use the custom field above of course. Do not select a field if you do not want to use this feature.'),
+    ];
+
+    $form['custom_wrapper']['publish_comment_webmention_field'] = [
+      '#type' => 'select',
+      '#title' => $this->t('Webmention entity reference field'),
+      '#options' => ['' => $this->t('Do not check')] + $reference_fields,
+      '#description' => $this->t('Select the comment webmention reference field. When replying on a comment, the value of the webmention of the parent comment will be used to populate link fields on the comment.'),
+      '#access' => $comment_enabled,
+      '#default_value' => $config->get('publish_comment_webmention_field'),
+    ];
+
+    $form['custom_wrapper']['publish_comment_permission_fields'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Block access to link and webmention fields on comments'),
+      '#description' => $this->t('Webmention reference field and link fields will be hidden for users who do not have the "Send webmention" permission.'),
+      '#access' => $comment_enabled,
+      '#default_value' => $config->get('publish_comment_permission_fields'),
     ];
 
     $form['send_wrapper'] = [
@@ -145,6 +177,8 @@ class PublishSettingsForm extends ConfigFormBase {
       ->set('publish_log_response', $form_state->getValue('publish_log_response'))
       ->set('publish_custom_url', $form_state->getValue('publish_custom_url'))
       ->set('publish_link_fields', $link_fields_string)
+      ->set('publish_comment_webmention_field', $form_state->getValue('publish_comment_webmention_field'))
+      ->set('publish_comment_permission_fields', $form_state->getValue('publish_comment_permission_fields'))
       ->save();
 
     Cache::invalidateTags(['rendered']);

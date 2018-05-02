@@ -167,6 +167,7 @@ class WebmentionEntity extends ContentEntityBase implements WebmentionEntityInte
       'author_name' => 'Author name',
       'author_photo' => 'Author avatar',
       'author_url' => 'Author URL',
+      'url' => 'url',
       'rsvp' => 'RSVP',
     ];
 

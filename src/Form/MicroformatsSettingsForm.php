@@ -26,6 +26,7 @@ class MicroformatsSettingsForm extends ConfigFormBase {
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
+    $comment_enabled = \Drupal::moduleHandler()->moduleExists('comment');
 
     $config = $this->config('indieweb.microformats');
 
@@ -48,6 +49,13 @@ class MicroformatsSettingsForm extends ConfigFormBase {
       '#description' => $this->t('This will be added on full, teaser and microformat view mode.'),
     ];
 
+    $form['classes']['h_entry_comment'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('<em>h-entry</em> on comment wrappers.'),
+      '#default_value' => $config->get('h_entry_comment'),
+      '#description' => $this->t('This will be added on the microformat view mode on comment/indieweb/id'),
+    ];
+
     $form['classes']['h_event'] = [
       '#type' => 'select',
       '#title' => $this->t('<em>h-event</em> on node wrappers.'),
@@ -62,6 +70,13 @@ class MicroformatsSettingsForm extends ConfigFormBase {
       '#default_value' => $config->get('e_content'),
     ];
 
+    $form['classes']['e_content_comment'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('<em>e-content</em> on standard comment body fields.'),
+      '#default_value' => $config->get('e_content_comment'),
+      '#access' => $comment_enabled,
+    ];
+
     $form['classes']['u_photo'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('<em>u-photo</em> on image styles.'),
@@ -70,9 +85,16 @@ class MicroformatsSettingsForm extends ConfigFormBase {
 
     $form['classes']['post_metadata'] = [
       '#type' => 'checkbox',
-      '#title' => $this->t('<em>dt-published</em>, <em>p-name</em>, <em>u-author</em> and <em>u-url</em> in a hidden span element.'),
+      '#title' => $this->t('<em>dt-published</em>, <em>p-name</em>, <em>u-author</em> and <em>u-url</em> in a hidden span element on nodes.'),
       '#description' => $this->t('This will be added on full, teaser and microformat view mode. Make sure \'Display author and date information\' is enabled, or put {{ metadata }} in your node template. Example:<br /><div class="indieweb-highlight-code">&lt;span class="hidden"&gt;&lt;a href="http://url" class="u-url"&gt;&lt;span class="p-name"&gt;title&lt;/span&gt;&lt;span class="dt-published"&gt;2018-01-31T20:38:25+01:00&lt;/span&gt;&lt;/a&gt;&lt;a class="u-author" href="/"&gt;&lt;/a&gt;&lt;/span&gt;</div>'),
       '#default_value' => $config->get('post_metadata'),
+    ];
+
+    $form['classes']['post_metadata_comment'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('<em>dt-published</em>, <em>u-author</em> and <em>u-url</em> in a hidden span element on comments.'),
+      '#description' => $this->t('This will be added on the microformat view mode. p-name will always be excluded. Example:<br /><div class="indieweb-highlight-code">&lt;span class="hidden"&gt;&lt;a href="http://url" class="u-url"&gt;&lt;span class="dt-published"&gt;2018-01-31T20:38:25+01:00&lt;/span&gt;&lt;/a&gt;&lt;a class="u-author" href="/"&gt;&lt;/a&gt;&lt;/span&gt;</div>'),
+      '#default_value' => $config->get('post_metadata_comment'),
     ];
 
     $form['classes']['u_video'] = [
@@ -120,10 +142,13 @@ class MicroformatsSettingsForm extends ConfigFormBase {
 
     $this->config('indieweb.microformats')
       ->set('h_entry', $form_state->getValue('h_entry'))
+      ->set('h_entry_comment', $form_state->getValue('h_entry_comment'))
       ->set('h_event', $form_state->getValue('h_event'))
       ->set('post_metadata', $form_state->getValue('post_metadata'))
+      ->set('post_metadata_comment', $form_state->getValue('post_metadata_comment'))
       ->set('p_name_exclude_node_type', $form_state->getValue('p_name_exclude_node_type'))
       ->set('e_content', $form_state->getValue('h_entry'))
+      ->set('e_content_comment', $form_state->getValue('e_content_comment'))
       ->set('u_photo', $form_state->getValue('u_photo'))
       ->set('u_video', $form_state->getValue('u_video'))
       ->set('p_summary', trim($form_state->getValue('p_summary')))

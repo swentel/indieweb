@@ -12,7 +12,8 @@ Current functionality:
 - Microformats for content and images
 - IndieAuth for Authentication API
 - Create content via Micropub endpoint
-- Create comments from 'in-reply-to'
+- Auto-create comments from 'in-reply-to'
+- Reply on comments and send webmention
 - Microsub link exposing
 
 This is only the tip of the iceberg and much more functionality will be added.
@@ -88,15 +89,17 @@ available on the page you want to publish, e.g.
 Note that Bridgy prefers p-summary over e-content, but for original tweets p-name first. See
 https://brid.gy/about#microformats. You can preview your posts on Bridgy to verify your markup is ok.
 
-This module exposes per channel an extra field which you can configure on the 'Manage Display' pages of each node type.
-That field exposes that snippet. See indieweb_node_view(). More info about this at https://brid.gy/about#webmentions
-Currently this field will be printed, even if you do not publish to that channel, that will be altered later.
-
-You can also configure to just enter a custom URL, or use a "link" field to publish to.
-
 The module ships with default Twitter and Facebook channels. More channels and other configuration can be configured at
 /admin/config/services/indieweb/publish. These channels are also used for the q=syndicate-to request for micropub, see
 micropub for more information.
+
+This module exposes per channel an extra field which you can configure on the 'Manage Display' pages of each node and
+comment type. That field exposes that snippet. See indieweb_node_view() and indieweb_comment_view(). More info about
+this at https://brid.gy/about#webmentions Currently this field will be printed, even if you do not publish to that
+channel, that will be altered later.
+
+You can also configure to just enter a custom URL, or use a "link" field to publish to. On comments, these link fields
+can be pre-filled when replying when the parent comment has a webmention reference.
 
 ## Microformats
 
@@ -182,7 +185,8 @@ webmention has comments enabled.
 You have to create an entity reference field on your comment type which points to a webmention. On the 'Manage display'
 page of the comment you can set the formatter of that reference field to 'Webmention'. Currently the formatter uses the
 text content of the webmention, using the 'restricted_html' content format which comes default in Drupal 8. Also, don't
-forget to set permissions to view webmentions.
+forget to set permissions to view webmentions. When replying, and the comment has a link field, this field can also
+be prefilled, see the 'Sending' section.
 
 Configuration is at /admin/config/services/indieweb/comments
 

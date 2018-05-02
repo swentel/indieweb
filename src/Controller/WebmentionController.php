@@ -87,6 +87,11 @@ class WebmentionController extends ControllerBase {
         }
       }
 
+      // Url.
+      if (!empty($mention['post']['url'])) {
+        $values['url'] = ['value' => $mention['post']['url']];
+      }
+
       // Text content.
       foreach (['html', 'text'] as $key) {
         if (!empty($mention['post']['content'][$key])) {
@@ -101,7 +106,7 @@ class WebmentionController extends ControllerBase {
 
       // Rsvp.
       if (!empty($mention['post']['rsvp'])) {
-        $values['rsvp'] = $mention['post']['rsvp'];
+        $values['rsvp'] = ['value' => $mention['post']['rsvp']];
       }
 
       // Save the entity.

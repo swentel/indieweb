@@ -45,7 +45,7 @@ class CommentController extends ControllerBase {
         throw new AccessDeniedHttpException();
       }
 
-      $build = $this->entityTypeManager()->getViewBuilder('comment')->view($comment, 'microformat');
+      $build = $this->entityTypeManager()->getViewBuilder('comment')->view($comment, 'indieweb_microformat');
 
       // Set canonical and shortlink to default comment permalink.
       $build['#attached']['html_head_link'][] = [

@@ -60,6 +60,9 @@ indieweb.microformats:
     e_content:
       type: boolean
       label: 'Enable microformat e-content class'
+    e_content_comment:
+      type: boolean
+      label: 'Enable microformat e-content class on comment'
     u_photo:
       type: boolean
       label: 'Enable microformat u-photo class'
@@ -306,6 +309,12 @@ indieweb.publish:
     publish_log_response:
       type: boolean
       label: 'Whether to log the response of the publish call'
+    publish_comment_webmention_field:
+      type: string
+      label: 'The comment webmention field'
+    publish_comment_permission_fields:
+      type: boolean
+      label: 'Put fields under permission'
 
 # schema for indieweb.webmention
 indieweb.webmention:

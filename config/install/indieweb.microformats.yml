@@ -1,9 +1,12 @@
 h_entry: false
+h_entry_comment: false
 h_event: ''
 e_content: false
+e_content_comment: false
 u_photo: false
 u_video: false
 post_metadata: false
+post_metadata_comment: false
 p_name_exclude_node_type: ''
 p_bridgy_twitter_content: false
 p_summary: ''

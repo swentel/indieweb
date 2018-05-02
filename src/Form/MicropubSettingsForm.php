@@ -109,7 +109,7 @@ class MicropubSettingsForm extends ConfigFormBase {
     $form['article'] = [
       '#type' => 'fieldset',
       '#title' => $this->t('Create a node when a micropub article is posted'),
-      '#description' => $this->t("An article request contains 'content', 'name' and the 'h' value is 'entry'. Think of it as a blog post. The article can also contain a 'mp-syndicate-to' value which will contain the channel you want to publish to, see the <a href=':link_publish'>Publish section</a> to configure this.<br /><strong>Important:</strong> might not work with clients who send json requests (e.g. quill), will be fixed when https://github.com/swentel/indieweb/issues/44 is done", [':link_publish' => Url::fromRoute('indieweb.admin.publish_settings')->toString(),]),
+      '#description' => $this->t("An article request contains 'content', 'name' and the 'h' value is 'entry'. Think of it as a blog post. The article can also contain a 'mp-syndicate-to' value which will contain the channel you want to publish to, see the <a href=':link_send'>Send webmention screen</a> to configure this.<br /><strong>Important:</strong> might not work with clients who send json requests (e.g. quill), will be fixed when https://github.com/swentel/indieweb/issues/44 is done", [':link_send' => Url::fromRoute('indieweb.admin.publish_settings')->toString(),]),
       '#states' => array(
         'visible' => array(
           ':input[name="micropub_enable"]' => array('checked' => TRUE),
@@ -207,7 +207,7 @@ class MicropubSettingsForm extends ConfigFormBase {
     $form['note'] = [
       '#type' => 'fieldset',
       '#title' => $this->t('Create a node when a micropub note is posted'),
-      '#description' => $this->t("A note request contains 'content', but no 'name' and the 'h' value is 'entry'. Think of it as a Tweet. The note can also contain a 'mp-syndicate-to' value which will contain the channel you want to publish to, see the <a href=':link_publish'>Publish section</a> to configure this.", [':link_publish' => Url::fromRoute('indieweb.admin.publish_settings')->toString(),]),
+      '#description' => $this->t("A note request contains 'content', but no 'name' and the 'h' value is 'entry'. Think of it as a Tweet. The note can also contain a 'mp-syndicate-to' value which will contain the channel you want to publish to, see the <a href=':link_send'>Send webmention screen</a> to configure this.", [':link_send' => Url::fromRoute('indieweb.admin.publish_settings')->toString(),]),
       '#states' => array(
         'visible' => array(
           ':input[name="micropub_enable"]' => array('checked' => TRUE),
@@ -305,7 +305,7 @@ class MicropubSettingsForm extends ConfigFormBase {
     $form['like'] = [
       '#type' => 'fieldset',
       '#title' => $this->t('Create a node when a micropub like is posted'),
-      '#description' => $this->t("A like request contains a URL in 'like-of' and 'h' value is 'entry'. The like can also contain a 'mp-syndicate-to' value which will contain the channel you want to publish to, see the <a href=':link_publish'>Publish section</a> to configure this."),
+      '#description' => $this->t("A like request contains a URL in 'like-of' and 'h' value is 'entry'. The like can also contain a 'mp-syndicate-to' value which will contain the channel you want to publish to, see the <a href=':link_send'>Send webmention screen</a> to configure this."),
       '#states' => array(
         'visible' => array(
           ':input[name="micropub_enable"]' => array('checked' => TRUE),
@@ -403,7 +403,7 @@ class MicropubSettingsForm extends ConfigFormBase {
     $form['reply'] = [
       '#type' => 'fieldset',
       '#title' => $this->t('Create a node when a micropub reply is posted'),
-      '#description' => $this->t("A reply request contains a URL in 'in-reply-to', has content and 'h' value is 'entry'. The reply can also contain a 'mp-syndicate-to' value which will contain the channel you want to publish to, see the <a href=':link_publish'>Publish section</a> to configure this."),
+      '#description' => $this->t("A reply request contains a URL in 'in-reply-to', has content and 'h' value is 'entry'. The reply can also contain a 'mp-syndicate-to' value which will contain the channel you want to publish to, see the <a href=':link_send'>Send webmention screen</a> to configure this."),
       '#states' => array(
         'visible' => array(
           ':input[name="micropub_enable"]' => array('checked' => TRUE),
@@ -501,7 +501,7 @@ class MicropubSettingsForm extends ConfigFormBase {
     $form['repost'] = [
       '#type' => 'fieldset',
       '#title' => $this->t('Create a node when a micropub repost is posted'),
-      '#description' => $this->t("A repost request contains a URL in 'repost-of' and 'h' value is 'entry'. The repost can also contain a 'mp-syndicate-to' value which will contain the channel you want to publish to, see the <a href=':link_publish'>Publish section</a> to configure this."),
+      '#description' => $this->t("A repost request contains a URL in 'repost-of' and 'h' value is 'entry'. The repost can also contain a 'mp-syndicate-to' value which will contain the channel you want to publish to, see the <a href=':link_send'>Send webmention screen</a> to configure this."),
       '#states' => array(
         'visible' => array(
           ':input[name="micropub_enable"]' => array('checked' => TRUE),
@@ -599,7 +599,7 @@ class MicropubSettingsForm extends ConfigFormBase {
     $form['bookmark'] = [
       '#type' => 'fieldset',
       '#title' => $this->t('Create a node when a micropub bookmark is posted'),
-      '#description' => $this->t("A bookmark request contains a URL in 'bookmark-of' and 'h' value is 'entry'. The bookmark can also contain a 'mp-syndicate-to' value which will contain the channel you want to publish to, see the <a href=':link_publish'>Publish section</a> to configure this."),
+      '#description' => $this->t("A bookmark request contains a URL in 'bookmark-of' and 'h' value is 'entry'. The bookmark can also contain a 'mp-syndicate-to' value which will contain the channel you want to publish to, see the <a href=':link_send'>Send webmention screen</a> to configure this."),
       '#states' => array(
         'visible' => array(
           ':input[name="micropub_enable"]' => array('checked' => TRUE),
@@ -697,7 +697,7 @@ class MicropubSettingsForm extends ConfigFormBase {
     $form['event'] = [
       '#type' => 'fieldset',
       '#title' => $this->t('Create a node when a micropub event is posted'),
-      '#description' => $this->t("An event request contains a start and end date and the 'h' value is 'event'. The event can also contain a 'mp-syndicate-to' value which will contain the channel you want to publish to, see the <a href=':link_publish'>Publish section</a> to configure this."),
+      '#description' => $this->t("An event request contains a start and end date and the 'h' value is 'event'. The event can also contain a 'mp-syndicate-to' value which will contain the channel you want to publish to, see the <a href=':link_send'>Send webmention screen</a> to configure this."),
       '#states' => array(
         'visible' => array(
           ':input[name="micropub_enable"]' => array('checked' => TRUE),
@@ -795,7 +795,7 @@ class MicropubSettingsForm extends ConfigFormBase {
     $form['rsvp'] = [
       '#type' => 'fieldset',
       '#title' => $this->t('Create a node when a micropub rsvp is posted'),
-      '#description' => $this->t("An rsvp request contains an rsvp field. The rsvp can also contain a 'mp-syndicate-to' value which will contain the channel you want to publish to, see the <a href=':link_publish'>Publish section</a> to configure this."),
+      '#description' => $this->t("An rsvp request contains an rsvp field. The rsvp can also contain a 'mp-syndicate-to' value which will contain the channel you want to publish to, see the <a href=':link_send'>Send webmention screen</a> to configure this."),
       '#states' => array(
         'visible' => array(
           ':input[name="micropub_enable"]' => array('checked' => TRUE),
