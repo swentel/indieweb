@@ -188,6 +188,9 @@ text content of the webmention, using the 'restricted_html' content format which
 forget to set permissions to view webmentions. When replying, and the comment has a link field, this field can also
 be prefilled, see the 'Sending' section.
 
+Every comment is available also at comment/indieweb/cid so this URL can also be a target for a webmention. If a
+webmention is send to this target, a comment will be created on the node, with the target cid as the parent.
+
 Configuration is at /admin/config/services/indieweb/comments
 
 Configuration still in settings.php
@@ -197,6 +200,22 @@ Configuration still in settings.php
   ```
   $settings['indieweb_comment_authors'] = ['Your name' => 3];
   ```
+
+## Feeds
+
+Besides the standard RSS feed which you can create where readers can subscribe to, you can also create microformat2
+feeds. These can either return HTML or JSON. You will need feeds when:
+
+- you use brid.gy: the service will look for html link headers with rel="feed" and use those pages to crawl so it knows
+  to which content it needs to send webmentions too.
+- you want to allow IndieWeb readers (Monocle, Together, Indigenous) to subscribe to your content. These are alternate
+  types which can either link to a page with microformat entries. It's advised to have an h-card on that page too as
+  some parsers don't go to the homepage to fetch that content.
+
+Because content can be nodes or comments, it isn't possible to use views. However, this module allows you to create a
+multiple feeds which aggregates all these content in a page and/or feed.
+
+Configuration is at /admin/config/services/indieweb/feeds
 
 ## Microsub
 

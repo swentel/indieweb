@@ -37,7 +37,7 @@ class CommentSettingsForm extends ConfigFormBase {
     $form['comment_create'] = [
       '#type' => 'fieldset',
       '#title' => $this->t('Create a comment'),
-      '#description' => $this->t("When a webmention is saved and is of property 'in-reply-to', it is possible to create a comment if the target of the webmention has comments enabled.<br />You have to create an entity reference field on your comment type which points to a webmention.<br />On the 'Manage display' page of the comment you can set the formatter of that entity reference field to 'Webmention'.<br />Currently the formatter uses the text content of the webmention, using the 'restricted_html' content format which comes default in Drupal 8.<br />Also, don't forget to set permissions to view webmentions."),
+      '#description' => $this->t("When a webmention is saved and is of property 'in-reply-to', it is possible to create a comment if the target of the webmention has comments enabled.<br />You have to create an entity reference field on your comment type which points to a webmention.<br />On the 'Manage display' page of the comment you can set the formatter of that entity reference field to 'Webmention'.<br />Currently the formatter uses the text content of the webmention, using the 'restricted_html' content format which comes default in Drupal 8.<br />Also, don't forget to set permissions to view webmentions.<br />Every comment is available also at comment/indieweb/cid so this URL can also be a target for a webmention. If a webmention is send to this target, a comment will be created on the node, with the target cid as the parent."),
     ];
 
     $form['comment_create']['comment_create_enable'] = [

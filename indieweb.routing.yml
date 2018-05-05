@@ -30,6 +30,14 @@ indieweb.admin.microformats_settings:
   requirements:
     _permission: 'administer indieweb'
 
+indieweb.admin.feeds_settings:
+  path: '/admin/config/services/indieweb/feeds'
+  defaults:
+    _controller: '\Drupal\indieweb\Controller\FeedController::adminFeedList'
+    _title: 'Feeds'
+  requirements:
+    _permission: 'administer indieweb'
+
 indieweb.admin.micropub_settings:
   path: '/admin/config/services/indieweb/micropub'
   defaults:
