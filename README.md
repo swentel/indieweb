@@ -1,9 +1,9 @@
-# Indieweb integration for Drupal 8
+# IndieWeb integration for Drupal 8
 
 ## About this module.
 
-Integrates the philosophy of Indieweb in your Drupal website.
-For more information about indieweb, see https://indieweb.org/.
+Integrates the philosophy of IndieWeb in your Drupal website.
+For more information about IndieWeb, see https://indieweb.org/.
 
 Current functionality:
 
@@ -33,8 +33,9 @@ Another good tool is http://xray.p3k.io, which displays the results in JSON.
 
 ## To install
 
-- composer require indieweb/mention-client in the root of your Drupal installation.
-- go to admin/modules and toggle 'Indieweb' to enable the module.
+- composer require indieweb/mention-client
+- composer require p3k/xray
+- go to admin/modules and toggle 'IndieWeb' to enable the module.
 
 ## Webmentions / Webmention.io
 
