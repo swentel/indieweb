@@ -2,21 +2,123 @@
 
 namespace Drupal\indieweb\Controller;
 
+use Drupal\Core\Cache\CacheableJsonResponse;
 use Drupal\Core\Controller\ControllerBase;
+use Drupal\Core\Url;
+use Drupal\indieweb\Entity\FeedInterface;
+use Exception;
+use p3k\XRay;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 
 class FeedController extends ControllerBase {
 
   /**
-   * Routing callback: admin overview.
+   * Routing callback: update items for a feed.
+   *
+   * @param \Drupal\indieweb\Entity\FeedInterface $indieweb_feed
+   * @return \Symfony\Component\HttpFoundation\RedirectResponse
+   *
+   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+   * @throws \Exception
    */
-  public function adminFeedList() {
+  public function updateItems(FeedInterface $indieweb_feed) {
+    indieweb_update_feed_items($indieweb_feed);
+    drupal_set_message($this->t('Updated items for %feed', ['%feed' => $indieweb_feed->label()]));
+    return new RedirectResponse(Url::fromRoute('entity.indieweb_feed.collection')->toString());
+  }
+
+  /**
+   * Routing callback: returns a microformat feed.
+   *
+   * @param \Drupal\indieweb\Entity\FeedInterface $indieweb_feed
+   *
+   * @return array|\Symfony\Component\HttpFoundation\Response
+   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+   */
+  public function feedMicroformat(FeedInterface $indieweb_feed) {
     $build = [];
 
-    $build['info'] = [
-      '#markup' => $this->t('<p>Besides the standard RSS feed which you can create where readers can subscribe to, you can also create microformat feeds. These can either be in HTML or in json. You will need feeds when:</p><ul><li>you use brid.gy: the service will look for html link headers with rel="feed" and use those pages to crawl so it knows to which content it needs to send webmentions too.</li><li>you want to allow IndieWeb readers (Monocle, Together, Indigenous) to subscribe to your content. These are alternatetypes which can either link to a page with microformat entries. It\'s advised to have an h-card on that page too as some parsers don\'t go to the homepage to fetch that content.</li></ul><p>Because content can be nodes or comments, it isn\'t possible to use views. However, you can create multiple feeds which aggregate the content in a page and/or feed.</p>')
-    ];
+    $build['#title'] = $indieweb_feed->label();
+
+    // Author info.
+    if ($indieweb_feed->getAuthor()) {
+      $build['author'] = [
+        '#markup' => '<div class="h-card author-information hidden">' .
+          $indieweb_feed->getAuthor() .
+          '</div>',
+        '#allowed_tags' => ['a', 'img', 'div', 'span'],
+      ];
+    }
+
+    $items = [];
+    $query = \Drupal::database()
+      ->select('indieweb_feed_items', 'ifi')
+      ->extend('\Drupal\Core\Database\Query\PagerSelectExtender');
+    $query->fields('ifi');
+    $query->condition('feed', $indieweb_feed->id());
+    $query->condition('published', 1);
+    $records = $query
+      ->limit($indieweb_feed->getLimit())
+      ->orderBy('timestamp', 'DESC')
+      ->execute();
+
+
+    foreach ($records as $record) {
+      $entity = \Drupal::entityTypeManager()->getStorage($record->entity_type_id)->load($record->entity_id);
+      if ($entity) {
+        try {
+          $items[] = \Drupal::entityTypeManager()->getViewBuilder($record->entity_type_id)->view($entity, 'indieweb_microformat');
+        }
+        catch (Exception $ignored) {}
+      }
+    }
+
+    if (empty($items)) {
+      $build['info']['#markup'] = '<p>' . $this->t('No items found') . '</p>';
+    }
+    else {
+
+      $build['wrapper'] = [
+        '#type' => 'container',
+        '#attributes' => [
+          'class' => ['h-feed'],
+        ],
+      ];
+
+      $build['wrapper']['items'] = $items;
+
+      $build['pager'] = [
+        '#type' => 'pager',
+      ];
+    }
+
+    $build['#cache']['tags'][] = 'indieweb_feed:' . $indieweb_feed->id();
 
     return $build;
+  }
+
+  /**
+   * Routing callback: returns a jf2 feed.
+   *
+   * @param \Drupal\indieweb\Entity\FeedInterface $indieweb_feed
+   *
+   * @return \Symfony\Component\HttpFoundation\JsonResponse
+   */
+  public function feedJf2(FeedInterface $indieweb_feed) {
+    $data = [];
+
+    $path = Url::fromUri('internal:/' . $indieweb_feed->getPath(), ['absolute' => TRUE])->toString();
+    $client = \Drupal::httpClient();
+    try {
+      $response = $client->get($path);
+      $body = $response->getBody()->getContents();
+      $xray = new XRay();
+      $data = $xray->parse($path, $body, ['expect' => 'feed']);
+    }
+    catch (Exception $ignored) {}
+
+    return JsonResponse::create($data);
   }
 
 }

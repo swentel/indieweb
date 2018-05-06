@@ -30,14 +30,6 @@ indieweb.admin.microformats_settings:
   requirements:
     _permission: 'administer indieweb'
 
-indieweb.admin.feeds_settings:
-  path: '/admin/config/services/indieweb/feeds'
-  defaults:
-    _controller: '\Drupal\indieweb\Controller\FeedController::adminFeedList'
-    _title: 'Feeds'
-  requirements:
-    _permission: 'administer indieweb'
-
 indieweb.admin.micropub_settings:
   path: '/admin/config/services/indieweb/micropub'
   defaults:
@@ -102,3 +94,14 @@ indieweb.comment.canonical:
   requirements:
     _entity_access: 'comment.view'
     comment: \d+
+
+entity.indieweb_feed.update_items:
+  path: '/admin/config/services/indieweb/feeds/{indieweb_feed}/update-items'
+  defaults:
+    _controller: '\Drupal\indieweb\Controller\FeedController::updateItems'
+    _title: 'Update items'
+  requirements:
+    _permission: 'administer indieweb'
+
+route_callbacks:
+  - '\Drupal\indieweb\Routing\FeedRoutes::routes'

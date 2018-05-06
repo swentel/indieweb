@@ -28,9 +28,9 @@ indieweb.admin.microformats_settings:
   route_name: indieweb.admin.microformats_settings
   base_route: indieweb.admin.dashboard
 
-indieweb.admin.feeds_settings:
+indieweb.admin.feeds_collection:
   title: 'Feeds'
-  route_name: indieweb.admin.feeds_settings
+  route_name: entity.indieweb_feed.collection
   base_route: indieweb.admin.dashboard
 
 indieweb.admin.micropub_settings:

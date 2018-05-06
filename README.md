@@ -12,8 +12,10 @@ Current functionality:
 - Microformats for content and images
 - IndieAuth for Authentication API
 - Create content via Micropub endpoint
+  (note, article, event, rsvp, reply, like, repost, bookmark)
 - Auto-create comments from 'in-reply-to'
 - Reply on comments and send webmention
+- Feeds: microformats and jf2
 - Microsub link exposing
 
 This is only the tip of the iceberg and much more functionality will be added.
@@ -204,18 +206,26 @@ Configuration still in settings.php
 ## Feeds
 
 Besides the standard RSS feed which you can create where readers can subscribe to, you can also create microformat2
-feeds. These can either return HTML or JSON. You will need feeds when:
+feeds. These can either return HTML or JF2FEED+JSON. You will need feeds when:
 
 - you use brid.gy: the service will look for html link headers with rel="feed" and use those pages to crawl so it knows
-  to which content it needs to send webmentions too.
+  to which content it needs to send webmentions to.
 - you want to allow IndieWeb readers (Monocle, Together, Indigenous) to subscribe to your content. These are alternate
   types which can either link to a page with microformat entries. It's advised to have an h-card on that page too as
   some parsers don't go to the homepage to fetch that content.
 
-Because content can be nodes or comments, it isn't possible to use views. However, this module allows you to create a
-multiple feeds which aggregates all these content in a page and/or feed.
+Because content can be nodes, comments, etc. it isn't possible to use views. However, this module allows you to create a
+multiple feeds which aggregates all these content in a page and/or feed. The feeds are controlled by the
+'access content' permission.
+
+If your homepage is a feed with microformats, you don't necessarily need this.
 
 Configuration is at /admin/config/services/indieweb/feeds
+
+For more information see
+
+- https://indieweb.org/feed
+- https://indieweb.org/jf2
 
 ## Microsub
 

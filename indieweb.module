@@ -9,11 +9,13 @@ use Drupal\comment\CommentInterface;
 use Drupal\comment\Entity\Comment;
 use Drupal\comment\Entity\CommentType;
 use Drupal\Core\Cache\Cache;
+use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Site\Settings;
 use Drupal\Core\Url;
+use Drupal\indieweb\Entity\FeedInterface;
 use Drupal\indieweb\Entity\WebmentionEntityInterface;
 use Drupal\node\Entity\NodeType;
 use Drupal\node\NodeInterface;
@@ -96,7 +98,8 @@ function indieweb_page_attachments_alter(array &$attachments) {
         '#tag' => 'link',
         '#attributes' => [
           'rel' => 'micropub',
-          'href' => Url::fromRoute('indieweb.micropub.endpoint', [], ['absolute' => TRUE])->toString(),
+          'href' => Url::fromRoute('indieweb.micropub.endpoint', [], ['absolute' => TRUE])
+            ->toString(),
         ],
       ];
 
@@ -123,6 +126,43 @@ function indieweb_page_attachments_alter(array &$attachments) {
       ];
     }
 
+    // Feeds.
+    /** @var \Drupal\indieweb\Entity\FeedInterface $feed */
+    foreach (\Drupal::entityTypeManager()->getStorage('indieweb_feed')->loadMultiple() as $feed) {
+      if ($feed->exposeRelHeaderLink()) {
+        $link = [
+          '#tag' => 'link',
+          '#attributes' => [
+            'rel' => 'feed',
+            'href' => Url::fromUri('internal:/' . $feed->getPath(), ['absolute' => TRUE])->toString(),
+          ],
+        ];
+
+        $attachments['#attached']['html_head'][] = [
+          $link,
+          'feed_endpoint_' . $feed->id(),
+        ];
+
+      }
+
+      if ($feed->exposeJf2Feed() && $feed->exposeJf2HeaderLink()) {
+        $link = [
+          '#tag' => 'link',
+          '#attributes' => [
+            'rel' => 'alternate',
+            'type' => 'application/jf2feed+json',
+            'href' => Url::fromUri('internal:/' . str_replace('/', '-', $feed->getPath()) . '.jf2', ['absolute' => TRUE])->toString(),
+          ],
+        ];
+
+        $attachments['#attached']['html_head'][] = [
+          $link,
+          'feed_endpoint_jf2_' . $feed->id(),
+        ];
+
+      }
+
+    }
   }
 
 }
@@ -272,13 +312,127 @@ function _indieweb_entity_content_form_submit($form, FormStateInterface $form_st
 }
 
 /**
- * Implements hook_ENTITY_TYPE_delete() to remove syndications.
+ * Implements hook_entity_insert().
+ */
+function indieweb_entity_insert(EntityInterface $entity) {
+  indieweb_entity_update($entity);
+}
+
+/**
+ * Implements hook_entity_update().
+ */
+function indieweb_entity_update(EntityInterface $entity) {
+  if ($entity instanceof ContentEntityInterface) {
+    try {
+      _indieweb_entity_update_check_feeds($entity);
+    }
+    catch (Exception $ignored) {}
+  }
+}
+
+/**
+ * Implements hook_entity_delete().
  */
 function indieweb_entity_delete(EntityInterface $entity) {
+
+  if ($entity instanceof ContentEntityInterface) {
+
+    // Delete from syndication table.
+    \Drupal::database()
+      ->delete('webmention_syndication')
+      ->condition('entity_id', $entity->id())
+      ->condition('entity_type_id', $entity->getEntityTypeId())
+      ->execute();
+
+    // Delete from feeds table.
+    \Drupal::database()
+      ->delete('indieweb_feed_items')
+      ->condition('entity_id', $entity->id())
+      ->condition('entity_type_id', $entity->getEntityTypeId())
+      ->execute();
+
+  }
+}
+
+/**
+ * Update items for a feed.
+ *
+ * @param \Drupal\indieweb\Entity\FeedInterface $feed
+ *
+ * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+ * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
+ * @throws \Exception
+ */
+function indieweb_update_feed_items(FeedInterface $feed) {
   \Drupal::database()
-    ->delete('webmention_syndication')
-    ->condition('entity_id', $entity->id())
-    ->condition('entity_type_id', $entity->getEntityTypeId())
+    ->delete('indieweb_feed_items')
+    ->condition('feed', $feed->id())
+    ->execute();
+
+  foreach ($feed->getBundles() as $item) {
+    list($entity_type, $bundle) = explode('|', $item);
+
+    $entityType = \Drupal::entityTypeManager()->getDefinition($entity_type);
+    $bundle_key = $entityType->getKey('bundle');
+
+    $ids = \Drupal::entityQuery($entity_type)
+      ->condition($bundle_key, $bundle)
+      // TODO how safe is relying on created ?
+      ->sort('created', 'DESC')
+      ->condition('uid', $feed->getOwnerId())
+      ->range(0, $feed->getLimit())
+      ->execute();
+    if (!empty($ids)) {
+      foreach (\Drupal::entityTypeManager()->getStorage($entity_type)->loadMultiple($ids) as $entity) {
+        _indieweb_entity_feed_insert($entity, $feed);
+      }
+    }
+  }
+
+  // Invalidate feed cache.
+  Cache::invalidateTags(['indieweb_feed:' . $feed->id()]);
+}
+
+/**
+ * Adds an entity to the feeds table, if necessary.
+ *
+ * @param \Drupal\Core\Entity\EntityInterface $entity
+ *
+ * @throws \Exception
+ */
+function _indieweb_entity_update_check_feeds(EntityInterface $entity) {
+  /** @var \Drupal\indieweb\Entity\FeedInterface $feed */
+  foreach (\Drupal::entityTypeManager()->getStorage('indieweb_feed')->loadMultiple() as $feed) {
+    if (in_array($entity->getEntityTypeId() . '|' . $entity->bundle(), $feed->getBundles())) {
+      _indieweb_entity_feed_insert($entity, $feed);
+      Cache::invalidateTags(['indieweb_feed:' . $feed->id()]);
+    }
+  }
+}
+
+/**
+ * Adds an entity to the feeds table.
+ *
+ * @param \Drupal\Core\Entity\EntityInterface $entity
+ * @param \Drupal\indieweb\Entity\FeedInterface|null $feed
+ *
+ * @throws \Exception
+ */
+function _indieweb_entity_feed_insert($entity, $feed) {
+  // Assume yes if isPublished does not exist.
+  $published = method_exists($entity, 'isPublished') ? $entity->isPublished() : 1;
+
+  \Drupal::database()
+    ->upsert('indieweb_feed_items')
+    ->key('entity_id')
+    ->key('entity_type_id')
+    ->fields([
+      'entity_id' => $entity->id(),
+      'entity_type_id' => $entity->getEntityTypeId(),
+      'feed' => $feed->id(),
+      'published' => (int) $published,
+      'timestamp' => $entity->getCreatedTime()
+    ])
     ->execute();
 }
 
