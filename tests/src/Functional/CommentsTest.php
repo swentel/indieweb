@@ -81,9 +81,8 @@ class CommentsTest extends IndiewebBrowserTestBase {
     $edit['publish_custom_url'] = 1;
     $this->drupalPostForm('admin/config/services/indieweb/publish', $edit, 'Save configuration');
 
-    $this->drupalLogout();
-
     // Send again, we should have a comment now.
+    $this->drupalLogout();
     $code = $this->sendWebmentionRequest($webmention);
     self::assertEquals(202, $code);
     $this->assertCommentCount(1);
@@ -99,6 +98,10 @@ class CommentsTest extends IndiewebBrowserTestBase {
       $this->assertTrue($cid, 'No comment found');
     }
 
+    // We should not have a notification.
+    $captured_emails = \Drupal::state()->get('system.test_mail_collector');
+    $this->assertFalse($captured_emails, 'No notification mail for comment.');
+
     // Publish the comment.
     $comment->setPublished(TRUE);
     $comment->save();
@@ -111,6 +114,12 @@ class CommentsTest extends IndiewebBrowserTestBase {
     $this->drupalLogin($this->adminUser);
     $this->drupalGet('comment/' . $cid . '/edit');
     $this->assertSession()->fieldNotExists('comment_body[0][value]');
+
+    // Set mail notification.
+    $edit = [
+      'comment_create_mail_notification' => 'no-reply@example.com',
+    ];
+    $this->drupalPostForm('admin/config/services/indieweb/comments', $edit, 'Save configuration');
     $this->drupalLogout();
 
     // Send a webmention now to the comment, this should create another comment
@@ -131,6 +140,11 @@ class CommentsTest extends IndiewebBrowserTestBase {
       // Explicit failure.
       $this->assertTrue($cid, 'No comment found');
     }
+
+    // We should a mail notification.
+    $captured_emails = \Drupal::state()->get('system.test_mail_collector');
+    $notification = end($captured_emails);
+    $this->assertTrue($notification && $notification['id'] == 'indieweb_webmention_comment_created', 'Notification mail found for comment.');
 
     // Publish the comment.
     $comment->setPublished(TRUE);
