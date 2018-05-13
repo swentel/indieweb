@@ -232,10 +232,10 @@ class MicropubTest extends IndiewebBrowserTestBase {
       $this->assertTrue($nid, 'No second article node found');
     }
 
-    // Add content to the like too.
+    // Add content to the like too, use access token in post.
     $post = $this->like;
     $post['content'] = 'That is a nice site!';
-    $code = $this->sendMicropubRequest($post);
+    $code = $this->sendMicropubRequest($post, 'this_is_a_valid_token', FALSE, TRUE);
     self::assertEquals(201, $code);
     $this->assertNodeCount(2, 'like');
     $nid = $this->getLastNid('like');

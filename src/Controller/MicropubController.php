@@ -75,7 +75,7 @@ class MicropubController extends ControllerBase {
     if (!empty($input)) {
 
       $payload_original = $input;
-      $valid_token = $this->isValidToken();
+      $valid_token = $this->isValidToken($input);
 
       if ($this->config->get('micropub_log_payload')) {
         $this->getLogger('indieweb_micropub_payload')->notice('input: @input', ['@input' => print_r($input, 1)]);
@@ -511,15 +511,24 @@ class MicropubController extends ControllerBase {
   /**
    * Check if there's a valid access token in the request.
    *
+   * @param $input
+   *   The input.
+   *
    * @return bool
    */
-  protected function isValidToken() {
+  protected function isValidToken($input = []) {
     $valid_token = FALSE;
 
-    // Start storing this, see https://github.com/swentel/indieweb/issues/79
-    $auth = \Drupal::request()->headers->get('Authorization');
-    if ($auth && preg_match('/Bearer\s(\S+)/', $auth, $matches)) {
+    $auth = NULL;
+    $auth_header = \Drupal::request()->headers->get('Authorization');
+    if ($auth_header && preg_match('/Bearer\s(\S+)/', $auth_header, $matches)) {
+      $auth = $auth_header;
+    }
+    elseif (!empty($input['access_token'])) {
+      $auth = 'Bearer ' . $input['access_token'];
+    }
 
+    if ($auth) {
       try {
         $client = \Drupal::httpClient();
         $headers = [
