@@ -5,6 +5,7 @@ namespace Drupal\indieweb\Form;
 use Drupal\Core\Cache\Cache;
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Url;
 
 class IndieAuthSettingsForm extends ConfigFormBase {
 
@@ -32,7 +33,38 @@ class IndieAuthSettingsForm extends ConfigFormBase {
     $config = $this->config('indieweb.indieauth');
 
     $form['info'] = [
-      '#markup' => '<p>' . $this->t('IndieAuth is a way to use your own domain name to sign in to websites. It works by linking your website to one or more authentication providers such as Twitter or Google, then entering your domain name in the login form on websites that support IndieAuth. Indieauth.com is a hosted service that does this for you and also adds Authentication API. Indieauth.com is open source so you can also host the service yourself.<br /><br />The easy way is to add rel="me" links on your homepage which point to your social media accounts and on each of those services adding a link back to your home page. They can even be hidden. e.g.<div class="indieweb-highlight-code">&lt;a href="https://twitter.com/swentel" target="_blank" title="Twitter" rel="me"&gt;&lt;/a&gt;</div><br /><br /> You can also use a PGP key if you don\'t want to use a third party service. See <a href="https://indieauth.com/setup" target="_blank">https://indieauth.com/setup</a> for full details. This module does not expose any of these links or help you with the PGP setup, you will have to manage this yourself.') . '</p>'];
+      '#markup' => '<p>' . $this->t('IndieAuth is a way to use your own domain name to sign in to websites. It works by linking your website to one or more authentication providers such as Twitter or Google, then entering your domain name in the login form on websites that support IndieAuth. Indieauth.com is a hosted service that does this for you and also adds Authentication API. Indielogin.com and Indieauth.com is open source so you can also host the service yourself.<br /><br />The easy way is to add rel="me" links on your homepage which point to your social media accounts and on each of those services adding a link back to your home page. They can even be hidden. e.g.<div class="indieweb-highlight-code">&lt;a href="https://twitter.com/swentel" target="_blank" title="Twitter" rel="me"&gt;&lt;/a&gt;</div><br /><br /> You can also use a PGP key if you don\'t want to use a third party service. See <a href="https://indieauth.com/setup" target="_blank">https://indieauth.com/setup</a> for full details.') . '</p>'];
+
+    $externalauth_module_enabled = \Drupal::moduleHandler()->moduleExists('externalauth');
+
+    $form['login'] = [
+      '#type' => 'fieldset',
+      '#title' => $this->t('Login'),
+      '#description' => $this->t('Allow users to login into this site by using their domain. A "Web Sign-In" block is available where users can enter their domain to login.<br />After authentication a new user account will be created if this domain does not exist yet. The account will automatically be verified.')
+    ];
+
+    $form['login']['login_enable'] = [
+      '#title' => $this->t('Enable login'),
+      '#type' => 'checkbox',
+      '#disabled' => !$externalauth_module_enabled,
+      '#default_value' => $config->get('login_enable'),
+    ];
+
+    if (!$externalauth_module_enabled) {
+      $form['login']['login_enable']['#description'] = $this->t('You need to install the <a href="https://www.drupal.org/project/externalauth" target="_blank">External Authentication</a> module for this feature to work.');
+    }
+
+    $form['login']['login_endpoint'] = [
+      '#title' => $this->t('Login endpoint'),
+      '#type' => 'textfield',
+      '#default_value' => $config->get('login_endpoint'),
+      '#description' => $this->t('The login endpoint. Defaults to https://indielogin.com/auth.<br />The redirect callback is automatically set to :redirect', [':redirect' => Url::fromRoute('indieweb.indieauth.login.redirect', [], ['absolute' => TRUE])->toString()]),
+      '#states' => array(
+        'visible' => array(
+          ':input[name="login_enable"]' => array('checked' => TRUE),
+        ),
+      ),
+    ];
 
     $form['indieauth'] = [
       '#type' => 'fieldset',
@@ -93,6 +125,8 @@ class IndieAuthSettingsForm extends ConfigFormBase {
       ->set('expose', $form_state->getValue('expose'))
       ->set('authorization_endpoint', $form_state->getValue('authorization_endpoint'))
       ->set('token_endpoint', $form_state->getValue('token_endpoint'))
+      ->set('login_enable', $form_state->getValue('login_enable'))
+      ->set('login_endpoint', $form_state->getValue('login_endpoint'))
       ->save();
 
     Cache::invalidateTags(['rendered']);

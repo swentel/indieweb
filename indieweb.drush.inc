@@ -23,6 +23,15 @@ function indieweb_drush_command() {
         'api-url' => 'The API url of webmention.io. Defaults to https://webmention.io/api/mentions',
       ],
     ],
+    'indieweb-externalauth-map-account' => [
+      'description' => 'Maps an existing account with a domain.',
+      'aliases' => ['iema'],
+      'required-arguments' => 2,
+      'arguments' => [
+        'uid' => 'The uid of the account.',
+        'domain' => 'The domain to map.'
+      ],
+    ],
   ];
 }
 
@@ -36,9 +45,42 @@ function drush_indieweb_send_webmentions() {
 }
 
 /**
+ * Maps a domain to an existing account.
+ *
+ * @param int $uid
+ * @param string $domain
+ *
+ * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+ */
+function drush_indieweb_externalauth_map_account($uid = 0, $domain = '') {
+
+  if (\Drupal::moduleHandler()->moduleExists('externalauth')) {
+
+    /** @var \Drupal\user\UserInterface $account */
+    $account = \Drupal::entityTypeManager()->getStorage('user')->load($uid);
+    if ($account) {
+      /** @var \Drupal\externalauth\ExternalAuthInterface $external_auth */
+      $external_auth = \Drupal::service('externalauth.externalauth');
+      $authname = str_replace(['https://', 'http://'], '', $domain);
+      $external_auth->linkExistingAccount($authname, 'indieweb', $account);
+      drush_print(dt('Mapped uid @uid with @domain.', ['@uid' => $uid, '@domain' => $domain]));
+    }
+    else {
+      drush_print(dt('Account with uid @uid not found.', ['@uid' => $uid]));
+    }
+
+  }
+  else {
+    drush_print('The External Authentication module is not enabled.');
+  }
+
+}
+
+/**
  * Gets webmentions from webmention.io.
  *
  * @param $target_url
+ * @param $base_url
  */
 function drush_indieweb_get_webmentions_from_webmention_io($target_url = '', $base_url = '') {
   $api_url = drush_get_option('api-url', 'https://webmention.io/api/mentions');

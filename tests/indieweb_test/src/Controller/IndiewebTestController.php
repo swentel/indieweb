@@ -4,6 +4,8 @@ namespace Drupal\indieweb_test\Controller;
 
 use Drupal\Core\Controller\ControllerBase;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\HttpFoundation\Response;
 
 class IndiewebTestController extends ControllerBase {
 
@@ -30,6 +32,31 @@ class IndiewebTestController extends ControllerBase {
     }
 
     return new JsonResponse($data, $status);
+  }
+
+  /**
+   * IndieWeb test IndieAuth login endpoint.
+   */
+  public function testLoginEndPoint() {
+
+
+    // Redirect with code.
+    if (!empty($_GET['state']) && !empty($_GET['redirect_uri']) && !empty($_GET['client_id'])) {
+      return new RedirectResponse($_GET['redirect_uri'] . '?state=' . $_GET['state'] . '&client_id=' . $_GET['client_id'] . '&code=1234');
+    }
+
+    // Verify code request.
+    if (!empty($_POST['code'])) {
+
+      if ($_POST['code'] == '1234') {
+        return new JsonResponse(['me' => 'https://example.com'], 200);
+      }
+      else {
+        return new JsonResponse(['error' => 'Invalid request', 'error_description' => 'The code was not valid.'], 400);
+      }
+    }
+
+    return new Response('Page not found', 404);
   }
 
 }

@@ -3,3 +3,5 @@ type: module
 description: Indieweb test module
 core: 8.x
 hidden: true
+dependencies:
+  - externalauth

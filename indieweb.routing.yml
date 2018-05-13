@@ -46,6 +46,14 @@ indieweb.admin.indieauth_settings:
   requirements:
     _permission: 'administer indieweb'
 
+indieweb.indieauth.login.redirect:
+  path: '/indieauth/login/redirect'
+  defaults:
+    _controller: '\Drupal\indieweb\Controller\IndieAuthController::loginRedirect'
+    _title: 'Login redirect callback'
+  requirements:
+    _access: 'TRUE'
+
 indieweb.admin.comment_settings:
   path: '/admin/config/services/indieweb/comments'
   defaults:

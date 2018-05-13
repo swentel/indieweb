@@ -39,6 +39,12 @@ indieweb.indieauth:
     token_endpoint:
       type: string
       label: 'IndieAuth token endpoint'
+    login_enable:
+      type: boolean
+      label: 'Enable login support'
+    login_endpoint:
+      type: string
+      label: 'Login endpoint'
 
 # schema for indieweb.microformats
 indieweb.microformats:

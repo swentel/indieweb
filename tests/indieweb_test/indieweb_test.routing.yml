@@ -13,3 +13,19 @@ indieweb_test.token_endpoint:
     _title: 'Indieweb test token endpoint'
   requirements:
     _access: 'TRUE'
+
+indieweb_test.indieauth.login.page:
+  path: '/indieauth-test/login'
+  defaults:
+    _form: '\Drupal\indieweb\Form\IndieAuthLoginForm'
+    _title: 'Login endpoint'
+  requirements:
+    _access: 'TRUE'
+
+indieweb_test.indieauth.login.endpoint:
+  path: '/indieauth-test/login/endpoint'
+  defaults:
+    _controller: '\Drupal\indieweb_test\Controller\IndiewebTestController::testLoginEndPoint'
+    _title: 'Login endpoint'
+  requirements:
+    _access: 'TRUE'

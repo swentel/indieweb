@@ -2,3 +2,5 @@ enable: false
 expose: false
 authorization_endpoint: 'https://indieauth.com/auth'
 token_endpoint: 'https://tokens.indieauth.com/token'
+login_enable: false
+login_endpoint: 'https://indielogin.com/auth'

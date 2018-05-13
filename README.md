@@ -10,6 +10,7 @@ Current functionality:
 - Send and receive webmentions and pingbacks via Webmention.io
 - Publish content, likes etc via bridg.y, store syndications
 - Microformats for content and images
+- Allow users to login and create accounts
 - IndieAuth for Authentication API
 - Create content via Micropub endpoint
   (note, article, event, rsvp, reply, like, repost, bookmark)
@@ -120,9 +121,11 @@ Your homepage should contain a h-card entry. This module does not expose this fo
 
 Classes added for publication (or other functionality).
 
-- h-entry: added on node wrapper, see indieweb_preprocess_node().
+- h-entry: added on node or comment wrapper
+  see indieweb_preprocess_node() / indieweb_preprocess_comment().
 - h-event: added on node wrapper for an event, see indieweb_preprocess_node().
-- dt-published, u-url and p-name in node metadata, see indieweb_preprocess_node().
+- dt-published, u-url and p-name in node or comment metadata
+  see indieweb_preprocess_node() / indieweb_preprocess_comment().
 - e-content: added on default body field, see indieweb_preprocess_field().
 - u-photo: added on image styles, indieweb_preprocess_image_style().
 - p-summary: see indieweb_preprocess_field().
@@ -132,12 +135,12 @@ Several field formatters are also available.
 
 You can configure this at /admin/config/services/indieweb/microformats
 
-## IndieAuth: sign in with your domain name.
+## IndieAuth: sign in with your domain name and create accounts or use for access tokens.
 
 IndieAuth is a way to use your own domain name to sign in to websites. It works by linking your website to one or more
 authentication providers such as Twitter or Google, then entering your domain name in the login form on websites that
-support IndieAuth. Indieauth.com is a hosted service that does this for you and also adds Authentication API.
-Indieauth.com is open source so you can also host the service yourself.
+support IndieAuth. Indieauth.com and Indielogin.com is a hosted service that does this for you and the latter also
+provides Authentication API. Both are open source so you can also host the service yourself.
 
 The easy way is to add rel="me" links on your homepage which point to your social media accounts and on each of those
 services adding a link back to your home page. They can even be hidden.
@@ -247,6 +250,7 @@ Note that you also need feeds to be enabled, see the Feeds section.
 - indieweb-send-webmentions (isw): handles the queue for sending webmentions
 - indieweb-get-webmentions-from-webmention-io (iwio): allows you to get webmentions for one url and optionally save
   them if they do not exist yet.
+- indieweb-external-auth-map: maps an existing user account with a domain.
 
 ## Hooks
 
