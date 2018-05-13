@@ -75,6 +75,12 @@ class CommentsTest extends IndiewebBrowserTestBase {
       'comment_create_webmention_reference_field' => 'field_webmention',
     ];
     $this->drupalPostForm('admin/config/services/indieweb/comments', $edit, 'Save configuration');
+
+    // Set publish fields.
+    $edit = [];
+    $edit['publish_custom_url'] = 1;
+    $this->drupalPostForm('admin/config/services/indieweb/publish', $edit, 'Save configuration');
+
     $this->drupalLogout();
 
     // Send again, we should have a comment now.
@@ -132,6 +138,27 @@ class CommentsTest extends IndiewebBrowserTestBase {
 
     $this->drupalGet('node/1');
     $this->assertSession()->responseContains('This is awesome!');
+
+    // Reply to the comment from the site.
+    $this->drupalLogin($this->adminUser);
+    $edit = [
+      'comment_body[0][value]' => "I know, isn't it!",
+      'indieweb_publish_custom_url' => 'https://brid-gy.appspot.com/comment/twitter/swentel/994117538731741185/994129251946418177',
+    ];
+    $this->drupalPostForm('comment/reply/node/1/comment/' . $comment->id(), $edit, 'Save');
+    $this->drupalGet('node/1');
+    $this->assertSession()->responseContains("I know, isn't it!");
+    $this->assertQueueItems(['https://brid-gy.appspot.com/comment/twitter/swentel/994117538731741185/994129251946418177' => 'https://brid-gy.appspot.com/comment/twitter/swentel/994117538731741185/994129251946418177'], 1);
+
+    // Save a syndication for this one, so we can detect that a webmention from
+    // brid.gy will not create the same comment again as it already exists.
+    $this->createSyndication('https://twitter.com/swentel/status/994133390680092672', 'node', 1);
+    $webmention['target'] = '/comment/indieweb/2';
+    $webmention['source'] = 'https://brid-gy.appspot.com/comment/twitter/swentel/994117538731741185/994133390680092672';
+    $webmention['post']['content']['text'] = "I know, isn't it!";
+    $code = $this->sendWebmentionRequest($webmention);
+    self::assertEquals(202, $code);
+    $this->assertCommentCount(3);
 
   }
 

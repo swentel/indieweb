@@ -205,4 +205,26 @@ abstract class IndiewebBrowserTestBase extends BrowserTestBase {
     }
   }
 
+  /**
+   * Create a syndication record.
+   *
+   * @param $url
+   * @param string $entity_type_id
+   * @param int $entity_id
+   *
+   * @throws \Exception
+   */
+  protected function createSyndication($url, $entity_type_id = 'node', $entity_id = 1) {
+    $values = [
+      'entity_id' => $entity_id,
+      'entity_type_id' => $entity_type_id,
+      'url' => $url
+    ];
+
+    \Drupal::database()
+      ->insert('webmention_syndication')
+      ->fields($values)
+      ->execute();
+  }
+
 }

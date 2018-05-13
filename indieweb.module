@@ -832,6 +832,12 @@ function indieweb_webmention_entity_insert(WebmentionEntityInterface $webmention
             $node = $storage->load($params[$entity_type]);
             if ($node && $node->hasField($comment_node_comment_field_name) && $node->{$comment_node_comment_field_name}->status == 2) {
 
+              // Last check now is to make sure we do not create the same
+              // comment again.
+              if (indieweb_source_exists_as_syndication($webmention)) {
+                return;
+              }
+
               $subject = 'Auto created comment from webmention';
 
               $values = [
@@ -1064,4 +1070,28 @@ function indieweb_get_summary_fields() {
   }
 
   return $fields;
+}
+
+/**
+ * Checks if a source url already exists as syndication.
+ *
+ * This can happen when you reply from your site to twitter. Brid.gy will then
+ * send that reply on  twitter back as a webmention.
+ *
+ * @param \Drupal\indieweb\Entity\WebmentionEntityInterface $webmention
+ *
+ * @return bool
+ */
+function indieweb_source_exists_as_syndication(WebmentionEntityInterface $webmention) {
+  $exists = FALSE;
+
+  if (strpos($webmention->get('source')->value, 'brid-gy.appspot') !== FALSE) {
+    $parts = parse_url($webmention->get('source')->value);
+    $path_parts = explode('/', $parts['path']);
+    if (!empty($path_parts[5])) {
+      $exists = \Drupal::database()->query("SELECT count(url) as count FROM {webmention_syndication} WHERE url LIKE :id", [':id' => '%/' . db_like($path_parts[5])])->fetchField();
+    }
+  }
+
+  return $exists;
 }
