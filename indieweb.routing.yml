@@ -86,6 +86,14 @@ indieweb.micropub.endpoint:
   requirements:
    _access: 'TRUE'
 
+indieweb.webmention.send.collection:
+  path: '/admin/content/webmention/send-list'
+  defaults:
+    _controller: '\Drupal\indieweb\Controller\WebmentionController::sendAdminOverview'
+    _title: 'Send'
+  requirements:
+    _permission: 'administer webmention entities'
+
 indieweb.syndications_list:
   path: '/admin/content/syndication'
   defaults:

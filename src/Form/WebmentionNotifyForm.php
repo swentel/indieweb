@@ -21,13 +21,13 @@ class webmentionNotifyForm extends FormBase {
   public function buildForm(array $form, FormStateInterface $form_state) {
     $form = [];
 
-    $form['source_url'] = [
+    $form['source'] = [
       '#title' => $this->t('Have you written a response to this? Let me know the URL'),
       '#type' => 'textfield',
       '#required' => TRUE,
     ];
 
-    $form['target_url'] = [
+    $form['target'] = [
       '#type' => 'value',
       '#value' => \Drupal::request()->getSchemeAndHttpHost() . \Drupal::request()->getPathInfo(),
     ];
@@ -44,8 +44,8 @@ class webmentionNotifyForm extends FormBase {
    * {@inheritdoc}
    */
   public function validateForm(array &$form, FormStateInterface $form_state) {
-    if (!UrlHelper::isValid($form_state->getValue('source_url'))) {
-      $form_state->setErrorByName('source_url', $this->t('This URL is not valid'));
+    if (!UrlHelper::isValid($form_state->getValue('source'))) {
+      $form_state->setErrorByName('source', $this->t('This URL is not valid'));
     }
   }
 
@@ -53,9 +53,9 @@ class webmentionNotifyForm extends FormBase {
    * {@inheritdoc}
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
-    $source_url = $form_state->getValue('source_url');
-    $target_url = $form_state->getValue('target_url');
-    indieweb_webmention_create_queue_item($source_url, $target_url);
+    $source = $form_state->getValue('source');
+    $target = $form_state->getValue('target');
+    indieweb_webmention_create_queue_item($source, $target);
     $this->t('Thanks for letting me know!');
   }
 

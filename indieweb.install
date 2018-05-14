@@ -49,6 +49,55 @@ function indieweb_schema() {
     ],
   ];
 
+  $schema['webmention_send'] = [
+    'description' => 'Stores the (send) webmentions.',
+    'fields' => [
+      'id' => array(
+        'description' => 'The primary identifier for a send webmention.',
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'source' => [
+        'description' => 'The source url.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ],
+      'target' => [
+        'description' => 'The source url.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ],
+      'entity_id' => [
+        'description' => 'The id to which the webmention belongs.',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ],
+      'entity_type_id' => [
+        'description' => 'The entity type id.',
+        'type' => 'varchar',
+        'length' => 40,
+        'not null' => TRUE,
+        'default' => '',
+      ],
+      'created' => [
+        'description' => 'The timestamp of the item.',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ],
+    ],
+    'primary key' => ['id'],
+    'indexes' => [
+      'entity_id__entity_type_id' => ['entity_id', 'entity_type_id']
+    ],
+  ];
+
   $schema['indieweb_feed_items'] = [
     'description' => 'Stores items for the feeds.',
     'fields' => [
@@ -156,5 +205,15 @@ function indieweb_update_8004() {
   if (!\Drupal::database()->schema()->tableExists('indieweb_feed_items')) {
     $schema = indieweb_schema();
     \Drupal::database()->schema()->createTable('indieweb_feed_items', $schema['indieweb_feed_items']);
+  }
+}
+
+/**
+ * Installs the {webmention_send} table.
+ */
+function indieweb_update_8005() {
+  if (!\Drupal::database()->schema()->tableExists('webmention_send')) {
+    $schema = indieweb_schema();
+    \Drupal::database()->schema()->createTable('webmention_send', $schema['webmention_send']);
   }
 }

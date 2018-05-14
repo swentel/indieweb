@@ -10,7 +10,19 @@ use Drupal\Core\Form\FormStateInterface;
  *
  * @ingroup webmention
  */
-class WebmentionEntityForm extends ContentEntityForm {
+class WebmentionForm extends ContentEntityForm {
+
+  /**
+   * {@inheritdoc}
+   */
+  public function form(array $form, FormStateInterface $form_state) {
+    $form = parent::form($form, $form_state);
+    $form['info'] = [
+      '#markup' => '<p>' . $this->t('This form stores a received webmention.') . '</p>',
+      '#weight' => -100,
+    ];
+    return $form;
+  }
 
   /**
    * {@inheritdoc}

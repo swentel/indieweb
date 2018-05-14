@@ -199,9 +199,9 @@ abstract class IndiewebBrowserTestBase extends BrowserTestBase {
         $records = \Drupal::database()->query($query, [':name' => WEBMENTION_QUEUE_NAME]);
         foreach ($records as $record) {
           $data = unserialize($record->data);
-          if (!empty($data['source_url']) && !empty($data['target_url'])) {
-            $this->assertTrue(in_array($data['target_url'], $channels));
-            $this->assertEquals($data['source_url'], Url::fromRoute('entity.node.canonical', ['node' => $nid], ['absolute' => TRUE])->toString());
+          if (!empty($data['source']) && !empty($data['target'])) {
+            $this->assertTrue(in_array($data['target'], $channels));
+            $this->assertEquals($data['source'], Url::fromRoute('entity.node.canonical', ['node' => $nid], ['absolute' => TRUE])->toString());
           }
         }
       }

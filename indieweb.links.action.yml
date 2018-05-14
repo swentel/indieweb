@@ -1,9 +1,3 @@
-entity.webmention_entity.add_form:
-  route_name: entity.webmention_entity.add_form
-  title: 'Add Webmention'
-  appears_on:
-    - entity.webmention_entity.collection
-
 entity.feed.add_form:
   route_name: entity.indieweb_feed.add_form
   title: 'Add Feed'

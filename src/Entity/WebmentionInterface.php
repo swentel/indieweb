@@ -11,7 +11,7 @@ use Drupal\user\EntityOwnerInterface;
  *
  * @ingroup webmention
  */
-interface WebmentionEntityInterface extends ContentEntityInterface, EntityChangedInterface, EntityOwnerInterface {
+interface WebmentionInterface extends ContentEntityInterface, EntityChangedInterface, EntityOwnerInterface {
 
   /**
    * Gets the Webmention creation timestamp.
@@ -27,7 +27,7 @@ interface WebmentionEntityInterface extends ContentEntityInterface, EntityChange
    * @param int $timestamp
    *   The Webmention creation timestamp.
    *
-   * @return \Drupal\indieweb\Entity\WebmentionEntityInterface
+   * @return \Drupal\indieweb\Entity\WebmentionInterface
    *   The called Webmention entity.
    */
   public function setCreatedTime($timestamp);
@@ -48,7 +48,7 @@ interface WebmentionEntityInterface extends ContentEntityInterface, EntityChange
    * @param bool $published
    *   TRUE to set this Webmention to published, FALSE to set it to unpublished.
    *
-   * @return \Drupal\indieweb\Entity\WebmentionEntityInterface
+   * @return \Drupal\indieweb\Entity\WebmentionInterface
    *   The called Webmention entity.
    */
   public function setPublished($published);

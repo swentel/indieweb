@@ -81,7 +81,7 @@ class RSVPBlock extends BlockBase {
 
       $show_avatar = $this->configuration['show_avatar'];
 
-      /** @var \Drupal\indieweb\Entity\WebmentionEntityInterface $mention */
+      /** @var \Drupal\indieweb\Entity\WebmentionInterface $mention */
       $mentions = \Drupal::entityTypeManager()->getStorage('webmention_entity')->loadMultiple($ids);
       foreach ($mentions as $mention) {
 

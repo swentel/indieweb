@@ -4,6 +4,7 @@ namespace Drupal\indieweb\Controller;
 
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Link;
+use Drupal\Core\Url;
 
 class SyndicationController extends ControllerBase {
 
@@ -15,7 +16,7 @@ class SyndicationController extends ControllerBase {
 
     $header = [
       $this->t('Source'),
-      $this->t('Target'),
+      $this->t('Syndication link'),
     ];
 
     $limit = 30;
@@ -30,12 +31,24 @@ class SyndicationController extends ControllerBase {
     foreach ($records as $record) {
       $row = [];
 
+      // Source.
       $entity = $this->entityTypeManager()->getStorage($record->entity_type_id)->load($record->entity_id);
       if ($entity) {
         $row[] = ['data' => ['#markup' => Link::fromTextAndUrl($entity->label(), $entity->toUrl())->toString() . ' (' . $entity->id() . ')']];
+      }
+      else {
+        $row[] = $this->t('Unknown entity: @id (@type)', ['@id' => $record->entity_id, '@type' => $record->entity_type_id]);
+      }
+
+      // Syndication link.
+      try {
+        $row[] = Link::fromTextAndUrl($record->url, Url::fromUri($record->url, ['external' => TRUE, 'attributes' => ['target' => '_blank']]))->toString();
+      }
+      catch (\Exception $ignored) {
         $row[] = $record->url;
       }
 
+      // Add to rows.
       $rows[] = $row;
     }
 

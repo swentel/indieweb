@@ -9,7 +9,7 @@ use Drupal\Core\Entity\ContentEntityDeleteForm;
  *
  * @ingroup webmention
  */
-class WebmentionEntityDeleteForm extends ContentEntityDeleteForm {
+class WebmentionDeleteForm extends ContentEntityDeleteForm {
 
 
 }

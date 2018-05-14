@@ -16,7 +16,7 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Site\Settings;
 use Drupal\Core\Url;
 use Drupal\indieweb\Entity\FeedInterface;
-use Drupal\indieweb\Entity\WebmentionEntityInterface;
+use Drupal\indieweb\Entity\WebmentionInterface;
 use Drupal\node\Entity\NodeType;
 use Drupal\node\NodeInterface;
 use IndieWeb\MentionClient;
@@ -234,7 +234,7 @@ function _indieweb_entity_form_alter(&$form, FormStateInterface $form_state) {
 
       // Default values for link fields on comment.
       if (($parent = $comment->getParentComment()) && $parent->hasField($reference_field) && \Drupal::currentUser()->hasPermission('send webmentions')) {
-        /** @var \Drupal\indieweb\Entity\WebmentionEntityInterface $webmention */
+        /** @var \Drupal\indieweb\Entity\WebmentionInterface $webmention */
         $webmention = $parent->get($reference_field)->entity;
         if ($webmention && $webmention->get('url')->value) {
           foreach ($options as $key => $field) {
@@ -276,17 +276,17 @@ function _indieweb_entity_content_form_submit($form, FormStateInterface $form_st
     // Use our route for comments. Drupal core redirects to the entity, but we
     // need a page so webmentions can scan them for the content more easily.
     if ($entity->getEntityTypeId() == 'comment') {
-      $source_url = Url::fromRoute('indieweb.comment.canonical', ['comment' => $entity->id()], ['absolute' => TRUE])->toString();
+      $source = Url::fromRoute('indieweb.comment.canonical', ['comment' => $entity->id()], ['absolute' => TRUE])->toString();
     }
     else {
-      $source_url = $entity->toUrl()->setAbsolute(TRUE)->toString();
+      $source = $entity->toUrl()->setAbsolute(TRUE)->toString();
     }
 
     $publish_to = $form_state->getValue('indieweb_publish_channels');
     if (!empty($publish_to)) {
       foreach ($publish_to as $key => $value) {
         if ($key === $value) {
-          indieweb_webmention_create_queue_item($source_url, $key, $entity->id(), $entity->getEntityTypeId());
+          indieweb_webmention_create_queue_item($source, $key, $entity->id(), $entity->getEntityTypeId());
         }
       }
     }
@@ -297,7 +297,7 @@ function _indieweb_entity_content_form_submit($form, FormStateInterface $form_st
       if ($entity->hasField($link_field)) {
         $values = $entity->get($link_field)->getValue();
         if (!empty($values[0]['uri'])) {
-          indieweb_webmention_create_queue_item($source_url, $values[0]['uri'], $entity->id(), $entity->getEntityTypeId());
+          indieweb_webmention_create_queue_item($source, $values[0]['uri'], $entity->id(), $entity->getEntityTypeId());
         }
       }
     }
@@ -305,7 +305,7 @@ function _indieweb_entity_content_form_submit($form, FormStateInterface $form_st
     // Custom URL.
     $custom_url = $form_state->getValue('indieweb_publish_custom_url');
     if (!empty($custom_url)) {
-      indieweb_webmention_create_queue_item($source_url, $custom_url, $entity->id(), $entity->getEntityTypeId());
+      indieweb_webmention_create_queue_item($source, $custom_url, $entity->id(), $entity->getEntityTypeId());
     }
 
   }
@@ -788,7 +788,7 @@ function indieweb_form_comment_form_alter(&$form, FormStateInterface $form_state
 /**
  * Implements hook_ENTITY_TYPE_insert().
  */
-function indieweb_webmention_entity_insert(WebmentionEntityInterface $webmention) {
+function indieweb_webmention_entity_insert(WebmentionInterface $webmention) {
 
   // Comment creation.
   if (($config = \Drupal::config('indieweb.comment')) && $config->get('comment_create_enable')) {
@@ -971,16 +971,26 @@ function indieweb_get_publishing_channels() {
 /**
  * Creates a webmention queue item.
  *
- * @param $source_url
- * @param $target_url
+ * @param $source
+ * @param $target
  * @param $entity_id
  * @param $entity_type_id
- *
- * @throws \Exception
  */
-function indieweb_webmention_create_queue_item($source_url, $target_url, $entity_id = '', $entity_type_id = '') {
-  $data = ['source_url' => $source_url, 'target_url' => $target_url, 'entity_id' => $entity_id, 'entity_type_id' => $entity_type_id];
-  \Drupal::queue(WEBMENTION_QUEUE_NAME)->createItem($data);
+function indieweb_webmention_create_queue_item($source, $target, $entity_id = '', $entity_type_id = '') {
+  $data = [
+    'source' => $source,
+    'target' => $target,
+    'entity_id' => $entity_id,
+    'entity_type_id' => $entity_type_id
+  ];
+
+  try {
+    \Drupal::queue(WEBMENTION_QUEUE_NAME)->createItem($data);
+  }
+  catch (\Exception $e) {
+    \Drupal::logger('indieweb_queue')->notice('Error creating queue item: @message', ['@message' => $e->getMessage()]);
+  }
+
 }
 
 /**
@@ -991,16 +1001,13 @@ function indieweb_handle_webmention_queue() {
   $channels = indieweb_get_publishing_channels();
   while (time() < $end && ($item = \Drupal::queue(WEBMENTION_QUEUE_NAME)->claimItem())) {
     $data = $item->data;
-    if (!empty($data['source_url']) && !empty($data['target_url'])) {
-      $sourceURL = $data['source_url'];
-      $targetURL = $data['target_url'];
+    if (!empty($data['source']) && !empty($data['target'])) {
+      $sourceURL = $data['source'];
+      $targetURL = $data['target'];
       $client = new MentionClient();
 
       try {
         $response = $client->sendWebmention($sourceURL, $targetURL);
-
-        // Log success.
-        \Drupal::logger('indieweb_publish')->notice('Success sending webmention for @source to @target', ['@source' => $sourceURL, '@target' => $targetURL]);
 
         // Store the syndication when the targetUrl is in the channels.
         if (isset($channels[$targetURL])) {
@@ -1021,14 +1028,16 @@ function indieweb_handle_webmention_queue() {
               Cache::invalidateTags([$data['entity_type_id'] . ':' . $data['entity_id']]);
             }
 
+            // Log the response if configured.
+            if (\Drupal::config('indieweb.publish')->get('publish_log_response')) {
+              \Drupal::logger('indieweb_publish_response')->notice('response for @source to @target: @response', ['@response' => print_r($response, 1), '@source' => $sourceURL, '@target' => $targetURL]);
+            }
+
           }
           else {
-            \Drupal::logger('indieweb_publish')->notice('No 201 or location received when publishing for @source to @target: @response', ['@response' => print_r($response, 1), '@source' => $sourceURL, '@target' => $targetURL]);
-          }
-
-          // Log the response if configured.
-          if (\Drupal::config('indieweb.publish')->get('publish_log_response')) {
-            \Drupal::logger('indieweb_publish_response')->notice('response for @source to @target: @response', ['@response' => print_r($response, 1), '@source' => $sourceURL, '@target' => $targetURL]);
+            if (\Drupal::config('indieweb.publish')->get('publish_log_response')) {
+              \Drupal::logger('indieweb_publish')->notice('No 201 or location received when publishing for @source to @target: @response', ['@response' => print_r($response, 1), '@source' => $sourceURL, '@target' => $targetURL]);
+            }
           }
         }
 
@@ -1036,7 +1045,25 @@ function indieweb_handle_webmention_queue() {
       catch (Exception $e) {
         \Drupal::logger('indieweb_publish')->notice('Error sending webmention for @source to @target: @message', ['@message' => $e->getMessage(), '@source' => $sourceURL, '@target' => $targetURL]);
       }
+    }
 
+    // Store in send table.
+    $values = [
+      'source' => $data['source'],
+      'target' => $data['target'],
+      'entity_id' => !empty($data['entity_id']) ? $data['entity_id'] : 0,
+      'entity_type_id' => !empty($data['entity_type_id']) ? $data['entity_type_id'] : '',
+      'created' => \Drupal::time()->getCurrentTime(),
+    ];
+
+    try {
+      \Drupal::database()
+        ->insert('webmention_send')
+        ->fields($values)
+        ->execute();
+    }
+    catch (\Exception $e) {
+      \Drupal::logger('indieweb_publish')->notice('Error saving send webmention record: @message', ['@message' => $e->getMessage()]);
     }
 
     // Remove the item - always.
@@ -1078,11 +1105,11 @@ function indieweb_get_summary_fields() {
  * This can happen when you reply from your site to twitter. Brid.gy will then
  * send that reply on  twitter back as a webmention.
  *
- * @param \Drupal\indieweb\Entity\WebmentionEntityInterface $webmention
+ * @param \Drupal\indieweb\Entity\WebmentionInterface $webmention
  *
  * @return bool
  */
-function indieweb_source_exists_as_syndication(WebmentionEntityInterface $webmention) {
+function indieweb_source_exists_as_syndication(WebmentionInterface $webmention) {
   $exists = FALSE;
 
   if (strpos($webmention->get('source')->value, 'brid-gy.appspot') !== FALSE) {

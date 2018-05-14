@@ -53,6 +53,16 @@ webmention_entity.list_tab:
   route_name: entity.webmention_entity.collection
   base_route: system.admin_content
 
+webmention_entity.list_received:
+  title: 'Received'
+  route_name: entity.webmention_entity.collection
+  parent_id: webmention_entity.list_tab
+
+webmention.list_send:
+  title: 'Send'
+  route_name: indieweb.webmention.send.collection
+  parent_id: webmention_entity.list_tab
+
 indieweb_syndications.list_tab:
   title: 'Syndications'
   route_name: indieweb.syndications_list

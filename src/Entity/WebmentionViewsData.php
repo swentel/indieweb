@@ -7,7 +7,7 @@ use Drupal\views\EntityViewsData;
 /**
  * Provides Views data for Webmention entities.
  */
-class WebmentionEntityViewsData extends EntityViewsData {
+class WebmentionViewsData extends EntityViewsData {
 
   /**
    * {@inheritdoc}

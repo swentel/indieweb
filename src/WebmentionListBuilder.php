@@ -11,7 +11,7 @@ use Drupal\Core\Link;
  *
  * @ingroup webmention
  */
-class WebmentionEntityListBuilder extends EntityListBuilder {
+class WebmentionListBuilder extends EntityListBuilder {
 
   /**
    * {@inheritdoc}
@@ -30,7 +30,7 @@ class WebmentionEntityListBuilder extends EntityListBuilder {
    * {@inheritdoc}
    */
   public function buildRow(EntityInterface $entity) {
-    /* @var $entity \Drupal\indieweb\Entity\WebmentionEntityInterface */
+    /* @var $entity \Drupal\indieweb\Entity\WebmentionInterface */
     $row['source'] = $entity->get('source')->value;
     $row['target'] = ['data' => ['#markup' => '<a href="' . \Drupal::request()->getSchemeAndHttpHost() . $entity->get('target')->value . '">' . $entity->get('target')->value . '</a>', '#allowed_tags' => ['a']]];
     $row['type'] = $entity->get('type')->value;

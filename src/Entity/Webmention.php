@@ -19,16 +19,16 @@ use Drupal\user\UserInterface;
  *   label = @Translation("Webmention"),
  *   handlers = {
  *     "view_builder" = "Drupal\Core\Entity\EntityViewBuilder",
- *     "list_builder" = "Drupal\indieweb\WebmentionEntityListBuilder",
- *     "views_data" = "Drupal\indieweb\Entity\WebmentionEntityViewsData",
+ *     "list_builder" = "Drupal\indieweb\WebmentionListBuilder",
+ *     "views_data" = "Drupal\indieweb\Entity\WebmentionViewsData",
  *
  *     "form" = {
- *       "default" = "Drupal\indieweb\Form\WebmentionEntityForm",
- *       "add" = "Drupal\indieweb\Form\WebmentionEntityForm",
- *       "edit" = "Drupal\indieweb\Form\WebmentionEntityForm",
- *       "delete" = "Drupal\indieweb\Form\WebmentionEntityDeleteForm",
+ *       "default" = "Drupal\indieweb\Form\WebmentionForm",
+ *       "add" = "Drupal\indieweb\Form\WebmentionForm",
+ *       "edit" = "Drupal\indieweb\Form\WebmentionForm",
+ *       "delete" = "Drupal\indieweb\Form\WebmentionDeleteForm",
  *     },
- *     "access" = "Drupal\indieweb\WebmentionEntityAccessControlHandler",
+ *     "access" = "Drupal\indieweb\WebmentionAccessControlHandler",
  *     "route_provider" = {
  *      "html" = "Drupal\Core\Entity\Routing\AdminHtmlRouteProvider",
  *     },
@@ -54,7 +54,7 @@ use Drupal\user\UserInterface;
  *   field_ui_base_route = "indieweb.admin.dashboard"
  * )
  */
-class WebmentionEntity extends ContentEntityBase implements WebmentionEntityInterface {
+class Webmention extends ContentEntityBase implements WebmentionInterface {
 
   use EntityChangedTrait;
 

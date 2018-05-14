@@ -4,10 +4,81 @@ namespace Drupal\indieweb\Controller;
 
 use Drupal\Core\Cache\Cache;
 use Drupal\Core\Controller\ControllerBase;
+use Drupal\Core\Link;
 use Drupal\Core\Url;
 use Symfony\Component\HttpFoundation\JsonResponse;
 
 class WebmentionController extends ControllerBase {
+
+  /**
+   * Routing callback: Webmention send list.
+   */
+  public function sendAdminOverview() {
+    $build = $header = $rows = [];
+
+    $header = [
+      $this->t('Source'),
+      $this->t('Target'),
+      $this->t('Send'),
+    ];
+
+    $limit = 30;
+    $select = \Drupal::database()->select('webmention_send', 's')
+      ->fields('s')
+      ->orderBy('id', 'DESC')
+      ->extend('Drupal\Core\Database\Query\PagerSelectExtender')
+      ->limit($limit);
+
+    $records = $select->execute();
+    foreach ($records as $record) {
+      $row = [];
+
+      // Source.
+      if (!empty($record->entity_id) && !empty($records->entity_type_id)) {
+        $entity = $this->entityTypeManager()->getStorage($record->entity_type_id)->load($record->entity_id);
+        if ($entity) {
+          $row[] = ['data' => ['#markup' => Link::fromTextAndUrl($entity->label(), $entity->toUrl())->toString() . ' (' . $entity->id() . ')']];
+        }
+        else {
+          $row[] = $this->t('Unknown entity: @id (@type)', ['@id' => $record->entity_id, '@type' => $record->entity_type_id]);
+        }
+      }
+      else {
+        $row[] = $record->source;
+      }
+
+      // Target.
+      try {
+        $row[] = Link::fromTextAndUrl($record->target, Url::fromUri($record->target, ['external' => TRUE, 'attributes' => ['target' => '_blank']]))->toString();
+      }
+      catch (\Exception $ignored) {
+        $row[] = $record->target;
+      }
+
+      // Created.
+      $row[] = \Drupal::service('date.formatter')->format($record->created, 'medium');
+
+      // Add to rows.
+      $rows[] = $row;
+    }
+
+    $build['queue'] = [
+      '#markup' => '<p>' . $this->t('Items in queue: @count', ['@count' => \Drupal::queue(WEBMENTION_QUEUE_NAME)->numberOfItems()]) . '</p>',
+    ];
+
+    $build['table'] = [
+      '#type' => 'table',
+      '#header' => $header,
+      '#rows' => $rows,
+      '#empty' => $this->t('No send webmentions found'),
+    ];
+
+    $build['pager'] = [
+      '#type' => 'pager',
+    ];
+
+    return $build;
+  }
 
   /**
    * Routing callback: receive webmentions and pingbacks.
@@ -175,6 +246,5 @@ class WebmentionController extends ControllerBase {
       $this->getLogger('indieweb_webmention')->notice('Error clearing cache for @target: @message', ['@target' => $target, '@message' => $e->getMessage()]);
     }
   }
-
 
 }

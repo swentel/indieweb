@@ -79,10 +79,10 @@ function drush_indieweb_externalauth_map_account($uid = 0, $domain = '') {
 /**
  * Gets webmentions from webmention.io.
  *
- * @param $target_url
+ * @param $target
  * @param $base_url
  */
-function drush_indieweb_get_webmentions_from_webmention_io($target_url = '', $base_url = '') {
+function drush_indieweb_get_webmentions_from_webmention_io($target = '', $base_url = '') {
   $api_url = drush_get_option('api-url', 'https://webmention.io/api/mentions');
 
   $api_key = drush_prompt('Please enter your API key');
@@ -92,7 +92,7 @@ function drush_indieweb_get_webmentions_from_webmention_io($target_url = '', $ba
 
     try {
       $client = \Drupal::httpClient();
-      $response = $client->get($api_url . '?target=' . $target_url);
+      $response = $client->get($api_url . '?target=' . $target);
       $json = json_decode($response->getBody(), TRUE);
       if (!empty($json['links'])) {
         foreach ($json['links'] as $mention) {
@@ -119,7 +119,7 @@ function drush_indieweb_get_webmentions_from_webmention_io($target_url = '', $ba
           $values = [
             'user_id' => $config->get('webmention_uid'),
             // Remove the base url
-            'target' => ['value' => str_replace($base_url, '', $target_url)],
+            'target' => ['value' => str_replace($base_url, '', $target)],
             'source' => ['value' => $mention['source']],
             'type' => ['value' => $type],
             'property' => ['value' => $property]

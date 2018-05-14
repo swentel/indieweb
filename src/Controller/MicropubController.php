@@ -661,16 +661,18 @@ class MicropubController extends ControllerBase {
   }
 
   /**
-   * Syndicate to other channels.
+   * Syndicate to.
    *
    * @param $input
    * @param \Drupal\node\NodeInterface $node
+   *
+   * @throws \Drupal\Core\Entity\EntityMalformedException
    */
   protected function syndicateTo($input, NodeInterface $node) {
     if (!empty($input['mp-syndicate-to'])) {
-      $source_url = $node->toUrl()->setAbsolute(TRUE)->toString();
-      foreach ($input['mp-syndicate-to'] as $target_url) {
-        indieweb_webmention_create_queue_item($source_url, $target_url, $node->id(), 'node');
+      $source = $node->toUrl()->setAbsolute(TRUE)->toString();
+      foreach ($input['mp-syndicate-to'] as $target) {
+        indieweb_webmention_create_queue_item($source, $target, $node->id(), 'node');
       }
     }
   }
