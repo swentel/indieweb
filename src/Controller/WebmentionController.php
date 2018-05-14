@@ -34,7 +34,7 @@ class WebmentionController extends ControllerBase {
       $row = [];
 
       // Source.
-      if (!empty($record->entity_id) && !empty($records->entity_type_id)) {
+      if (!empty($record->entity_id) && !empty($record->entity_type_id)) {
         $entity = $this->entityTypeManager()->getStorage($record->entity_type_id)->load($record->entity_id);
         if ($entity) {
           $row[] = ['data' => ['#markup' => Link::fromTextAndUrl($entity->label(), $entity->toUrl())->toString() . ' (' . $entity->id() . ')']];
