@@ -44,6 +44,8 @@ function hook_indieweb_micropub_node_pre_create_alter(&$values, &$payload) {
  *   altered by hook_indieweb_micropub_node_pre_create_alter().
  * @param $payload_original
  *   The original payload from the micropub request.
+ *
+ * @throws \Drupal\Core\Entity\EntityMalformedException
  */
 function hook_indieweb_micropub_node_saved(NodeInterface $node, $values, $payload, $payload_original) {
   if (!empty($payload['category'])) {
@@ -55,4 +57,18 @@ function hook_indieweb_micropub_node_saved(NodeInterface $node, $values, $payloa
       }
     }
   }
+}
+
+/**
+ * Act when no post has been made. Create this function anywhere to do something
+ * with the values that are coming into the request. The request has been
+ * validated. If you return an absolute URL, that will be used as the response.
+ *
+ * @param $payload
+ *   The payload entered in the micropub request.
+ *
+ * @return string $url|NULL
+ *   Absolute URL. Return NULL in case nothing happened.
+ */
+function indieweb_micropub_no_post_made($payload) {
 }

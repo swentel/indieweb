@@ -503,6 +503,17 @@ class MicropubController extends ControllerBase {
         }
       }
 
+      // If we get to here, it means that no post has been created. Allow a
+      // dedicated function to do something with it.
+      if (function_exists('indieweb_micropub_no_post_made') && $valid_token) {
+        $location = indieweb_micropub_no_post_made($payload_original);
+        if ($location) {
+          $response_code = 201;
+          header('Location: ' . $location);
+          return new Response($response_message, $response_code);
+        }
+      }
+
     }
 
     return new JsonResponse($response_message, $response_code);
