@@ -2,7 +2,7 @@ indieweb.admin.dashboard:
   path: '/admin/config/services/indieweb'
   defaults:
     _controller: '\Drupal\indieweb\Controller\IndiewebController::dashboard'
-    _title: 'Indieweb'
+    _title: 'IndieWeb'
   requirements:
     _permission: 'administer indieweb'
 

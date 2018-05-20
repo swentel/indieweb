@@ -1,6 +1,6 @@
-name: Indieweb
+name: IndieWeb
 type: module
-description: Indieweb functionality for your site.
+description: IndieWeb functionality for your site.
 core: 8.x
 test_dependencies:
   - externalauth:externalauth

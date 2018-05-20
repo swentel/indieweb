@@ -1,30 +1,30 @@
 administer indieweb:
-  title: 'Administer Indieweb configuration'
-  description: 'Manage all Indieweb configuration including syndications, micropub, microsub and webmentions.'
+  title: 'Administer IndieWeb configuration'
+  description: 'Manage all IndieWeb configuration including syndications, micropub, microsub and webmentions.'
 
 view indieweb syndications:
   title: 'View syndications'
   description: 'Allow access to the overview page of all syndications.'
 
 administer webmention entities:
-  title: 'Administer Webmention entities'
-  description: 'Allow to access the administration form to configure Webmention entities.'
+  title: 'Administer webmention entities'
+  description: 'Allow to access the administration form to configure webmentions.'
 
 add webmention entities:
-  title: 'Create new Webmention entities'
+  title: 'Create new webmention'
 
 edit webmention entities:
-  title: 'Edit Webmention entities'
+  title: 'Edit webmention'
 
 delete webmention entities:
-  title: 'Delete Webmention entities'
+  title: 'Delete webmention'
 
 view published webmention entities:
-  title: 'View published Webmention entities'
+  title: 'View published webmention'
 
 view unpublished webmention entities:
-  title: 'View unpublished Webmention entities'
+  title: 'View unpublished webmention'
 
 send webmentions:
-  title: 'Send webmentions'
+  title: 'Send webmention'
   description: 'Allow access to the "Publish to" component to publish content to other sites.'

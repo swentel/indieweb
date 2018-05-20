@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Indieweb functionality.
+ * IndieWeb functionality.
  */
 
 use Drupal\comment\CommentInterface;

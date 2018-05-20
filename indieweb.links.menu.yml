@@ -1,5 +1,5 @@
 indieweb.admin.dashboard:
-  title: 'Indieweb'
-  description: 'Configure Indieweb for your website'
+  title: 'IndieWeb'
+  description: 'Configure IndieWeb for your website'
   route_name: indieweb.admin.dashboard
   parent: system.admin_config_services

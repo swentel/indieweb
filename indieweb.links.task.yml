@@ -1,5 +1,5 @@
 indieweb.admin.dashboard:
-  title: 'Indieweb'
+  title: 'IndieWeb'
   route_name: indieweb.admin.dashboard
   base_route: indieweb.admin.dashboard
 

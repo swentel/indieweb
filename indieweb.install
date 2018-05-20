@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Indieweb install file.
+ * IndieWeb install file.
  */
 
 define('INDIEWEB_MODULE_WEIGHT', 10);
