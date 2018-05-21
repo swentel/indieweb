@@ -516,7 +516,7 @@ function indieweb_preprocess_comment(&$variables) {
   if ($variables['elements']['#view_mode'] == 'indieweb_microformat') {
 
     // h-entry
-    if (\Drupal::config('indieweb.microformats')->get('h_entry')) {
+    if (\Drupal::config('indieweb.microformats')->get('h_entry_comment')) {
       $variables['attributes']['class'][] = 'h-entry';
     }
 

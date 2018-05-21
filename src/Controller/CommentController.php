@@ -36,6 +36,7 @@ class CommentController extends ControllerBase {
    *
    * @throws \Symfony\Component\HttpKernel\Exception\NotFoundHttpException
    * @throws \Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException
+   * @throws \Drupal\Core\Entity\EntityMalformedException
    */
   public function commentPermalink(CommentInterface $comment) {
     if ($entity = $comment->getCommentedEntity()) {
@@ -45,7 +46,12 @@ class CommentController extends ControllerBase {
         throw new AccessDeniedHttpException();
       }
 
-      $build = $this->entityTypeManager()->getViewBuilder('comment')->view($comment, 'indieweb_microformat');
+      // Render in default when the owner is anonymous.
+      $view_mode = 'indieweb_microformat';
+      if (empty($comment->getOwnerId())) {
+        $view_mode = 'full';
+      }
+      $build = $this->entityTypeManager()->getViewBuilder('comment')->view($comment, $view_mode);
 
       // Set canonical and shortlink to default comment permalink.
       $build['#attached']['html_head_link'][] = [

@@ -39,6 +39,17 @@ class CommentsTest extends IndiewebBrowserTestBase {
     $this->drupalPostForm(NULL, ['settings[target_type]' => 'webmention_entity'], 'Save field settings');
     $this->drupalPostForm('admin/structure/comment/manage/comment/display', ['fields[field_webmention][type]' => 'entity_reference_entity_view'], 'Save');
 
+
+
+    // Configure microformats.
+    $edit = [
+      'h_entry_comment' => 1,
+      'e_content_comment' => 1,
+      'post_metadata_comment' => 1,
+    ];
+    $this->drupalPostForm('admin/config/services/indieweb/microformats', $edit, 'Save configuration');
+
+
     // Create article.
     $edit = [
       'title[0][value]' => $this->title_text,
@@ -115,6 +126,12 @@ class CommentsTest extends IndiewebBrowserTestBase {
     $this->drupalGet('comment/' . $cid . '/edit');
     $this->assertSession()->fieldNotExists('comment_body[0][value]');
 
+    // Check that no microformats are rendered.
+    $this->drupalGet('/comment/indieweb/1');
+    $this->assertSession()->responseContains('Wow, this is a great module!');
+    $this->assertSession()->responseNotContains('h-entry');
+    $this->assertSession()->responseNotContains('dt-published');
+
     // Set mail notification.
     $edit = [
       'comment_create_mail_notification' => 'no-reply@example.com',
@@ -163,6 +180,11 @@ class CommentsTest extends IndiewebBrowserTestBase {
     $this->drupalGet('node/1');
     $this->assertSession()->responseContains("I know, isn't it!");
     $this->assertQueueItems(['https://brid-gy.appspot.com/comment/twitter/swentel/994117538731741185/994129251946418177' => 'https://brid-gy.appspot.com/comment/twitter/swentel/994117538731741185/994129251946418177'], 1);
+
+    $this->drupalGet('/comment/indieweb/3');
+    $this->assertSession()->responseContains("I know, isn't it!");
+    $this->assertSession()->responseContains('h-entry');
+    $this->assertSession()->responseContains('dt-published');
 
     // Save a syndication for this one, so we can detect that a webmention from
     // brid.gy will not create the same comment again as it already exists.
