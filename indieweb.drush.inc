@@ -81,9 +81,15 @@ function drush_indieweb_externalauth_map_account($uid = 0, $domain = '') {
  *
  * @param $target
  * @param $base_url
+ * @param $options
  */
-function drush_indieweb_get_webmentions_from_webmention_io($target = '', $base_url = '') {
-  $api_url = drush_get_option('api-url', 'https://webmention.io/api/mentions');
+function drush_indieweb_get_webmentions_from_webmention_io($target = '', $base_url = '', $options = ['api-url' => NULL]) {
+  if (!empty($options['api-url'])) {
+    $api_url = $options['api-url'];
+  }
+  else {
+    $api_url = drush_get_option('api-url', 'https://webmention.io/api/mentions');
+  }
 
   $api_key = drush_prompt('Please enter your API key');
   if (!empty($api_key)) {

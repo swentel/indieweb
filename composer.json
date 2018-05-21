@@ -16,5 +16,12 @@
   "require": {
     "indieweb/mention-client": "^1.1",
     "p3k/xray": "^1.4"
+  },
+  "extra": {
+    "drush": {
+      "services": {
+        "drush.services.yml": "^9"
+      }
+    }
   }
 }
