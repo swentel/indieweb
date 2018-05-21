@@ -99,6 +99,8 @@ class FeedsTest extends IndiewebBrowserTestBase {
       'uid' => 1,
     ];
     $article = $this->createNode($settings);
+    $this->assertFeedItems(1, 1, $article->id());
+
     $this->drupalLogin($this->adminUser);
     $this->drupalGet('admin/config/services/indieweb/feeds');
     $this->clickLink('Update items');
@@ -109,6 +111,7 @@ class FeedsTest extends IndiewebBrowserTestBase {
       'relHeaderJf2' => TRUE,
     ];
     $this->drupalPostForm('admin/config/services/indieweb/feeds/timeline/edit', $edit, 'Save');
+    $this->assertFeedItems(1, 1, $article->id());
 
     $this->drupalLogout();
     $this->drupalGet('<front>');
@@ -131,6 +134,7 @@ class FeedsTest extends IndiewebBrowserTestBase {
     $this->assertSession()->responseContains('Updated title');
     $this->drupalGet($this->timeline_jf2_path);
     $this->assertSession()->responseContains('Updated title');
+    $this->assertFeedItems(1, 1, $article->id());
 
     // Add new article, this will be added to the timeline by the hooks.
     $settings['title'] = 'Now this will be cool!';
@@ -140,12 +144,38 @@ class FeedsTest extends IndiewebBrowserTestBase {
     $this->drupalGet($this->timeline_jf2_path);
     $this->assertSession()->responseContains($article_2->label());
 
+    // Edit article, should only be once in timeline.
+    $article_2->set('title', 'Now this is updated');
+    $article_2->save();
+    $this->drupalGet($this->timeline_path);
+    $this->assertSession()->responseContains($article_2->label());
+    $this->assertFeedItems(2, 1, $article_2->id());
+
     // Delete, should be gone from timeline.
     $article_2->delete();
     $this->drupalGet($this->timeline_path);
     $this->assertSession()->responseNotContains($settings['title']);
     $this->drupalGet($this->timeline_jf2_path);
     $this->assertSession()->responseNotContains($settings['title']);
+
+  }
+
+  /**
+   * Assert number of items in feed.
+   *
+   * @param $total
+   * @param $total_nid
+   * @param $entity_id
+   *
+   * @param string $feed
+   */
+  protected function assertFeedItems($total_feed, $total_nid, $entity_id, $feed = 'timeline') {
+
+    $total = \Drupal::database()->query('SELECT count(id) FROM {indieweb_feed_items} WHERE feed = :feed AND entity_id = :entity_id', [':feed' => $feed, ':entity_id' => $entity_id])->fetchField();
+    $this->assertEquals($total_nid, $total);
+
+    $total = \Drupal::database()->query('SELECT count(id) FROM {indieweb_feed_items} WHERE feed = :feed', [':feed' => $feed])->fetchField();
+    $this->assertEquals($total_feed, $total);
 
   }
 

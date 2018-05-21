@@ -423,13 +423,11 @@ function _indieweb_entity_feed_insert($entity, $feed) {
   $published = method_exists($entity, 'isPublished') ? $entity->isPublished() : 1;
 
   \Drupal::database()
-    ->upsert('indieweb_feed_items')
-    ->key('entity_id')
-    ->key('entity_type_id')
+    ->merge('indieweb_feed_items')
+    ->key('entity_id', $entity->id())
+    ->key('entity_type_id', $entity->getEntityTypeId())
+    ->key('feed', $feed->id())
     ->fields([
-      'entity_id' => $entity->id(),
-      'entity_type_id' => $entity->getEntityTypeId(),
-      'feed' => $feed->id(),
       'published' => (int) $published,
       'timestamp' => $entity->getCreatedTime()
     ])
