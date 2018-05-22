@@ -56,7 +56,7 @@ class WebmentionSettingsForm extends ConfigFormBase {
       '#title' => $this->t('Webmention endpoint'),
       '#type' => 'textfield',
       '#default_value' => $config->get('webmention_endpoint'),
-      '#description' => $this->t('If you use webmention.io, the endpoint will look like <strong>https://webmention.io/@domain/webmention</strong><br />This link will be added on all non admin pages. Leave empty if you are going to add this manually to html.html.twig.<br /><div class="indieweb-highlight-code">&lt;link rel="webmention" href="https://webmention.io/@domain/webmention" /&gt;</div>', ['@domain' => \Drupal::request()->getHttpHost()]),
+      '#description' => $this->t('If you use webmention.io, the endpoint will look like <strong>https://webmention.io/@domain/webmention</strong><br />If you already have an account on webmention.io, you can use that URL (the domain is your username and does not matter).<br />This link will be added on all non admin pages. Leave empty if you are going to add this manually to html.html.twig.<br /><div class="indieweb-highlight-code">&lt;link rel="webmention" href="https://webmention.io/@domain/webmention" /&gt;</div>', ['@domain' => \Drupal::request()->getHttpHost()]),
       '#states' => array(
         'visible' => array(
           ':input[name="webmention_enable"]' => array('checked' => TRUE),
