@@ -51,6 +51,16 @@ class MicropubTest extends IndiewebBrowserTestBase {
   ];
 
   /**
+   * Default like $_POST content.
+   *
+   * @var array
+   */
+  protected $like_silo = [
+    'h' => 'entry',
+    'like-of' => 'https://twitter.com/swentel/status/1'
+  ];
+
+  /**
    * {@inheritdoc}
    */
   function setUp() {
@@ -167,7 +177,7 @@ class MicropubTest extends IndiewebBrowserTestBase {
     $this->assertNodeCount(0, 'like');
 
     $this->drupalLogin($this->adminUser);
-    $edit = ['like_create_node' => 1, 'like_node_type' => 'like', 'like_link_field' => 'field_link', 'like_content_field' => 'body'];
+    $edit = ['like_create_node' => 1, 'like_node_type' => 'like', 'like_link_field' => 'field_link', 'like_content_field' => 'body', 'like_auto_send_webmention' => 1];
     $this->drupalPostForm('admin/config/services/indieweb/micropub', $edit, 'Save configuration');
     $this->drupalLogout();
     $code = $this->sendMicropubRequest($this->like);
@@ -192,9 +202,30 @@ class MicropubTest extends IndiewebBrowserTestBase {
       $this->assertTrue($nid, 'No like node found');
     }
 
-    // Set default status to unpublished for all post types.
+    // Clear the queue.
+    $this->clearQueue();
+
+    // Do not send when like url is from a silo.
+    $code = $this->sendMicropubRequest($this->like_silo);
+    self::assertEquals(201, $code);
+    $this->assertNodeCount(2, 'like');
+    $this->assertQueueItems();
+
+    // Configure to not auto send a webmention.
     $this->drupalLogin($this->adminUser);
-    $edit = ['note_status' => 0, 'article_status' => 0, 'like_status' => 0];
+    $edit = ['like_auto_send_webmention' => 0];
+    $this->drupalPostForm('admin/config/services/indieweb/micropub', $edit, 'Save configuration');
+    $this->drupalLogout();
+    $code = $this->sendMicropubRequest($this->like);
+    self::assertEquals(201, $code);
+    $this->assertNodeCount(3, 'like');
+    $this->assertQueueItems();
+
+    // Set default status to unpublished for all post types.
+    // Turn on auto webmention, which shouldn't kick in for like as the node
+    // isn't published.
+    $this->drupalLogin($this->adminUser);
+    $edit = ['note_status' => 0, 'article_status' => 0, 'like_status' => 0, 'like_auto_send_webmention' => 1];
     $this->drupalPostForm('admin/config/services/indieweb/micropub', $edit, 'Save configuration');
     $this->drupalLogout();
 
@@ -237,7 +268,7 @@ class MicropubTest extends IndiewebBrowserTestBase {
     $post['content'] = 'That is a nice site!';
     $code = $this->sendMicropubRequest($post, 'this_is_a_valid_token', FALSE, TRUE);
     self::assertEquals(201, $code);
-    $this->assertNodeCount(2, 'like');
+    $this->assertNodeCount(4, 'like');
     $nid = $this->getLastNid('like');
     if ($nid) {
       /** @var \Drupal\node\NodeInterface $node */
@@ -249,6 +280,7 @@ class MicropubTest extends IndiewebBrowserTestBase {
       // Explicit failure.
       $this->assertTrue($nid, 'No like node found');
     }
+    $this->assertQueueItems();
 
   }
 

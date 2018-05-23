@@ -19,6 +19,7 @@ article_uid: 1
 like_create_node: false
 like_status: 1
 like_node_type: ''
+like_auto_send_webmention: false
 like_content_field: ''
 like_link_field: ''
 like_tags_field: ''

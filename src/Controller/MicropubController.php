@@ -308,11 +308,13 @@ class MicropubController extends ControllerBase {
         ];
 
         // Add url to syndicate to.
-        if (isset($input['mp-syndicate-to'])) {
-          $input['mp-syndicate-to'][] = $input['like-of'];
-        }
-        else {
-          $input['mp-syndicate-to'] = [$input['like-of']];
+        if ($this->config->get('like_auto_send_webmention')) {
+          if (isset($input['mp-syndicate-to'])) {
+            $input['mp-syndicate-to'][] = $input['like-of'];
+          }
+          else {
+            $input['mp-syndicate-to'] = [$input['like-of']];
+          }
         }
 
         // Allow code to change the values and payload.
@@ -680,7 +682,7 @@ class MicropubController extends ControllerBase {
    * @throws \Drupal\Core\Entity\EntityMalformedException
    */
   protected function syndicateTo($input, NodeInterface $node) {
-    if (!empty($input['mp-syndicate-to'])) {
+    if (!empty($input['mp-syndicate-to']) && $node->isPublished()) {
       $source = $node->toUrl()->setAbsolute(TRUE)->toString();
       foreach ($input['mp-syndicate-to'] as $target) {
         indieweb_webmention_create_queue_item($source, $target, $node->id(), 'node');

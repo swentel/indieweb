@@ -372,6 +372,18 @@ class MicropubSettingsForm extends ConfigFormBase {
       ),
     ];
 
+    $form['like']['like_auto_send_webmention'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Send webmention'),
+      '#default_value' => $config->get('like_auto_send_webmention'),
+      '#states' => array(
+        'visible' => array(
+          ':input[name="like_create_node"]' => array('checked' => TRUE),
+        ),
+      ),
+      '#description' => $this->t('Automatically send a webmention to the URL that is found in the link field.'),
+    ];
+
     // Content field.
     $form['like']['like_content_field'] = [
       '#type' => 'select',
@@ -937,6 +949,7 @@ class MicropubSettingsForm extends ConfigFormBase {
       ->set('like_node_type', $form_state->getValue('like_node_type'))
       ->set('like_content_field', $form_state->getValue('like_content_field'))
       ->set('like_link_field', $form_state->getValue('like_link_field'))
+      ->set('like_auto_send_webmention', $form_state->getValue('like_auto_send_webmention'))
       ->set('like_tags_field', $form_state->getValue('like_tags_field'))
       ->set('reply_create_node', $form_state->getValue('reply_create_node'))
       ->set('reply_uid', $form_state->getValue('reply_uid'))

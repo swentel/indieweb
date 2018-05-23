@@ -162,6 +162,9 @@ indieweb.micropub:
     like_link_field:
       type: string
       label: 'The node link field for the like'
+    like_auto_send_webmention:
+      type: boolean
+      label: 'Whether to automatically send a webmention to the url found in the link field'
     like_tags_field:
       type: string
       label: 'The node tags field for the like'

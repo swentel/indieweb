@@ -214,6 +214,14 @@ abstract class IndiewebBrowserTestBase extends BrowserTestBase {
   }
 
   /**
+   * Truncate the queue.
+   */
+  protected function clearQueue() {
+    \Drupal::database()->delete('queue')->condition('name', WEBMENTION_QUEUE_NAME)->execute();
+    $this->assertQueueItems();
+  }
+
+  /**
    * Create a syndication record.
    *
    * @param $url

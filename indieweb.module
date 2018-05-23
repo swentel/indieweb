@@ -1011,6 +1011,12 @@ function indieweb_webmention_create_queue_item($source, $target, $entity_id = ''
     'entity_type_id' => $entity_type_id
   ];
 
+  // Bail out when target is one of the silos, but not actually the webmention
+  // endpoint. This can happen with reply urls to twitter for example.
+  if (indieweb_is_silo_url($target)) {
+    return;
+  }
+
   try {
     \Drupal::queue(WEBMENTION_QUEUE_NAME)->createItem($data);
   }
@@ -1148,4 +1154,24 @@ function indieweb_source_exists_as_syndication(WebmentionInterface $webmention) 
   }
 
   return $exists;
+}
+
+/**
+ * Checks whether the url is a silo URL or not. Currently detects Twitter urls.
+ *
+ * e.g. https://twitter.com/studioemma/status/999193968234713093 should be
+ * marked as a silo url.
+ *
+ * @param $url
+ *
+ * @return bool
+ */
+function indieweb_is_silo_url($url) {
+  $is_silo_url = FALSE;
+
+  if (strpos($url, 'twitter.com') !== FALSE) {
+    $is_silo_url = TRUE;
+  }
+
+  return $is_silo_url;
 }
