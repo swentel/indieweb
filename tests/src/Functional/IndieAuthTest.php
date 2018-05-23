@@ -75,6 +75,8 @@ class IndieAuthTest extends IndiewebBrowserTestBase {
     $this->drupalPostForm('indieauth-test/login', $edit, 'Sign in');
     $this->assertSession()->statusCodeEquals(200);
     $this->assertSession()->addressEquals('user/3');
+    $this->assertSession()->responseContains('indieweb_example.com');
+    $this->assertSession()->responseNotContains('indieweb_example.com/');
 
     // Login again, should be same user.
     $this->drupalLogout();

@@ -58,6 +58,11 @@ class IndieAuthLoginForm extends FormBase {
   public function submitForm(array &$form, FormStateInterface $form_state) {
     $domain = $form_state->getValue('domain');
 
+    // Add trailing slash if necessary.
+    if (substr($domain, -1, 0) != '/') {
+      $domain .= '/';
+    }
+
     // Start a session.
     $_SESSION['started'] = TRUE;
     $_SESSION['domain'] = $domain;

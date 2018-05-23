@@ -26,7 +26,7 @@ class IndieAuthController extends ControllerBase {
     $message = $this->t('Access denied');
 
     // Verify code.
-    if (!empty($_GET['code']) && !empty($_GET['state']) && !empty($_GET['client_id']) && $_GET['client_id'] == \Drupal::request()->getSchemeAndHttpHost() && $_GET['state'] == session_id()) {
+    if (!empty($_GET['code']) && !empty($_GET['state']) && $_GET['state'] == session_id()) {
 
       // Validate the code.
       $valid_code = FALSE;
@@ -36,12 +36,13 @@ class IndieAuthController extends ControllerBase {
         $client = \Drupal::httpClient();
         $body = [
           'code' => $_GET['code'],
-          'client_id' => $_GET['client_id'],
+          'client_id' => \Drupal::request()->getSchemeAndHttpHost(),
           'redirect_uri' => Url::fromroute('indieweb.indieauth.login.redirect', [], ['absolute' => TRUE])->toString(),
         ];
 
-        $response = $client->post($config->get('login_endpoint'), ['form_params' => $body]);
-        $json = json_decode($response->getBody());
+        $headers = ['Accept' => 'application/json'];
+        $response = $client->post($config->get('login_endpoint'), ['form_params' => $body, 'headers' => $headers]);
+        $json = json_decode($response->getBody()->getContents());
         if (isset($json->me) && isset($_SESSION['domain']) && $json->me == $_SESSION['domain']) {
           $domain = $_SESSION['domain'];
           unset($_SESSION['domain']);
@@ -58,7 +59,7 @@ class IndieAuthController extends ControllerBase {
 
         /** @var \Drupal\externalauth\ExternalAuthInterface $external_auth */
         $external_auth = \Drupal::service('externalauth.externalauth');
-        $authname = str_replace(['https://', 'http://'], '', $domain);
+        $authname = str_replace(['https://', 'http://', '/'], '', $domain);
         try {
           $account = $external_auth->loginRegister($authname, 'indieweb');
           if ($account) {

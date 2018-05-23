@@ -58,7 +58,7 @@ class IndieAuthSettingsForm extends ConfigFormBase {
       '#title' => $this->t('Login endpoint'),
       '#type' => 'textfield',
       '#default_value' => $config->get('login_endpoint'),
-      '#description' => $this->t('The login endpoint. Defaults to https://indielogin.com/auth.<br />The redirect callback is automatically set to :redirect', [':redirect' => Url::fromRoute('indieweb.indieauth.login.redirect', [], ['absolute' => TRUE])->toString()]),
+      '#description' => $this->t('The login endpoint. Defaults to https://indieauth.com/auth.<br />The redirect callback is automatically set to :redirect. <br />Indielogin.com will be available soon.', [':redirect' => Url::fromRoute('indieweb.indieauth.login.redirect', [], ['absolute' => TRUE])->toString()]),
       '#states' => array(
         'visible' => array(
           ':input[name="login_enable"]' => array('checked' => TRUE),
