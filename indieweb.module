@@ -10,6 +10,7 @@ use Drupal\comment\Entity\Comment;
 use Drupal\comment\Entity\CommentType;
 use Drupal\Core\Cache\Cache;
 use Drupal\Core\Entity\ContentEntityInterface;
+use Drupal\Core\Entity\Display\EntityFormDisplayInterface;
 use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Form\FormStateInterface;
@@ -172,6 +173,34 @@ function indieweb_page_attachments_alter(array &$attachments) {
  */
 function indieweb_form_node_form_alter(&$form, FormStateInterface $form_state) {
   _indieweb_entity_form_alter($form, $form_state);
+}
+
+/**
+ * Implements hook_entity_form_display_alter().
+ */
+function indieweb_entity_form_display_alter(EntityFormDisplayInterface $form_display, array $context) {
+  if (_indieweb_user_authenticated_with_domain_on_edit_form()) {
+    $form_display->removeComponent('account');
+  }
+}
+
+/**
+ * Checks if a user is authenticated with his domain on the user edit form.
+ *
+ * @return bool
+ */
+function _indieweb_user_authenticated_with_domain_on_edit_form() {
+  $authenticated = FALSE;
+
+  if (\Drupal::routeMatch()->getRouteName() == 'entity.user.edit_form' && ($account = \Drupal::routeMatch()->getParameter('user')) && \Drupal::currentUser()->id() == $account->id()) {
+    // Check if login is enabled and current user is authenticated with domain
+    // and has no administer users permission.
+    if (\Drupal::config('indieweb.indieauth')->get('login_enable') && \Drupal::service('externalauth.authmap')->get($account->id(), 'indieweb') && !\Drupal::currentUser()->hasPermission('administer users')) {
+      $authenticated = TRUE;
+    }
+  }
+
+  return $authenticated;
 }
 
 /**

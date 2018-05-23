@@ -84,6 +84,48 @@ class IndieAuthTest extends IndiewebBrowserTestBase {
     $this->drupalPostForm('indieauth-test/login', $edit, 'Sign in');
     $this->assertSession()->statusCodeEquals(200);
     $this->assertSession()->addressEquals('user/3');
+
+    // Now let's check the edit form as the indieauth user, you should not be
+    // able to set the password or change your username as that is used for
+    // external auth.
+    $this->drupalGet('user/3/edit');
+    $this->assertSession()->responseNotContains('Required if you want to change the');
+    $this->assertSession()->responseNotContains('To change the current user password, enter the new password in both fields.');
+    $this->assertSession()->responseNotContains('Several special characters are allowed');
+
+    /** @var \Drupal\user\UserInterface $account */
+    $account = \Drupal::entityTypeManager()->getStorage('user')->load(3);
+    self::assertTrue(empty($account->getEmail()));
+
+    // Normal user can change it.
+    $this->drupalLogout();
+    $another = $this->drupalCreateUser(['access content', 'change own username'], 'anotheruser');
+    $this->drupalLogin($another);
+    $this->drupalGet('user/4/edit');
+    $this->assertSession()->responseContains('Required if you want to change the');
+    $this->assertSession()->responseContains('To change the current user password, enter the new password in both fields.');
+    $this->assertSession()->responseContains('Several special characters are allowed');
+
+    // Check fields as admin user that everything is there.
+    $this->drupalLogout();
+    $this->drupalLogin($this->adminUser);
+    $this->drupalGet('user/2/edit');
+    $this->assertSession()->responseContains('Required if you want to change the');
+    $this->assertSession()->responseContains('To change the current user password, enter the new password in both fields.');
+    $this->assertSession()->responseContains('Several special characters are allowed');
+    $this->drupalGet('user/3/edit');
+    $this->assertSession()->responseNotContains('Required if you want to change the');
+    $this->assertSession()->responseContains('To change the current user password, enter the new password in both fields.');
+    $this->assertSession()->responseContains('Several special characters are allowed');
+    $this->drupalGet('user/4/edit');
+    $this->assertSession()->responseNotContains('Required if you want to change the');
+    $this->assertSession()->responseContains('To change the current user password, enter the new password in both fields.');
+    $this->assertSession()->responseContains('Several special characters are allowed');
+
+    // Make sure you can't login with user 3 since it has no password.
+    $this->drupalLogout();
+    $this->drupalPostForm('user/login', ['name' => 'indieweb_example.com', 'pass' => ''], 'Log in');
+    $this->assertSession()->responseContains('Password field is required');
   }
 
 }
