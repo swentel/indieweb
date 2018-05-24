@@ -198,11 +198,13 @@ class MicropubController extends ControllerBase {
         ];
 
         // Add url to syndicate to.
-        if (isset($input['mp-syndicate-to'])) {
-          $input['mp-syndicate-to'][] = $input['repost-of'];
-        }
-        else {
-          $input['mp-syndicate-to'] = [$input['repost-of']];
+        if ($this->config->get('repost_auto_send_webmention')) {
+          if (isset($input['mp-syndicate-to'])) {
+            $input['mp-syndicate-to'][] = $input['repost-of'];
+          }
+          else {
+            $input['mp-syndicate-to'] = [$input['repost-of']];
+          }
         }
 
         // Allow code to change the values and payload.

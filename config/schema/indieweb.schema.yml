@@ -207,6 +207,9 @@ indieweb.micropub:
     repost_link_field:
       type: string
       label: 'The node link field for the repost'
+    repost_auto_send_webmention:
+      type: boolean
+      label: 'Whether to automatically send a webmention to the url found in the link field'
     repost_tags_field:
       type: string
       label: 'The node tags field for the repost'
