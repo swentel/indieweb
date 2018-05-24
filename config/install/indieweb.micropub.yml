@@ -60,6 +60,7 @@ rsvp_status: 1
 rsvp_node_type: ''
 rsvp_content_field: ''
 rsvp_link_field: ''
+rsvp_auto_send_webmention: false
 rsvp_rsvp_field: ''
 rsvp_tags_field: ''
 rsvp_uid: 1

@@ -58,6 +58,13 @@ abstract class IndiewebBrowserTestBase extends BrowserTestBase {
   protected $summary_text = 'A summary';
 
   /**
+   * RSVP settings.
+   *
+   * @var string
+   */
+  protected $rsvp_settings = "yes|I am going!\nno|I can not go\nmaybe|I might go\ninterested|Interested, but will decide later!";
+
+  /**
    * {@inheritdoc}
    */
   public function setUp() {
@@ -71,6 +78,46 @@ abstract class IndiewebBrowserTestBase extends BrowserTestBase {
       ->getEditable('system.site')
       ->set('page.front', '/indieweb-test-front')
       ->save();
+  }
+
+  /**
+   * Creates several node types that are useful for micropub, posting etc.
+   */
+  protected function createNodeTypes() {
+
+    $this->drupalLogin($this->adminUser);
+
+    foreach (['like', 'bookmark', 'repost', 'reply', 'rsvp', 'event'] as $type) {
+      $edit = ['name' => $type, 'type' => $type];
+      $this->drupalPostForm('admin/structure/types/add', $edit, 'Save and manage fields');
+
+      if ($type != 'event') {
+        $edit = ['new_storage_type' => 'link', 'label' => 'Link', 'field_name' => $type . '_link'];
+        $this->drupalPostForm('admin/structure/types/manage/' . $type . '/fields/add-field', $edit, 'Save and continue');
+        $this->drupalPostForm(NULL, [], 'Save field settings');
+        $this->drupalPostForm(NULL, [], 'Save settings');
+        $edit = ['fields[field_' . $type . '_link][type]' => 'link_microformat'];
+        $this->drupalPostForm('admin/structure/types/manage/' . $type . '/display', $edit, 'Save');
+      }
+
+      if ($type == 'rsvp') {
+        $edit = ['new_storage_type' => 'list_string', 'label' => 'RSVP', 'field_name' => 'rsvp'];
+        $this->drupalPostForm('admin/structure/types/manage/' . $type . '/fields/add-field', $edit, 'Save and continue');
+        $this->drupalPostForm(NULL, ['settings[allowed_values]' => $this->rsvp_settings], 'Save field settings');
+        $this->drupalPostForm(NULL, [], 'Save settings');
+        $edit = ['fields[field_rsvp][type]' => 'list_microformat'];
+        $this->drupalPostForm('admin/structure/types/manage/' . $type . '/display', $edit, 'Save');
+      }
+
+      if ($type == 'event') {
+        $edit = ['new_storage_type' => 'daterange', 'label' => 'Date', 'field_name' => 'date'];
+        $this->drupalPostForm('admin/structure/types/manage/' . $type . '/fields/add-field', $edit, 'Save and continue');
+        $this->drupalPostForm(NULL, [], 'Save field settings');
+        $this->drupalPostForm(NULL, [], 'Save settings');
+      }
+    }
+
+    drupal_flush_all_caches();
   }
 
   /**

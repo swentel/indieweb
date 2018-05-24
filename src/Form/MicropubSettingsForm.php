@@ -924,6 +924,18 @@ class MicropubSettingsForm extends ConfigFormBase {
       ),
     ];
 
+    $form['rsvp']['rsvp_auto_send_webmention'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Send webmention'),
+      '#default_value' => $config->get('rsvp_auto_send_webmention'),
+      '#states' => array(
+        'visible' => array(
+          ':input[name="rsvp_create_node"]' => array('checked' => TRUE),
+        ),
+      ),
+      '#description' => $this->t('Automatically send a webmention to the URL that is found in the link field.'),
+    ];
+
     // Content field.
     $form['rsvp']['rsvp_content_field'] = [
       '#type' => 'select',
@@ -1024,6 +1036,7 @@ class MicropubSettingsForm extends ConfigFormBase {
       ->set('rsvp_node_type', $form_state->getValue('rsvp_node_type'))
       ->set('rsvp_content_field', $form_state->getValue('rsvp_content_field'))
       ->set('rsvp_link_field', $form_state->getValue('rsvp_link_field'))
+      ->set('rsvp_auto_send_webmention', $form_state->getValue('rsvp_auto_send_webmention'))
       ->set('rsvp_rsvp_field', $form_state->getValue('rsvp_rsvp_field'))
       ->set('rsvp_tags_field', $form_state->getValue('rsvp_tags_field'))
 

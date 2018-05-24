@@ -279,6 +279,9 @@ indieweb.micropub:
     rsvp_link_field:
       type: string
       label: 'The node link field for the RSVP'
+    rsvp_auto_send_webmention:
+      type: boolean
+      label: 'Whether to automatically send a webmention to the url found in the link field'
     rsvp_rsvp_field:
       type: string
       label: 'The node RSVP field for the RSVP'

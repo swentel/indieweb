@@ -19,6 +19,18 @@ class MicropubTest extends IndiewebBrowserTestBase {
   protected $profile = 'standard';
 
   /**
+   * Modules to enable for this test.
+   *
+   * @var string[]
+   */
+  public static $modules = [
+    'node',
+    'indieweb',
+    'indieweb_test',
+    'datetime_range',
+  ];
+
+  /**
    * Default note $_POST content.
    *
    * @var array
@@ -38,6 +50,19 @@ class MicropubTest extends IndiewebBrowserTestBase {
     'name' => 'An article',
     'content' => 'An article content',
     'category' => ['tag 1', 'tag 2'],
+  ];
+
+  /**
+   * Default event $_POST content.
+   *
+   * @var array
+   */
+  protected $event = [
+    'h' => 'event',
+    'name' => 'An event',
+    'content' => 'Where it takes place',
+    'start' => '2018-05-24 14:00',
+    'end' => '2018-05-24 18:00',
   ];
 
   /**
@@ -82,6 +107,18 @@ class MicropubTest extends IndiewebBrowserTestBase {
   ];
 
   /**
+   * Default RSVP $_POST content.
+   *
+   * @var array
+   */
+  protected $rsvp = [
+    'h' => 'entry',
+    'rsvp' => 'yes',
+    'in-reply-to' => 'https://example.com/what-a-page',
+    'content' => 'So excited!',
+  ];
+
+  /**
    * Default like $_POST content.
    *
    * @var array
@@ -97,20 +134,14 @@ class MicropubTest extends IndiewebBrowserTestBase {
   function setUp() {
     parent::setUp();
 
-    $this->drupalLogin($this->adminUser);
+    // Create node types.
+    $this->createNodeTypes();
 
-    foreach (['like', 'bookmark', 'repost', 'reply'] as $type) {
-      $edit = ['name' => $type, 'type' => $type];
-      $this->drupalPostForm('admin/structure/types/add', $edit, 'Save and manage fields');
-      $edit = ['new_storage_type' => 'link', 'label' => 'Link', 'field_name' => $type . '_link'];
-      $this->drupalPostForm('admin/structure/types/manage/' . $type . '/fields/add-field', $edit, 'Save and continue');
-      $this->drupalPostForm(NULL, [], 'Save field settings');
-      $this->drupalPostForm(NULL, [], 'Save settings');
-      $edit = ['fields[field_' . $type . '_link][type]' => 'link_microformat'];
-      $this->drupalPostForm('admin/structure/types/manage/' . $type . '/display', $edit, 'Save');
-    }
-
-    drupal_flush_all_caches();
+    // Configure event microformats.
+    $edit = [
+      'h_event' => 'event',
+    ];
+    $this->drupalPostForm('admin/config/services/indieweb/microformats', $edit, 'Save configuration');
   }
 
   /**
@@ -205,6 +236,33 @@ class MicropubTest extends IndiewebBrowserTestBase {
     else {
       // Explicit failure.
       $this->assertTrue($nid, 'No article node found');
+    }
+
+    // Test event.
+    $this->drupalLogin($this->adminUser);
+    $edit = ['event_create_node' => 1, 'event_node_type' => 'event', 'event_content_field' => 'body', 'event_date_field' => 'field_date'];
+    $this->drupalPostForm('admin/config/services/indieweb/micropub', $edit, 'Save configuration');
+    $this->drupalLogout();
+    $code = $this->sendMicropubRequest($this->event, 'this_is_a_valid_token', TRUE);
+    self::assertEquals(201, $code);
+    $this->assertNodeCount(1, 'event');
+    $nid = $this->getLastNid('event');
+    if ($nid) {
+      /** @var \Drupal\node\NodeInterface $node */
+      $node = \Drupal::entityTypeManager()->getStorage('node')->load($nid);
+      self::assertEquals(TRUE, $node->isPublished());
+      self::assertEquals($this->event['name'], $node->getTitle());
+      self::assertEquals($this->event['content'], $node->get('body')->value);
+
+      // Check 'dt-start' and 'dt-end' classes.
+      $this->drupalGet('node/' . $nid);
+      $this->assertSession()->responseContains('datetime="2018-05-24T04:00:00Z" class="dt-start datetime"');
+      $this->assertSession()->responseContains('datetime="2018-05-24T08:00:00Z" class="dt-end datetime"');
+
+    }
+    else {
+      // Explicit failure.
+      $this->assertTrue($nid, 'No event node found');
     }
 
     // Test likes.
@@ -378,6 +436,53 @@ class MicropubTest extends IndiewebBrowserTestBase {
     $this->assertNodeCount(2, 'reply');
     $this->assertQueueItems();
 
+    // Test RSVP.
+    $code = $this->sendMicropubRequest($this->rsvp);
+    self::assertEquals(400, $code);
+    $this->assertNodeCount(0, 'rsvp');
+
+    $this->drupalLogin($this->adminUser);
+    $edit = ['rsvp_create_node' => 1, 'rsvp_node_type' => 'rsvp', 'rsvp_link_field' => 'field_rsvp_link', 'rsvp_rsvp_field' => 'field_rsvp', 'rsvp_content_field' => 'body', 'rsvp_auto_send_webmention' => 1];
+    $this->drupalPostForm('admin/config/services/indieweb/micropub', $edit, 'Save configuration');
+    $this->drupalLogout();
+    $code = $this->sendMicropubRequest($this->rsvp);
+    self::assertEquals(201, $code);
+    $this->assertNodeCount(1, 'rsvp');
+    $nid = $this->getLastNid('rsvp');
+    $this->assertQueueItems([$this->rsvp['in-reply-to']], $nid);
+    if ($nid) {
+      /** @var \Drupal\node\NodeInterface $node */
+      $node = \Drupal::entityTypeManager()->getStorage('node')->load($nid);
+      self::assertEquals(TRUE, $node->isPublished());
+      self::assertEquals('rsvp', $node->bundle());
+      self::assertEquals('RSVP on ' . $this->rsvp['in-reply-to'], $node->getTitle());
+      self::assertEquals($this->rsvp['in-reply-to'], $node->get('field_rsvp_link')->uri);
+      self::assertEquals($this->rsvp['content'], $node->get('body')->value);
+      self::assertEquals($this->rsvp['rsvp'], $node->get('field_rsvp')->value);
+
+      // Check 'rsvp' class.
+      $this->drupalGet('node/' . $nid);
+      $this->assertSession()->responseContains('class="p-rsvp" value="yes"');
+
+    }
+    else {
+      // Explicit failure.
+      $this->assertTrue($nid, 'No rsvp node found');
+    }
+
+    // Clear the queue.
+    $this->clearQueue();
+
+    // Configure to not auto send a webmention.
+    $this->drupalLogin($this->adminUser);
+    $edit = ['rsvp_auto_send_webmention' => 0];
+    $this->drupalPostForm('admin/config/services/indieweb/micropub', $edit, 'Save configuration');
+    $this->drupalLogout();
+    $code = $this->sendMicropubRequest($this->rsvp);
+    self::assertEquals(201, $code);
+    $this->assertNodeCount(2, 'rsvp');
+    $this->assertQueueItems();
+
     // Set default status to unpublished for all post types.
     // Turn on auto webmentions too.
     $this->drupalLogin($this->adminUser);
@@ -388,10 +493,13 @@ class MicropubTest extends IndiewebBrowserTestBase {
       'bookmark_status' => 0,
       'repost_status' => 0,
       'reply_status' => 0,
+      'rsvp_status' => 0,
+      'event_status' => 0,
       'bookmark_auto_send_webmention' => 1,
       'like_auto_send_webmention' => 1,
       'repost_auto_send_webmention' => 1,
-      'reply_auto_send_webmention' => 1
+      'reply_auto_send_webmention' => 1,
+      'rsvp_auto_send_webmention' => 1,
     ];
     $this->drupalPostForm('admin/config/services/indieweb/micropub', $edit, 'Save configuration');
     $this->drupalLogout();
@@ -505,6 +613,43 @@ class MicropubTest extends IndiewebBrowserTestBase {
       $this->assertTrue($nid, 'No reply node found');
     }
     $this->assertQueueItems();
+
+    // Unpublished rsvp
+    $post = $this->rsvp;
+    $post['content'] = 'This is not a published rsvp';
+    $code = $this->sendMicropubRequest($post);
+    self::assertEquals(201, $code);
+    $this->assertNodeCount(3, 'rsvp');
+    $nid = $this->getLastNid('rsvp');
+    if ($nid) {
+      /** @var \Drupal\node\NodeInterface $node */
+      $node = \Drupal::entityTypeManager()->getStorage('node')->load($nid);
+      self::assertEquals(FALSE, $node->isPublished());
+      self::assertEquals($post['content'], $node->get('body')->value);
+    }
+    else {
+      // Explicit failure.
+      $this->assertTrue($nid, 'No rsvp node found');
+    }
+    $this->assertQueueItems();
+
+    // Unpublished event
+    $post = $this->event;
+    $post['name'] = 'Unpublished event';
+    $code = $this->sendMicropubRequest($post);
+    self::assertEquals(201, $code);
+    $this->assertNodeCount(2, 'event');
+    $nid = $this->getLastNid('event');
+    if ($nid) {
+      /** @var \Drupal\node\NodeInterface $node */
+      $node = \Drupal::entityTypeManager()->getStorage('node')->load($nid);
+      self::assertEquals(FALSE, $node->isPublished());
+      self::assertEquals($post['name'], $node->getTitle());
+    }
+    else {
+      // Explicit failure.
+      $this->assertTrue($nid, 'No event node found');
+    }
   }
 
 }

@@ -139,11 +139,13 @@ class MicropubController extends ControllerBase {
         ];
 
         // Add url to syndicate to.
-        if (isset($input['mp-syndicate-to'])) {
-          $input['mp-syndicate-to'][] = $input['in-reply-to'];
-        }
-        else {
-          $input['mp-syndicate-to'] = [$input['in-reply-to']];
+        if ($this->config->get('rsvp_auto_send_webmention')) {
+          if (isset($input['mp-syndicate-to'])) {
+            $input['mp-syndicate-to'][] = $input['in-reply-to'];
+          }
+          else {
+            $input['mp-syndicate-to'] = [$input['in-reply-to']];
+          }
         }
 
         // Allow code to change the values and payload.
@@ -357,7 +359,7 @@ class MicropubController extends ControllerBase {
       }
 
       // Reply support.
-      if ($this->config->get('reply_create_node') && !empty($input['in-reply-to']) && !empty($input['content']) && (!empty($input['h']) && $input['h'] == 'entry') && $valid_token) {
+      if ($this->config->get('reply_create_node') && !empty($input['in-reply-to']) && !isset($input['rsvp']) && !empty($input['content']) && (!empty($input['h']) && $input['h'] == 'entry') && $valid_token) {
 
         $values = [
           'uid' => $this->config->get('reply_uid'),
