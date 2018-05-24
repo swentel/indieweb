@@ -367,11 +367,13 @@ class MicropubController extends ControllerBase {
         ];
 
         // Add url to syndicate to.
-        if (isset($input['mp-syndicate-to'])) {
-          $input['mp-syndicate-to'][] = $input['in-reply-to'];
-        }
-        else {
-          $input['mp-syndicate-to'] = [$input['in-reply-to']];
+        if ($this->config->get('reply_auto_send_webmention')) {
+          if (isset($input['mp-syndicate-to'])) {
+            $input['mp-syndicate-to'][] = $input['in-reply-to'];
+          }
+          else {
+            $input['mp-syndicate-to'] = [$input['in-reply-to']];
+          }
         }
 
         // Allow code to change the values and payload.
@@ -410,7 +412,7 @@ class MicropubController extends ControllerBase {
       }
 
       // Note support.
-      if ($this->config->get('note_create_node') && !empty($input['content']) && !isset($input['name']) && (!empty($input['h']) && $input['h'] == 'entry') && $valid_token) {
+      if ($this->config->get('note_create_node') && !empty($input['content']) && !isset($input['name']) && !isset($input['in-reply-to']) && !isset($input['bookmark-of']) && !isset($input['repost-of']) && !isset($input['like-of']) && (!empty($input['h']) && $input['h'] == 'entry') && $valid_token) {
 
         $values = [
           'uid' => $this->config->get('note_uid'),
@@ -460,7 +462,7 @@ class MicropubController extends ControllerBase {
       }
 
       // Article support.
-      if ($this->config->get('article_create_node') && !empty($input['content']) && !empty($input['name']) && (!empty($input['h']) && $input['h'] == 'entry') && $valid_token) {
+      if ($this->config->get('article_create_node') && !empty($input['content']) && !empty($input['name']) && !isset($input['in-reply-to']) && !isset($input['bookmark-of']) && !isset($input['repost-of']) && !isset($input['like-of']) &&  (!empty($input['h']) && $input['h'] == 'entry') && $valid_token) {
 
         $values = [
           'uid' => $this->config->get('article_uid'),

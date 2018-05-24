@@ -71,6 +71,17 @@ class MicropubTest extends IndiewebBrowserTestBase {
   ];
 
   /**
+   * Default reply $_POST content.
+   *
+   * @var array
+   */
+  protected $reply = [
+    'h' => 'entry',
+    'in-reply-to' => 'https://example.com/what-a-page',
+    'content' => 'I am replying now'
+  ];
+
+  /**
    * Default like $_POST content.
    *
    * @var array
@@ -88,7 +99,7 @@ class MicropubTest extends IndiewebBrowserTestBase {
 
     $this->drupalLogin($this->adminUser);
 
-    foreach (['like', 'bookmark', 'repost'] as $type) {
+    foreach (['like', 'bookmark', 'repost', 'reply'] as $type) {
       $edit = ['name' => $type, 'type' => $type];
       $this->drupalPostForm('admin/structure/types/add', $edit, 'Save and manage fields');
       $edit = ['new_storage_type' => 'link', 'label' => 'Link', 'field_name' => $type . '_link'];
@@ -326,6 +337,47 @@ class MicropubTest extends IndiewebBrowserTestBase {
     $this->assertNodeCount(2, 'repost');
     $this->assertQueueItems();
 
+    // Test replies.
+    $code = $this->sendMicropubRequest($this->reply);
+    self::assertEquals(400, $code);
+    $this->assertNodeCount(0, 'reply');
+
+    $this->drupalLogin($this->adminUser);
+    $edit = ['reply_create_node' => 1, 'reply_node_type' => 'reply', 'reply_link_field' => 'field_reply_link', 'reply_content_field' => 'body', 'reply_auto_send_webmention' => 1];
+    $this->drupalPostForm('admin/config/services/indieweb/micropub', $edit, 'Save configuration');
+    $this->drupalLogout();
+    $code = $this->sendMicropubRequest($this->reply);
+    self::assertEquals(201, $code);
+    $this->assertNodeCount(1, 'reply');
+    $nid = $this->getLastNid('reply');
+    $this->assertQueueItems([$this->reply['in-reply-to']], $nid);
+    if ($nid) {
+      /** @var \Drupal\node\NodeInterface $node */
+      $node = \Drupal::entityTypeManager()->getStorage('node')->load($nid);
+      self::assertEquals(TRUE, $node->isPublished());
+      self::assertEquals('reply', $node->bundle());
+      self::assertEquals('In reply to ' . $this->reply['in-reply-to'], $node->getTitle());
+      self::assertEquals($this->reply['in-reply-to'], $node->get('field_reply_link')->uri);
+      self::assertEquals($this->reply['content'], $node->get('body')->value);
+    }
+    else {
+      // Explicit failure.
+      $this->assertTrue($nid, 'No reply node found');
+    }
+
+    // Clear the queue.
+    $this->clearQueue();
+
+    // Configure to not auto send a webmention.
+    $this->drupalLogin($this->adminUser);
+    $edit = ['reply_auto_send_webmention' => 0];
+    $this->drupalPostForm('admin/config/services/indieweb/micropub', $edit, 'Save configuration');
+    $this->drupalLogout();
+    $code = $this->sendMicropubRequest($this->reply);
+    self::assertEquals(201, $code);
+    $this->assertNodeCount(2, 'reply');
+    $this->assertQueueItems();
+
     // Set default status to unpublished for all post types.
     // Turn on auto webmentions too.
     $this->drupalLogin($this->adminUser);
@@ -335,9 +387,11 @@ class MicropubTest extends IndiewebBrowserTestBase {
       'like_status' => 0,
       'bookmark_status' => 0,
       'repost_status' => 0,
+      'reply_status' => 0,
       'bookmark_auto_send_webmention' => 1,
       'like_auto_send_webmention' => 1,
-      'repost_auto_send_webmention' => 1
+      'repost_auto_send_webmention' => 1,
+      'reply_auto_send_webmention' => 1
     ];
     $this->drupalPostForm('admin/config/services/indieweb/micropub', $edit, 'Save configuration');
     $this->drupalLogout();
@@ -356,7 +410,7 @@ class MicropubTest extends IndiewebBrowserTestBase {
     }
     else {
       // Explicit failure.
-      $this->assertTrue($nid, 'No second page node found');
+      $this->assertTrue($nid, 'No page node found');
     }
 
     $post = $this->article;
@@ -373,7 +427,7 @@ class MicropubTest extends IndiewebBrowserTestBase {
     }
     else {
       // Explicit failure.
-      $this->assertTrue($nid, 'No second article node found');
+      $this->assertTrue($nid, 'No article node found');
     }
 
     // Add content to the like too, use access token in post.
@@ -430,6 +484,25 @@ class MicropubTest extends IndiewebBrowserTestBase {
     else {
       // Explicit failure.
       $this->assertTrue($nid, 'No repost node found');
+    }
+    $this->assertQueueItems();
+
+    // Unpublished reply
+    $post = $this->reply;
+    $post['content'] = 'This is not a published reply';
+    $code = $this->sendMicropubRequest($post);
+    self::assertEquals(201, $code);
+    $this->assertNodeCount(3, 'reply');
+    $nid = $this->getLastNid('reply');
+    if ($nid) {
+      /** @var \Drupal\node\NodeInterface $node */
+      $node = \Drupal::entityTypeManager()->getStorage('node')->load($nid);
+      self::assertEquals(FALSE, $node->isPublished());
+      self::assertEquals($post['content'], $node->get('body')->value);
+    }
+    else {
+      // Explicit failure.
+      $this->assertTrue($nid, 'No reply node found');
     }
     $this->assertQueueItems();
   }

@@ -29,6 +29,7 @@ reply_status: 1
 reply_node_type: ''
 reply_content_field: ''
 reply_link_field: ''
+reply_auto_send_webmention: false
 reply_tags_field: ''
 reply_uid: 1
 repost_create_node: false

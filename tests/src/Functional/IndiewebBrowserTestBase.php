@@ -170,14 +170,19 @@ abstract class IndiewebBrowserTestBase extends BrowserTestBase {
   }
 
   /**
-   * Get the last nid for a node type.
+   * Get the last nid.
    *
    * @param $type
    *
    * @return mixed
    */
-  protected function getLastNid($type) {
-    return \Drupal::database()->query('SELECT nid FROM {node} WHERE type = :type ORDER by nid DESC LIMIT 1', [':type' => $type])->fetchField();
+  protected function getLastNid($type = '') {
+    if ($type) {
+      return \Drupal::database()->query('SELECT nid FROM {node} WHERE type = :type ORDER by nid DESC LIMIT 1', [':type' => $type])->fetchField();
+    }
+    else {
+      return \Drupal::database()->query('SELECT nid FROM {node} ORDER by nid DESC LIMIT 1')->fetchField();
+    }
   }
 
   /**

@@ -482,6 +482,18 @@ class MicropubSettingsForm extends ConfigFormBase {
       ),
     ];
 
+    $form['reply']['reply_auto_send_webmention'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Send webmention'),
+      '#default_value' => $config->get('reply_auto_send_webmention'),
+      '#states' => array(
+        'visible' => array(
+          ':input[name="reply_create_node"]' => array('checked' => TRUE),
+        ),
+      ),
+      '#description' => $this->t('Automatically send a webmention to the URL that is found in the link field.'),
+    ];
+
     // Content field.
     $form['reply']['reply_content_field'] = [
       '#type' => 'select',
@@ -981,6 +993,7 @@ class MicropubSettingsForm extends ConfigFormBase {
       ->set('reply_node_type', $form_state->getValue('reply_node_type'))
       ->set('reply_content_field', $form_state->getValue('reply_content_field'))
       ->set('reply_link_field', $form_state->getValue('reply_link_field'))
+      ->set('reply_auto_send_webmention', $form_state->getValue('reply_auto_send_webmention'))
       ->set('reply_tags_field', $form_state->getValue('reply_tags_field'))
       ->set('repost_create_node', $form_state->getValue('repost_create_node'))
       ->set('repost_uid', $form_state->getValue('repost_uid'))
