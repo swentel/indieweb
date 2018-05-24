@@ -255,11 +255,13 @@ class MicropubController extends ControllerBase {
         }
 
         // Add url to syndicate to.
-        if (isset($input['mp-syndicate-to'])) {
-          $input['mp-syndicate-to'][] = $input['bookmark-of'];
-        }
-        else {
-          $input['mp-syndicate-to'] = [$input['bookmark-of']];
+        if ($this->config->get('bookmark_auto_send_webmention')) {
+          if (isset($input['mp-syndicate-to'])) {
+            $input['mp-syndicate-to'][] = $input['bookmark-of'];
+          }
+          else {
+            $input['mp-syndicate-to'] = [$input['bookmark-of']];
+          }
         }
 
         // Allow code to change the values and payload.

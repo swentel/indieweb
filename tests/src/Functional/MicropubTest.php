@@ -51,6 +51,16 @@ class MicropubTest extends IndiewebBrowserTestBase {
   ];
 
   /**
+   * Default bookmark $_POST content.
+   *
+   * @var array
+   */
+  protected $bookmark = [
+    'h' => 'entry',
+    'bookmark-of' => 'https://example.com/what-a-page'
+  ];
+
+  /**
    * Default like $_POST content.
    *
    * @var array
@@ -67,14 +77,18 @@ class MicropubTest extends IndiewebBrowserTestBase {
     parent::setUp();
 
     $this->drupalLogin($this->adminUser);
-    $edit = ['name' => 'like', 'type' => 'like'];
-    $this->drupalPostForm('admin/structure/types/add', $edit, 'Save and manage fields');
-    $edit = ['new_storage_type' => 'link', 'label' => 'Link', 'field_name' => 'link'];
-    $this->drupalPostForm('admin/structure/types/manage/like/fields/add-field', $edit, 'Save and continue');
-    $this->drupalPostForm(NULL, [], 'Save field settings');
-    $this->drupalPostForm(NULL, [], 'Save settings');
-    $edit = ['fields[field_link][type]' => 'link_microformat'];
-    $this->drupalPostForm('admin/structure/types/manage/like/display', $edit, 'Save');
+
+    foreach (['like', 'bookmark'] as $type) {
+      $edit = ['name' => $type, 'type' => $type];
+      $this->drupalPostForm('admin/structure/types/add', $edit, 'Save and manage fields');
+      $edit = ['new_storage_type' => 'link', 'label' => 'Link', 'field_name' => $type . '_link'];
+      $this->drupalPostForm('admin/structure/types/manage/' . $type . '/fields/add-field', $edit, 'Save and continue');
+      $this->drupalPostForm(NULL, [], 'Save field settings');
+      $this->drupalPostForm(NULL, [], 'Save settings');
+      $edit = ['fields[field_' . $type . '_link][type]' => 'link_microformat'];
+      $this->drupalPostForm('admin/structure/types/manage/' . $type . '/display', $edit, 'Save');
+    }
+
     drupal_flush_all_caches();
   }
 
@@ -127,6 +141,7 @@ class MicropubTest extends IndiewebBrowserTestBase {
     $this->assertNodeCount(0, 'page');
     $this->assertNodeCount(0, 'like');
     $this->assertNodeCount(0, 'article');
+    $this->assertNodeCount(0, 'bookmark');
     // With valid access token now.
     // TEST: url from 201 header
     $code = $this->sendMicropubRequest($this->note);
@@ -177,7 +192,7 @@ class MicropubTest extends IndiewebBrowserTestBase {
     $this->assertNodeCount(0, 'like');
 
     $this->drupalLogin($this->adminUser);
-    $edit = ['like_create_node' => 1, 'like_node_type' => 'like', 'like_link_field' => 'field_link', 'like_content_field' => 'body', 'like_auto_send_webmention' => 1];
+    $edit = ['like_create_node' => 1, 'like_node_type' => 'like', 'like_link_field' => 'field_like_link', 'like_content_field' => 'body', 'like_auto_send_webmention' => 1];
     $this->drupalPostForm('admin/config/services/indieweb/micropub', $edit, 'Save configuration');
     $this->drupalLogout();
     $code = $this->sendMicropubRequest($this->like);
@@ -191,7 +206,7 @@ class MicropubTest extends IndiewebBrowserTestBase {
       self::assertEquals(TRUE, $node->isPublished());
       self::assertEquals('like', $node->bundle());
       self::assertEquals('Like of ' . $this->like['like-of'], $node->getTitle());
-      self::assertEquals($this->like['like-of'], $node->get('field_link')->uri);
+      self::assertEquals($this->like['like-of'], $node->get('field_like_link')->uri);
 
       // Check 'u-like-of' class.
       $this->drupalGet('node/' . $nid);
@@ -221,11 +236,50 @@ class MicropubTest extends IndiewebBrowserTestBase {
     $this->assertNodeCount(3, 'like');
     $this->assertQueueItems();
 
-    // Set default status to unpublished for all post types.
-    // Turn on auto webmention, which shouldn't kick in for like as the node
-    // isn't published.
+    // Test bookmarks.
+    $code = $this->sendMicropubRequest($this->bookmark);
+    self::assertEquals(400, $code);
+    $this->assertNodeCount(0, 'bookmark');
+
     $this->drupalLogin($this->adminUser);
-    $edit = ['note_status' => 0, 'article_status' => 0, 'like_status' => 0, 'like_auto_send_webmention' => 1];
+    $edit = ['bookmark_create_node' => 1, 'bookmark_node_type' => 'bookmark', 'bookmark_link_field' => 'field_bookmark_link', 'bookmark_content_field' => 'body', 'bookmark_auto_send_webmention' => 1];
+    $this->drupalPostForm('admin/config/services/indieweb/micropub', $edit, 'Save configuration');
+    $this->drupalLogout();
+    $code = $this->sendMicropubRequest($this->bookmark);
+    self::assertEquals(201, $code);
+    $this->assertNodeCount(1, 'bookmark');
+    $nid = $this->getLastNid('bookmark');
+    $this->assertQueueItems([$this->bookmark['bookmark-of']], $nid);
+    if ($nid) {
+      /** @var \Drupal\node\NodeInterface $node */
+      $node = \Drupal::entityTypeManager()->getStorage('node')->load($nid);
+      self::assertEquals(TRUE, $node->isPublished());
+      self::assertEquals('bookmark', $node->bundle());
+      self::assertEquals('Bookmark of ' . $this->bookmark['bookmark-of'], $node->getTitle());
+      self::assertEquals($this->bookmark['bookmark-of'], $node->get('field_bookmark_link')->uri);
+    }
+    else {
+      // Explicit failure.
+      $this->assertTrue($nid, 'No bookmark node found');
+    }
+
+    // Clear the queue.
+    $this->clearQueue();
+
+    // Configure to not auto send a webmention.
+    $this->drupalLogin($this->adminUser);
+    $edit = ['bookmark_auto_send_webmention' => 0];
+    $this->drupalPostForm('admin/config/services/indieweb/micropub', $edit, 'Save configuration');
+    $this->drupalLogout();
+    $code = $this->sendMicropubRequest($this->bookmark);
+    self::assertEquals(201, $code);
+    $this->assertNodeCount(2, 'bookmark');
+    $this->assertQueueItems();
+
+    // Set default status to unpublished for all post types.
+    // Turn on auto webmentions too.
+    $this->drupalLogin($this->adminUser);
+    $edit = ['note_status' => 0, 'article_status' => 0, 'like_status' => 0, 'bookmark_status' => 0, 'bookmark_auto_send_webmention' => 1, 'like_auto_send_webmention' => 1];
     $this->drupalPostForm('admin/config/services/indieweb/micropub', $edit, 'Save configuration');
     $this->drupalLogout();
 
@@ -282,6 +336,24 @@ class MicropubTest extends IndiewebBrowserTestBase {
     }
     $this->assertQueueItems();
 
+    // Add content to the bookmark too.
+    $post = $this->bookmark;
+    $post['content'] = 'That is a nice bookmark!';
+    $code = $this->sendMicropubRequest($post);
+    self::assertEquals(201, $code);
+    $this->assertNodeCount(3, 'bookmark');
+    $nid = $this->getLastNid('bookmark');
+    if ($nid) {
+      /** @var \Drupal\node\NodeInterface $node */
+      $node = \Drupal::entityTypeManager()->getStorage('node')->load($nid);
+      self::assertEquals(FALSE, $node->isPublished());
+      self::assertEquals($post['content'], $node->get('body')->value);
+    }
+    else {
+      // Explicit failure.
+      $this->assertTrue($nid, 'No bookmark node found');
+    }
+    $this->assertQueueItems();
   }
 
 }

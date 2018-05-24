@@ -692,6 +692,18 @@ class MicropubSettingsForm extends ConfigFormBase {
       ),
     ];
 
+    $form['bookmark']['bookmark_auto_send_webmention'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Send webmention'),
+      '#default_value' => $config->get('bookmark_auto_send_webmention'),
+      '#states' => array(
+        'visible' => array(
+          ':input[name="bookmark_create_node"]' => array('checked' => TRUE),
+        ),
+      ),
+      '#description' => $this->t('Automatically send a webmention to the URL that is found in the link field.'),
+    ];
+
     // Tags field.
     $form['bookmark']['bookmark_tags_field'] = [
       '#type' => 'select',
@@ -971,6 +983,7 @@ class MicropubSettingsForm extends ConfigFormBase {
       ->set('bookmark_node_type', $form_state->getValue('bookmark_node_type'))
       ->set('bookmark_content_field', $form_state->getValue('bookmark_content_field'))
       ->set('bookmark_link_field', $form_state->getValue('bookmark_link_field'))
+      ->set('bookmark_auto_send_webmention', $form_state->getValue('bookmark_auto_send_webmention'))
       ->set('bookmark_tags_field', $form_state->getValue('bookmark_tags_field'))
       ->set('event_create_node', $form_state->getValue('event_create_node'))
       ->set('event_uid', $form_state->getValue('event_uid'))

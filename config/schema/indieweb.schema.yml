@@ -228,6 +228,9 @@ indieweb.micropub:
     bookmark_link_field:
       type: string
       label: 'The node link field for the repost'
+    bookmark_auto_send_webmention:
+      type: boolean
+      label: 'Whether to automatically send a webmention to the url found in the link field'
     bookmark_tags_field:
       type: string
       label: 'The node tags field for the bookmark'
