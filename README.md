@@ -248,8 +248,6 @@ Note that you also need feeds to be enabled, see the Feeds section.
 ## Drush commands
 
 - indieweb-send-webmentions (isw): handles the queue for sending webmentions
-- indieweb-get-webmentions-from-webmention-io (iwio): allows you to get webmentions for one url and optionally save
-  them if they do not exist yet.
 - indieweb-external-auth-map: maps an existing user account with a domain.
 
 ## Hooks
