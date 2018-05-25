@@ -77,7 +77,7 @@ class MicroformatsTest extends IndiewebBrowserTestBase {
     ];
     $this->drupalPostForm('admin/config/services/indieweb/microformats', $edit, 'Save configuration');
     $this->drupalGet('node/1');
-    $this->assertMicroformats($this->microformats, FALSE);
+    $this->assertMicroformats($this->microformats, FALSE, TRUE);
 
     // Turn all on again, exclude node page for p-name.
     $edit = [
@@ -90,8 +90,8 @@ class MicroformatsTest extends IndiewebBrowserTestBase {
     ];
     $this->drupalPostForm('admin/config/services/indieweb/microformats', $edit, 'Save configuration');
 
-    // Create a 'note', we use page for that. Assert p-name is not printed.
-    // Enable 'Display author and date information' first.
+    // Create a 'note', we use page for that. Assert that p-name is printed with
+    // p-name and e-content.
     $edit = [
       'display_submitted' => 1,
     ];
@@ -101,7 +101,7 @@ class MicroformatsTest extends IndiewebBrowserTestBase {
       'body[0][value]' => $this->body_text,
     ];
     $this->drupalPostForm('node/add/page', $edit, 'Save');
-    $this->assertMicroformats(['p-name'], FALSE);
+    $this->assertMicroformats(['p-name'], TRUE, TRUE);
 
   }
 
@@ -110,20 +110,31 @@ class MicroformatsTest extends IndiewebBrowserTestBase {
    *
    * @param $formats
    * @param $visible
+   * @param $all_off_or_e_content
    */
-  protected function assertMicroformats($formats = [], $visible = TRUE) {
+  protected function assertMicroformats($formats = [], $visible = TRUE, $all_off_or_e_content = FALSE) {
     foreach ($formats as $class) {
       if ($visible) {
 
         // Make sure the HTML is not escaped.
         if ($class == 'p-name') {
-          $this->assertSession()->responseContains('<span class="p-name">');
+          if ($all_off_or_e_content) {
+            $this->assertSession()->responseContains('class="e-content p-name');
+          }
+          else {
+            $this->assertSession()->responseContains('<span class="p-name">');
+          }
         }
 
         $this->assertSession()->responseContains($class);
       }
       else {
-        $this->assertSession()->responseNotContains($class);
+        if ($class == 'p-name' && $visible && $all_off_or_e_content) {
+          $this->assertSession()->responseContains('class="e-content p-name');
+        }
+        else {
+          $this->assertSession()->responseNotContains($class);
+        }
       }
     }
   }

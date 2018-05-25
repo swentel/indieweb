@@ -24,7 +24,14 @@ class FeedsTest extends IndiewebBrowserTestBase {
   protected $timeline_path = '/timeline/all';
 
   /**
-   * Timeline path.
+   * Timeline atom path.
+   *
+   * @var string
+   */
+  protected $timeline_atom_path = '/timeline-all.xml';
+
+  /**
+   * Timeline jf2 path.
    *
    * @var string
    */
@@ -36,6 +43,13 @@ class FeedsTest extends IndiewebBrowserTestBase {
    * @var string
    */
   protected $header_link_rel_link = '<link rel="feed"';
+
+  /**
+   * The atom header link.
+   *
+   * @var string
+   */
+  protected $header_link_atom_link = '<link rel="alternate" type="application/atom+xml"';
 
   /**
    * The jf2 header link.
@@ -55,6 +69,7 @@ class FeedsTest extends IndiewebBrowserTestBase {
       'label' => 'Timeline',
       'id' => 'timeline',
       'path' => $this->timeline_path,
+      'feedTitle' => 'Timeline',
       'owner' => 1,
       'limit' => 10,
       'author' => '<a class="u-url p-name" href="/">Your name</a><img src="https://example.com/image/avatar.png" class="u-photo hidden" alt="Your name">',
@@ -79,6 +94,7 @@ class FeedsTest extends IndiewebBrowserTestBase {
     $this->drupalLogout();
     $this->drupalGet('<front>');
     $this->assertSession()->responseNotContains($this->header_link_rel_link);
+    $this->assertSession()->responseNotContains($this->header_link_atom_link);
     $this->assertSession()->responseNotContains($this->header_link_jf2_link);
 
     $this->drupalGet($this->timeline_path);
@@ -86,6 +102,8 @@ class FeedsTest extends IndiewebBrowserTestBase {
     $this->assertSession()->responseContains($edit['author']);
 
     $this->drupalGet($this->timeline_jf2_path);
+    $this->assertSession()->statusCodeEquals(404);
+    $this->drupalGet($this->timeline_atom_path);
     $this->assertSession()->statusCodeEquals(404);
 
     // Create an article.
@@ -104,10 +122,12 @@ class FeedsTest extends IndiewebBrowserTestBase {
     $this->drupalLogin($this->adminUser);
     $this->drupalGet('admin/config/services/indieweb/feeds');
     $this->clickLink('Update items');
-    // Also expose headers and jf2
+    // Also expose headers and jf2 and atom.
     $edit = [
+      'atom' => TRUE,
       'jf2' => TRUE,
       'relHeader' => TRUE,
+      'relHeaderAtom' => TRUE,
       'relHeaderJf2' => TRUE,
     ];
     $this->drupalPostForm('admin/config/services/indieweb/feeds/timeline/edit', $edit, 'Save');
@@ -116,9 +136,11 @@ class FeedsTest extends IndiewebBrowserTestBase {
     $this->drupalLogout();
     $this->drupalGet('<front>');
     $this->assertSession()->responseContains($this->header_link_rel_link);
+    $this->assertSession()->responseContains($this->header_link_atom_link);
     $this->assertSession()->responseContains($this->header_link_jf2_link);
     $this->assertSession()->responseContains('/timeline/all');
     $this->assertSession()->responseContains('/timeline-all.jf2');
+    $this->assertSession()->responseContains('/timeline-all.xml');
 
     // Check timelines.
     $this->drupalGet($this->timeline_path);
@@ -157,13 +179,12 @@ class FeedsTest extends IndiewebBrowserTestBase {
     $this->assertSession()->responseNotContains($settings['title']);
     $this->drupalGet($this->timeline_jf2_path);
     $this->assertSession()->responseNotContains($settings['title']);
-
   }
 
   /**
    * Assert number of items in feed.
    *
-   * @param $total
+   * @param $total_feed
    * @param $total_nid
    * @param $entity_id
    *

@@ -10,6 +10,13 @@ use Drupal\Core\Config\Entity\ConfigEntityInterface;
 interface FeedInterface extends ConfigEntityInterface {
 
   /**
+   * Whether to expose an Atom feed.
+   *
+   * @return bool
+   */
+  public function exposeAtomFeed();
+
+  /**
    * Whether to expose a jf2 feed.
    *
    * @return bool
@@ -22,6 +29,13 @@ interface FeedInterface extends ConfigEntityInterface {
    * @return bool
    */
   public function exposeRelHeaderLink();
+
+  /**
+   * Whether to expose the application/atom+xml header link.
+   *
+   * @return bool
+   */
+  public function exposeAtomHeaderLink();
 
   /**
    * Whether to expose the application/jf2feed+json header link.
@@ -73,5 +87,12 @@ interface FeedInterface extends ConfigEntityInterface {
    * @return int
    */
   public function getOwnerId();
+
+  /**
+   * Returns the feed title.
+   *
+   * @return string
+   */
+  public function getFeedTitle();
 
 }

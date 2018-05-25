@@ -78,6 +78,20 @@ class Feed extends ConfigEntityBase implements FeedInterface {
   protected $author;
 
   /**
+   * The feed title.
+   *
+   * @var string
+   */
+  protected $feedTitle;
+
+  /**
+   * Whether to create an atom feed.
+   *
+   * @var bool
+   */
+  protected $atom;
+
+  /**
    * Whether to create a jf2 feed.
    *
    * @var bool
@@ -90,6 +104,13 @@ class Feed extends ConfigEntityBase implements FeedInterface {
    * @var bool
    */
   protected $relHeader;
+
+  /**
+   * Whether to expose application/atom+xml
+   *
+   * @var bool
+   */
+  protected $relHeaderAtom;
 
   /**
    * Whether to expose application/jf2feed+json
@@ -115,6 +136,13 @@ class Feed extends ConfigEntityBase implements FeedInterface {
   /**
    * {@inheritdoc}
    */
+  public function exposeAtomFeed() {
+    return $this->atom;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function exposeJf2Feed() {
     return $this->jf2;
   }
@@ -124,6 +152,13 @@ class Feed extends ConfigEntityBase implements FeedInterface {
    */
   public function exposeRelHeaderLink() {
     return $this->relHeader;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function exposeAtomHeaderLink() {
+    return $this->relHeaderAtom;
   }
 
   /**
@@ -152,6 +187,13 @@ class Feed extends ConfigEntityBase implements FeedInterface {
    */
   public function getAuthor() {
     return $this->author;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getFeedTitle() {
+    return $this->feedTitle;
   }
 
   /**

@@ -146,6 +146,23 @@ function indieweb_page_attachments_alter(array &$attachments) {
 
       }
 
+      if ($feed->exposeAtomFeed() && $feed->exposeAtomHeaderLink()) {
+        $link = [
+          '#tag' => 'link',
+          '#attributes' => [
+            'rel' => 'alternate',
+            'type' => 'application/atom+xml',
+            'href' => Url::fromUri('internal:/' . str_replace('/', '-', $feed->getPath()) . '.xml', ['absolute' => TRUE])
+              ->toString(),
+          ],
+        ];
+
+        $attachments['#attached']['html_head'][] = [
+          $link,
+          'feed_endpoint_atom_' . $feed->id(),
+        ];
+      }
+
       if ($feed->exposeJf2Feed() && $feed->exposeJf2HeaderLink()) {
         $link = [
           '#tag' => 'link',
@@ -573,6 +590,11 @@ function indieweb_preprocess_field(&$variables) {
   // Put e-content on body.
   if ($variables['field_name'] == 'body' && \Drupal::config('indieweb.microformats')->get('e_content')) {
     $variables['attributes']['class'][] = 'e-content';
+
+    $exclude_p_name_node_type = \Drupal::config('indieweb.microformats')->get('p_name_exclude_node_type');
+    if ($variables['element']['#object']->bundle() == $exclude_p_name_node_type) {
+      $variables['attributes']['class'][] = 'p-name';
+    }
 
     // Check p-bridgy-twitter-content class. In case there is no summary field
     // on this entity or the field is empty, then add it.

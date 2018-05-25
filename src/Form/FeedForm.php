@@ -42,6 +42,15 @@ class FeedForm extends EntityForm {
       '#disabled' => !$feed->isNew(),
     ];
 
+    $form['feedTitle'] = [
+      '#type' => 'textfield',
+      '#title' => $this->t('Feed title'),
+      '#maxlength' => 255,
+      '#default_value' => $feed->getFeedTitle(),
+      '#description' => $this->t("Title for the feed. This will be printed hidden and used for atom feeds for instance"),
+      '#required' => TRUE,
+    ];
+
     $form['path'] = [
       '#required' => TRUE,
       '#type' => 'textfield',
@@ -67,6 +76,13 @@ class FeedForm extends EntityForm {
       '#required' => TRUE,
     ];
 
+    $form['atom'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Expose Atom feed'),
+      '#default_value' => $feed->exposeAtomFeed(),
+      '#description' => $this->t('This uses https://granary.io by default.'),
+    ];
+
     $form['jf2'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('Expose JF2 feed'),
@@ -78,6 +94,17 @@ class FeedForm extends EntityForm {
       '#type' => 'checkbox',
       '#title' => $this->t('Expose feed header link'),
       '#default_value' => $feed->exposeRelHeaderLink(),
+    ];
+
+    $form['relHeaderAtom'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Expose Atom feed header link'),
+      '#default_value' => $feed->exposeAtomHeaderLink(),
+      '#states' => array(
+        'visible' => array(
+          ':input[name="atom"]' => array('checked' => TRUE),
+        ),
+      ),
     ];
 
     $form['relHeaderJf2'] = [

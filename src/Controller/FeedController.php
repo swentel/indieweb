@@ -2,14 +2,15 @@
 
 namespace Drupal\indieweb\Controller;
 
-use Drupal\Core\Cache\CacheableJsonResponse;
 use Drupal\Core\Controller\ControllerBase;
+use Drupal\Core\Routing\TrustedRedirectResponse;
 use Drupal\Core\Url;
 use Drupal\indieweb\Entity\FeedInterface;
-use Exception;
+use FeedWriter\ATOM;
 use p3k\XRay;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\HttpFoundation\Response;
 
 class FeedController extends ControllerBase {
 
@@ -52,26 +53,12 @@ class FeedController extends ControllerBase {
     }
 
     $items = [];
-    $query = \Drupal::database()
-      ->select('indieweb_feed_items', 'ifi')
-      ->extend('\Drupal\Core\Database\Query\PagerSelectExtender');
-    $query->fields('ifi');
-    $query->condition('feed', $indieweb_feed->id());
-    $query->condition('published', 1);
-    $records = $query
-      ->limit($indieweb_feed->getLimit())
-      ->orderBy('timestamp', 'DESC')
-      ->execute();
-
-
-    foreach ($records as $record) {
-      $entity = \Drupal::entityTypeManager()->getStorage($record->entity_type_id)->load($record->entity_id);
-      if ($entity) {
-        try {
-          $items[] = \Drupal::entityTypeManager()->getViewBuilder($record->entity_type_id)->view($entity, 'indieweb_microformat');
-        }
-        catch (Exception $ignored) {}
+    $entities = $this->getItems($indieweb_feed);
+    foreach ($entities as $entity) {
+      try {
+        $items[] = \Drupal::entityTypeManager()->getViewBuilder($entity->getEntityTypeId())->view($entity, 'indieweb_microformat');
       }
+      catch (\Exception $ignored) {}
     }
 
     if (empty($items)) {
@@ -86,6 +73,7 @@ class FeedController extends ControllerBase {
         ],
       ];
 
+      $build['wrapper']['feed_name'] = ['#markup' => '<span class="hidden p-name">' . $indieweb_feed->getFeedTitle() . '</span>'];
       $build['wrapper']['items'] = $items;
 
       $build['pager'] = [
@@ -96,6 +84,18 @@ class FeedController extends ControllerBase {
     $build['#cache']['tags'][] = 'indieweb_feed:' . $indieweb_feed->id();
 
     return $build;
+  }
+
+  /**
+   * Routing callback: returns an Atom feed.
+   *
+   * @param \Drupal\indieweb\Entity\FeedInterface $indieweb_feed
+   */
+  public function feedAtom(FeedInterface $indieweb_feed) {
+    $feed_url = Url::fromRoute('indieweb.feeds.microformat.' . $indieweb_feed->id(), [], ['absolute' => TRUE])->toString(FALSE);
+    $atom_url = 'https://granary.io/url?url=' . $feed_url . '&input=html&output=atom&hub=https://bridgy-fed.superfeedr.com/';
+    header("Location: " . $atom_url, FALSE, 301);
+    exit();
   }
 
   /**
@@ -116,9 +116,42 @@ class FeedController extends ControllerBase {
       $xray = new XRay();
       $data = $xray->parse($path, $body, ['expect' => 'feed']);
     }
-    catch (Exception $ignored) {}
+    catch (\Exception $e) {
+      $this->getLogger('indieweb_feed')->notice('Error generating JF2 feed: @message', ['@message' => $e->getMessage()]);
+    }
 
     return JsonResponse::create($data);
+  }
+
+  /**
+   * Get items for a feed.
+   *
+   * @param \Drupal\indieweb\Entity\FeedInterface $indieweb_feed
+   *
+   * @return array $entities
+   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+   */
+  protected function getItems(FeedInterface $indieweb_feed) {
+    $entities = [];
+    $query = \Drupal::database()
+      ->select('indieweb_feed_items', 'ifi')
+      ->extend('\Drupal\Core\Database\Query\PagerSelectExtender');
+    $query->fields('ifi');
+    $query->condition('feed', $indieweb_feed->id());
+    $query->condition('published', 1);
+    $records = $query
+      ->limit($indieweb_feed->getLimit())
+      ->orderBy('timestamp', 'DESC')
+      ->execute();
+
+    foreach ($records as $record) {
+      $entity = \Drupal::entityTypeManager()->getStorage($record->entity_type_id)->load($record->entity_id);
+      if ($entity) {
+        $entities[] = $entity;
+      }
+    }
+
+    return $entities;
   }
 
 }

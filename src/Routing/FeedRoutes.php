@@ -68,11 +68,23 @@ class FeedRoutes implements ContainerInjectionInterface {
         )
       );
 
+      if ($feed->exposeAtomFeed()) {
+        $atom_path = str_replace('/', '-', $path) . '.xml';
+        $args['_controller'] = 'Drupal\indieweb\Controller\FeedController::feedAtom';
+        $routes['indieweb.feeds.atom.' . $feed->id()] = new Route(
+          $atom_path,
+          $args,
+          array(
+            '_permission' => 'access content',
+          )
+        );
+      }
+
       if ($feed->exposeJf2Feed()) {
-        $path = str_replace('/', '-', $path) . '.jf2';
+        $jf2_path = str_replace('/', '-', $path) . '.jf2';
         $args['_controller'] = 'Drupal\indieweb\Controller\FeedController::feedJf2';
         $routes['indieweb.feeds.jf2.' . $feed->id()] = new Route(
-          $path,
+          $jf2_path,
           $args,
           array(
             '_permission' => 'access content',

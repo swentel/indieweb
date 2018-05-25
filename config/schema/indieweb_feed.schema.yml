@@ -19,9 +19,18 @@ indieweb.indieweb_feed.*:
     jf2:
       type: boolean
       label: 'Whether to expose a JF2 feed'
+    atom:
+      type: boolean
+      label: 'Whether to expose an Atom feed'
+    feedTitle:
+      type: label
+      label: 'Feed title'
     relHeader:
       type: boolean
       label: 'Whether to expose the rel="feed" header link'
+    relHeaderAtom:
+      type: boolean
+      label: 'Whether to expose the application/atom+xml header link'
     relHeaderJf2:
       type: boolean
       label: 'Whether to expose the application/jf2feed+json header link'
