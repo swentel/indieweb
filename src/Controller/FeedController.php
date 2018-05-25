@@ -93,7 +93,7 @@ class FeedController extends ControllerBase {
    */
   public function feedAtom(FeedInterface $indieweb_feed) {
     $feed_url = Url::fromRoute('indieweb.feeds.microformat.' . $indieweb_feed->id(), [], ['absolute' => TRUE])->toString(FALSE);
-    $atom_url = 'https://granary.io/url?url=' . $feed_url . '&input=html&output=atom&hub=https://bridgy-fed.superfeedr.com/';
+    $atom_url = 'https://granary.io/url?url=' . $feed_url . '&input=html&output=atom';
     header("Location: " . $atom_url, FALSE, 301);
     exit();
   }

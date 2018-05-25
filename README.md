@@ -211,7 +211,8 @@ Configuration still in settings.php
 ## Feeds
 
 Besides the standard RSS feed which you can create where readers can subscribe to, you can also create microformat2
-feeds. These can either return HTML, Atom feed or jf2feed+json (which is experimental though). You will need feeds when:
+feeds. These can either return HTML, Atom feed or jf2feed+json (which is experimental though). Atom feeds are generated
+using https://granary.io/. You will need feeds when:
 
 - you use Bridgy: the service will look for html link headers with rel="feed" and use those pages to crawl so it knows
   to which content it needs to send webmentions to.
