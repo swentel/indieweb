@@ -138,16 +138,22 @@ abstract class IndiewebBrowserTestBase extends BrowserTestBase {
    * Sends a webmention request.
    *
    * @param $post
+   * @param $json
    * @param $debug
    *
    * @return int $status_code
    */
-  protected function sendWebmentionRequest($post = [], $debug = FALSE) {
+  protected function sendWebmentionRequest($post = [], $json = TRUE, $debug = FALSE) {
     $micropub_endpoint = Url::fromRoute('indieweb.webmention.notify', [], ['absolute' => TRUE])->toString();
 
     $client = \Drupal::httpClient();
     try {
-      $response = $client->post($micropub_endpoint, ['json' => $post]);
+      if ($json) {
+        $response = $client->post($micropub_endpoint, ['json' => $post]);
+      }
+      else {
+        $response = $client->post($micropub_endpoint, ['form_params' => $post]);
+      }
       $status_code = $response->getStatusCode();
     }
     catch (\Exception $e) {

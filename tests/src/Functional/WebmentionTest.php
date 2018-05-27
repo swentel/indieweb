@@ -13,6 +13,15 @@ class WebmentionTest extends IndiewebBrowserTestBase {
   protected $pingback_endpoint = '<link rel="pingback" href="https://webmention.io/webmention?forward=http://example.com/webmention/notify" />';
 
   /**
+   * {@inheritdoc}
+   */
+  public function setUp() {
+    parent::setUp();
+
+    $this->drupalCreateContentType(['type' => 'page']);
+  }
+
+  /**
    * Tests webmention functionality.
    */
   public function testWebmention() {
@@ -56,11 +65,15 @@ class WebmentionTest extends IndiewebBrowserTestBase {
     $this->assertSession()->responseNotContains($this->webmention_endpoint);
     $this->assertSession()->responseNotContains($this->pingback_endpoint);
 
+    $node = $this->drupalCreateNode(['type' => 'page']);
+    $node_2 = $this->drupalCreateNode(['type' => 'page', 'title' => 'wicked', 'body' => ['value' => 'url is not on']]);
+    $node_3 = $this->drupalCreateNode(['type' => 'page', 'title' => 'wicked', 'body' => ['value' => 'url is on! ' . $node->toUrl('canonical', ['absolute' => TRUE])->toString()]]);
+
     // Send a webmention request, try invalid one first, then a valid.
     $webmention = [
-      'secret' => 'valid_secret',
+      'secret' => 'in_valid_secret',
       'source' => 'external.com',
-      'target' => 'example.com/node/1',
+      'target' => $node->toUrl('canonical', ['absolute' => TRUE])->toString(),
       'post' => [
         'type' => 'entry',
         'wm-property' => 'like-of',
@@ -70,6 +83,30 @@ class WebmentionTest extends IndiewebBrowserTestBase {
       ],
     ];
     $code = $this->sendWebmentionRequest($webmention);
+    self::assertEquals(400, $code);
+    $webmention['secret'] = 'valid_secret';
+    $code = $this->sendWebmentionRequest($webmention);
+    self::assertEquals(202, $code);
+
+    // Test pingback.
+    $pingback = [
+      'source' => 'blahahaasd;flkjsf',
+      'target' => $node->toUrl('canonical', ['absolute' => TRUE])->toString(),
+    ];
+    $code = $this->sendWebmentionRequest($pingback, FALSE);
+    self::assertEquals(400, $code);
+    $pingback = [
+      'source' => $node_2->toUrl('canonical', ['absolute' => TRUE])->toString(),
+      'target' => $node->toUrl('canonical', ['absolute' => TRUE])->toString(),
+    ];
+    $code = $this->sendWebmentionRequest($pingback, FALSE);
+    self::assertEquals(400, $code);
+    $pingback = [
+      'source' => $node_3->toUrl('canonical', ['absolute' => TRUE])->toString(),
+      'target' => $node->toUrl('canonical', ['absolute' => TRUE])->toString(),
+    ];
+    $code = $this->sendWebmentionRequest($pingback, FALSE);
+    $this->drupalGet('node/' . $node_3->id());
     self::assertEquals(202, $code);
 
   }
