@@ -4,6 +4,7 @@ namespace Drupal\Tests\indieweb\Functional;
 
 use Drupal\Core\Url;
 use Drupal\node\Entity\NodeType;
+use Drupal\node\NodeInterface;
 use Drupal\Tests\BrowserTestBase;
 
 /**
@@ -145,12 +146,12 @@ abstract class IndiewebBrowserTestBase extends BrowserTestBase {
    *
    * @return array
    */
-  protected function getWebmentionPayload($node, $secret = 'in_valid_secret') {
+  protected function getWebmentionPayload(NodeInterface $node, $secret = 'in_valid_secret') {
 
     $webmention = [
       'secret' => $secret,
       'source' => 'http://external.com/page/1',
-      'target' => $node->toUrl('canonical', ['absolute' => TRUE])->toString(),
+      'target' => '/node/' . $node->id(),
       'post' => [
         'type' => 'entry',
         'wm-property' => 'like-of',
