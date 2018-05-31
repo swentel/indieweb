@@ -17,6 +17,7 @@ abstract class IndiewebBrowserTestBase extends BrowserTestBase {
    * @var string[]
    */
   public static $modules = [
+    'block',
     'node',
     'indieweb',
     'indieweb_test',
@@ -134,6 +135,32 @@ abstract class IndiewebBrowserTestBase extends BrowserTestBase {
       'pingback_endpoint' => 'https://webmention.io/webmention?forward=http://example.com/webmention/notify',
     ];
     $this->drupalPostForm('admin/config/services/indieweb/webmention', $edit, 'Save configuration');
+  }
+
+  /**
+   * Gets a minimum webmention payload.
+   *
+   * @param $node
+   * @param string $secret
+   *
+   * @return array
+   */
+  protected function getWebmentionPayload($node, $secret = 'in_valid_secret') {
+
+    $webmention = [
+      'secret' => $secret,
+      'source' => 'http://external.com/page/1',
+      'target' => $node->toUrl('canonical', ['absolute' => TRUE])->toString(),
+      'post' => [
+        'type' => 'entry',
+        'wm-property' => 'like-of',
+        'content' => [
+          'text' => 'Webmention from external.com'
+        ],
+      ],
+    ];
+
+    return $webmention;
   }
 
   /**

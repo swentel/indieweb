@@ -4,6 +4,8 @@ namespace Drupal\Tests\indieweb\Functional;
 
 use Drupal\Core\Url;
 use Drupal\indieweb_test\WebmentionClient\WebmentionClientTest;
+use Drupal\user\Entity\Role;
+use Drupal\user\RoleInterface;
 
 /**
  * Tests integration of webmentions.
@@ -22,6 +24,7 @@ class WebmentionTest extends IndiewebBrowserTestBase {
     parent::setUp();
 
     $this->drupalCreateContentType(['type' => 'page']);
+    $this->grantPermissions(Role::load(RoleInterface::ANONYMOUS_ID), ['view published webmention entities']);
   }
 
   /**
@@ -73,18 +76,7 @@ class WebmentionTest extends IndiewebBrowserTestBase {
     $node_3 = $this->drupalCreateNode(['type' => 'page', 'title' => 'wicked', 'body' => ['value' => 'url is on! ' . $node->toUrl('canonical', ['absolute' => TRUE])->toString()]]);
 
     // Send a webmention request, try invalid one first, then a valid.
-    $webmention = [
-      'secret' => 'in_valid_secret',
-      'source' => 'external.com',
-      'target' => $node->toUrl('canonical', ['absolute' => TRUE])->toString(),
-      'post' => [
-        'type' => 'entry',
-        'wm-property' => 'like-of',
-        'content' => [
-          'text' => 'Webmention from external.com'
-        ],
-      ],
-    ];
+    $webmention = $this->getWebmentionPayload($node);
     $code = $this->sendWebmentionNotificationRequest($webmention);
     self::assertEquals(400, $code);
     $webmention['secret'] = 'valid_secret';
@@ -173,14 +165,102 @@ class WebmentionTest extends IndiewebBrowserTestBase {
   }
 
   /**
+   * Tests the Webmention Block
+   */
+  public function testWebmentionInteractionsBlock() {
+
+    $this->drupalLogin($this->adminUser);
+    $this->enableWebmention();
+
+    $this->placeBlock('indieweb_webmention', ['region' => 'content', 'label' => 'Interactions', 'id' => 'webmention']);
+    $this->createPage();
+    $this->createPage();
+    $node = \Drupal::entityTypeManager()->getStorage('node')->load(1);
+    $node_2 = \Drupal::entityTypeManager()->getStorage('node')->load(2);
+    $this->drupalLogout();
+
+    $this->drupalGet('node/1');
+    $this->assertSession()->responseNotContains('Interactions');
+
+    $webmention = $this->getWebmentionPayload($node, 'valid_secret');
+    $webmention['post']['author'] = ['name' => 'swentel'];
+    $this->sendWebmentionNotificationRequest($webmention);
+    $webmention['post']['author'] = ['name' => 'Dries'];
+    $webmention['post']['wm-property'] = 'mention-of';
+    $this->sendWebmentionNotificationRequest($webmention);
+    $webmention['post']['wm-property'] = 'repost-of';
+    $webmention['post']['author'] = ['name' => 'swentie'];
+    $this->sendWebmentionNotificationRequest($webmention);
+
+    $this->drupalGet('node/1');
+    $this->assertSession()->responseContains('Interactions');
+    $this->assertSession()->responseContains('Liked by swentel');
+    $this->assertSession()->responseNotContains('swentie');
+    $this->assertSession()->responseNotContains('Dries');
+
+    $this->drupalGet('node/2');
+    $this->assertSession()->responseNotContains('Interactions');
+    $this->assertSession()->responseNotContains('Liked by swentel');
+    $this->assertSession()->responseNotContains('swentie');
+    $this->assertSession()->responseNotContains('Dries');
+
+    $edit = ['settings[webmentions][show_reposts]' => TRUE];
+    $this->changeBlockConfiguration('webmention', $edit);
+    $this->drupalGet('node/1');
+    $this->assertSession()->responseContains('Interactions');
+    $this->assertSession()->responseContains('Liked by swentel');
+    $this->assertSession()->responseContains('Reposted by swentie');
+    $this->assertSession()->responseNotContains('Dries');
+
+    $webmention['target'] = $node_2->toUrl('canonical', ['absolute' => TRUE])->toString();
+    $webmention['post']['wm-property'] = 'repost-of';
+    $webmention['post']['author'] = ['name' => 'Dries'];
+    $this->sendWebmentionNotificationRequest($webmention);
+
+    $this->drupalGet('node/2');
+    $this->assertSession()->responseContains('Interactions');
+    $this->assertSession()->responseNotContains('Liked by swentel');
+    $this->assertSession()->responseNotContains('swentie');
+    $this->assertSession()->responseContains('Reposted by Dries');
+
+    $edit = ['settings[webmentions][number_of_posts]' => 1];
+    $this->changeBlockConfiguration('webmention', $edit);
+    $this->drupalGet('node/1');
+    $this->assertSession()->responseContains('Interactions');
+    $this->assertSession()->responseNotContains('Liked by swentel');
+    $this->assertSession()->responseContains('Reposted by swentie');
+
+    $edit = ['settings[webmentions][number_of_posts]' => 0];
+    $this->changeBlockConfiguration('webmention', $edit);
+    $this->drupalGet('node/1');
+    $this->assertSession()->responseContains('Interactions');
+    $this->assertSession()->responseContains('Liked by swentel');
+    $this->assertSession()->responseContains('Reposted by swentie');
+  }
+
+  /**
+   * Change block configuration.
+   *
+   * @param $block_id
+   *   The block id.
+   * @param $edit
+   *   The edit
+   */
+  protected function changeBlockConfiguration($block_id, $edit) {
+    $this->drupalLogin($this->adminUser);
+    $this->drupalPostForm('admin/structure/block/manage/' . $block_id, $edit, 'Save block');
+    $this->drupalLogout();
+  }
+
+  /**
    * Creates a page and send webmention to url.
    *
    * @param $target_url
    * @param $publish
    * @param $custom
    */
-  protected function createPage($target_url, $publish = FALSE, $custom = FALSE) {
-    $edit = [
+  protected function createPage($target_url = '', $publish = FALSE, $custom = FALSE, $edit = []) {
+    $edit += [
       'title[0][value]' => 'It sure it!',
       'body[0][value]' => 'And here is mine!',
     ];

@@ -1,0 +1,24 @@
+block.settings.indieweb_webmention:
+  type: block_settings
+  label: 'Webmentions block'
+  mapping:
+    show_likes:
+      type: boolean
+      label: 'Show likes'
+    show_reposts:
+      type: boolean
+      label: 'Show reposts'
+    show_avatar:
+      type: boolean
+      label: 'Show avatar'
+    number_of_posts:
+      type: integer
+      label: 'Number of posts in block'
+
+block.settings.indieweb_rsvp:
+  type: block_settings
+  label: 'RSVP block'
+  mapping:
+    show_avatar:
+      type: boolean
+      label: 'Show avatar'

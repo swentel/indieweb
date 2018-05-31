@@ -2,13 +2,10 @@
 
 namespace Drupal\indieweb\Plugin\Block;
 
+use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Block\BlockBase;
-use Drupal\Core\Cache\Cache;
-use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
-use Drupal\Core\Url;
-use Symfony\Component\DependencyInjection\ContainerInterface;
+use Drupal\Core\Session\AccountInterface;
 
 /**
  * Provides a block to display 'Webmentions'.
@@ -39,6 +36,7 @@ class WebmentionBlock extends BlockBase {
 
     $form['webmentions'] = [
       '#type' => 'fieldset',
+      '#description' => $this->t('Do not forget to check permissions for viewing webmentions.'),
       '#title' => $this->t('Configuration'),
     ];
     $form['webmentions']['show_likes'] = [
@@ -55,13 +53,14 @@ class WebmentionBlock extends BlockBase {
 
     $form['webmentions']['show_avatar'] = [
       '#type' => 'checkbox',
-      '#title' => $this->t('Whether to show the avatar or not'),
+      '#title' => $this->t('Show avatar'),
       '#default_value' => $this->configuration['show_avatar'],
     ];
 
     $form['webmentions']['number_of_posts'] = [
       '#type' => 'number',
       '#title' => $this->t('Number of mentions to show'),
+      '#description' => $this->t('Set to 0 to show all'),
       '#default_value' => $this->configuration['number_of_posts'],
     ];
 
@@ -101,56 +100,66 @@ class WebmentionBlock extends BlockBase {
       return $build;
     }
 
-    // Get mentions.
-    $query = \Drupal::entityQuery('webmention_entity')
+    $show_avatar = $this->configuration['show_avatar'];
+    $items = [];
+
+    // Get mentions. We use a query and not entity api at all to make sure this
+    // blocked is speedy. If you have tons of webmentions, this can be rough.
+    $query = \Drupal::database()
+      ->select('webmention_entity', 'w')
+      ->fields('w', ['author_name', 'author_photo', 'property'])
       ->condition('target', \Drupal::request()->getPathInfo())
-      ->condition('property', $types, 'IN')
-      ->range(0, $this->configuration['number_of_posts']);
+      ->condition('property', $types, 'IN');
 
-    $ids = $query->execute();
+    $query->orderBy('id', 'DESC');
 
-    if (!empty($ids)) {
+    if ($this->configuration['number_of_posts']) {
+      $query->range(0, $this->configuration['number_of_posts']);
+    }
 
-      $show_avatar = $this->configuration['show_avatar'];
-      $items = [];
+    $records = $query->execute();
 
-      /** @var \Drupal\indieweb\Entity\WebmentionInterface $mention */
-      $mentions = \Drupal::entityTypeManager()->getStorage('webmention_entity')->loadMultiple($ids);
-      foreach ($mentions as $mention) {
+    foreach ($records as $record) {
 
-        $image = '';
-        if ($show_avatar && !($mention->get('author_photo')->isEmpty())) {
-          $image = '<img width="40" src="' . $mention->get('author_photo')->value . '" />&nbsp;';
-        }
-
-        $type = 'Liked by ';
-        if ($mention->get('property')->value == 'repost-of') {
-          $type = 'Reposted by ';
-        }
-
-        $items[] = [
-          '#markup' => $image . $type . $mention->get('author_name')->value,
-          '#allowed_tags' => ['img']
-        ];
-
+      $image = '';
+      if ($show_avatar && !empty($record->author_photo)) {
+        $image = '<img width="40" src="' . $record->author_photo . '" />&nbsp;';
       }
 
-      $build['webmentions'] = [
-        '#theme' => 'item_list',
-        '#items' => $items,
+      $type = 'Liked by ';
+      if ($record->property == 'repost-of') {
+        $type = 'Reposted by ';
+      }
+
+      $items[] = [
+        '#markup' => $image . $type . $record->author_name,
+        '#allowed_tags' => ['img']
       ];
 
     }
 
+    if (!empty($items)) {
+      $build['webmentions'] = [
+        '#theme' => 'item_list',
+        '#items' => $items,
+      ];
+    }
+
     return $build;
   }
-
 
   /**
    * {@inheritdoc}
    */
   public function getCacheMaxAge() {
     return 0;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function blockAccess(AccountInterface $account) {
+    return AccessResult::allowedIfHasPermission($account, 'view published webmention entities');
   }
 
 }

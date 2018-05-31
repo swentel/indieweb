@@ -2,13 +2,10 @@
 
 namespace Drupal\indieweb\Plugin\Block;
 
+use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Block\BlockBase;
-use Drupal\Core\Cache\Cache;
-use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
-use Drupal\Core\Url;
-use Symfony\Component\DependencyInjection\ContainerInterface;
+use Drupal\Core\Session\AccountInterface;
 
 /**
  * Provides a block to display 'RSVP's'.
@@ -25,7 +22,6 @@ class RSVPBlock extends BlockBase {
    */
   public function defaultConfiguration() {
     return [
-      'show_counter' => TRUE,
       'show_avatar' => TRUE,
     ];
   }
@@ -37,11 +33,13 @@ class RSVPBlock extends BlockBase {
 
     $form['rsvp'] = [
       '#type' => 'fieldset',
+      '#description' => $this->t('Do not forget to check permissions for viewing webmentions.'),
       '#title' => $this->t('Configuration'),
     ];
+
     $form['rsvp']['show_avatar'] = [
       '#type' => 'checkbox',
-      '#title' => $this->t('Whether to show the avatar or not'),
+      '#title' => $this->t('Show avatar'),
       '#default_value' => $this->configuration['show_avatar'],
     ];
 
@@ -116,12 +114,18 @@ class RSVPBlock extends BlockBase {
     return $build;
   }
 
-
   /**
    * {@inheritdoc}
    */
   public function getCacheMaxAge() {
     return 0;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function blockAccess(AccountInterface $account) {
+    return AccessResult::allowedIfHasPermission($account, 'view published webmention entities');
   }
 
 }
