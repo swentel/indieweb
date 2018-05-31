@@ -212,7 +212,7 @@ class WebmentionTest extends IndiewebBrowserTestBase {
     $this->assertSession()->responseContains('Reposted by swentie');
     $this->assertSession()->responseNotContains('Dries');
 
-    $webmention['target'] = $node_2->toUrl('canonical', ['absolute' => TRUE])->toString();
+    $webmention['target'] = '/node/' . $node_2->id();
     $webmention['post']['wm-property'] = 'repost-of';
     $webmention['post']['author'] = ['name' => 'Dries'];
     $this->sendWebmentionNotificationRequest($webmention);
