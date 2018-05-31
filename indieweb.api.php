@@ -60,9 +60,8 @@ function hook_indieweb_micropub_node_saved(NodeInterface $node, $values, $payloa
 }
 
 /**
- * Act when no post has been made. Create this function anywhere to do something
- * with the values that are coming into the request. The request has been
- * validated. If you return an absolute URL, that will be used as the response.
+ * Act when no post has been made, but has a valid token. If you return an
+ * absolute URL, that will be used as the response.
  *
  * @param $payload
  *   The payload entered in the micropub request.
@@ -70,5 +69,5 @@ function hook_indieweb_micropub_node_saved(NodeInterface $node, $values, $payloa
  * @return string $url|NULL
  *   Absolute URL. Return NULL in case nothing happened.
  */
-function indieweb_micropub_no_post_made($payload) {
+function hook_indieweb_micropub_no_post_made($payload) {
 }

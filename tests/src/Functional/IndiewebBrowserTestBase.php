@@ -176,11 +176,12 @@ abstract class IndiewebBrowserTestBase extends BrowserTestBase {
    * @param $post
    * @param $access_token
    * @param $debug
-   * @param $auth_in_body
+   * @param $type
+   *   Either POST or JSON (form_params or json)
    *
    * @return int $status_code
    */
-  protected function sendMicropubRequest($post, $access_token = 'this_is_a_valid_token', $debug = FALSE, $auth_in_body = FALSE) {
+  protected function sendMicropubRequest($post, $access_token = 'is_valid', $debug = FALSE, $type = 'form_params') {
     $auth = 'Bearer ' . $access_token;
     $micropub_endpoint = Url::fromRoute('indieweb.micropub.endpoint', [], ['absolute' => TRUE])->toString();
 
@@ -189,20 +190,26 @@ abstract class IndiewebBrowserTestBase extends BrowserTestBase {
       'Accept' => 'application/json',
     ];
 
-    if (!$auth_in_body) {
-      $headers['Authorization'] = $auth;
-    }
-    else {
-      $post['access_token'] = $access_token;
-    }
+    // Access token is always in the headers when using Request from p3k.
+    $headers['Authorization'] = $auth;
 
     try {
-      $response = $client->post($micropub_endpoint, ['form_params' => $post, 'headers' => $headers]);
+      $response = $client->post($micropub_endpoint, [$type => $post, 'headers' => $headers]);
       $status_code = $response->getStatusCode();
     }
     catch (\Exception $e) {
-      // Assume 400 on exception.
+
+      // Default 400 on exception.
       $status_code = 400;
+
+      if (strpos($e->getMessage(), '401') !== FALSE) {
+        $status_code = 401;
+      }
+
+      if (strpos($e->getMessage(), '403') !== FALSE) {
+        $status_code = 403;
+      }
+
       if ($debug) {
         debug($e->getMessage());
       }

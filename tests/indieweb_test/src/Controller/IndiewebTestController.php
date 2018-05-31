@@ -26,7 +26,7 @@ class IndiewebTestController extends ControllerBase {
     $status = 400;
 
     $auth = \Drupal::request()->headers->get('Authorization');
-    if ($auth && preg_match('/Bearer\s(\S+)/', $auth, $matches) && strpos($auth, 'this_is_a_valid_token') !== FALSE) {
+    if ($auth && preg_match('/Bearer\s(\S+)/', $auth, $matches) && strpos($auth, 'is_valid') !== FALSE) {
       $status = 200;
       $data['me'] = 'https://indieweb.micropub.testdomain';
     }

@@ -178,7 +178,7 @@ class MicropubTest extends IndiewebBrowserTestBase {
     // Send request to create a note, will fail because the 'me' is wrong.
     $this->drupalLogout();
     $code = $this->sendMicropubRequest($this->note);
-    self::assertEquals(400, $code);
+    self::assertEquals(403, $code);
 
     // Set me right.
     $this->drupalLogin($this->adminUser);
@@ -189,13 +189,12 @@ class MicropubTest extends IndiewebBrowserTestBase {
     // a note then.
     $this->drupalLogout();
     $code = $this->sendMicropubRequest($this->note, 'invalid_token');
-    self::assertEquals(400, $code);
+    self::assertEquals(403, $code);
     $this->assertNodeCount(0, 'page');
     $this->assertNodeCount(0, 'like');
     $this->assertNodeCount(0, 'article');
     $this->assertNodeCount(0, 'bookmark');
     // With valid access token now.
-    // TEST: url from 201 header
     $code = $this->sendMicropubRequest($this->note);
     self::assertEquals(201, $code);
     $this->assertNodeCount(1, 'page');
@@ -210,7 +209,7 @@ class MicropubTest extends IndiewebBrowserTestBase {
       $this->assertTrue($nid, 'No page node found');
     }
 
-    // Try to send article, should be 400.
+    // Try to send article, should be 401.
     $code = $this->sendMicropubRequest($this->article);
     self::assertEquals(400, $code);
     // Try to send like, should be 400.
@@ -222,7 +221,7 @@ class MicropubTest extends IndiewebBrowserTestBase {
     $edit = ['article_create_node' => 1, 'article_node_type' => 'article', 'article_tags_field' => 'field_tags'];
     $this->drupalPostForm('admin/config/services/indieweb/micropub', $edit, 'Save configuration');
     $this->drupalLogout();
-    $code = $this->sendMicropubRequest($this->article, 'this_is_a_valid_token', TRUE);
+    $code = $this->sendMicropubRequest($this->article);
     self::assertEquals(201, $code);
     $this->assertNodeCount(1, 'article');
     $nid = $this->getLastNid('article');
@@ -243,7 +242,7 @@ class MicropubTest extends IndiewebBrowserTestBase {
     $edit = ['event_create_node' => 1, 'event_node_type' => 'event', 'event_content_field' => 'body', 'event_date_field' => 'field_date'];
     $this->drupalPostForm('admin/config/services/indieweb/micropub', $edit, 'Save configuration');
     $this->drupalLogout();
-    $code = $this->sendMicropubRequest($this->event, 'this_is_a_valid_token', TRUE);
+    $code = $this->sendMicropubRequest($this->event);
     self::assertEquals(201, $code);
     $this->assertNodeCount(1, 'event');
     $nid = $this->getLastNid('event');
@@ -541,7 +540,7 @@ class MicropubTest extends IndiewebBrowserTestBase {
     // Add content to the like too, use access token in post.
     $post = $this->like;
     $post['content'] = 'That is a nice site!';
-    $code = $this->sendMicropubRequest($post, 'this_is_a_valid_token', FALSE, TRUE);
+    $code = $this->sendMicropubRequest($post);
     self::assertEquals(201, $code);
     $this->assertNodeCount(4, 'like');
     $nid = $this->getLastNid('like');
@@ -650,6 +649,68 @@ class MicropubTest extends IndiewebBrowserTestBase {
       // Explicit failure.
       $this->assertTrue($nid, 'No event node found');
     }
+
+    // Test hooks.
+    $this->drupalLogin($this->adminUser);
+    $edit = [
+      'note_status' => 1,
+    ];
+    $this->drupalPostForm('admin/config/services/indieweb/micropub', $edit, 'Save configuration');
+    $this->drupalLogout();
+
+    $post = $this->note;
+    $post['act_on_hooks'] = TRUE;
+    $code = $this->sendMicropubRequest($post);
+    self::assertEquals(201, $code);
+    $this->assertNodeCount(4, 'page');
+    $nid = $this->getLastNid('page');
+    if ($nid) {
+      $previous_nid = $nid;
+      $previous_nid--;
+
+      /** @var \Drupal\node\NodeInterface $node */
+      $node = \Drupal::entityTypeManager()->getStorage('node')->load($previous_nid);
+      self::assertEquals('Title set from hook', $node->label());
+
+      $node = \Drupal::entityTypeManager()->getStorage('node')->load($nid);
+      self::assertEquals('duplicated node', $node->label());
+    }
+    else {
+      // Explicit failure.
+      $this->assertTrue($nid, 'No page node found');
+    }
+
+    // A json post.
+    $post = ['type' => ['h-entry'], 'properties' => ['content' => ['json node']]];
+    $code = $this->sendMicropubRequest($post, 'is_valid', FALSE, 'json');
+    self::assertEquals(201, $code);
+    $this->assertNodeCount(5, 'page');
+    $nid = $this->getLastNid('page');
+    if ($nid) {
+      $node = \Drupal::entityTypeManager()->getStorage('node')->load($nid);
+      self::assertEquals('json node', $node->get('body')->value);
+    }
+    else {
+      // Explicit failure.
+      $this->assertTrue($nid, 'No page node found');
+    }
+
+    // A post with random properties.
+    $post = ['no_post_made' => TRUE, 'h' => 'entry', 'random_content' => 'random content', 'random_title' => 'random_title'];
+    $code = $this->sendMicropubRequest($post, 'is_valid', TRUE);
+    self::assertEquals(201, $code);
+    $this->assertNodeCount(6, 'page');
+    $nid = $this->getLastNid('page');
+    if ($nid) {
+      $node = \Drupal::entityTypeManager()->getStorage('node')->load($nid);
+      self::assertEquals($post['random_title'], $node->label());
+      self::assertEquals($post['random_content'], $node->get('body')->value);
+    }
+    else {
+      // Explicit failure.
+      $this->assertTrue($nid, 'No page node found');
+    }
+
   }
 
 }

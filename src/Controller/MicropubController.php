@@ -6,9 +6,9 @@ use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Language\LanguageInterface;
 use Drupal\datetime\Plugin\Field\FieldType\DateTimeItemInterface;
 use Drupal\node\Entity\Node;
-use Drupal\node\NodeInterface;
 use Drupal\taxonomy\Entity\Term;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 class MicropubController extends ControllerBase {
@@ -17,13 +17,58 @@ class MicropubController extends ControllerBase {
   protected $config;
 
   /**
-   * Routing callback: micropub endpoint.
+   * The action of the request.
+   *
+   * @var string
    */
-  public function endpoint() {
+  public $action = '';
+
+  /**
+   * The object type.
+   */
+  public $object_type = NULL;
+
+  /**
+   * The values used to create the node.
+   *
+   * @var array
+   */
+  public $values = [];
+
+  /**
+   * The request input.
+   *
+   * @var array
+   */
+  public $input = [];
+
+  /**
+   * The original payload
+   *
+   * @var null
+   */
+  public $payload_original = NULL;
+
+  /**
+   * The node which is being created.
+   *
+   * @var \Drupal\node\NodeInterface
+   */
+  public $node = NULL;
+
+  /**
+   * Routing callback: micropub endpoint.
+   *
+   * @param \Symfony\Component\HttpFoundation\Request $request
+   * @return \Symfony\Component\HttpFoundation\JsonResponse|\Symfony\Component\HttpFoundation\Response
+   * @throws \Drupal\Core\Entity\EntityMalformedException
+   * @throws \Drupal\Core\Entity\EntityStorageException
+   */
+  public function endpoint(Request $request) {
     $this->config = \Drupal::config('indieweb.micropub');
     $micropub_enabled = $this->config->get('micropub_enable');
 
-    // Early return when endpoint is not enabled.
+    // Early response when endpoint is not enabled.
     if (!$micropub_enabled) {
       return new JsonResponse('', 404);
     }
@@ -35,10 +80,14 @@ class MicropubController extends ControllerBase {
     // q=syndicate-to request.
     if (isset($_GET['q']) && $_GET['q'] == 'syndicate-to') {
 
-      if ($this->isValidToken()) {
+      // Get authorization header, response early if none found.
+      $auth_header = $this->getAuthorizationHeader();
+      if (!$auth_header) {
+        return new JsonResponse('', 401);
+      }
 
+      if ($this->isValidToken($auth_header)) {
         $syndicate_channels = [];
-
         $response_code = 200;
         $channels = indieweb_get_publishing_channels();
         if (!empty($channels)) {
@@ -54,474 +103,153 @@ class MicropubController extends ControllerBase {
           'syndicate-to' => $syndicate_channels
         ];
       }
+      else {
+        $response_code = 403;
+      }
+
+      return new JsonResponse($response_message, $response_code);
     }
 
-    $input = NULL;
-    if (!empty($_POST)) {
-      $input = $_POST;
+    // Indigenous sends POST vars along with multipart, we use all().
+    if (strpos($request->headers->get('Content-Type'), 'multipart/form-data') !== FALSE) {
+      $input = $request->request->all();
     }
     else {
-      $php_input = file('php://input');
-      $php_input = is_array($php_input) ? array_shift($php_input) : '';
-      $input = json_decode($php_input, TRUE);
-
-      // Need to figure out why quill nests everything in 'properties'
-      // probably todo with the the format
-      if (isset($input['properties'])) {
-        $input += $input['properties'];
-      }
-
+      $input = $request->getContent();
     }
-    if (!empty($input)) {
+    // Determine action and input from request. This can either be POST or JSON
+    // request. We use p3k/Micropub to handle that part.
+    $micropub_request = \p3k\Micropub\Request::create($input);
+    if ($micropub_request instanceof \p3k\Micropub\Request && $micropub_request->action) {
+      $this->action = $micropub_request->action;
+      $mf2 = $micropub_request->toMf2();
+      $this->object_type = !empty($mf2['type'][0]) ? $mf2['type'][0] : '';
+      $this->input = $mf2['properties'];
+    }
+    else {
+      $description = $micropub_request->error_description ? $micropub_request->error_description : 'Unknown error';
+      $this->getLogger('indieweb_micropub')->notice('Error parsing incoming request: @message', ['@message' => $description]);
+      return new JsonResponse('Bad request', 400);
+    }
 
-      $payload_original = $input;
-      $valid_token = $this->isValidToken($input);
+    // Attempt to create a node.
+    if (!empty($this->input) && $this->action == 'create') {
 
-      if ($this->config->get('micropub_log_payload')) {
-        $this->getLogger('indieweb_micropub_payload')->notice('input: @input', ['@input' => print_r($input, 1)]);
+      // Get authorization header, response early if none found.
+      $auth_header = $this->getAuthorizationHeader();
+      if (!$auth_header) {
+        return new JsonResponse('', 401);
       }
+
+      // Validate token. Return early if it's not valid.
+      $valid_token = $this->isValidToken($auth_header);
+      if (!$valid_token) {
+        return new JsonResponse('', 403);
+      }
+
+      // Store original input so it can be inspected by hooks.
+      $this->payload_original = $this->input;
+
+      // Log payload.
+      if ($this->config->get('micropub_log_payload')) {
+        $this->getLogger('indieweb_micropub_payload')->notice('input: @input', ['@input' => print_r($this->input, 1)]);
+      }
+
+      // The order here is of importance. Don't change it, unless there's a good
+      // reason for, see https://indieweb.org/post-type-discovery. This does not
+      // follow the exact rules, because we can be more flexible in Drupal.
 
       // Event support.
-      if ($this->config->get('event_create_node') && !empty($input['start']) && !empty($input['end']) && !empty($input['name']) && (!empty($input['h']) && $input['h'] == 'event') && $valid_token) {
-
-        $values = [
-          'uid' => $this->config->get('event_uid'),
-          'title' => $input['name'],
-          'type' => $this->config->get('event_node_type'),
-          'status' => $this->config->get('event_status'),
-        ];
-
-        // Allow code to change the values and payload.
-        \Drupal::moduleHandler()->alter('indieweb_micropub_node_pre_create', $values, $input);
-
-        /** @var \Drupal\node\NodeInterface $node */
-        $node = Node::create($values);
-
-        // Content.
-        $content_field_name = $this->config->get('event_content_field');
-        if (!empty($input['content']) && $content_field_name && $node->hasField($content_field_name)) {
-          $node->set($content_field_name, $input['content']);
-        }
+      if ($this->createNodeFromPostType('event') && $this->isHEvent() && $this->hasRequiredInput(['start', 'end', 'name'])) {
+        $this->createNode($this->input['name'], 'event');
 
         // Date.
         $date_field_name = $this->config->get('event_date_field');
-        if ($date_field_name && $node->hasField($date_field_name)) {
-          $node->set($date_field_name, ['value' => gmdate(DateTimeItemInterface::DATETIME_STORAGE_FORMAT, strtotime($input['start'])), 'end_value' => gmdate(DateTimeItemInterface::DATETIME_STORAGE_FORMAT, strtotime($input['end']))]);
+        if ($date_field_name && $this->node->hasField($date_field_name)) {
+          $this->node->set($date_field_name, ['value' => gmdate(DateTimeItemInterface::DATETIME_STORAGE_FORMAT, strtotime($this->input['start'][0])), 'end_value' => gmdate(DateTimeItemInterface::DATETIME_STORAGE_FORMAT, strtotime($this->input['end'][0]))]);
         }
 
-        // Categories.
-        $this->handleCategories($input, $node, 'event_tags_field');
-
-        $node->save();
-        if ($node->id()) {
-
-          // Syndicate.
-          $this->syndicateTo($input, $node);
-
-          // Allow code to react after the node is saved.
-          \Drupal::moduleHandler()->invokeAll('indieweb_micropub_node_saved', [$node, $values, $input, $payload_original]);
-
-          $response_code = 201;
-          $response_message = '';
-          header('Location: ' . $node->toUrl('canonical', ['absolute' => TRUE])->toString());
-          return new Response($response_message, $response_code);
+        $response = $this->saveNode();
+        if ($response instanceof Response) {
+          return $response;
         }
       }
 
       // RSVP support.
-      if ($this->config->get('rsvp_create_node') && !empty($input['in-reply-to']) && !empty($input['rsvp']) && (!empty($input['h']) && $input['h'] == 'entry') && $valid_token) {
+      if ($this->createNodeFromPostType('rsvp') && $this->isHEntry() && $this->hasRequiredInput(['in-reply-to', 'rsvp'])) {
+        $this->createNode('RSVP on ' . $this->input['in-reply-to'][0], 'rsvp', 'in-reply-to');
 
-        $values = [
-          'uid' => $this->config->get('rsvp_uid'),
-          'title' => 'RSVP on ' . $input['in-reply-to'],
-          'type' => $this->config->get('rsvp_node_type'),
-          'status' => $this->config->get('rsvp_status'),
-        ];
-
-        // Add url to syndicate to.
-        if ($this->config->get('rsvp_auto_send_webmention')) {
-          if (isset($input['mp-syndicate-to'])) {
-            $input['mp-syndicate-to'][] = $input['in-reply-to'];
-          }
-          else {
-            $input['mp-syndicate-to'] = [$input['in-reply-to']];
-          }
-        }
-
-        // Allow code to change the values and payload.
-        \Drupal::moduleHandler()->alter('indieweb_micropub_node_pre_create', $values, $input);
-
-        /** @var \Drupal\node\NodeInterface $node */
-        $node = Node::create($values);
-
-        // Link field.
-        $rsvp_link_field = $this->config->get('rsvp_link_field');
-        $node->set($rsvp_link_field, ['uri' => $input['in-reply-to'], 'title' => '']);
-
-        // Content.
-        $content_field_name = $this->config->get('rsvp_content_field');
-        if (!empty($input['content']) && $content_field_name && $node->hasField($content_field_name)) {
-          $node->set($content_field_name, $input['content']);
-        }
-
-        // RSVP.
+        // RSVP field
         $rsvp_field_name = $this->config->get('rsvp_rsvp_field');
-        if ($rsvp_field_name && $node->hasField($rsvp_field_name)) {
-          $node->set($rsvp_field_name, $input['rsvp']);
+        if ($rsvp_field_name && $this->node->hasField($rsvp_field_name)) {
+          $this->node->set($rsvp_field_name, $this->input['rsvp']);
         }
 
-        // Categories.
-        $this->handleCategories($input, $node, 'rsvp_tags_field');
-
-        $node->save();
-        if ($node->id()) {
-
-          // Syndicate.
-          $this->syndicateTo($input, $node);
-
-          // Allow code to react after the node is saved.
-          \Drupal::moduleHandler()->invokeAll('indieweb_micropub_node_saved', [$node, $values, $input, $payload_original]);
-
-          $response_code = 201;
-          $response_message = '';
-          header('Location: ' . $node->toUrl('canonical', ['absolute' => TRUE])->toString());
-          return new Response($response_message, $response_code);
+        $response = $this->saveNode();
+        if ($response instanceof Response) {
+          return $response;
         }
       }
 
       // Repost support.
-      if ($this->config->get('repost_create_node') && !empty($input['repost-of']) && (!empty($input['h']) && $input['h'] == 'entry') && $valid_token) {
-
-        $values = [
-          'uid' => $this->config->get('repost_uid'),
-          'title' => 'Repost of ' . $input['repost-of'],
-          'type' => $this->config->get('repost_node_type'),
-          'status' => $this->config->get('repost_status'),
-        ];
-
-        // Add url to syndicate to.
-        if ($this->config->get('repost_auto_send_webmention')) {
-          if (isset($input['mp-syndicate-to'])) {
-            $input['mp-syndicate-to'][] = $input['repost-of'];
-          }
-          else {
-            $input['mp-syndicate-to'] = [$input['repost-of']];
-          }
-        }
-
-        // Allow code to change the values and payload.
-        \Drupal::moduleHandler()->alter('indieweb_micropub_node_pre_create', $values, $input);
-
-        /** @var \Drupal\node\NodeInterface $node */
-        $node = Node::create($values);
-
-        // Link field.
-        $repost_link_field = $this->config->get('repost_link_field');
-        $node->set($repost_link_field, ['uri' => $input['repost-of'], 'title' => '']);
-
-        // Content.
-        $content_field_name = $this->config->get('repost_content_field');
-        if (!empty($input['content']) && $content_field_name && $node->hasField($content_field_name)) {
-          $node->set($content_field_name, $input['content']);
-        }
-
-        // Categories.
-        $this->handleCategories($input, $node, 'repost_tags_field');
-
-        $node->save();
-        if ($node->id()) {
-
-          // Syndicate.
-          $this->syndicateTo($input, $node);
-
-          // Allow code to react after the node is saved.
-          \Drupal::moduleHandler()->invokeAll('indieweb_micropub_node_saved', [$node, $values, $input, $payload_original]);
-
-          $response_code = 201;
-          $response_message = '';
-          header('Location: ' . $node->toUrl('canonical', ['absolute' => TRUE])->toString());
-          return new Response($response_message, $response_code);
+      if ($this->createNodeFromPostType('repost') && $this->isHEntry() && $this->hasRequiredInput(['repost-of'])) {
+        $this->createNode('Repost of ' . $this->input['repost-of'][0], 'repost', 'repost-of');
+        $response = $this->saveNode();
+        if ($response instanceof Response) {
+          return $response;
         }
       }
 
       // Bookmark support.
-      if ($this->config->get('bookmark_create_node') && !empty($input['bookmark-of']) && (!empty($input['h']) && $input['h'] == 'entry') && $valid_token) {
-
-        $values = [
-          'uid' => $this->config->get('bookmark_uid'),
-          'title' => 'Bookmark of ' . $input['bookmark-of'],
-          'type' => $this->config->get('bookmark_node_type'),
-          'status' => $this->config->get('bookmark_status'),
-        ];
-
-        if (!empty($input['name'])) {
-          $values['title'] = $input['name'];
-        }
-
-        // Add url to syndicate to.
-        if ($this->config->get('bookmark_auto_send_webmention')) {
-          if (isset($input['mp-syndicate-to'])) {
-            $input['mp-syndicate-to'][] = $input['bookmark-of'];
-          }
-          else {
-            $input['mp-syndicate-to'] = [$input['bookmark-of']];
-          }
-        }
-
-        // Allow code to change the values and payload.
-        \Drupal::moduleHandler()->alter('indieweb_micropub_node_pre_create', $values, $input);
-
-        /** @var \Drupal\node\NodeInterface $node */
-        $node = Node::create($values);
-
-        // Link field.
-        $bookmark_link_field = $this->config->get('bookmark_link_field');
-        $node->set($bookmark_link_field, ['uri' => $input['bookmark-of'], 'title' => '']);
-
-        // Content.
-        $content_field_name = $this->config->get('bookmark_content_field');
-        if (!empty($input['content']) && $content_field_name && $node->hasField($content_field_name)) {
-          $node->set($content_field_name, $input['content']);
-        }
-
-        // Categories.
-        $this->handleCategories($input, $node, 'bookmark_tags_field');
-
-        $node->save();
-        if ($node->id()) {
-
-          // Syndicate.
-          $this->syndicateTo($input, $node);
-
-          // Allow code to react after the node is saved.
-          \Drupal::moduleHandler()->invokeAll('indieweb_micropub_node_saved', [$node, $values, $input, $payload_original]);
-
-          $response_code = 201;
-          $response_message = '';
-          header('Location: ' . $node->toUrl('canonical', ['absolute' => TRUE])->toString());
-          return new Response($response_message, $response_code);
+      if ($this->createNodeFromPostType('bookmark') && $this->isHEntry() && $this->hasRequiredInput(['bookmark-of'])) {
+        $this->createNode('Bookmark of ' . $this->input['bookmark-of'][0], 'bookmark', 'bookmark-of');
+        $response = $this->saveNode();
+        if ($response instanceof Response) {
+          return $response;
         }
       }
 
       // Like support.
-      if ($this->config->get('like_create_node') && !empty($input['like-of']) && (!empty($input['h']) && $input['h'] == 'entry') && $valid_token) {
-
-        $values = [
-          'uid' => $this->config->get('like_uid'),
-          'title' => 'Like of ' . $input['like-of'],
-          'type' => $this->config->get('like_node_type'),
-          'status' => $this->config->get('like_status'),
-        ];
-
-        // Add url to syndicate to.
-        if ($this->config->get('like_auto_send_webmention')) {
-          if (isset($input['mp-syndicate-to'])) {
-            $input['mp-syndicate-to'][] = $input['like-of'];
-          }
-          else {
-            $input['mp-syndicate-to'] = [$input['like-of']];
-          }
-        }
-
-        // Allow code to change the values and payload.
-        \Drupal::moduleHandler()->alter('indieweb_micropub_node_pre_create', $values, $input);
-
-        /** @var \Drupal\node\NodeInterface $node */
-        $node = Node::create($values);
-
-        // Link field.
-        $like_link_field = $this->config->get('like_link_field');
-        $node->set($like_link_field, ['uri' => $input['like-of'], 'title' => '']);
-
-        // Content.
-        $content_field_name = $this->config->get('like_content_field');
-        if (!empty($input['content']) && $content_field_name && $node->hasField($content_field_name)) {
-          $node->set($content_field_name, $input['content']);
-        }
-
-        // Categories.
-        $this->handleCategories($input, $node, 'like_tags_field');
-
-        $node->save();
-        if ($node->id()) {
-
-          // Syndicate.
-          $this->syndicateTo($input, $node);
-
-          // Allow code to react after the node is saved.
-          \Drupal::moduleHandler()->invokeAll('indieweb_micropub_node_saved', [$node, $values, $input, $payload_original]);
-
-          $response_code = 201;
-          $response_message = '';
-          header('Location: ' . $node->toUrl('canonical', ['absolute' => TRUE])->toString());
-          return new Response($response_message, $response_code);
+      if ($this->createNodeFromPostType('like') && $this->isHEntry() && $this->hasRequiredInput(['like-of'])) {
+        $this->createNode('Like of ' . $this->input['like-of'][0], 'like', 'like-of');
+        $response = $this->saveNode();
+        if ($response instanceof Response) {
+          return $response;
         }
       }
 
       // Reply support.
-      if ($this->config->get('reply_create_node') && !empty($input['in-reply-to']) && !isset($input['rsvp']) && !empty($input['content']) && (!empty($input['h']) && $input['h'] == 'entry') && $valid_token) {
-
-        $values = [
-          'uid' => $this->config->get('reply_uid'),
-          'title' => 'In reply to ' . $input['in-reply-to'],
-          'type' => $this->config->get('reply_node_type'),
-          'status' => $this->config->get('reply_status'),
-        ];
-
-        // Add url to syndicate to.
-        if ($this->config->get('reply_auto_send_webmention')) {
-          if (isset($input['mp-syndicate-to'])) {
-            $input['mp-syndicate-to'][] = $input['in-reply-to'];
-          }
-          else {
-            $input['mp-syndicate-to'] = [$input['in-reply-to']];
-          }
-        }
-
-        // Allow code to change the values and payload.
-        \Drupal::moduleHandler()->alter('indieweb_micropub_node_pre_create', $values, $input);
-
-        /** @var \Drupal\node\NodeInterface $node */
-        $node = Node::create($values);
-
-        // Link field.
-        $reply_link_field = $this->config->get('reply_link_field');
-        $node->set($reply_link_field, ['uri' => $input['in-reply-to'], 'title' => '']);
-
-        // Content.
-        $content_field_name = $this->config->get('reply_content_field');
-        if (!empty($input['content']) && $content_field_name && $node->hasField($content_field_name)) {
-          $node->set($content_field_name, $input['content']);
-        }
-
-        // Categories.
-        $this->handleCategories($input, $node, 'reply_tags_field');
-
-        $node->save();
-        if ($node->id()) {
-
-          // Syndicate.
-          $this->syndicateTo($input, $node);
-
-          // Allow code to react after the node is saved.
-          \Drupal::moduleHandler()->invokeAll('indieweb_micropub_node_saved', [$node, $values, $input, $payload_original]);
-
-          $response_code = 201;
-          $response_message = '';
-          header('Location: ' . $node->toUrl('canonical', ['absolute' => TRUE])->toString());
-          return new Response($response_message, $response_code);
+      if ($this->createNodeFromPostType('reply') && $this->isHEntry() && $this->hasRequiredInput(['in-reply-to', 'content']) && $this->hasNoKeysSet(['rsvp'])) {
+        $this->createNode('In reply to ' . $this->input['in-reply-to'][0], 'reply', 'in-reply-to');
+        $response = $this->saveNode();
+        if ($response instanceof Response) {
+          return $response;
         }
       }
 
-      // Note support.
-      if ($this->config->get('note_create_node') && !empty($input['content']) && !isset($input['name']) && !isset($input['in-reply-to']) && !isset($input['bookmark-of']) && !isset($input['repost-of']) && !isset($input['like-of']) && (!empty($input['h']) && $input['h'] == 'entry') && $valid_token) {
-
-        $values = [
-          'uid' => $this->config->get('note_uid'),
-          'title' => 'Micropub post',
-          'type' => $this->config->get('note_node_type'),
-          'status' => $this->config->get('note_status'),
-        ];
-
-        // Allow code to change the values and payload.
-        \Drupal::moduleHandler()->alter('indieweb_micropub_node_pre_create', $values, $input);
-
-        /** @var \Drupal\node\NodeInterface $node */
-        $node = Node::create($values);
-
-        // Content.
-        $content_field_name = $this->config->get('note_content_field');
-        if (!empty($input['content']) && $node->hasField($content_field_name)) {
-          $node->set($content_field_name, $input['content']);
-        }
-
-        // File (currently only image, limited to 1).
-        $file_field_name = $this->config->get('note_upload_field');
-        if ($file_field_name && $node->hasField($file_field_name)) {
-          $file = $this->saveUpload('photo');
-          if ($file) {
-            $node->set($file_field_name, $file->id());
-          }
-        }
-
-        // Categories.
-        $this->handleCategories($input, $node, 'note_tags_field');
-
-        $node->save();
-        if ($node->id()) {
-
-          // Syndicate.
-          $this->syndicateTo($input, $node);
-
-          // Allow code to react after the node is saved.
-          \Drupal::moduleHandler()->invokeAll('indieweb_micropub_node_saved', [$node, $values, $input, $payload_original]);
-
-          $response_code = 201;
-          $response_message = '';
-          header('Location: ' . $node->toUrl('canonical', ['absolute' => TRUE])->toString());
-          return new Response($response_message, $response_code);
+      // Note post type.
+      if ($this->createNodeFromPostType('note') && $this->isHEntry() && $this->hasRequiredInput(['content']) && $this->hasNoKeysSet(['name', 'in-reply-to', 'bookmark-of', 'repost-of', 'like-of'])) {
+        $this->createNode('Micropub post', 'note');
+        $response = $this->saveNode();
+        if ($response instanceof Response) {
+          return $response;
         }
       }
 
-      // Article support.
-      if ($this->config->get('article_create_node') && !empty($input['content']) && !empty($input['name']) && !isset($input['in-reply-to']) && !isset($input['bookmark-of']) && !isset($input['repost-of']) && !isset($input['like-of']) &&  (!empty($input['h']) && $input['h'] == 'entry') && $valid_token) {
-
-        $values = [
-          'uid' => $this->config->get('article_uid'),
-          'title' => $input['name'],
-          'type' => $this->config->get('article_node_type'),
-          'status' => $this->config->get('article_status'),
-        ];
-
-        // Allow code to change the values.
-        \Drupal::moduleHandler()->alter('indieweb_micropub_node_pre_create', $values, $input);
-
-        /** @var \Drupal\node\NodeInterface $node */
-        $node = Node::create($values);
-
-        // Content.
-        $content_field_name = $this->config->get('article_content_field');
-        if (!empty($input['content']) && $node->hasField($content_field_name)) {
-          $node->set($content_field_name, $input['content']);
-        }
-
-        // File (currently only image, limited to 1).
-        $file_field_name = $this->config->get('article_upload_field');
-        if ($file_field_name && $node->hasField($file_field_name)) {
-          $file = $this->saveUpload('photo');
-          if ($file) {
-            $node->set($file_field_name, $file->id());
-          }
-        }
-
-        // Categories.
-        $this->handleCategories($input, $node, 'article_tags_field');
-
-        $node->save();
-        if ($node->id()) {
-
-          // Syndicate.
-          $this->syndicateTo($input, $node);
-
-          // Allow code to react after the node is saved.
-          \Drupal::moduleHandler()->invokeAll('indieweb_micropub_node_saved', [$node, $values, $input, $payload_original]);
-
-          $response_code = 201;
-          $response_message = '';
-          header('Location: ' . $node->toUrl('canonical', ['absolute' => TRUE])->toString());
-          return new Response($response_message, $response_code);
+      // Article post type.
+      if ($this->createNodeFromPostType('article') && $this->isHEntry() && $this->hasRequiredInput(['content', 'name']) && $this->hasNoKeysSet(['in-reply-to', 'bookmark-of', 'repost-of', 'like-of'])) {
+        $this->createNode($this->input['name'], 'article');
+        $response = $this->saveNode();
+        if ($response instanceof Response) {
+          return $response;
         }
       }
 
-      // If we get to here, it means that no post has been created. Allow a
-      // dedicated function to do something with it.
-      if (function_exists('indieweb_micropub_no_post_made') && $valid_token) {
-        $location = indieweb_micropub_no_post_made($payload_original);
-        if ($location) {
-          $response_code = 201;
-          header('Location: ' . $location);
-          return new Response($response_message, $response_code);
-        }
+      // If we get end up here, it means that no node has been created.
+      $location = \Drupal::moduleHandler()->invokeAll('indieweb_micropub_no_post_made', [$this->payload_original]);
+      if (!empty($location[0])) {
+        header('Location: ' . $location[0]);
+        return new JsonResponse('', 201);
       }
 
     }
@@ -530,55 +258,207 @@ class MicropubController extends ControllerBase {
   }
 
   /**
-   * Check if there's a valid access token in the request.
+   * Gets the Authorization header from the request.
    *
-   * @param $input
-   *   The input.
-   *
-   * @return bool
+   * @return null|string|string[]
    */
-  protected function isValidToken($input = []) {
-    $valid_token = FALSE;
-
+  protected function getAuthorizationHeader() {
     $auth = NULL;
     $auth_header = \Drupal::request()->headers->get('Authorization');
     if ($auth_header && preg_match('/Bearer\s(\S+)/', $auth_header, $matches)) {
       $auth = $auth_header;
     }
-    elseif (!empty($input['access_token'])) {
-      $auth = 'Bearer ' . $input['access_token'];
+
+    return $auth;
+  }
+
+  /**
+   * Returns whether the input type is a h-entry.
+   *
+   * @return bool
+   */
+  protected function isHEntry() {
+    return isset($this->object_type) && $this->object_type == 'h-entry';
+  }
+
+  /**
+   * Returns whether the input type is a h-event.
+   *
+   * @return bool
+   */
+  protected function isHEvent() {
+    return isset($this->object_type) && $this->object_type == 'h-event';
+  }
+
+  /**
+   * Check if there's a valid access token in the request.
+   *
+   * @param $auth_header
+   *   The input.
+   *
+   * @return bool
+   */
+  protected function isValidToken($auth_header) {
+    $valid_token = FALSE;
+
+    try {
+      $client = \Drupal::httpClient();
+      $headers = [
+        'Accept' => 'application/json',
+        'Authorization' => $auth_header,
+      ];
+
+      $response = $client->get(\Drupal::config('indieweb.indieauth')->get('token_endpoint'), ['headers' => $headers]);
+      $json = json_decode($response->getBody());
+      if (isset($json->me) && $json->me == $this->config->get('micropub_me')) {
+        $valid_token = TRUE;
+      }
     }
-
-    if ($auth) {
-      try {
-        $client = \Drupal::httpClient();
-        $headers = [
-          'Accept' => 'application/json',
-          'Authorization' => $auth,
-        ];
-
-        $response = $client->get(\Drupal::config('indieweb.indieauth')->get('token_endpoint'), ['headers' => $headers]);
-        $json = json_decode($response->getBody());
-        if (isset($json->me) && $json->me == $this->config->get('micropub_me')) {
-          $valid_token = TRUE;
-        }
-      }
-      catch (\Exception $e) {
-        $this->getLogger('indieweb_micropub')->notice('Error validating the access token: @message', ['@message' => $e->getMessage()]);
-      }
+    catch (\Exception $e) {
+      $this->getLogger('indieweb_micropub')->notice('Error validating the access token: @message', ['@message' => $e->getMessage()]);
     }
 
     return $valid_token;
   }
 
   /**
+   * Checks if required values are in input.
+   *
+   * @param array $keys
+   *
+   * @return bool
+   */
+  protected function hasRequiredInput($keys = []) {
+    $has_required_values = TRUE;
+
+    foreach ($keys as $key) {
+      if (empty($this->input[$key])) {
+        $has_required_values = FALSE;
+        break;
+      }
+    }
+
+    return $has_required_values;
+  }
+
+  /**
+   * Check that none of the keys are set in input.
+   *
+   * @param $keys
+   *
+   * @return bool
+   */
+  protected function hasNoKeysSet($keys) {
+    $has_no_keys_set = TRUE;
+
+    foreach ($keys as $key) {
+      if (isset($this->input[$key])) {
+        $has_no_keys_set = FALSE;
+        break;
+      }
+    }
+
+    return $has_no_keys_set;
+  }
+
+  /**
+   * Whether creating a node for this post type is enabled.
+   *
+   * @param $post_type
+   *
+   * @return array|mixed|null
+   */
+  protected function createNodeFromPostType($post_type) {
+    return $this->config->get($post_type . '_create_node');
+  }
+
+  /**
+   * Create a node.
+   *
+   * @param $title
+   *   The title for the node.
+   * @param $post_type
+   *   The IndieWeb post type.
+   * @param $link_input_name
+   *   The name of the property in input for auto syndication.
+   */
+  protected function createNode($title, $post_type, $link_input_name = NULL) {
+
+    $this->values = [
+      'uid' => $this->config->get($post_type . '_uid'),
+      'title' => $title,
+      'type' => $this->config->get($post_type . '_node_type'),
+      'status' => $this->config->get($post_type . '_status'),
+    ];
+
+    // Add link to syndicate to.
+    if ($link_input_name && $this->config->get($post_type . '_auto_send_webmention')) {
+      if (isset($input['mp-syndicate-to'])) {
+        $this->input['mp-syndicate-to'] += $this->input[$link_input_name];
+      }
+      else {
+        $this->input['mp-syndicate-to'] = $this->input[$link_input_name];
+      }
+    }
+
+    // Allow code to change the values and payload.
+    \Drupal::moduleHandler()->alter('indieweb_micropub_node_pre_create', $this->values, $this->input);
+
+    $this->node = Node::create($this->values);
+
+    // Content.
+    $content_field_name = $this->config->get($post_type . '_content_field');
+    if (!empty($this->input['content'][0]) && $this->node->hasField($content_field_name)) {
+      $this->node->set($content_field_name, $this->input['content']);
+    }
+
+    // Link.
+    $link_field_name = $this->config->get($post_type . '_link_field');
+    if ($link_field_name && $this->node->hasField($link_field_name)) {
+      $this->node->set($link_field_name, ['uri' => $this->input[$link_input_name][0], 'title' => '']);
+    }
+
+    // Uploads.
+    $this->handleUpload($post_type . '_upload_field');
+
+    // Categories.
+    $this->handleCategories($post_type . '_tags_field');
+  }
+
+  /**
+   * Saves the node.
+   *
+   * @return \Symfony\Component\HttpFoundation\Response
+   *
+   * @throws \Drupal\Core\Entity\EntityMalformedException
+   * @throws \Drupal\Core\Entity\EntityStorageException
+   */
+  protected function saveNode() {
+
+    $this->node->save();
+    if ($this->node->id()) {
+
+      // Syndicate.
+      $this->syndicateTo();
+
+      // Allow modules to react after the node is saved.
+      \Drupal::moduleHandler()->invokeAll('indieweb_micropub_node_saved', [$this->node, $this->values, $this->input, $this->payload_original]);
+
+      header('Location: ' . $this->node->toUrl('canonical', ['absolute' => TRUE])->toString());
+      return new Response('', 201);
+    }
+
+  }
+
+  /**
    * Helper function to upload file(s).
+   *
    * Currently limited to 1 file.
    *
    * @param $file_key
    *   The key in the $_FILES variable to look for in upload.
    *
-   * @return \Drupal\file\FileInterface $file|false.
+   * @return bool|\Drupal\file\FileInterface
    */
   protected function saveUpload($file_key) {
     $file = FALSE;
@@ -610,24 +490,36 @@ class MicropubController extends ControllerBase {
   }
 
   /**
+   * Handle uploads
+   *
+   * @param $upload_field
+   */
+  protected function handleUpload($upload_field) {
+    // File (currently only image, limited to 1).
+    $file_field_name = $this->config->get($upload_field);
+    if ($file_field_name && $this->node->hasField($file_field_name)) {
+      $file = $this->saveUpload('photo');
+      if ($file) {
+        $this->node->set($file_field_name, $file->id());
+      }
+    }
+  }
+
+  /**
    * Handle and set categories.
    *
-   * @param $input
-   *   The input from the request.
-   * @param \Drupal\node\NodeInterface $node
-   *   The current node which is going to be created.
    * @param $config_key
    *   The config key for the tags field.
    */
-  protected function handleCategories($input, NodeInterface $node, $config_key) {
+  protected function handleCategories($config_key) {
     $tags_field_name = $this->config->get($config_key);
 
-    if ($tags_field_name && $node->hasField($tags_field_name) && !empty($input['category'])) {
+    if ($tags_field_name && $this->node->hasField($tags_field_name) && !empty($this->input['category'])) {
       $values = $bundles = [];
       $auto_create = FALSE;
 
       // Check field definition settings of the field.
-      $field_settings = $node->getFieldDefinition($tags_field_name)->getSettings();
+      $field_settings = $this->node->getFieldDefinition($tags_field_name)->getSettings();
       if (!empty($field_settings['handler_settings']['auto_create'])) {
         $auto_create = TRUE;
       }
@@ -645,7 +537,7 @@ class MicropubController extends ControllerBase {
         // Get any ids that match with the incoming categories.
         $existing_categories = [];
         $existing_category_ids = \Drupal::entityQuery('taxonomy_term')
-          ->condition('name', $input['category'], 'IN')
+          ->condition('name', $this->input['category'], 'IN')
           ->execute();
 
         // Get the actual terms.
@@ -657,7 +549,7 @@ class MicropubController extends ControllerBase {
         }
 
         // Now loop over incoming categories.
-        foreach ($input['category'] as $category) {
+        foreach ($this->input['category'] as $category) {
 
           // Auto create and not existing term.
           if ($auto_create && !isset($existing_categories[$category])) {
@@ -675,7 +567,7 @@ class MicropubController extends ControllerBase {
         }
 
         if (!empty($values)) {
-          $node->set($tags_field_name, $values);
+          $this->node->set($tags_field_name, $values);
         }
       }
     }
@@ -684,16 +576,13 @@ class MicropubController extends ControllerBase {
   /**
    * Syndicate to.
    *
-   * @param $input
-   * @param \Drupal\node\NodeInterface $node
-   *
    * @throws \Drupal\Core\Entity\EntityMalformedException
    */
-  protected function syndicateTo($input, NodeInterface $node) {
-    if (!empty($input['mp-syndicate-to']) && $node->isPublished()) {
-      $source = $node->toUrl()->setAbsolute(TRUE)->toString();
-      foreach ($input['mp-syndicate-to'] as $target) {
-        indieweb_webmention_create_queue_item($source, $target, $node->id(), 'node');
+  protected function syndicateTo() {
+    if (!empty($this->input['mp-syndicate-to']) && $this->node->isPublished()) {
+      $source = $this->node->toUrl()->setAbsolute(TRUE)->toString();
+      foreach ($this->input['mp-syndicate-to'] as $target) {
+        indieweb_webmention_create_queue_item($source, $target, $this->node->id(), 'node');
       }
     }
   }

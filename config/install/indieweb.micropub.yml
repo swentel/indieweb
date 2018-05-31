@@ -23,6 +23,7 @@ like_auto_send_webmention: false
 like_content_field: ''
 like_link_field: ''
 like_tags_field: ''
+like_upload_field: ''
 like_uid: 1
 reply_create_node: false
 reply_status: 1
@@ -31,6 +32,7 @@ reply_content_field: ''
 reply_link_field: ''
 reply_auto_send_webmention: false
 reply_tags_field: ''
+reply_upload_field: ''
 reply_uid: 1
 repost_create_node: false
 repost_status: 1
@@ -39,6 +41,7 @@ repost_content_field: ''
 repost_link_field: ''
 repost_auto_send_webmention: false
 repost_tags_field: ''
+repost_upload_field: ''
 repost_uid: 1
 bookmark_create_node: false
 bookmark_status: 1
@@ -47,6 +50,7 @@ bookmark_content_field: ''
 bookmark_link_field: ''
 bookmark_auto_send_webmention: false
 bookmark_tags_field: ''
+bookmark_upload_field: ''
 bookmark_uid: 1
 event_create_node: false
 event_status: 1
@@ -54,6 +58,7 @@ event_node_type: ''
 event_content_field: ''
 event_date_field: ''
 event_tags_field: ''
+event_upload_field: ''
 event_uid: 1
 rsvp_create_node: false
 rsvp_status: 1
@@ -63,4 +68,5 @@ rsvp_link_field: ''
 rsvp_auto_send_webmention: false
 rsvp_rsvp_field: ''
 rsvp_tags_field: ''
+rsvp_upload_field: ''
 rsvp_uid: 1

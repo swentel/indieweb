@@ -168,6 +168,9 @@ indieweb.micropub:
     like_tags_field:
       type: string
       label: 'The node tags field for the like'
+    like_upload_field:
+      type: string
+      label: 'The node upload field for the like'
     like_uid:
       type: integer
       label: 'The user id of the like'
@@ -192,6 +195,9 @@ indieweb.micropub:
     reply_tags_field:
       type: string
       label: 'The node tags field for the reply'
+    reply_upload_field:
+      type: string
+      label: 'The node upload field for the reply'
     reply_uid:
       type: integer
       label: 'The user id of the reply'
@@ -216,6 +222,9 @@ indieweb.micropub:
     repost_tags_field:
       type: string
       label: 'The node tags field for the repost'
+    repost_upload_field:
+      type: string
+      label: 'The node upload field for the repost'
     repost_uid:
       type: integer
       label: 'The user id of the repost'
@@ -240,6 +249,9 @@ indieweb.micropub:
     bookmark_tags_field:
       type: string
       label: 'The node tags field for the bookmark'
+    bookmark_upload_field:
+      type: string
+      label: 'The node upload field for the bookmark'
     bookmark_uid:
       type: integer
       label: 'The user id of the bookmark'
@@ -261,6 +273,9 @@ indieweb.micropub:
     event_tags_field:
       type: string
       label: 'The node tags field for the event'
+    event_upload_field:
+      type: string
+      label: 'The node upload field for the event'
     event_uid:
       type: integer
       label: 'The user id of the event'
@@ -288,6 +303,9 @@ indieweb.micropub:
     rsvp_tags_field:
       type: string
       label: 'The node tags field for the rsvp'
+    rsvp_upload_field:
+      type: string
+      label: 'The node upload field for the rsvp'
     rsvp_uid:
       type: integer
       label: 'The user id of the RSVP'

@@ -37,6 +37,7 @@ Another good tool is http://xray.p3k.io, which displays the results in JSON.
 
 - composer require indieweb/mention-client
 - composer require p3k/xray
+- composer require p3k/Micropub
 - go to admin/modules and toggle 'IndieWeb' to enable the module.
 
 ## Webmentions / Webmention.io

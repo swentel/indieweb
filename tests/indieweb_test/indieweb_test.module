@@ -1,0 +1,57 @@
+<?php
+
+/**
+ * @file
+ * IndieWeb test module file.
+ */
+
+use Drupal\node\Entity\Node;
+use Drupal\node\NodeInterface;
+
+/**
+ * Implements hook_indieweb_micropub_node_pre_create_alter().
+ */
+function indieweb_test_indieweb_micropub_node_pre_create_alter(&$values, &$payload) {
+  if (isset($payload['act_on_hooks'])) {
+    $values['title'] = 'Title set from hook';
+  }
+}
+
+/**
+ * Implements hook_indieweb_micropub_node_saved().
+ */
+function indieweb_test_indieweb_micropub_node_saved(NodeInterface $node, $values, $payload, $payload_original) {
+  if (isset($payload_original['act_on_hooks'])) {
+    // Just create another node with the same label.
+    $second_node = $node->createDuplicate();
+    $second_node->setTitle('duplicated node');
+    $second_node->save();
+  }
+}
+
+/**
+ * Implements hook_indieweb_micropub_no_post_made().
+ *
+ * @param $payload
+ *
+ * @return \Drupal\Core\GeneratedUrl|string
+ *
+ * @throws \Drupal\Core\Entity\EntityStorageException
+ * @throws \Drupal\Core\Entity\EntityMalformedException
+ */
+function indieweb_test_indieweb_micropub_no_post_made($payload) {
+  if (isset($payload['no_post_made'])) {
+    $values = [
+      'uid' => 1,
+      'status' => 1,
+      'type' => 'page',
+      'title' => $payload['random_title'][0],
+    ];
+    $node = Node::create($values);
+    $node->set('body', $payload['random_content']);
+    $node->save();
+    if ($node->id()) {
+      return $node->toUrl('canonical', ['absolute' => TRUE])->toString();
+    }
+  }
+}
