@@ -74,7 +74,7 @@ class CommentsTest extends IndiewebBrowserTestBase {
         ],
       ],
     ];
-    $code = $this->sendWebmentionRequest($webmention);
+    $code = $this->sendWebmentionNotificationRequest($webmention);
     self::assertEquals(202, $code);
     $this->assertCommentCount(0);
 
@@ -94,7 +94,7 @@ class CommentsTest extends IndiewebBrowserTestBase {
 
     // Send again, we should have a comment now.
     $this->drupalLogout();
-    $code = $this->sendWebmentionRequest($webmention);
+    $code = $this->sendWebmentionNotificationRequest($webmention);
     self::assertEquals(202, $code);
     $this->assertCommentCount(1);
     $cid = \Drupal::database()->query('SELECT cid FROM {comment_field_data}')->fetchField();
@@ -143,7 +143,7 @@ class CommentsTest extends IndiewebBrowserTestBase {
     // on node 1. The target is comment/indieweb/cid.
     $webmention['target'] = '/comment/indieweb/1';
     $webmention['post']['content']['text'] = 'This is awesome!';
-    $code = $this->sendWebmentionRequest($webmention);
+    $code = $this->sendWebmentionNotificationRequest($webmention);
     self::assertEquals(202, $code);
     $this->assertCommentCount(2);
 
@@ -179,7 +179,7 @@ class CommentsTest extends IndiewebBrowserTestBase {
     $this->drupalPostForm('comment/reply/node/1/comment/' . $comment->id(), $edit, 'Save');
     $this->drupalGet('node/1');
     $this->assertSession()->responseContains("I know, isn't it!");
-    $this->assertQueueItems(['https://brid-gy.appspot.com/comment/twitter/swentel/994117538731741185/994129251946418177' => 'https://brid-gy.appspot.com/comment/twitter/swentel/994117538731741185/994129251946418177'], 1);
+    $this->assertQueueItems(['https://brid-gy.appspot.com/comment/twitter/swentel/994117538731741185/994129251946418177' => 'https://brid-gy.appspot.com/comment/twitter/swentel/994117538731741185/994129251946418177'], 3);
 
     $this->drupalGet('/comment/indieweb/3');
     $this->assertSession()->responseContains("I know, isn't it!");
@@ -192,7 +192,7 @@ class CommentsTest extends IndiewebBrowserTestBase {
     $webmention['target'] = '/comment/indieweb/2';
     $webmention['source'] = 'https://brid-gy.appspot.com/comment/twitter/swentel/994117538731741185/994133390680092672';
     $webmention['post']['content']['text'] = "I know, isn't it!";
-    $code = $this->sendWebmentionRequest($webmention);
+    $code = $this->sendWebmentionNotificationRequest($webmention);
     self::assertEquals(202, $code);
     $this->assertCommentCount(3);
 

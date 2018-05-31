@@ -1057,11 +1057,15 @@ function indieweb_handle_webmention_queue() {
   while (time() < $end && ($item = \Drupal::queue(WEBMENTION_QUEUE_NAME)->claimItem())) {
     $data = $item->data;
     if (!empty($data['source']) && !empty($data['target'])) {
-      $sourceURL = $data['source'];
-      $targetURL = $data['target'];
-      $client = new MentionClient();
 
       try {
+
+        $sourceURL = $data['source'];
+        $targetURL = $data['target'];
+
+        /** @var \Drupal\indieweb\WebmentionClient\WebmentionClientInterface $client */
+        $client = \Drupal::service('indieweb.webmention.client');
+
         $response = $client->sendWebmention($sourceURL, $targetURL);
 
         // Store the syndication when the targetUrl is in the channels.

@@ -3,6 +3,7 @@
 namespace Drupal\indieweb_test\Controller;
 
 use Drupal\Core\Controller\ControllerBase;
+use Drupal\Core\Url;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Response;
@@ -10,7 +11,7 @@ use Symfony\Component\HttpFoundation\Response;
 class IndiewebTestController extends ControllerBase {
 
   /**
-   * Indieweb test front page.
+   * IndieWeb test front page.
    *
    * @return array
    */
@@ -19,7 +20,19 @@ class IndiewebTestController extends ControllerBase {
   }
 
   /**
-   * Indieweb test IndieAuth token endpoint
+   * IndieWeb test webmention endpoint.
+   *
+   * Also acts as publish endpoint, so we'll always send 201 back.
+   *
+   * @see \Drupal\Tests\indieweb\Functional\WebmentionTest::testSendingWebmention();
+   */
+  public function testWebmentionEndpoint() {
+    header('Location: ' . Url::fromRoute('entity.node.canonical', ['node' => '1'], ['absolute' => TRUE])->toString());
+    return new Response('', 201);
+  }
+
+  /**
+   * IndieWeb test IndieAuth token endpoint
    */
   public function testTokenEndpoint() {
     $data = [];

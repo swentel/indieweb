@@ -67,10 +67,14 @@ class PublishSettingsForm extends ConfigFormBase {
       '#description' => $this->t('The "Publish to" fieldset on content can contain two additional ways to send webmentions to other sites: a textfield to enter a custom URL or a select which listens to a "link" field on node types.'),
     ];
 
+    $comment_enabled = \Drupal::moduleHandler()->moduleExists('comment');
+
     // Collect fields.
     $link_fields = $reference_fields = [];
     $fields = \Drupal::service('entity_field.manager')->getFieldStorageDefinitions('node');
-    $fields += \Drupal::service('entity_field.manager')->getFieldStorageDefinitions('comment');
+    if ($comment_enabled) {
+      $fields += \Drupal::service('entity_field.manager')->getFieldStorageDefinitions('comment');
+    }
     /** @var \Drupal\Core\Field\FieldStorageDefinitionInterface $field */
     foreach ($fields as $key => $field) {
       if (in_array($field->getType(), ['link'])) {
@@ -78,7 +82,6 @@ class PublishSettingsForm extends ConfigFormBase {
       }
     }
 
-    $comment_enabled = \Drupal::moduleHandler()->moduleExists('comment');
     if ($comment_enabled) {
       $comment_fields = \Drupal::service('entity_field.manager')->getFieldStorageDefinitions('comment');
       /** @var \Drupal\Core\Field\FieldStorageDefinitionInterface $field */

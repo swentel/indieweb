@@ -14,6 +14,14 @@ indieweb_test.token_endpoint:
   requirements:
     _access: 'TRUE'
 
+indieweb_test.webmention_endpoint:
+  path: '/test-webmention-endpoint'
+  defaults:
+    _controller: '\Drupal\indieweb_test\Controller\IndiewebTestController::testWebmentionEndpoint'
+    _title: 'Indieweb test webmention endpoint'
+  requirements:
+    _access: 'TRUE'
+
 indieweb_test.indieauth.login.page:
   path: '/indieauth-test/login'
   defaults:

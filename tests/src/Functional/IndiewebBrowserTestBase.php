@@ -122,9 +122,11 @@ abstract class IndiewebBrowserTestBase extends BrowserTestBase {
 
   /**
    * Enable webmention functionality in the UI.
+   *
+   * @param $edit
    */
-  protected function enableWebmention() {
-    $edit = [
+  protected function enableWebmention($edit = []) {
+    $edit += [
       'webmention_enable' => 1,
       'pingback_enable' => 1,
       'webmention_secret' => 'valid_secret',
@@ -143,16 +145,16 @@ abstract class IndiewebBrowserTestBase extends BrowserTestBase {
    *
    * @return int $status_code
    */
-  protected function sendWebmentionRequest($post = [], $json = TRUE, $debug = FALSE) {
-    $micropub_endpoint = Url::fromRoute('indieweb.webmention.notify', [], ['absolute' => TRUE])->toString();
+  protected function sendWebmentionNotificationRequest($post = [], $json = TRUE, $debug = FALSE) {
+    $notify_endpoint = Url::fromRoute('indieweb.webmention.notify', [], ['absolute' => TRUE])->toString();
 
     $client = \Drupal::httpClient();
     try {
       if ($json) {
-        $response = $client->post($micropub_endpoint, ['json' => $post]);
+        $response = $client->post($notify_endpoint, ['json' => $post]);
       }
       else {
-        $response = $client->post($micropub_endpoint, ['form_params' => $post]);
+        $response = $client->post($notify_endpoint, ['form_params' => $post]);
       }
       $status_code = $response->getStatusCode();
     }
@@ -248,13 +250,13 @@ abstract class IndiewebBrowserTestBase extends BrowserTestBase {
   /**
    * Assert queue items.
    *
-   * @param array $channels
-   * @param $nid
+   * @param array $urls
+   * @param $id
    */
-  protected function assertQueueItems($channels = [], $nid = NULL) {
-    if ($channels) {
+  protected function assertQueueItems($urls = [], $id = NULL) {
+    if ($urls) {
       $count = \Drupal::queue(WEBMENTION_QUEUE_NAME)->numberOfItems();
-      $this->assertTrue($count == count($channels));
+      $this->assertTrue($count == count($urls));
 
       // We use a query here, don't want to use a while loop. When there's
       // nothing in the queue yet, the table won't exist, so the query will
@@ -264,13 +266,20 @@ abstract class IndiewebBrowserTestBase extends BrowserTestBase {
         $records = \Drupal::database()->query($query, [':name' => WEBMENTION_QUEUE_NAME]);
         foreach ($records as $record) {
           $data = unserialize($record->data);
-          if (!empty($data['source']) && !empty($data['target'])) {
-            $this->assertTrue(in_array($data['target'], $channels));
-            $this->assertEquals($data['source'], Url::fromRoute('entity.node.canonical', ['node' => $nid], ['absolute' => TRUE])->toString());
+          if (!empty($data['source']) && !empty($data['target']) && $id) {
+            $this->assertTrue(in_array($data['target'], $urls));
+            if ($data['entity_type_id'] == 'node') {
+              $this->assertEquals($data['source'], Url::fromRoute('entity.node.canonical', ['node' => $id], ['absolute' => TRUE])->toString());
+            }
+            elseif ($data['entity_type_id'] == 'comment') {
+              $this->assertEquals($data['source'], Url::fromRoute('entity.comment.canonical', ['comment' => $id], ['absolute' => TRUE])->toString());
+            }
           }
         }
       }
-      catch (\Exception $ignored) {}
+      catch (\Exception $ignored) {
+        //debug($ignored->getMessage());
+      }
     }
     else {
       $count = \Drupal::queue(WEBMENTION_QUEUE_NAME)->numberOfItems();
@@ -284,6 +293,32 @@ abstract class IndiewebBrowserTestBase extends BrowserTestBase {
   protected function clearQueue() {
     \Drupal::database()->delete('queue')->condition('name', WEBMENTION_QUEUE_NAME)->execute();
     $this->assertQueueItems();
+  }
+
+  /**
+   * Runs the queue. Both calls cron and drush.
+   */
+  protected function runWebmentionQueue() {
+    module_load_include('inc', 'indieweb', 'indieweb.drush');
+    drush_indieweb_send_webmentions();
+    indieweb_cron();
+  }
+
+  /**
+   * Asserts a syndication.
+   *
+   * @param $source_id
+   * @param $url
+   */
+  protected function assertSyndication($source_id, $url) {
+    $object = \Drupal::database()->query('SELECT * FROM {webmention_syndication} WHERE entity_id = :id', [':id' => $source_id])->fetchObject();
+    if (isset($object->url)) {
+      self::assertEquals($url, $object->url);
+    }
+    else {
+      // explicit fail
+      $this->assertTrue($object, 'no syndication found');
+    }
   }
 
   /**
