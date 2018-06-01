@@ -70,7 +70,7 @@ class FeedsTest extends IndiewebBrowserTestBase {
       'id' => 'timeline',
       'path' => $this->timeline_path,
       'feedTitle' => 'Timeline',
-      'owner' => 1,
+      'ownerId' => 1,
       'limit' => 10,
       'author' => '<a class="u-url p-name" href="/">Your name</a><img src="https://example.com/image/avatar.png" class="u-photo hidden" alt="Your name">',
       'bundles[]' => [
