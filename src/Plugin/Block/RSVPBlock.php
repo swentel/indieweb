@@ -73,47 +73,37 @@ class RSVPBlock extends BlockBase {
       ->condition('property', $types, 'IN');
 
     $query->orderBy('id', 'DESC');
+    $records = $query->execute();
 
     $values = [
       0 => 'yes', 1 => 'maybe', 2 => 'interested', 3 => 'no',
     ];
     $values_array = [];
-
     $show_avatar = $this->configuration['show_avatar'];
 
-    if (!empty($ids)) {
+    foreach ($records as $record) {
 
+      $image = '';
+      if ($show_avatar && !empty($record->author_photo)) {
+        $image = '<img width="40" src="' . $record->author_photo . '" />&nbsp;';
+      }
 
-      /** @var \Drupal\indieweb\Entity\WebmentionInterface $mention */
-      $mentions = \Drupal::entityTypeManager()->getStorage('webmention_entity')->loadMultiple($ids);
-      foreach ($mentions as $mention) {
+      $rsvp = $record->rsvp;
+      $values_array[$rsvp][] = [
+        '#markup' => $image . $record->author_name,
+        '#allowed_tags' => ['img']
+      ];
+    }
 
-        $image = '';
-        if ($show_avatar && !($mention->get('author_photo')->isEmpty())) {
-          $image = '<img width="40" src="' . $mention->get('author_photo')->value . '" />&nbsp;';
-        }
-
-        $rsvp = $mention->get('rsvp')->value;
-
-        $values_array[$rsvp][] = [
-          '#markup' => $image . $mention->get('author_name')->value,
-          '#allowed_tags' => ['img']
+    foreach ($values as $weight => $value) {
+      if (!empty($values_array[$value])) {
+        $build[$value] = [
+          '#title' => ucfirst($value),
+          '#weight' => $weight,
+          '#theme' => 'item_list',
+          '#items' => $values_array[$value],
         ];
-
       }
-
-      foreach ($values as $weight => $value) {
-        if (!empty($values_array[$value])) {
-          $build[$value] = [
-            '#title' => ucfirst($value),
-            '#weight' => $weight,
-            '#theme' => 'item_list',
-            '#items' => $values_array[$value],
-          ];
-        }
-      }
-
-
     }
 
     return $build;

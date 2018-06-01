@@ -10,7 +10,7 @@ use Drupal\user\RoleInterface;
 /**
  * Tests integration of RSVP.
  *
- * @group indieweb_single
+ * @group indieweb
  */
 class RsvpTest extends IndiewebBrowserTestBase {
 
@@ -56,7 +56,7 @@ class RsvpTest extends IndiewebBrowserTestBase {
 
     $this->drupalGet('node/1');
     $this->assertSession()->responseContains('RSVP title block');
-    $this->assertSession()->responseContains('<div class="item-list"><h3>Yes</h3><ul><li>swentel</li><li>Dries</li></ul></div>');
+    $this->assertSession()->responseContains('<div class="item-list"><h3>Yes</h3><ul><li>Dries</li><li>swentel</li></ul></div>');
     $this->assertSession()->responseContains('<div class="item-list"><h3>Maybe</h3><ul><li>swentie</li></ul></div>');
 
     $this->drupalGet('node/2');
