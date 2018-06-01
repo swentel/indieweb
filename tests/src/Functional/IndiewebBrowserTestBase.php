@@ -139,6 +139,44 @@ abstract class IndiewebBrowserTestBase extends BrowserTestBase {
   }
 
   /**
+   * Creates a page and send webmention to url potentially.
+   *
+   * @param $target_url
+   * @param $publish
+   * @param $custom
+   */
+  protected function createPage($target_url = '', $publish = FALSE, $custom = FALSE, $edit = []) {
+    $edit += [
+      'title[0][value]' => 'It sure it!',
+      'body[0][value]' => 'And here is mine!',
+    ];
+
+    if ($publish) {
+      $edit['indieweb_publish_channels[' . $target_url . ']'] = TRUE;
+    }
+
+    if ($custom) {
+      $edit['indieweb_publish_custom_url'] = $target_url;
+    }
+
+    $this->drupalPostForm('node/add/page', $edit, 'Save');
+  }
+
+  /**
+   * Change block configuration.
+   *
+   * @param $block_id
+   *   The block id.
+   * @param $edit
+   *   The edit
+   */
+  protected function changeBlockConfiguration($block_id, $edit) {
+    $this->drupalLogin($this->adminUser);
+    $this->drupalPostForm('admin/structure/block/manage/' . $block_id, $edit, 'Save block');
+    $this->drupalLogout();
+  }
+
+  /**
    * Gets a minimum webmention payload.
    *
    * @param $node

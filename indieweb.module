@@ -20,7 +20,6 @@ use Drupal\indieweb\Entity\FeedInterface;
 use Drupal\indieweb\Entity\WebmentionInterface;
 use Drupal\node\Entity\NodeType;
 use Drupal\node\NodeInterface;
-use IndieWeb\MentionClient;
 
 define('WEBMENTION_QUEUE_NAME', 'indieweb_webmention');
 

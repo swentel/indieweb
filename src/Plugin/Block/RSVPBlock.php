@@ -64,20 +64,25 @@ class RSVPBlock extends BlockBase {
       'rsvp' => 'rsvp',
     ];
 
-    // Get mentions.
-    $query = \Drupal::entityQuery('webmention_entity')
+    // Get mentions. We use a query and not entity api at all to make sure this
+    // blocked is speedy. If you have tons of webmentions, this can be rough.
+    $query = \Drupal::database()
+      ->select('webmention_entity', 'w')
+      ->fields('w', ['author_name', 'author_photo', 'property', 'rsvp'])
       ->condition('target', \Drupal::request()->getPathInfo())
       ->condition('property', $types, 'IN');
-    $ids = $query->execute();
+
+    $query->orderBy('id', 'DESC');
 
     $values = [
       0 => 'yes', 1 => 'maybe', 2 => 'interested', 3 => 'no',
     ];
     $values_array = [];
 
+    $show_avatar = $this->configuration['show_avatar'];
+
     if (!empty($ids)) {
 
-      $show_avatar = $this->configuration['show_avatar'];
 
       /** @var \Drupal\indieweb\Entity\WebmentionInterface $mention */
       $mentions = \Drupal::entityTypeManager()->getStorage('webmention_entity')->loadMultiple($ids);
