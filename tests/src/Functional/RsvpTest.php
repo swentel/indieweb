@@ -37,13 +37,13 @@ class RsvpTest extends IndiewebBrowserTestBase {
     $this->createPage();
     $this->createPage();
     $node = \Drupal::entityTypeManager()->getStorage('node')->load(1);
-    $node_2 = \Drupal::entityTypeManager()->getStorage('node')->load(2);
     $this->drupalLogout();
 
     $this->drupalGet('node/1');
     $this->assertSession()->responseNotContains('RSVP title block');
 
     $webmention = $this->getWebmentionPayload($node, 'valid_secret');
+    $webmention['target'] = '/node/' . $node->id();
     $webmention['post']['rsvp'] = 'yes';
     $webmention['post']['wm-property'] = 'rsvp';
     $webmention['post']['author'] = ['name' => 'swentel'];
