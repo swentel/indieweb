@@ -67,7 +67,7 @@ class FeedForm extends EntityForm {
       '#required' => TRUE,
     ];
 
-    $form['owner'] = [
+    $form['ownerId'] = [
       '#type' => 'number',
       '#title' => $this->t('Owner id'),
       '#default_value' => $feed->getOwnerId(),

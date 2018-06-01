@@ -37,7 +37,7 @@ indieweb.indieweb_feed.*:
     limit:
       type: integer
       label: 'Number of items in feed'
-    owner:
+    ownerId:
       type: integer
       label: 'The user id of the posts for this feed'
     bundles:
