@@ -119,7 +119,7 @@ class RSVPBlock extends BlockBase {
       if ($node && $node->bundle() == $this->configuration['node_type'] && $node->hasField($this->configuration['node_daterange_field'])) {
         $date = $node->get($this->configuration['node_daterange_field'])->getValue();
         if (!empty($date[0]['end_value']) && strtotime($date[0]['end_value']) > \Drupal::time()->getCurrentTime()) {
-          if (\Drupal::currentUser()->hasPermission('allow rsvp')) {
+          if (\Drupal::currentUser()->isAuthenticated() && \Drupal::currentUser()->hasPermission('allow rsvp')) {
             $build['rsvp_form'] = \Drupal::formBuilder()->getForm('Drupal\indieweb\Form\RSVPForm');
           }
           else {
