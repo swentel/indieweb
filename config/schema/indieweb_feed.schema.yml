@@ -25,6 +25,9 @@ indieweb.indieweb_feed.*:
     feedTitle:
       type: label
       label: 'Feed title'
+    excludeIndexing:
+      type: boolean
+      label: 'Whether to exclude from search engines'
     relHeader:
       type: boolean
       label: 'Whether to expose the rel="feed" header link'

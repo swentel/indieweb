@@ -85,6 +85,11 @@ class Feed extends ConfigEntityBase implements FeedInterface {
   protected $feedTitle;
 
   /**
+   * Exclude from indexing.
+   */
+  protected $excludeIndexing = FALSE;
+
+  /**
    * Whether to create an atom feed.
    *
    * @var bool
@@ -132,6 +137,13 @@ class Feed extends ConfigEntityBase implements FeedInterface {
    * @var int
    */
   protected $ownerId = 1;
+
+  /**
+   * {@inheritdoc}
+   */
+  public function excludeIndexing() {
+    return $this->excludeIndexing;
+  }
 
   /**
    * {@inheritdoc}

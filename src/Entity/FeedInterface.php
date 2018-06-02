@@ -10,6 +10,13 @@ use Drupal\Core\Config\Entity\ConfigEntityInterface;
 interface FeedInterface extends ConfigEntityInterface {
 
   /**
+   * Whether to exclude from indexing.
+   *
+   * @return bool
+   */
+  public function excludeIndexing();
+
+  /**
    * Whether to expose an Atom feed.
    *
    * @return bool

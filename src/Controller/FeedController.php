@@ -81,6 +81,17 @@ class FeedController extends ControllerBase {
       ];
     }
 
+    if ($indieweb_feed->excludeIndexing()) {
+      $noindex = [
+        '#tag' => 'meta',
+        '#attributes' => [
+          'name' => 'robots',
+          'content' => 'noindex, nofollow',
+        ],
+      ];
+      $build['#attached']['html_head'][] = [$noindex, 'indieweb_feed_noindex'];
+    }
+
     $build['#cache']['tags'][] = 'indieweb_feed:' . $indieweb_feed->id();
 
     return $build;

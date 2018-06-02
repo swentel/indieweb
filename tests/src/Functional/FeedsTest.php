@@ -71,6 +71,7 @@ class FeedsTest extends IndiewebBrowserTestBase {
       'path' => $this->timeline_path,
       'feedTitle' => 'Timeline',
       'ownerId' => 1,
+      'excludeIndexing' => 1,
       'limit' => 10,
       'author' => '<a class="u-url p-name" href="/">Your name</a><img src="https://example.com/image/avatar.png" class="u-photo hidden" alt="Your name">',
       'bundles[]' => [
@@ -100,6 +101,7 @@ class FeedsTest extends IndiewebBrowserTestBase {
     $this->drupalGet($this->timeline_path);
     $this->assertSession()->responseContains('<h1 class="title page-title">Timeline</h1>');
     $this->assertSession()->responseContains($edit['author']);
+    $this->assertSession()->responseContains('noindex, nofollow');
 
     $this->drupalGet($this->timeline_jf2_path);
     $this->assertSession()->statusCodeEquals(404);
@@ -124,6 +126,7 @@ class FeedsTest extends IndiewebBrowserTestBase {
     $this->clickLink('Update items');
     // Also expose headers and jf2 and atom.
     $edit = [
+      'excludeIndexing' => FALSE,
       'atom' => TRUE,
       'jf2' => TRUE,
       'relHeader' => TRUE,
@@ -145,6 +148,7 @@ class FeedsTest extends IndiewebBrowserTestBase {
     // Check timelines.
     $this->drupalGet($this->timeline_path);
     $this->assertSession()->responseContains($article->label());
+    $this->assertSession()->responseNotContains('noindex, nofollow');
 
     $this->drupalGet($this->timeline_jf2_path);
     $this->assertSession()->statusCodeEquals(200);

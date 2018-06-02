@@ -76,6 +76,12 @@ class FeedForm extends EntityForm {
       '#required' => TRUE,
     ];
 
+    $form['excludeIndexing'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Exclude from indexing by search engines'),
+      '#default_value' => $feed->excludeIndexing(),
+    ];
+
     $form['atom'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('Expose Atom feed'),
