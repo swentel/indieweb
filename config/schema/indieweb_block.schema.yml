@@ -22,3 +22,12 @@ block.settings.indieweb_rsvp:
     show_avatar:
       type: boolean
       label: 'Show avatar'
+    allow_user_rsvp:
+      type: boolean
+      label: 'Allow user to RSVP'
+    node_type:
+      type: string
+      label: 'Event node type'
+    node_daterange_field:
+      type: string
+      label: 'Event date range field'
