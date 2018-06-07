@@ -125,6 +125,7 @@ class MicropubController extends ControllerBase {
       $mf2 = $micropub_request->toMf2();
       $this->object_type = !empty($mf2['type'][0]) ? $mf2['type'][0] : '';
       $this->input = $mf2['properties'];
+      $this->input += $micropub_request->commands;
     }
     else {
       $description = $micropub_request->error_description ? $micropub_request->error_description : 'Unknown error';
@@ -393,7 +394,7 @@ class MicropubController extends ControllerBase {
 
     // Add link to syndicate to.
     if ($link_input_name && $this->config->get($post_type . '_auto_send_webmention')) {
-      if (isset($input['mp-syndicate-to'])) {
+      if (isset($this->input['mp-syndicate-to'])) {
         $this->input['mp-syndicate-to'] += $this->input[$link_input_name];
       }
       else {
