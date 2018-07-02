@@ -8,7 +8,7 @@ For more information about IndieWeb, see https://indieweb.org/.
 Current functionality:
 
 - Send and receive webmentions and pingbacks via Webmention.io
-- Publish content, likes etc via bridg.y, store syndications
+- Publish content, likes etc via [brid.gy](https://brid.gy), store syndications
 - Microformats for content and images
 - Allow users to login and create accounts
 - IndieAuth for Authentication API
