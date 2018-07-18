@@ -4,3 +4,8 @@ entity.feed.add_form:
   appears_on:
     - entity.indieweb_feed.collection
 
+indieweb.syndication.add_form:
+  route_name: indieweb.syndication.form
+  title: 'Add syndication'
+  appears_on:
+    - indieweb.syndications_list

@@ -100,7 +100,15 @@ indieweb.syndications_list:
     _controller: '\Drupal\indieweb\Controller\SyndicationController::adminOverview'
     _title: 'Syndications'
   requirements:
-    _permission: 'view indieweb syndications'
+    _permission: 'administer indieweb'
+
+indieweb.syndication.form:
+  path: '/admin/content/syndication/form'
+  defaults:
+    _form: '\Drupal\indieweb\Form\SyndicationForm'
+    _title: 'Add syndication'
+  requirements:
+    _permission: 'administer indieweb'
 
 indieweb.comment.canonical:
   path: '/comment/indieweb/{comment}'

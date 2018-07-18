@@ -22,7 +22,6 @@ class RSVPForm extends FormBase {
   public function buildForm(array $form, FormStateInterface $form_state) {
     $form = [];
 
-
     $rsvp = $this->getRSVP();
     $form['rsvp'] = [
       '#title' => $this->t('RSVP'),

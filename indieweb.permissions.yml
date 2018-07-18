@@ -1,6 +1,6 @@
 administer indieweb:
   title: 'Administer IndieWeb configuration'
-  description: 'Manage all IndieWeb configuration including syndications, micropub, microsub and webmentions.'
+  description: 'Manage all IndieWeb configuration including syndications, micropub, microsub, syndications and webmentions.'
 
 view indieweb syndications:
   title: 'View syndications'
