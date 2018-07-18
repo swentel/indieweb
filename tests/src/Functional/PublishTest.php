@@ -21,7 +21,7 @@ class PublishTest extends IndiewebBrowserTestBase {
    *
    * @var string
    */
-  protected $channels = "Twitter (bridgy)|https://brid.gy/publish/twitter\nFacebook (bridgy)|https://brid.gy/publish/facebook\nAnother channel|https://example.com/publish/test";
+  protected $channels = "Twitter (bridgy)|https://brid.gy/publish/twitter\nAnother channel|https://example.com/publish/test";
 
   /**
    * {@inheritdoc}

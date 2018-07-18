@@ -1,4 +1,4 @@
-channels: "Twitter (bridgy)|https://brid.gy/publish/twitter\r\nFacebook (bridgy)|https://brid.gy/publish/facebook"
+channels: "Twitter (bridgy)|https://brid.gy/publish/twitter"
 back_link: always
 publish_send_webmention_by: disabled
 publish_custom_url: true
