@@ -190,6 +190,7 @@ class MicropubSettingsForm extends ConfigFormBase {
             ':input[name="' . $post_type . '_create_node"]' => array('checked' => TRUE),
           ),
         ),
+        '#description' => $this->t('When the payload contains the "post-status" property, its value will take precedence over this one. See <a href="https://indieweb.org/Micropub-extensions#Post_Status" target="_blank">https://indieweb.org/Micropub-extensions#Post_Status</a>'),
       ];
 
       $form[$post_type][$post_type . '_uid'] = [

@@ -732,6 +732,20 @@ class MicropubTest extends IndiewebBrowserTestBase {
     $this->sendMicropubRequest($post);
     $this->assertQueueItems($post['mp-syndicate-to']);
 
+    // Test post-status
+    $post = $this->note;
+    $post['post-status'] = 'draft';
+    $this->sendMicropubRequest($post);
+    $nid = $this->getLastNid('page');
+    if ($nid) {
+      $node = \Drupal::entityTypeManager()->getStorage('node')->load($nid);
+      self::assertEquals(FALSE, $node->isPublished());
+    }
+    else {
+      // Explicit failure.
+      $this->assertTrue($nid, 'No page node found');
+    }
+
   }
 
 }

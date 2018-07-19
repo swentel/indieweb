@@ -392,6 +392,16 @@ class MicropubController extends ControllerBase {
       'status' => $this->config->get($post_type . '_status'),
     ];
 
+    // Check post-status.
+    if (!empty($this->input['post-status'][0])) {
+      if ($this->input['post-status'][0] == 'published') {
+        $this->values['status'] = 1;
+      }
+      if ($this->input['post-status'][0] == 'draft') {
+        $this->values['status'] = 0;
+      }
+    }
+
     // Add link to syndicate to.
     if ($link_input_name && $this->config->get($post_type . '_auto_send_webmention')) {
       if (isset($this->input['mp-syndicate-to'])) {
