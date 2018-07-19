@@ -719,7 +719,20 @@ class MicropubTest extends IndiewebBrowserTestBase {
       $this->assertTrue($nid, 'No page node found');
     }
 
-    // Set note on again.
+    // Test that nothing comes in the queue as the note is unpublished.
+    $this->drupalLogin($this->adminUser);
+    $edit = [
+      'note_status' => 0,
+    ];
+    $this->drupalPostForm('admin/config/services/indieweb/micropub', $edit, 'Save configuration');
+    $this->drupalLogout();
+    $this->clearQueue();
+    $post = $this->note;
+    $post['mp-syndicate-to'] = ['https://brid.gy/publish/twitter'];
+    $this->sendMicropubRequest($post);
+    $this->assertQueueItems();
+
+    // Set note default to published again.
     $this->drupalLogin($this->adminUser);
     $edit = [
       'note_status' => 1,
