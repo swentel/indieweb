@@ -247,11 +247,13 @@ abstract class IndiewebBrowserTestBase extends BrowserTestBase {
    * @param $debug
    * @param $type
    *   Either POST or JSON (form_params or json)
+   * @param $return_array_response
    *
-   * @return int $status_code
+   * @return array|int
    */
-  protected function sendMicropubRequest($post, $access_token = 'is_valid', $debug = FALSE, $type = 'form_params') {
+  protected function sendMicropubRequest($post, $access_token = 'is_valid', $debug = FALSE, $type = 'form_params', $return_array_response = FALSE) {
     $auth = 'Bearer ' . $access_token;
+    $location = '';
     $micropub_endpoint = Url::fromRoute('indieweb.micropub.endpoint', [], ['absolute' => TRUE])->toString();
 
     $client = \Drupal::httpClient();
@@ -265,6 +267,10 @@ abstract class IndiewebBrowserTestBase extends BrowserTestBase {
     try {
       $response = $client->post($micropub_endpoint, [$type => $post, 'headers' => $headers]);
       $status_code = $response->getStatusCode();
+      $headersLocation = $response->getHeader('Location');
+      if (!empty($headersLocation)) {
+        $location = $headersLocation[0];
+      }
     }
     catch (\Exception $e) {
 
@@ -284,7 +290,15 @@ abstract class IndiewebBrowserTestBase extends BrowserTestBase {
       }
     }
 
-    return $status_code;
+    if ($return_array_response) {
+      return [
+        'location' => $location,
+        'code' => $status_code,
+      ];
+    }
+    else {
+      return $status_code;
+    }
   }
 
   /**

@@ -194,9 +194,10 @@ class MicropubTest extends IndiewebBrowserTestBase {
     $this->assertNodeCount(0, 'like');
     $this->assertNodeCount(0, 'article');
     $this->assertNodeCount(0, 'bookmark');
+
     // With valid access token now.
-    $code = $this->sendMicropubRequest($this->note);
-    self::assertEquals(201, $code);
+    $response_data = $this->sendMicropubRequest($this->note, 'is_valid', FALSE, 'form_params', TRUE);
+    self::assertEquals(201, $response_data['code']);
     $this->assertNodeCount(1, 'page');
     $nid = $this->getLastNid('page');
     if ($nid) {
@@ -204,6 +205,7 @@ class MicropubTest extends IndiewebBrowserTestBase {
       $node = \Drupal::entityTypeManager()->getStorage('node')->load($nid);
       self::assertEquals($this->note['content'], $node->get('body')->value);
       self::assertEquals($this->adminUser->id(), $node->getOwnerId());
+      self::assertEquals($node->toUrl('canonical', ['absolute' => TRUE])->toString(), $response_data['location']);
     }
     else {
       // Explicit failure.
