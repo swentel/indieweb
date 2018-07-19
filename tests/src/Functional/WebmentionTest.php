@@ -82,6 +82,9 @@ class WebmentionTest extends IndiewebBrowserTestBase {
     $webmention['secret'] = 'valid_secret';
     $code = $this->sendWebmentionNotificationRequest($webmention);
     self::assertEquals(202, $code);
+    $webmentionEntity = $this->getLatestWebmention();
+    self::assertEquals($this->adminUser->id(), $webmentionEntity->getOwnerId());
+
 
     // Test pingback.
     $pingback = [
@@ -236,6 +239,17 @@ class WebmentionTest extends IndiewebBrowserTestBase {
     $this->assertSession()->responseContains('Interactions');
     $this->assertSession()->responseContains('Liked by swentel');
     $this->assertSession()->responseContains('Reposted by swentie');
+  }
+
+  /**
+   * Get latest webmention.
+   *
+   * @return \Drupal\indieweb\Entity\WebmentionInterface|null
+   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+   */
+  protected function getLatestWebmention() {
+    $webmention_id = \Drupal::database()->query("SELECT id FROM {webmention_entity} ORDER by id DESC limit 1")->fetchField();
+    return \Drupal::entityTypeManager()->getStorage('webmention_entity')->load($webmention_id);
   }
 
 }

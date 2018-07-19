@@ -131,6 +131,7 @@ abstract class IndiewebBrowserTestBase extends BrowserTestBase {
     $edit += [
       'webmention_enable' => 1,
       'pingback_enable' => 1,
+      'webmention_uid' => $this->adminUser->id(),
       'webmention_secret' => 'valid_secret',
       'webmention_endpoint' => 'https://webmention.io/example.com/webmention',
       'pingback_endpoint' => 'https://webmention.io/webmention?forward=http://example.com/webmention/notify',
