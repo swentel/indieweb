@@ -15,8 +15,14 @@ class WebmentionViewsData extends EntityViewsData {
   public function getViewsData() {
     $data = parent::getViewsData();
 
-    // Additional information for Views integration, such as table joins, can be
-    // put here.
+    // Jobs bulk form.
+    $data['webmention_entity']['webmention_bulk_form'] = array(
+      'title' => $this->t('Webmention operations bulk form'),
+      'help' => $this->t('Add a form element that lets you run operations on multiple webmentions.'),
+      'field' => array(
+        'id' => 'webmention_bulk_form',
+      ),
+    );
 
     return $data;
   }

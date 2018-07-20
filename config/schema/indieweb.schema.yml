@@ -387,3 +387,7 @@ indieweb.webmention:
     webmention_log_payload:
       type: boolean
       label: 'Whether to log the payload'
+
+action.configuration.webmention_delete_action:
+  type: action_configuration_default
+  label: 'Delete webmention configuration'

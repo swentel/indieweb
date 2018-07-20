@@ -86,6 +86,13 @@ indieweb.micropub.endpoint:
   requirements:
    _access: 'TRUE'
 
+indieweb.webmention.multiple_delete_confirm:
+  path: '/admin/content/webmention/delete'
+  defaults:
+    _form: '\Drupal\indieweb\Form\WebmentionDeleteMultiple'
+  requirements:
+    _permission: 'administer webmention entities'
+
 indieweb.webmention.send.collection:
   path: '/admin/content/webmention/send-list'
   defaults:
