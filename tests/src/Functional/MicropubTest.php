@@ -235,6 +235,14 @@ class MicropubTest extends IndiewebBrowserTestBase {
       self::assertEquals($this->article['name'], $node->getTitle());
       self::assertEquals($this->article['content'], $node->get('body')->value);
       self::assertEquals($this->adminUser->id(), $node->getOwnerId());
+      $terms = \Drupal::database()->query('SELECT count(tid) FROM {taxonomy_term_field_data}')->fetchField();
+      self::assertEquals(2, $terms);
+      $tags = $node->get('field_tags')->getValue();
+      self::assertEquals(2, count($tags));
+      foreach ($tags as $tag) {
+        $term = \Drupal::entityTypeManager()->getStorage('taxonomy_term')->load($tag['target_id']);
+        self::assertTrue(in_array($term->label(), $this->article['category']));
+      }
     }
     else {
       // Explicit failure.
@@ -738,6 +746,7 @@ class MicropubTest extends IndiewebBrowserTestBase {
     $this->drupalLogin($this->adminUser);
     $edit = [
       'note_status' => 1,
+      'article_status' => 1,
     ];
     $this->drupalPostForm('admin/config/services/indieweb/micropub', $edit, 'Save configuration');
     $this->drupalLogout();
@@ -761,6 +770,26 @@ class MicropubTest extends IndiewebBrowserTestBase {
       $this->assertTrue($nid, 'No page node found');
     }
 
+    // More tags tests.
+    $post = $this->article;
+    $post['category'][] = 'another tag';
+    $this->sendMicropubRequest($post);
+    $nid = $this->getLastNid('article');
+    if ($nid) {
+      $terms = \Drupal::database()->query('SELECT count(tid) FROM {taxonomy_term_field_data}')->fetchField();
+      self::assertEquals(3, $terms);
+      $node = \Drupal::entityTypeManager()->getStorage('node')->load($nid);
+      $tags = $node->get('field_tags')->getValue();
+      self::assertEquals(3, count($tags));
+      foreach ($tags as $tag) {
+        $term = \Drupal::entityTypeManager()->getStorage('taxonomy_term')->load($tag['target_id']);
+        self::assertTrue(in_array($term->label(), $post['category']));
+      }
+    }
+    else {
+      // Explicit failure.
+      $this->assertTrue($nid, 'No article node found');
+    }
   }
 
 }
