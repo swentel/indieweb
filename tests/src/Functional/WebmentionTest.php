@@ -111,6 +111,11 @@ class WebmentionTest extends IndiewebBrowserTestBase {
 
   /**
    * Tests sending webmentions.
+   *
+   * @throws \Behat\Mink\Exception\ExpectationException
+   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+   * @throws \Drupal\Core\Entity\EntityMalformedException
+   * @throws \Drupal\Core\Entity\EntityStorageException
    */
   public function testSendingWebmention() {
 
@@ -164,6 +169,11 @@ class WebmentionTest extends IndiewebBrowserTestBase {
     $this->runWebmentionQueue();
     $this->assertQueueItems();
     $this->assertSyndication(4, $node_1_url);
+
+    // Remove syndication.
+    $node = \Drupal::entityTypeManager()->getStorage('node')->load(4);
+    $node->delete();
+    $this->assertNoSyndication(4);
 
   }
 

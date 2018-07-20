@@ -403,6 +403,16 @@ abstract class IndiewebBrowserTestBase extends BrowserTestBase {
   }
 
   /**
+   * Asserts no syndication.
+   *
+   * @param $source_id
+   */
+  protected function assertNoSyndication($source_id) {
+    $false = \Drupal::database()->query('SELECT * FROM {webmention_syndication} WHERE entity_id = :id', [':id' => $source_id])->fetchField();
+    self::assertTrue($false === FALSE);
+  }
+
+  /**
    * Create a syndication record.
    *
    * @param $url
