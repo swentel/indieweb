@@ -127,7 +127,7 @@ class WebmentionDeleteMultiple extends ConfirmFormBase {
 
       if ($webmentions) {
         $this->storage->delete($webmentions);
-        $this->logger('content')->notice('Deleted @count posts.', ['@count' => $total_count]);
+        $this->logger('indieweb_webmention')->notice('Deleted @count posts.', ['@count' => $total_count]);
       }
 
       if ($total_count) {
