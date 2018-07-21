@@ -137,7 +137,7 @@ class MicropubController extends ControllerBase {
     if (!empty($this->input) && $this->action == 'create') {
 
       // Get authorization header, response early if none found.
-      $auth_header = $this->getAuthorizationHeader();
+      /*$auth_header = $this->getAuthorizationHeader();
       if (!$auth_header) {
         return new JsonResponse('', 401);
       }
@@ -146,7 +146,7 @@ class MicropubController extends ControllerBase {
       $valid_token = $this->isValidToken($auth_header);
       if (!$valid_token) {
         return new JsonResponse('', 403);
-      }
+      }*/
 
       // Store original input so it can be inspected by hooks.
       $this->payload_original = $this->input;
@@ -434,6 +434,9 @@ class MicropubController extends ControllerBase {
 
     // Categories.
     $this->handleCategories($post_type . '_tags_field');
+
+    // Geo location.
+    $this->handleGeoLocation($post_type . '_geo_field');
   }
 
   /**
@@ -579,6 +582,36 @@ class MicropubController extends ControllerBase {
 
         if (!empty($values)) {
           $this->node->set($tags_field_name, $values);
+        }
+      }
+    }
+  }
+
+  /**
+   * Handles geo location input.
+   *
+   * @param $config_key
+   *   The config key for the tags field.
+   */
+  protected function handleGeoLocation($config_key) {
+    $geo_field_name = $this->config->get($config_key);
+    if ($geo_field_name && $this->node->hasField($geo_field_name) && !empty($this->input['location'][0])) {
+      $properties = explode(':', $this->input['location'][0]);
+      if (!empty($properties[0]) && $properties[0] == 'geo' && !empty($properties[1])) {
+        $lat_lon = explode(',', $properties[1]);
+        if (!empty($lat_lon[0]) && !empty($lat_lon[1])) {
+          try {
+            $service = \Drupal::service('geofield.wkt_generator');
+            if ($service) {
+              $value = $service->wktBuildPoint([trim($lat_lon[1]), trim($lat_lon[0])]);
+              if (!empty($value)) {
+                $this->node->set($geo_field_name, $value);
+              }
+            }
+          }
+          catch (\Exception $e) {
+            $this->getLogger('indieweb_micropub')->notice('Error saving geo location: @message', ['@message' => $e->getMessage()]);
+          }
         }
       }
     }

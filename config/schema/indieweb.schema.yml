@@ -123,6 +123,9 @@ indieweb.micropub:
     note_tags_field:
       type: string
       label: 'The node tags field for the note'
+    note_geo_field:
+      type: string
+      label: 'The node geo field for the note'
     note_uid:
       type: integer
       label: 'The user id of the note'
@@ -144,6 +147,9 @@ indieweb.micropub:
     article_tags_field:
       type: string
       label: 'The node tags field for the article'
+    article_geo_field:
+      type: string
+      label: 'The node geo field for the article'
     article_uid:
       type: integer
       label: 'The user id of the article'
@@ -273,6 +279,9 @@ indieweb.micropub:
     event_tags_field:
       type: string
       label: 'The node tags field for the event'
+    event_geo_field:
+      type: string
+      label: 'The node geo field for the event'
     event_upload_field:
       type: string
       label: 'The node upload field for the event'

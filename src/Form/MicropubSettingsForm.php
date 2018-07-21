@@ -17,10 +17,12 @@ class MicropubSettingsForm extends ConfigFormBase {
   protected function getPostTypes() {
     $post_types = [
       'article' => [
-        'description' => $this->t("An article request contains 'content', 'name' and the 'h' value is 'entry'. Think of it as a blog post. The article can also contain a 'mp-syndicate-to' value which will contain the channel you want to publish to, see the <a href=':link_send'>Send webmention screen</a> to configure this.", [':link_send' => Url::fromRoute('indieweb.admin.publish_settings')->toString(),])
+        'description' => $this->t("An article request contains 'content', 'name' and the 'h' value is 'entry'. Think of it as a blog post. The article can also contain a 'mp-syndicate-to' value which will contain the channel you want to publish to, see the <a href=':link_send'>Send webmention screen</a> to configure this.", [':link_send' => Url::fromRoute('indieweb.admin.publish_settings')->toString(),]),
+        'geo_field' => TRUE,
       ],
       'note' => [
-        'description' => $this->t("A note request contains 'content', but no 'name' and the 'h' value is 'entry'. Think of it as a Tweet. The note can also contain a 'mp-syndicate-to' value which will contain the channel you want to publish to, see the <a href=':link_send'>Send webmention screen</a> to configure this.", [':link_send' => Url::fromRoute('indieweb.admin.publish_settings')->toString(),])
+        'description' => $this->t("A note request contains 'content', but no 'name' and the 'h' value is 'entry'. Think of it as a Tweet. The note can also contain a 'mp-syndicate-to' value which will contain the channel you want to publish to, see the <a href=':link_send'>Send webmention screen</a> to configure this.", [':link_send' => Url::fromRoute('indieweb.admin.publish_settings')->toString(),]),
+        'geo_field' => TRUE,
       ],
       'like' => [
         'description' => $this->t("A like request contains a URL in 'like-of' and 'h' value is 'entry'. The like can also contain a 'mp-syndicate-to' value which will contain the channel you want to publish to, see the <a href=':link_send'>Send webmention screen</a> to configure this."),
@@ -49,6 +51,7 @@ class MicropubSettingsForm extends ConfigFormBase {
         'description' => $this->t("An event request contains a start and end date and the 'h' value is 'event'. The event can also contain a 'mp-syndicate-to' value which will contain the channel you want to publish to, see the <a href=':link_send'>Send webmention screen</a> to configure this."),
         'date_field' => TRUE,
         'optional_body' => TRUE,
+        'geo_field' => TRUE,
       ],
       'rsvp' => [
         'description' => $this->t("An rsvp request contains an rsvp field. The rsvp can also contain a 'mp-syndicate-to' value which will contain the channel you want to publish to, see the <a href=':link_send'>Send webmention screen</a> to configure this."),
@@ -131,7 +134,7 @@ class MicropubSettingsForm extends ConfigFormBase {
     ];
 
     // Collect fields.
-    $text_fields = $upload_fields = $link_fields = $date_range_fields = $option_fields = $tag_fields = [];
+    $text_fields = $upload_fields = $link_fields = $date_range_fields = $option_fields = $tag_fields = $geo_fields = [];
     $fields = \Drupal::service('entity_field.manager')->getFieldStorageDefinitions('node');
     /** @var \Drupal\Core\Field\FieldStorageDefinitionInterface $field */
     foreach ($fields as $key => $field) {
@@ -149,6 +152,9 @@ class MicropubSettingsForm extends ConfigFormBase {
       }
       if (in_array($field->getType(), ['list_string'])) {
         $option_fields[$key] = $field->getName();
+      }
+      if (in_array($field->getType(), ['geofield'])) {
+        $geo_fields[$key] = $field->getName();
       }
       if (in_array($field->getType(), ['entity_reference'])) {
         $settings = $field->getSettings();
@@ -219,7 +225,7 @@ class MicropubSettingsForm extends ConfigFormBase {
 
       // Date field.
       if (isset($configuration['date_field'])) {
-        $form[$post_type]['event_date_field'] = [
+        $form[$post_type][$post_type . '_date_field'] = [
           '#type' => 'select',
           '#title' => $this->t('Date field'),
           '#description' => $this->t('Select the field which will be used to store the date. Make sure the field exists on the node type.<br />This can only be a date range field.'),
@@ -326,6 +332,23 @@ class MicropubSettingsForm extends ConfigFormBase {
         ),
       ];
 
+      // Location field.
+      if (isset($configuration['geo_field'])) {
+        $optional_location = ['' => $this->t('Do not store location')];
+        $form[$post_type][$post_type . '_geo_field'] = [
+          '#type' => 'select',
+          '#title' => $this->t('Geo field'),
+          '#description' => $this->t('Select the field which will be used to store the geo location. Make sure the field exists on the node type.<br />This can only be a geofield field from the <a href="https://www.drupal.org/project/geofield" target="_blank">Geofield module</a>.'),
+          '#options' => $optional_location + $geo_fields,
+          '#default_value' => $config->get($post_type . '_geo_field'),
+          '#states' => array(
+            'visible' => array(
+              ':input[name="'. $post_type . '_create_node"]' => array('checked' => TRUE),
+            ),
+          ),
+        ];
+      }
+
     }
 
     return parent::buildForm($form, $form_state);
@@ -358,6 +381,10 @@ class MicropubSettingsForm extends ConfigFormBase {
 
       if (isset($configuration['link_field'])) {
         $config->set($post_type . '_link_field', $form_state->getValue($post_type . '_link_field'));
+      }
+
+      if (isset($configuration['geo_field'])) {
+        $config->set($post_type . '_geo_field', $form_state->getValue($post_type . '_geo_field'));
       }
 
       if (isset($configuration['date_field'])) {

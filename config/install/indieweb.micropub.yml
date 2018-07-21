@@ -8,6 +8,7 @@ note_node_type: ''
 note_content_field: ''
 note_upload_field: ''
 note_tags_field: ''
+note_geo_field: ''
 note_uid: 1
 article_create_node: false
 article_status: 1
@@ -15,6 +16,7 @@ article_node_type: ''
 article_content_field: ''
 article_upload_field: ''
 article_tags_field: ''
+article_geo_field: ''
 article_uid: 1
 like_create_node: false
 like_status: 1
@@ -58,6 +60,7 @@ event_node_type: ''
 event_content_field: ''
 event_date_field: ''
 event_tags_field: ''
+event_geo_field: ''
 event_upload_field: ''
 event_uid: 1
 rsvp_create_node: false
