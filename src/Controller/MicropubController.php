@@ -137,7 +137,7 @@ class MicropubController extends ControllerBase {
     if (!empty($this->input) && $this->action == 'create') {
 
       // Get authorization header, response early if none found.
-      /*$auth_header = $this->getAuthorizationHeader();
+      $auth_header = $this->getAuthorizationHeader();
       if (!$auth_header) {
         return new JsonResponse('', 401);
       }
@@ -146,7 +146,7 @@ class MicropubController extends ControllerBase {
       $valid_token = $this->isValidToken($auth_header);
       if (!$valid_token) {
         return new JsonResponse('', 403);
-      }*/
+      }
 
       // Store original input so it can be inspected by hooks.
       $this->payload_original = $this->input;
