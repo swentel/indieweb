@@ -65,6 +65,7 @@ Blocks
 - Webmentions: render like and repost webmentions per page
 - Webmention notify form: let people submit a URL if the current page is mentioned there
 - RSVP: shows people attending, interested for an event
+- Pingbacks: render all urls to site pinging back per page
 
 ![ScreenShot](https://realize.be/sites/default/files/2018-03/webmention-basic.png)
 
