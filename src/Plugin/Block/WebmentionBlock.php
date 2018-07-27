@@ -108,6 +108,7 @@ class WebmentionBlock extends BlockBase {
     $query = \Drupal::database()
       ->select('webmention_entity', 'w')
       ->fields('w', ['author_name', 'author_photo', 'property'])
+      ->condition('status', 1)
       ->condition('target', \Drupal::request()->getPathInfo())
       ->condition('property', $types, 'IN');
 

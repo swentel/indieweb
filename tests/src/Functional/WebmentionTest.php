@@ -178,7 +178,7 @@ class WebmentionTest extends IndiewebBrowserTestBase {
   }
 
   /**
-   * Tests the Webmention Block
+   * Tests the Webmention Block.
    */
   public function testWebmentionInteractionsBlock() {
 
