@@ -97,18 +97,23 @@ class MicropubSettingsForm extends ConfigFormBase {
     ];
 
     $form['micropub'] = [
-      '#type' => 'fieldset',
-      '#title' => $this->t('Micropub'),
+      '#type' => 'vertical_tabs',
     ];
 
-    $form['micropub']['micropub_enable'] = [
+    $form['general'] = [
+      '#type' => 'details',
+      '#group' => 'micropub',
+      '#title' => $this->t('General'),
+    ];
+
+    $form['general']['micropub_enable'] = [
       '#title' => $this->t('Enable micropub'),
       '#type' => 'checkbox',
       '#default_value' => $config->get('micropub_enable'),
       '#description' => $this->t('This will allow the endpoint to receive requests.')
     ];
 
-    $form['micropub']['micropub_add_header_link'] = [
+    $form['general']['micropub_add_header_link'] = [
       '#title' => $this->t('Add micropub endpoint to header'),
       '#type' => 'checkbox',
       '#default_value' => $config->get('micropub_add_header_link'),
@@ -120,14 +125,14 @@ class MicropubSettingsForm extends ConfigFormBase {
       ),
     ];
 
-    $form['micropub']['micropub_me'] = [
+    $form['general']['micropub_me'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Me'),
       '#default_value' => $config->get('micropub_me'),
       '#description' => $this->t('Every request will contain an access token which will be verified to make sure it is really you who is posting.<br />The response of the access token check request contains the "me" value which should match with your domain.<br />This is the value of your domain. Make sure there is a trailing slash, e.g. <strong>@domain/</strong>', ['@domain' => \Drupal::request()->getSchemeAndHttpHost()]),
     ];
 
-    $form['micropub']['micropub_log_payload'] = [
+    $form['general']['micropub_log_payload'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('Log the payload in watchdog on the micropub endpoint.'),
       '#default_value' => $config->get('micropub_log_payload'),
@@ -167,20 +172,21 @@ class MicropubSettingsForm extends ConfigFormBase {
     foreach ($this->getPostTypes() as $post_type => $configuration) {
 
       $form[$post_type] = [
-        '#type' => 'fieldset',
-        '#title' => $this->t('Create a node when a micropub @post_type is posted', ['@post_type' => $post_type]),
+        '#type' => 'details',
+        '#group' => 'micropub',
+        '#title' => $this->t('@micropub_post_type', ['@micropub_post_type' => ucfirst($post_type)]),
         '#description' => $configuration['description'],
-        '#states' => array(
-          'visible' => array(
-            ':input[name="micropub_enable"]' => array('checked' => TRUE),
-          ),
-        ),
       ];
 
       $form[$post_type][$post_type . '_create_node'] = [
         '#type' => 'checkbox',
         '#title' => $this->t('Enable'),
         '#default_value' => $config->get($post_type . '_create_node'),
+        '#states' => array(
+          'visible' => array(
+            ':input[name="micropub_enable"]' => array('checked' => TRUE),
+          ),
+        ),
       ];
 
       $form[$post_type][$post_type . '_status'] = [
@@ -193,6 +199,7 @@ class MicropubSettingsForm extends ConfigFormBase {
         '#default_value' => $config->get($post_type . '_status'),
         '#states' => array(
           'visible' => array(
+            ':input[name="micropub_enable"]' => array('checked' => TRUE),
             ':input[name="' . $post_type . '_create_node"]' => array('checked' => TRUE),
           ),
         ),
@@ -205,6 +212,7 @@ class MicropubSettingsForm extends ConfigFormBase {
         '#default_value' => $config->get($post_type . '_uid'),
         '#states' => array(
           'visible' => array(
+            ':input[name="micropub_enable"]' => array('checked' => TRUE),
             ':input[name="' . $post_type . '_create_node"]' => array('checked' => TRUE),
           ),
         ),
@@ -218,6 +226,7 @@ class MicropubSettingsForm extends ConfigFormBase {
         '#default_value' => $config->get($post_type . '_node_type'),
         '#states' => array(
           'visible' => array(
+            ':input[name="micropub_enable"]' => array('checked' => TRUE),
             ':input[name="' . $post_type . '_create_node"]' => array('checked' => TRUE),
           ),
         ),
@@ -233,6 +242,7 @@ class MicropubSettingsForm extends ConfigFormBase {
           '#default_value' => $config->get($post_type . '_date_field'),
           '#states' => array(
             'visible' => array(
+              ':input[name="micropub_enable"]' => array('checked' => TRUE),
               ':input[name="'. $post_type . '_create_node"]' => array('checked' => TRUE),
             ),
           ),
@@ -249,6 +259,7 @@ class MicropubSettingsForm extends ConfigFormBase {
           '#default_value' => $config->get($post_type . '_rsvp_field'),
           '#states' => array(
             'visible' => array(
+              ':input[name="micropub_enable"]' => array('checked' => TRUE),
               ':input[name="' . $post_type . '_create_node"]' => array('checked' => TRUE),
             ),
           ),
@@ -265,6 +276,7 @@ class MicropubSettingsForm extends ConfigFormBase {
           '#default_value' => $config->get($post_type . '_link_field'),
           '#states' => array(
             'visible' => array(
+              ':input[name="micropub_enable"]' => array('checked' => TRUE),
               ':input[name="' . $post_type . '_create_node"]' => array('checked' => TRUE),
             ),
           ),
@@ -279,6 +291,7 @@ class MicropubSettingsForm extends ConfigFormBase {
           '#default_value' => $config->get($post_type . '_auto_send_webmention'),
           '#states' => array(
             'visible' => array(
+              ':input[name="micropub_enable"]' => array('checked' => TRUE),
               ':input[name="' . $post_type . '_create_node"]' => array('checked' => TRUE),
             ),
           ),
@@ -299,6 +312,7 @@ class MicropubSettingsForm extends ConfigFormBase {
         '#default_value' => $config->get($post_type . '_content_field'),
         '#states' => array(
           'visible' => array(
+            ':input[name="micropub_enable"]' => array('checked' => TRUE),
             ':input[name="' . $post_type . '_create_node"]' => array('checked' => TRUE),
           ),
         ),
@@ -313,6 +327,7 @@ class MicropubSettingsForm extends ConfigFormBase {
         '#default_value' => $config->get($post_type . '_upload_field'),
         '#states' => array(
           'visible' => array(
+            ':input[name="micropub_enable"]' => array('checked' => TRUE),
             ':input[name="' . $post_type . '_create_node"]' => array('checked' => TRUE),
           ),
         ),
@@ -327,6 +342,7 @@ class MicropubSettingsForm extends ConfigFormBase {
         '#default_value' => $config->get($post_type . '_tags_field'),
         '#states' => array(
           'visible' => array(
+            ':input[name="micropub_enable"]' => array('checked' => TRUE),
             ':input[name="' . $post_type . '_create_node"]' => array('checked' => TRUE),
           ),
         ),
@@ -343,6 +359,7 @@ class MicropubSettingsForm extends ConfigFormBase {
           '#default_value' => $config->get($post_type . '_geo_field'),
           '#states' => array(
             'visible' => array(
+              ':input[name="micropub_enable"]' => array('checked' => TRUE),
               ':input[name="'. $post_type . '_create_node"]' => array('checked' => TRUE),
             ),
           ),
