@@ -114,7 +114,7 @@ class MicropubSettingsForm extends ConfigFormBase {
     ];
 
     $form['general']['micropub_add_header_link'] = [
-      '#title' => $this->t('Add micropub endpoint to header'),
+      '#title' => $this->t('Expose micropub endpoint header link'),
       '#type' => 'checkbox',
       '#default_value' => $config->get('micropub_add_header_link'),
       '#description' => $this->t('The endpoint will look like <strong>https://@domain/indieweb/micropub</strong><br />This link will be added on the front page. You can also add this manually to html.html.twig.<br /><div class="indieweb-highlight-code">&lt;link rel="micropub" href="https://@domain/indieweb/micropub" /&gt;</div>', ['@domain' => \Drupal::request()->getHttpHost()]),
@@ -123,6 +123,13 @@ class MicropubSettingsForm extends ConfigFormBase {
           ':input[name="micropub_enable"]' => array('checked' => TRUE),
         ),
       ),
+    ];
+
+    $form['general']['micropub_media_enable'] = [
+      '#title' => $this->t('Enable media endpoint'),
+      '#type' => 'checkbox',
+      '#default_value' => $config->get('micropub_media_enable'),
+      '#description' => $this->t('This will enable the micropub media endpoint to receive files, currently limited to images (jpg, png, gif). <br />The endpoint will look like <strong>https://@domain/indieweb/micropub/media</strong><br />')
     ];
 
     $form['general']['micropub_me'] = [
@@ -381,6 +388,7 @@ class MicropubSettingsForm extends ConfigFormBase {
     $config
       ->set('micropub_enable', $form_state->getValue('micropub_enable'))
       ->set('micropub_add_header_link', $form_state->getValue('micropub_add_header_link'))
+      ->set('micropub_media_enable', $form_state->getValue('micropub_media_enable'))
       ->set('micropub_me', $form_state->getValue('micropub_me'))
       ->set('micropub_log_payload', $form_state->getValue('micropub_log_payload'));
 

@@ -152,15 +152,20 @@ class MicropubTest extends IndiewebBrowserTestBase {
 
     // Request to micropub should be a 404.
     $this->drupalGet('indieweb/micropub');
+    $this->drupalGet('indieweb/micropub/media');
     $this->assertSession()->statusCodeEquals(404);
 
-    // Enable the endpoint.
+    // Enable the endpoints.
     $this->drupalLogin($this->adminUser);
-    $this->drupalPostForm('admin/config/services/indieweb/micropub', ['micropub_enable' => 1, 'micropub_add_header_link' => 1], 'Save configuration');
+    $this->drupalPostForm('admin/config/services/indieweb/micropub', ['micropub_enable' => 1, 'micropub_add_header_link' => 1, 'micropub_media_enable' => 1], 'Save configuration');
     $this->drupalGet('<front>');
     $this->assertSession()->responseContains('/indieweb/micropub');
     $this->drupalGet('indieweb/micropub');
     $this->assertSession()->statusCodeEquals(400);
+    $this->drupalGet('indieweb/micropub/media');
+    $this->assertSession()->statusCodeEquals(400);
+    $this->drupalGet('indieweb/micropub', ['query' => ['q' => 'config']]);
+    $this->assertSession()->statusCodeEquals(401);
 
     $this->drupalLogout();
     $this->drupalGet('<front>');
@@ -195,6 +200,15 @@ class MicropubTest extends IndiewebBrowserTestBase {
     $this->assertNodeCount(0, 'article');
     $this->assertNodeCount(0, 'bookmark');
 
+    // Check q=config - should be 403.
+    $auth = 'Bearer invalid_token';
+    $headers = [
+      'Accept' => 'application/json',
+      'Authorization' => $auth,
+    ];
+    $this->drupalGet('indieweb/micropub', ['query' => ['q' => 'config']], $headers);
+    $this->assertSession()->statusCodeEquals(403);
+
     // With valid access token now.
     $response_data = $this->sendMicropubRequest($this->note, 'is_valid', FALSE, 'form_params', TRUE);
     self::assertEquals(201, $response_data['code']);
@@ -211,6 +225,17 @@ class MicropubTest extends IndiewebBrowserTestBase {
       // Explicit failure.
       $this->assertTrue($nid, 'No page node found');
     }
+
+    // Check q=config - should contain media endpoint.
+    $auth = 'Bearer is_valid';
+    $headers = [
+      'Accept' => 'application/json',
+      'Authorization' => $auth,
+    ];
+    $this->drupalGet('indieweb/micropub', ['query' => ['q' => 'config']], $headers);
+    $this->assertSession()->statusCodeEquals(200);
+    $this->assertSession()->responseContains("media-endpoint");
+    $this->assertSession()->responseContains("\/indieweb\/micropub\/media");
 
     // Try to send article, should be 401.
     $code = $this->sendMicropubRequest($this->article);

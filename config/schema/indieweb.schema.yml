@@ -99,6 +99,9 @@ indieweb.micropub:
     micropub_add_header_link:
       type: boolean
       label: 'Expose micropub header link'
+    micropub_media_enable:
+      type: boolean
+      label: 'Enable micropub media endpoint'
     micropub_me:
       type: string
       label: 'The url of your website'

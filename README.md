@@ -173,6 +173,8 @@ Indigenous (for iOS and Android) are also microsub readers.
 Even if you do not decide to use the micropub endpoint, the configuration screen gives you a good overview what kind of
 content types and fields you can create which can be used for sending webmentions or read by microformat parsers.
 
+A media endpoint is also available where you can upload files, currently limited to images.
+
 ### Supported post types
 
 - Article: a blog post

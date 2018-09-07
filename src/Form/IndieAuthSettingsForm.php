@@ -78,7 +78,7 @@ class IndieAuthSettingsForm extends ConfigFormBase {
     ];
 
     $form['indieauth']['expose'] = [
-      '#title' => $this->t('Expose authentication API head links'),
+      '#title' => $this->t('Expose authentication API header links'),
       '#type' => 'checkbox',
       '#default_value' => $config->get('expose'),
       '#states' => array(

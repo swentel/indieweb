@@ -4,6 +4,7 @@ namespace Drupal\indieweb\Controller;
 
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Language\LanguageInterface;
+use Drupal\Core\Url;
 use Drupal\datetime\Plugin\Field\FieldType\DateTimeItemInterface;
 use Drupal\node\Entity\Node;
 use Drupal\taxonomy\Entity\Term;
@@ -57,14 +58,14 @@ class MicropubController extends ControllerBase {
   public $node = NULL;
 
   /**
-   * Routing callback: micropub endpoint.
+   * Routing callback: micropub post endpoint.
    *
    * @param \Symfony\Component\HttpFoundation\Request $request
    * @return \Symfony\Component\HttpFoundation\JsonResponse|\Symfony\Component\HttpFoundation\Response
    * @throws \Drupal\Core\Entity\EntityMalformedException
    * @throws \Drupal\Core\Entity\EntityStorageException
    */
-  public function endpoint(Request $request) {
+  public function postEndpoint(Request $request) {
     $this->config = \Drupal::config('indieweb.micropub');
     $micropub_enabled = $this->config->get('micropub_enable');
 
@@ -87,21 +88,37 @@ class MicropubController extends ControllerBase {
       }
 
       if ($this->isValidToken($auth_header)) {
-        $syndicate_channels = [];
         $response_code = 200;
-        $channels = indieweb_get_publishing_channels();
-        if (!empty($channels)) {
-          foreach ($channels as $url => $name) {
-            $syndicate_channels[] = [
-              'uid' => $url,
-              'name' => $name,
-            ];
-          }
-        }
-
         $response_message = [
-          'syndicate-to' => $syndicate_channels
+          'syndicate-to' => $this->getSyndicationTargets(),
         ];
+      }
+      else {
+        $response_code = 403;
+      }
+
+      return new JsonResponse($response_message, $response_code);
+    }
+
+    // q=config request.
+    if (isset($_GET['q']) && $_GET['q'] == 'config') {
+
+      // Get authorization header, response early if none found.
+      $auth_header = $this->getAuthorizationHeader();
+      if (!$auth_header) {
+        return new JsonResponse('', 401);
+      }
+
+      if ($this->isValidToken($auth_header)) {
+        $response_code = 200;
+        $response_message = [
+          'syndicate-to' => $this->getSyndicationTargets(),
+        ];
+
+        // Check media endpoint.
+        if ($this->config->get('micropub_media_enable')) {
+          $response_message['media-endpoint'] = Url::fromRoute('indieweb.micropub.media.endpoint', [], ['absolute' => TRUE])->toString();
+        }
       }
       else {
         $response_code = 403;
@@ -253,6 +270,58 @@ class MicropubController extends ControllerBase {
         return new JsonResponse('', 201);
       }
 
+    }
+
+    return new JsonResponse($response_message, $response_code);
+  }
+
+  /**
+   * Upload files through the media endpoint.
+   *
+   * @return \Symfony\Component\HttpFoundation\JsonResponse
+   * @throws \Drupal\Core\Entity\EntityStorageException
+   */
+  public function mediaEndpoint() {
+    $this->config = \Drupal::config('indieweb.micropub');
+    $micropub_media_enabled = $this->config->get('micropub_media_enable');
+
+    // Early response when endpoint is not enabled.
+    if (!$micropub_media_enabled) {
+      return new JsonResponse('', 404);
+    }
+
+    // Default message.
+    $response_message = 'Bad request';
+
+    // Get authorization header, response early if none found.
+    $auth_header = $this->getAuthorizationHeader();
+    if (!$auth_header) {
+      return new JsonResponse('', 401);
+    }
+
+    if ($this->isValidToken($auth_header)) {
+      $response_code = 200;
+      $extensions = 'jpg jpeg gif png';
+      $validators['file_validate_extensions'] = [];
+      $validators['file_validate_extensions'][0] = $extensions;
+      $file = $this->saveUpload('file', 'public://micropub', $validators);
+      if ($file) {
+
+        // Set permanent.
+        $file->setPermanent();
+        $file->save();
+
+        // Return the url in Location.
+        $response_code = 201;
+        $file_url = file_create_url($file->getFileUri());
+        $response_message = [];
+        $response_message['url'] = $file_url;
+        header('Location: ' . $file_url);
+      }
+    }
+    else {
+      $response_code = 403;
+      $response_message = 'Forbidden';
     }
 
     return new JsonResponse($response_message, $response_code);
@@ -471,10 +540,14 @@ class MicropubController extends ControllerBase {
    *
    * @param $file_key
    *   The key in the $_FILES variable to look for in upload.
+   * @param string $destination
+   *   The destination of the file.
+   * @param array $validators
+   *   A list of validators. If empty, anything is allowed.
    *
    * @return bool|\Drupal\file\FileInterface
    */
-  protected function saveUpload($file_key) {
+  protected function saveUpload($file_key, $destination = 'public://', $validators = []) {
     $file = FALSE;
 
     // Return early if there are no uploads.
@@ -488,7 +561,7 @@ class MicropubController extends ControllerBase {
 
     // Try to save the file.
     try {
-      $file = file_save_upload($file_key, array(), "public://", 0);
+      $file = file_save_upload($file_key, $validators, $destination, 0);
       $messages = drupal_get_messages();
       if (!empty($messages)) {
         foreach ($messages as $message) {
@@ -524,6 +597,8 @@ class MicropubController extends ControllerBase {
    *
    * @param $config_key
    *   The config key for the tags field.
+   *
+   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
    */
   protected function handleCategories($config_key) {
     $tags_field_name = $this->config->get($config_key);
@@ -631,4 +706,23 @@ class MicropubController extends ControllerBase {
     }
   }
 
+  /**
+   * Gets syndication targets.
+   *
+   * @return array
+   */
+  protected function getSyndicationTargets() {
+    $syndication_targets = [];
+    $channels = indieweb_get_publishing_channels();
+    if (!empty($channels)) {
+      foreach ($channels as $url => $name) {
+        $syndication_targets[] = [
+          'uid' => $url,
+          'name' => $name,
+        ];
+      }
+    }
+
+    return $syndication_targets;
+  }
 }

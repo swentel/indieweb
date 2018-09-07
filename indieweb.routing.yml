@@ -81,8 +81,16 @@ indieweb.webmention.notify:
 indieweb.micropub.endpoint:
   path: '/indieweb/micropub'
   defaults:
-   _controller: '\Drupal\indieweb\Controller\MicropubController::endpoint'
+   _controller: '\Drupal\indieweb\Controller\MicropubController::postEndpoint'
    _title: 'Micropub endpoint'
+  requirements:
+   _access: 'TRUE'
+
+indieweb.micropub.media.endpoint:
+  path: '/indieweb/micropub/media'
+  defaults:
+   _controller: '\Drupal\indieweb\Controller\MicropubController::mediaEndpoint'
+   _title: 'Micropub media endpoint'
   requirements:
    _access: 'TRUE'
 

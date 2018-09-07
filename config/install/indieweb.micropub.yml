@@ -1,5 +1,6 @@
 micropub_enable: false
 micropub_add_header_link: true
+micropub_media_enable: false
 micropub_me: ''
 micropub_log_payload: false
 note_create_node: false
