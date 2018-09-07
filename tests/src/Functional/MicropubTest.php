@@ -163,7 +163,7 @@ class MicropubTest extends IndiewebBrowserTestBase {
     $this->drupalGet('indieweb/micropub');
     $this->assertSession()->statusCodeEquals(400);
     $this->drupalGet('indieweb/micropub/media');
-    $this->assertSession()->statusCodeEquals(400);
+    $this->assertSession()->statusCodeEquals(401);
     $this->drupalGet('indieweb/micropub', ['query' => ['q' => 'config']]);
     $this->assertSession()->statusCodeEquals(401);
 
