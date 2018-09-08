@@ -12,6 +12,9 @@ class WebmentionController extends ControllerBase {
 
   /**
    * Routing callback: Webmention send list.
+   *
+   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+   * @throws \Drupal\Core\Entity\EntityMalformedException
    */
   public function sendAdminOverview() {
     $build = $header = $rows = [];
@@ -23,12 +26,14 @@ class WebmentionController extends ControllerBase {
     ];
 
     $limit = 30;
+    /** @noinspection PhpUndefinedMethodInspection */
     $select = \Drupal::database()->select('webmention_send', 's')
       ->fields('s')
       ->orderBy('id', 'DESC')
       ->extend('Drupal\Core\Database\Query\PagerSelectExtender')
       ->limit($limit);
 
+    /** @noinspection PhpUndefinedMethodInspection */
     $records = $select->execute();
     foreach ($records as $record) {
       $row = [];
@@ -82,6 +87,9 @@ class WebmentionController extends ControllerBase {
 
   /**
    * Routing callback: receive webmentions and pingbacks.
+   *
+   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+   * @throws \Drupal\Core\Entity\EntityStorageException
    */
   public function endpoint() {
     $valid = FALSE;
