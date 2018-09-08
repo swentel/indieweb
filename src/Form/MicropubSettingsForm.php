@@ -148,30 +148,31 @@ class MicropubSettingsForm extends ConfigFormBase {
     // Collect fields.
     $text_fields = $upload_fields = $link_fields = $date_range_fields = $option_fields = $tag_fields = $geo_fields = [];
     $fields = \Drupal::service('entity_field.manager')->getFieldStorageDefinitions('node');
+    $field_types = \Drupal::service('plugin.manager.field.field_type')->getDefinitions();
     /** @var \Drupal\Core\Field\FieldStorageDefinitionInterface $field */
     foreach ($fields as $key => $field) {
       if (in_array($field->getType(), ['text_with_summary', 'text_long'])) {
-        $text_fields[$key] = $field->getName();
+        $text_fields[$key] = $field_types[$field->getType()]['label'] . ': ' . $field->getName();
       }
       if (in_array($field->getType(), ['file', 'image'])) {
-        $upload_fields[$key] = $field->getName();
+        $upload_fields[$key] = $field_types[$field->getType()]['label'] . ': ' . $field->getName();
       }
       if (in_array($field->getType(), ['link'])) {
-        $link_fields[$key] = $field->getName();
+        $link_fields[$key] = $field_types[$field->getType()]['label'] . ': ' . $field->getName();
       }
       if (in_array($field->getType(), ['daterange'])) {
-        $date_range_fields[$key] = $field->getName();
+        $date_range_fields[$key] = $field_types[$field->getType()]['label'] . ': ' . $field->getName();
       }
       if (in_array($field->getType(), ['list_string'])) {
-        $option_fields[$key] = $field->getName();
+        $option_fields[$key] = $field_types[$field->getType()]['label'] . ': ' . $field->getName();
       }
       if (in_array($field->getType(), ['geofield'])) {
-        $geo_fields[$key] = $field->getName();
+        $geo_fields[$key] = $field_types[$field->getType()]['label'] . ': ' . $field->getName();
       }
       if (in_array($field->getType(), ['entity_reference'])) {
         $settings = $field->getSettings();
         if (isset($settings['target_type']) && $settings['target_type'] == 'taxonomy_term') {
-          $tag_fields[$key] = $field->getName();
+          $tag_fields[$key] = $field_types[$field->getType()]['label'] . ': ' . $field->getName();
         }
       }
     }
