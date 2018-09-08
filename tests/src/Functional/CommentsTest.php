@@ -34,12 +34,9 @@ class CommentsTest extends IndiewebBrowserTestBase {
 
     $this->drupalLogin($this->adminUser);
     $this->enableWebmention();
-    $edit = ['new_storage_type' => 'entity_reference', 'label' => 'Webmention reference', 'field_name' => 'webmention'];
+    $edit = ['existing_storage_name' => 'indieweb_webmention', 'existing_storage_label' => 'Webmention reference'];
     $this->drupalPostForm('admin/structure/comment/manage/comment/fields/add-field', $edit, 'Save and continue');
-    $this->drupalPostForm(NULL, ['settings[target_type]' => 'webmention_entity'], 'Save field settings');
-    $this->drupalPostForm('admin/structure/comment/manage/comment/display', ['fields[field_webmention][type]' => 'entity_reference_entity_view'], 'Save');
-
-
+    $this->drupalPostForm('admin/structure/comment/manage/comment/display', ['fields[indieweb_webmention][type]' => 'entity_reference_entity_view'], 'Save');
 
     // Configure microformats.
     $edit = [
@@ -83,7 +80,7 @@ class CommentsTest extends IndiewebBrowserTestBase {
     $this->drupalLogin($this->adminUser);
     $edit = [
       'comment_create_enable' => 1,
-      'comment_create_webmention_reference_field' => 'field_webmention',
+      'comment_create_webmention_reference_field' => 'indieweb_webmention',
     ];
     $this->drupalPostForm('admin/config/services/indieweb/comments', $edit, 'Save configuration');
 

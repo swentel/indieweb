@@ -60,13 +60,6 @@ abstract class IndiewebBrowserTestBase extends BrowserTestBase {
   protected $summary_text = 'A summary';
 
   /**
-   * RSVP settings.
-   *
-   * @var string
-   */
-  protected $rsvp_settings = "yes|I am going!\nno|I can not go\nmaybe|I might go\ninterested|Interested, but will decide later!";
-
-  /**
    * {@inheritdoc}
    */
   public function setUp() {
@@ -103,11 +96,9 @@ abstract class IndiewebBrowserTestBase extends BrowserTestBase {
       }
 
       if ($type == 'rsvp') {
-        $edit = ['new_storage_type' => 'list_string', 'label' => 'RSVP', 'field_name' => 'rsvp'];
+        $edit = ['existing_storage_name' => 'indieweb_rsvp', 'existing_storage_label' => 'RSVP'];
         $this->drupalPostForm('admin/structure/types/manage/' . $type . '/fields/add-field', $edit, 'Save and continue');
-        $this->drupalPostForm(NULL, ['settings[allowed_values]' => $this->rsvp_settings], 'Save field settings');
-        $this->drupalPostForm(NULL, [], 'Save settings');
-        $edit = ['fields[field_rsvp][type]' => 'list_microformat'];
+        $edit = ['fields[indieweb_rsvp][type]' => 'list_microformat'];
         $this->drupalPostForm('admin/structure/types/manage/' . $type . '/display', $edit, 'Save');
       }
 

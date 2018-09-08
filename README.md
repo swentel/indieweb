@@ -243,7 +243,7 @@ For more information see
 
 Microsub is an early draft of a spec that provides a standardized way for clients to consume and interact with feeds
 collected by a server. Readers are Indigenous (iOS and Android), Monocle and Together and many others to come.
-Servers are Aperture.
+Servers are Aperture, Ekster etc .. see https://indieweb.org/Microsub#Servers
 
 For more information see
 

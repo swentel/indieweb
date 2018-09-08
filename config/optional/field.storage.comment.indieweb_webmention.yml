@@ -1,0 +1,19 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - comment
+    - indieweb
+id: comment.indieweb_webmention
+field_name: indieweb_webmention
+entity_type: comment
+type: entity_reference
+settings:
+  target_type: webmention_entity
+module: core
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: true
+custom_storage: false

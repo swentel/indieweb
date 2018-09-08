@@ -1,0 +1,32 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - node
+    - options
+id: node.indieweb_rsvp
+field_name: indieweb_rsvp
+entity_type: node
+type: list_string
+settings:
+  allowed_values:
+    -
+      value: 'yes'
+      label: 'I am going!'
+    -
+      value: 'no'
+      label: 'I can not go'
+    -
+      value: maybe
+      label: 'I might go'
+    -
+      value: interested
+      label: 'Interested, but will decide later!'
+  allowed_values_function: ''
+module: options
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: true
+custom_storage: false

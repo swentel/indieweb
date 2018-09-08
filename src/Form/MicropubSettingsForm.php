@@ -261,7 +261,7 @@ class MicropubSettingsForm extends ConfigFormBase {
         $form[$post_type][$post_type . '_rsvp_field'] = [
           '#type' => 'select',
           '#title' => $this->t('RSVP field'),
-          '#description' => $this->t('Select the field which will be used to store the RSVP value. Make sure the field exists on the node type.<br />This can only be a list option field with following values:<br />yes|I am going!<br />no|I am not going<br />maybe|I might attend<br />interested|I am interested'),
+          '#description' => $this->t('Select the field which will be used to store the RSVP value. Make sure the field exists on the node type.<br />This can only be a list option field with following values:<br />yes|I am going!<br />no|I am not going<br />maybe|I might attend<br />interested|I am interested<br />This module comes with a rsvp storage field with those settings, so it is easy to add.'),
           '#options' => $option_fields,
           '#default_value' => $config->get($post_type . '_rsvp_field'),
           '#states' => array(

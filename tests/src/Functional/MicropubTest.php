@@ -483,7 +483,7 @@ class MicropubTest extends IndiewebBrowserTestBase {
     $this->assertNodeCount(0, 'rsvp');
 
     $this->drupalLogin($this->adminUser);
-    $edit = ['rsvp_create_node' => 1, 'rsvp_node_type' => 'rsvp', 'rsvp_link_field' => 'field_rsvp_link', 'rsvp_rsvp_field' => 'field_rsvp', 'rsvp_content_field' => 'body', 'rsvp_auto_send_webmention' => 1, 'rsvp_uid' => $this->adminUser->id()];
+    $edit = ['rsvp_create_node' => 1, 'rsvp_node_type' => 'rsvp', 'rsvp_link_field' => 'field_rsvp_link', 'rsvp_rsvp_field' => 'indieweb_rsvp', 'rsvp_content_field' => 'body', 'rsvp_auto_send_webmention' => 1, 'rsvp_uid' => $this->adminUser->id()];
     $this->drupalPostForm('admin/config/services/indieweb/micropub', $edit, 'Save configuration');
     $this->drupalLogout();
     $code = $this->sendMicropubRequest($this->rsvp);
@@ -499,7 +499,7 @@ class MicropubTest extends IndiewebBrowserTestBase {
       self::assertEquals('RSVP on ' . $this->rsvp['in-reply-to'], $node->getTitle());
       self::assertEquals($this->rsvp['in-reply-to'], $node->get('field_rsvp_link')->uri);
       self::assertEquals($this->rsvp['content'], $node->get('body')->value);
-      self::assertEquals($this->rsvp['rsvp'], $node->get('field_rsvp')->value);
+      self::assertEquals($this->rsvp['rsvp'], $node->get('indieweb_rsvp')->value);
       self::assertEquals($this->adminUser->id(), $node->getOwnerId());
 
       // Check 'rsvp' class.
