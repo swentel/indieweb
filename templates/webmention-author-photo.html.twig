@@ -1,0 +1,16 @@
+{#
+/**
+ * @file
+ * Theme implementation to display a webmention author photo.
+ */
+#}
+
+{%
+  set classes = [
+    'webmention-author-photo',
+  ]
+%}
+
+<div{{ attributes.addClass(classes) }}>
+  <img src="{{ author_photo }}" width="40" title="{{ author_name }}" />
+</div>

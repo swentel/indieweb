@@ -63,8 +63,8 @@ class PingbackBlock extends BlockBase {
     $build = [];
     $items = [];
 
-    // Get mentions. We use a query and not entity api at all to make sure this
-    // blocked is speedy. If you have tons of webmentions, this can be rough.
+    // Get pingbacks. We use a query and not entity api at all to make sure this
+    // block is fast because if you have tons of webmentions, this can be rough.
     $query = \Drupal::database()
       ->select('webmention_entity', 'w')
       ->fields('w', ['source'])

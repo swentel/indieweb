@@ -24,6 +24,86 @@ use Drupal\node\NodeInterface;
 define('WEBMENTION_QUEUE_NAME', 'indieweb_webmention');
 
 /**
+ * Implements hook_theme().
+ */
+function indieweb_theme() {
+  return [
+    'webmention' => [
+      'variables' => [
+        'show_summary' => NULL,
+        'show_created' => NULL,
+        'show_avatar' => FALSE,
+        'replace_comment_user_picture' => FALSE,
+        'property' => NULL,
+        'author_photo' => NULL,
+        'author_name' => NULL,
+        'created' => NULL,
+        'source' => NULL,
+        'content_text' => NULL,
+        'content_html' => NULL,
+      ]
+    ],
+    'webmention_author_photo' => [
+      'variables' => [
+        'author_photo' => NULL,
+        'author_name' => NULL,
+      ]
+    ],
+  ];
+}
+
+/**
+ * Implements hook_theme_suggestions_HOOK().
+ */
+function indieweb_theme_suggestions_webmention(array $variables) {
+  $suggestions = [];
+  if (!empty($variables['property'])) {
+    $suggestions[] = 'webmention__' . str_replace('-', '_', $variables['property']);
+  }
+  return $suggestions;
+}
+
+/**
+ * Prepares variables for the webmention template.
+ *
+ * @param $variables
+ */
+function template_preprocess_webmention(&$variables) {
+  $content = '';
+
+  switch ($variables['property']) {
+    case 'like-of':
+      $interaction = t('Liked by');
+      break;
+    case 'repost-of':
+      $interaction = t('Reposted by');
+      break;
+    case 'in-reply-to':
+      $interaction = t('Reply by');
+      $content = $variables['content_text'];
+      break;
+    case 'mention-of':
+      $interaction = t('Mention by');
+      $content = $variables['content_text'];
+      break;
+    default:
+      $interaction = t('Interaction from');
+      break;
+  }
+
+  $variables['interaction'] = $interaction;
+
+  if ($variables['show_created']) {
+    $variables['created'] = \Drupal::service('date.formatter')->format($variables['created']);
+  }
+
+  if (!empty($content)) {
+    $content = check_markup($content, 'restricted_html');
+  }
+  $variables['content'] = $content;
+}
+
+/**
  * Implements hook_page_attachments_alter().
  */
 function indieweb_page_attachments_alter(array &$attachments) {
@@ -556,6 +636,17 @@ function indieweb_preprocess_node(&$variables) {
  * Implements hook_preprocess_comment().
  */
 function indieweb_preprocess_comment(&$variables) {
+
+  // Replace comment user picture.
+  if (isset($variables['content']['field_webmention'][0]['#replace_comment_user_picture']) && $variables['content']['field_webmention'][0]['#replace_comment_user_picture'] && !empty($variables['content']['field_webmention'][0]['#author_photo'])) {
+    $variables['user_picture'] = [
+      '#theme' => 'webmention_author_photo',
+      '#author_photo' => $variables['content']['field_webmention'][0]['#author_photo'],
+      '#author_name' => $variables['content']['field_webmention'][0]['#author_name']
+    ];
+  }
+
+  // Microformats for comments.
   if ($variables['elements']['#view_mode'] == 'indieweb_microformat') {
 
     // h-entry

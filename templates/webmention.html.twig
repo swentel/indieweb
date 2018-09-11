@@ -1,0 +1,43 @@
+{#
+/**
+ * @file
+ * Theme implementation to display a webmention.
+ */
+#}
+
+{%
+  set classes = [
+    'webmention',
+    'webmention--' ~ property|clean_class,
+  ]
+%}
+
+<div{{ attributes.addClass(classes) }}>
+
+    {% if show_summary %}
+
+      <span class="webmention-summary">
+
+        {% if show_avatar %}
+            <img src="{{ author_photo }}" width="40" title="{{ author_name }}" />
+        {% endif %}
+
+        {{ interaction }} {{ author_name }}
+
+        {% if show_created %}
+          {% trans %}on{% endtrans %}  {{ created }}
+        {% endif %}
+
+      </span>
+
+    {% endif %}
+
+    {% if content %}
+
+      <div class="webmention-content">
+        {{ content }}
+      </div>
+
+    {% endif %}
+
+</div>

@@ -21,7 +21,6 @@ use Drupal\user\UserInterface;
  *     "view_builder" = "Drupal\Core\Entity\EntityViewBuilder",
  *     "list_builder" = "Drupal\indieweb\WebmentionListBuilder",
  *     "views_data" = "Drupal\indieweb\Entity\WebmentionViewsData",
- *
  *     "form" = {
  *       "default" = "Drupal\indieweb\Form\WebmentionForm",
  *       "add" = "Drupal\indieweb\Form\WebmentionForm",
@@ -32,7 +31,6 @@ use Drupal\user\UserInterface;
  *     "route_provider" = {
  *      "html" = "Drupal\Core\Entity\Routing\AdminHtmlRouteProvider",
  *     },
- *
  *   },
  *   base_table = "webmention_entity",
  *   admin_permission = "administer webmention entities",
@@ -50,8 +48,7 @@ use Drupal\user\UserInterface;
  *     "edit-form" = "/admin/content/webmention/{webmention_entity}/edit",
  *     "delete-form" = "/admin/content/webmention/{webmention_entity}/delete",
  *     "collection" = "/admin/content/webmention",
- *   },
- *   field_ui_base_route = "indieweb.admin.dashboard"
+ *   }
  * )
  */
 class Webmention extends ContentEntityBase implements WebmentionInterface {

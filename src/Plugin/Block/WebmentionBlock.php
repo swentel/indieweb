@@ -25,6 +25,7 @@ class WebmentionBlock extends BlockBase {
       'show_likes' => TRUE,
       'show_reposts' => FALSE,
       'show_avatar' => TRUE,
+      'show_created' => FALSE,
       'number_of_posts' => 10,
     ];
   }
@@ -55,6 +56,14 @@ class WebmentionBlock extends BlockBase {
       '#type' => 'checkbox',
       '#title' => $this->t('Show avatar'),
       '#default_value' => $this->configuration['show_avatar'],
+      '#description' => $this->t('This will only show up if summary is enabled.'),
+    ];
+
+    $form['webmentions']['show_created'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Show created time'),
+      '#default_value' => $this->configuration['show_created'],
+      '#description' => $this->t('This will only show up if summary is enabled.'),
     ];
 
     $form['webmentions']['number_of_posts'] = [
@@ -75,6 +84,7 @@ class WebmentionBlock extends BlockBase {
     $this->configuration['show_likes'] = $values['show_likes'];
     $this->configuration['show_reposts'] = $values['show_reposts'];
     $this->configuration['show_avatar'] = $values['show_avatar'];
+    $this->configuration['show_created'] = $values['show_created'];
     $this->configuration['number_of_posts'] = $values['number_of_posts'];
   }
 
@@ -101,13 +111,15 @@ class WebmentionBlock extends BlockBase {
     }
 
     $show_avatar = $this->configuration['show_avatar'];
+    $show_created = $this->configuration['show_created'];
+
     $items = [];
 
     // Get mentions. We use a query and not entity api at all to make sure this
-    // blocked is speedy. If you have tons of webmentions, this can be rough.
+    // block is fast because if you have tons of webmentions, this can be rough.
     $query = \Drupal::database()
       ->select('webmention_entity', 'w')
-      ->fields('w', ['author_name', 'author_photo', 'property'])
+      ->fields('w', ['author_name', 'author_photo', 'property', 'created', 'source', 'content_text', 'content_html'])
       ->condition('status', 1)
       ->condition('target', \Drupal::request()->getPathInfo())
       ->condition('property', $types, 'IN');
@@ -121,29 +133,23 @@ class WebmentionBlock extends BlockBase {
     $records = $query->execute();
 
     foreach ($records as $record) {
-
-      $image = '';
-      if ($show_avatar && !empty($record->author_photo)) {
-        $image = '<img width="40" src="' . $record->author_photo . '" />&nbsp;';
-      }
-
-      $type = 'Liked by ';
-      if ($record->property == 'repost-of') {
-        $type = 'Reposted by ';
-      }
-
       $items[] = [
-        '#markup' => $image . $type . $record->author_name,
-        '#allowed_tags' => ['img']
+        '#theme' => 'webmention',
+        '#show_summary' => TRUE,
+        '#show_avatar' => $show_avatar,
+        '#show_created' => $show_created,
+        '#property' => $record->property,
+        '#author_name' => $record->author_name,
+        '#author_photo' => $record->author_photo,
+        '#created' => $record->created,
+        '#source' => $record->source,
+        '#content_text' => $record->content_text,
+        '#content_html' => $record->content_html,
       ];
-
     }
 
     if (!empty($items)) {
-      $build['webmentions'] = [
-        '#theme' => 'item_list',
-        '#items' => $items,
-      ];
+      $build = $items;
     }
 
     return $build;

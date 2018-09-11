@@ -49,8 +49,8 @@ class RSVPBlock extends BlockBase {
 
     $form['rsvp']['allow_user_rsvp'] = [
       '#type' => 'checkbox',
-      '#title' => $this->t('Allow RSVP on-site'),
-      '#description' => $this->t('Drpual users with the "allow rsvp on event" permission will be able to RSVP when authenticated.'),
+      '#title' => $this->t('Allow RSVP'),
+      '#description' => $this->t('Drupal users with the "allow rsvp on event" permission will be able to RSVP when authenticated.'),
       '#default_value' => $this->configuration['allow_user_rsvp'],
     ];
 
@@ -72,7 +72,7 @@ class RSVPBlock extends BlockBase {
     /** @var \Drupal\Core\Field\FieldStorageDefinitionInterface $field */
     foreach ($fields as $key => $field) {
       if (in_array($field->getType(), ['daterange'])) {
-        $date_range_fields[$key] = $field->getName();
+        $date_range_fields[$key] = 'Date range: ' . $field->getName();
       }
     }
     $form['rsvp']['node_daterange_field'] = [
@@ -133,7 +133,7 @@ class RSVPBlock extends BlockBase {
     }
 
     // Get mentions. We use a query and not entity api at all to make sure this
-    // blocked is speedy. If you have tons of webmentions, this can be rough.
+    // block is fast because if you have tons of webmentions, this can be rough.
     $query = \Drupal::database()
       ->select('webmention_entity', 'w')
       ->fields('w', ['author_name', 'author_photo', 'property', 'rsvp'])
@@ -168,7 +168,7 @@ class RSVPBlock extends BlockBase {
         $build['rsvps'][$value] = [
           '#title' => ucfirst($value),
           '#weight' => $weight,
-          '#theme' => 'item_list',
+          '#theme' => 'item_list__indieweb_rsvp',
           '#items' => $values_array[$value],
         ];
       }

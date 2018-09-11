@@ -11,6 +11,9 @@ block.settings.indieweb_webmention:
     show_avatar:
       type: boolean
       label: 'Show avatar'
+    show_created:
+      type: boolean
+      label: 'Show created'
     number_of_posts:
       type: integer
       label: 'Number of posts in block'

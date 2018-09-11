@@ -61,11 +61,16 @@ further below.
 - Configuration is at /admin/config/services/indieweb/webmention
 - Overview of all collected webmentions and pingbacks are at /admin/content/webmention
 
-Blocks
+**Blocks**
+
 - Webmentions: render like and repost webmentions per page
 - Webmention notify form: let people submit a URL if the current page is mentioned there
 - RSVP: shows people attending, interested for an event
 - Pingbacks: render all urls to site pinging back per page
+
+**Theming**
+
+Webmentions are rendered through templates. Suggestions are available per property (e.g. webmention--like-of.tpl.php).
 
 ![ScreenShot](https://realize.be/sites/default/files/2018-03/webmention-basic.png)
 
@@ -122,7 +127,7 @@ Your homepage should contain a h-card entry. This module does not expose this fo
   <p class="h-card">My name is <a class="u-url p-name" rel="me" href="/">Your name</a>
   ```
 
-Classes added for publication (or other functionality).
+**Classes added for publication (or other functionality)**
 
 - h-entry: added on node or comment wrapper
   see indieweb_preprocess_node() / indieweb_preprocess_comment().
@@ -175,7 +180,7 @@ content types and fields you can create which can be used for sending webmention
 
 A media endpoint is also available where you can upload files, currently limited to images.
 
-### Supported post types
+**Supported post types**
 
 - Article: a blog post
 - Note: a small post, think of it as a tweet
@@ -194,10 +199,10 @@ When a webmention is saved and is of property 'in-reply-to', it is possible to c
 webmention has comments enabled.
 
 You have to create an entity reference field on your comment type which points to a webmention. On the 'Manage display'
-page of the comment you can set the formatter of that reference field to 'Webmention'. Currently the formatter uses the
-text content of the webmention, using the 'restricted_html' content format which comes default in Drupal 8. Also, don't
+page of the comment you can set the formatter of that reference field to 'Webmention'. The webmention preprocess 
+formats the text content using the 'restricted_html' content format which comes default in Drupal 8. Also, don't
 forget to set permissions to view webmentions. When replying, and the comment has a link field, this field can also
-be prefilled, see the 'Sending' section.
+be pre-filled, see the 'Sending' section.
 
 Every comment is available also at comment/indieweb/cid so this URL can also be a target for a webmention. If a
 webmention is send to this target, a comment will be created on the node, with the target cid as the parent.

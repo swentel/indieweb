@@ -322,15 +322,6 @@ indieweb.micropub:
       type: integer
       label: 'The user id of the RSVP'
 
-field.formatter.settings.link_microformat:
-  type: field.formatter.settings.link
-  label: 'Link microformat format settings'
-  mapping:
-    microformat_class:
-      type: string
-      label: 'The microformat class for the link'
-
-
 # schema for indieweb.microsub
 indieweb.microsub:
   type: config_object
@@ -400,6 +391,34 @@ indieweb.webmention:
       type: boolean
       label: 'Whether to log the payload'
 
+# schema for webmention_delete_action
 action.configuration.webmention_delete_action:
   type: action_configuration_default
   label: 'Delete webmention configuration'
+
+# schema for link_microformat setting
+field.formatter.settings.link_microformat:
+  type: field.formatter.settings.link
+  label: 'Link microformat format settings'
+  mapping:
+    microformat_class:
+      type: string
+      label: 'The microformat class for the link'
+
+# schema for entity_reference_webmention setting
+field.formatter.settings.entity_reference_webmention:
+  type: mapping
+  label: 'Webmention format settings'
+  mapping:
+    show_avatar:
+      type: integer
+      label: 'Show avatar'
+    show_summary:
+      type: boolean
+      label: 'Show summary'
+    show_created:
+      type: boolean
+      label: 'Show created'
+    replace_comment_user_picture:
+      type: string
+      label: 'Replace comment user picture'
