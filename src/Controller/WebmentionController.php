@@ -189,8 +189,22 @@ class WebmentionController extends ControllerBase {
       }
 
       // Save the entity.
-      $webmention = $this->entityTypeManager()->getStorage('webmention_entity')->create($values);
-      $webmention->save();
+      try {
+        /** @var \Drupal\indieweb\Entity\WebmentionInterface $webmention */
+        $webmention = $this->entityTypeManager()->getStorage('webmention_entity')->create($values);
+        $webmention->save();
+      }
+      catch (\Exception $ignored) {}
+
+      // Send micropub request to Aperture if configured.
+      if (isset($webmention)) {
+        $microsub = \Drupal::config('indieweb.microsub');
+        if ($microsub->get('aperture_enable_micropub') && !empty($microsub->get('aperture_api_key'))) {
+          /** @var \Drupal\indieweb\ApertureClient\ApertureClientInterface $client */
+          $client = \Drupal::service('indieweb.aperture.client');
+          $client->sendPost($microsub->get('aperture_api_key'), $webmention);
+        }
+      }
 
       // Clear cache.
       $this->clearCache($values['target']['value']);

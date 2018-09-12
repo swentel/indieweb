@@ -1,2 +1,4 @@
 enable: false
 microsub_endpoint: ''
+aperture_enable_micropub: false
+aperture_api_key: ''

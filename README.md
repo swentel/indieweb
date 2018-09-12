@@ -16,9 +16,10 @@ Current functionality:
   (note, article, event, rsvp, reply, like, repost, bookmark)
 - Auto-create comments from 'in-reply-to'
 - Reply on comments and send webmention
-- Feeds: microformats and jf2
-- Fediverse integration
+- Feeds: microformats, atom and jf2
 - Microsub link exposing
+- Send a micropub post to Aperture on incoming webmentions
+- Fediverse integration
 
 This is only the tip of the iceberg and much more functionality will be added.
 
@@ -248,15 +249,22 @@ For more information see
 
 Microsub is an early draft of a spec that provides a standardized way for clients to consume and interact with feeds
 collected by a server. Readers are Indigenous (iOS and Android), Monocle and Together and many others to come.
-Servers are Aperture, Ekster etc .. see https://indieweb.org/Microsub#Servers
+Servers are Aperture, Ekster etc.
 
 For more information see
 
-- https://indieweb.org/Microsub-spec
 - https://indieweb.org/Microsub
+- https://indieweb.org/Microsub-spec
 
 This modules does not expose itself as a microsub server, it mainly allows you to expose the microsub header link.
 Note that you also need feeds to be enabled, see the Feeds section.
+
+**Aperture**
+
+If you use Aperture as your Microsub server, you can send a micropub post to one channel when a webmention is received 
+by this site. The canonical example is to label that channel name as "Notifications" so you can view incoming 
+webmentions on readers like Monocle or Indigenous. Following webmentions are send: likes, reposts, bookmarks and 
+replies.
 
 ## Fediverse via Bridgy Fed
 

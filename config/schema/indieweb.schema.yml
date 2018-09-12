@@ -333,6 +333,12 @@ indieweb.microsub:
     microsub_endpoint:
       type: string
       label: 'Microsub endpoint'
+    aperture_enable_micropub:
+      type: boolean
+      label: 'Enable micropub post to Aperture'
+    aperture_api_key:
+      type: string
+      label: 'ApertureClient channel API key'
 
 # schema for indieweb.publish
 indieweb.publish:

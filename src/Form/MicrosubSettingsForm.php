@@ -33,7 +33,7 @@ class MicrosubSettingsForm extends ConfigFormBase {
     $config = $this->config('indieweb.microsub');
 
     $form['info'] = [
-      '#markup' => '<p>' . $this->t('Microsub is an early draft of a spec that provides a standardized way for clients to consume and interact with feeds collected by a server. Readers are Indigenous (iOS and Android), Monocle and Together (both web) and many others to come. Servers are Aperture, Ekster etc. See <a href="https://indieweb.org/Microsub#Servers" target="_blank">https://indieweb.org/Microsub#Servers</a>. This modules does not expose itself as a microsub server, it mainly allows you to expose the microsub header link. Note that you also need feeds to be enabled, see the <a href=":feeds_link">Feeds section</a>.', [':feeds_link' => Url::fromRoute('entity.indieweb_feed.collection')->toString()]) . '</p>'];
+      '#markup' => '<p>' . $this->t('Microsub is an early draft of a spec that provides a standardized way for clients to consume and interact with feeds collected by a server. <a href="https://indieweb.org/Microsub#Clients" target="_blank">Readers</a> are Indigenous (iOS and Android), Monocle and Together (both web) and many others to come. Servers are Aperture, Ekster etc. See <a href="https://indieweb.org/Microsub#Servers" target="_blank">https://indieweb.org/Microsub#Servers</a>. This modules does not expose itself as a microsub server, it mainly allows you to expose the microsub header link. Note that you also need feeds to be enabled, see the <a href=":feeds_link">Feeds section</a>.', [':feeds_link' => Url::fromRoute('entity.indieweb_feed.collection')->toString()]) . '</p>'];
 
     $form['microsub'] = [
       '#type' => 'fieldset',
@@ -59,6 +59,24 @@ class MicrosubSettingsForm extends ConfigFormBase {
       ),
     ];
 
+    $form['aperture'] = [
+      '#type' => 'fieldset',
+      '#title' => $this->t('Aperture'),
+      '#description' => $this->t('If you use <a href="https://aperture.p3k.io" target="_blank">Aperture</a> as your Microsub server, you can send a micropub post to one channel when a webmention is received by this site.<br />The canonical example is to label that channel name as "Notifications" so you can view incoming webmentions on readers like Monocle or Indigenous.<br />Following webmentions are send: likes, reposts, bookmarks and replies.</a>'),
+    ];
+
+    $form['aperture']['aperture_enable_micropub'] = [
+      '#title' => $this->t('Send micropub request to Aperture'),
+      '#type' => 'checkbox',
+      '#default_value' => $config->get('aperture_enable_micropub'),
+    ];
+
+    $form['aperture']['aperture_api_key'] = [
+      '#title' => $this->t('Channel API key'),
+      '#type' => 'textfield',
+      '#default_value' => $config->get('aperture_api_key'),
+    ];
+
     return parent::buildForm($form, $form_state);
   }
 
@@ -70,6 +88,8 @@ class MicrosubSettingsForm extends ConfigFormBase {
     $this->config('indieweb.microsub')
       ->set('enable', $form_state->getValue('enable'))
       ->set('microsub_endpoint', $form_state->getValue('microsub_endpoint'))
+      ->set('aperture_enable_micropub', $form_state->getValue('aperture_enable_micropub'))
+      ->set('aperture_api_key', $form_state->getValue('aperture_api_key'))
       ->save();
 
     Cache::invalidateTags(['rendered']);
