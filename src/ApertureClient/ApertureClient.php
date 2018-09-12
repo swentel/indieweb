@@ -41,7 +41,7 @@ class ApertureClient implements ApertureClientInterface {
       $post = new \stdClass();
       $post->type = ['h-entry'];
       $post->properties = $properties;
-      $this->sendMicroPubRequest($api_key, $post);
+      $this->sendMicropubRequest($api_key, $post);
     }
 
   }
@@ -76,12 +76,14 @@ class ApertureClient implements ApertureClientInterface {
   }
 
   /**
+   * Send micropub request.
+   *
    * @param $api_key
    *   The Aperture Channel API key.
    * @param $post
    *   The micropub post to send.
    */
-  public function sendMicroPubRequest($api_key, $post) {
+  public function sendMicropubRequest($api_key, $post) {
     $auth = 'Bearer ' . $api_key;
 
     $client = \Drupal::httpClient();

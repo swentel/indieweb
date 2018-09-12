@@ -17,8 +17,8 @@ Current functionality:
 - Auto-create comments from 'in-reply-to'
 - Reply on comments and send webmention
 - Feeds: microformats, atom and jf2
-- Microsub link exposing
 - Send a micropub post to Aperture on incoming webmentions
+- Microsub link exposing
 - Fediverse integration
 
 This is only the tip of the iceberg and much more functionality will be added.

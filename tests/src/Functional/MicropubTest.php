@@ -237,7 +237,7 @@ class MicropubTest extends IndiewebBrowserTestBase {
     $this->assertSession()->responseContains("media-endpoint");
     $this->assertSession()->responseContains("\/indieweb\/micropub\/media");
 
-    // Try to send article, should be 401.
+    // Try to send article, should be 400.
     $code = $this->sendMicropubRequest($this->article);
     self::assertEquals(400, $code);
     // Try to send like, should be 400.
