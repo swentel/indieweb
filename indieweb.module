@@ -945,8 +945,8 @@ function indieweb_webmention_entity_insert(WebmentionInterface $webmention) {
       try {
         $params = Url::fromUri("internal:" . $path)->getRouteParameters();
 
-        // This can be a reply on a comment. Get the node then to attach the
-        // comment there and set pid.
+        // This can be a reply on a comment. Get the node to attach the comment
+        // there and set pid.
         if (key($params) == 'comment') {
           /** @var \Drupal\comment\CommentInterface $comment */
           $comment = \Drupal::entityTypeManager()->getStorage('comment')->load($params['comment']);
@@ -1252,7 +1252,7 @@ function indieweb_get_summary_fields() {
  * Checks if a source url already exists as syndication.
  *
  * This can happen when you reply from your site to twitter. Brid.gy will then
- * send that reply on  twitter back as a webmention.
+ * send that reply on twitter back as a webmention.
  *
  * @param \Drupal\indieweb\Entity\WebmentionInterface $webmention
  *

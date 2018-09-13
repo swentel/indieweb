@@ -80,7 +80,7 @@ class IndieAuthController extends ControllerBase {
     }
 
     // Default message.
-    drupal_set_message($message);
+    $this->messenger()->addMessage($message);
 
     // Redirect.
     return new RedirectResponse(Url::fromRoute('user.login')->toString(), 302);

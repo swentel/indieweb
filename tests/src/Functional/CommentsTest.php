@@ -1,6 +1,8 @@
 <?php
 
 namespace Drupal\Tests\indieweb\Functional;
+
+use Drupal\Core\Url;
 use Drupal\user\Entity\Role;
 use Drupal\user\RoleInterface;
 
@@ -24,7 +26,10 @@ class CommentsTest extends IndiewebBrowserTestBase {
   public function setUp() {
     parent::setUp();
 
-    $this->grantPermissions(Role::load(RoleInterface::ANONYMOUS_ID), ['view published webmention entities']);
+    // Create node types.
+    $this->createNodeTypes(['reply']);
+
+    $this->grantPermissions(Role::load(RoleInterface::ANONYMOUS_ID), ['view published webmention entities', 'access comments']);
   }
 
   /**
@@ -37,6 +42,13 @@ class CommentsTest extends IndiewebBrowserTestBase {
     $edit = ['existing_storage_name' => 'indieweb_webmention', 'existing_storage_label' => 'Webmention reference'];
     $this->drupalPostForm('admin/structure/comment/manage/comment/fields/add-field', $edit, 'Save and continue');
     $this->drupalPostForm('admin/structure/comment/manage/comment/display', ['fields[indieweb_webmention][type]' => 'entity_reference_entity_view'], 'Save');
+
+    // Create link field on comments.
+    $edit = ['new_storage_type' => 'link', 'label' => 'Link', 'field_name' => 'comment_link'];
+    $this->drupalPostForm('admin/structure/comment/manage/comment/fields/add-field', $edit, 'Save and continue');
+    $this->drupalPostForm(NULL, [], 'Save field settings');
+    $this->drupalPostForm(NULL, [], 'Save settings');
+    drupal_flush_all_caches();
 
     // Configure microformats.
     $edit = [
@@ -87,7 +99,9 @@ class CommentsTest extends IndiewebBrowserTestBase {
     // Set publish fields.
     $edit = [];
     $edit['publish_custom_url'] = 1;
+    $edit['publish_link_fields[]'] = ['field_comment_link'];
     $this->drupalPostForm('admin/config/services/indieweb/publish', $edit, 'Save configuration');
+    $this->assertSession()->responseNotContains('An illegal choice has been detected.');
 
     // Send again, we should have a comment now.
     $this->drupalLogout();
@@ -111,7 +125,7 @@ class CommentsTest extends IndiewebBrowserTestBase {
     $this->assertFalse($captured_emails, 'No notification mail for comment.');
 
     // Publish the comment.
-    $comment->setPublished(TRUE);
+    $comment->setPublished();
     $comment->save();
 
     // Check the comment is visible.
@@ -155,13 +169,13 @@ class CommentsTest extends IndiewebBrowserTestBase {
       $this->assertTrue($cid, 'No comment found');
     }
 
-    // We should a mail notification.
+    // We should have a mail notification.
     $captured_emails = \Drupal::state()->get('system.test_mail_collector');
     $notification = end($captured_emails);
     $this->assertTrue($notification && $notification['id'] == 'indieweb_webmention_comment_created', 'Notification mail found for comment.');
 
     // Publish the comment.
-    $comment->setPublished(TRUE);
+    $comment->setPublished();
     $comment->save();
 
     $this->drupalGet('node/1');
@@ -193,6 +207,126 @@ class CommentsTest extends IndiewebBrowserTestBase {
     self::assertEquals(202, $code);
     $this->assertCommentCount(3);
 
+    // ------------------------------------------------------------------------
+    // Test micropub reply post to create a comment.
+
+    $this->drupalLogin($this->adminUser);
+    $edit = ['micropub_enable' => 1, 'micropub_me' => 'https://indieweb.micropub.testdomain', 'reply_create_comment' => 1, 'reply_create_node' => 1, 'reply_node_type' => 'reply', 'reply_link_field' => 'field_reply_link', 'reply_content_field' => 'body', 'reply_auto_send_webmention' => 1, 'reply_uid' => $this->adminUser->id()];
+    $this->drupalPostForm('admin/config/services/indieweb/micropub', $edit, 'Save configuration');
+
+    // Set IndieAuth token endpoint.
+    $this->drupalLogin($this->adminUser);
+    $edit = ['enable' => '1', 'expose' => 1, 'token_endpoint' => Url::fromRoute('indieweb_test.token_endpoint', [], ['absolute' => TRUE])->toString()];
+    $this->drupalPostForm('admin/config/services/indieweb/indieauth', $edit, 'Save configuration');
+
+    $this->drupalLogout();
+
+    // Create an article.
+    $article = $this->createNode(['type' => 'article', 'title' => 'Test generating comments via micropub', 'body' => ['value' => 'This will be awesome when it works!']]);
+    $this->drupalGet('node/' . $article->id());
+    $this->assertSession()->responseContains('This will be awesome when it works!');
+
+    // Now send a webmention to this article (with different source).
+    $webmention['target'] = '/node/' . $article->id();
+    $webmention['source'] = 'https://brid-gy.appspot.com/comment/twitter/swentel/1039829498676563968/1039835297159282688';
+    $webmention['post']['url'] = 'https://twitter.com/jgmac1106/status/1039835297159282688';
+    $webmention['post']['content']['text'] = "This comes in via a webmention";
+    $code = $this->sendWebmentionNotificationRequest($webmention);
+    self::assertEquals(202, $code);
+    $this->assertCommentCount(4);
+
+    $cid = \Drupal::database()->query('SELECT cid FROM {comment_field_data} ORDER by cid DESC limit 1')->fetchField();
+    if ($cid) {
+      $comment = \Drupal::entityTypeManager()->getStorage('comment')->load($cid);
+      self::assertEquals(FALSE, $comment->isPublished());
+      self::assertEquals($article->id(), $comment->getCommentedEntityId());
+    }
+    else {
+      // Explicit failure.
+      $this->assertTrue($cid, 'No comment found');
+    }
+    $comment->setPublished();
+    $comment->save();
+    $this->drupalGet('node/' . $article->id());
+    $this->assertSession()->responseContains('This comes in via a webmention');
+    $webmention_cid = $cid;
+
+    $reply = [
+      'h' => 'entry',
+      'in-reply-to' => '/node/' . $article->id(),
+      'content' => 'Reply with node target'
+    ];
+
+    // Micropub reply request with 'in-reply-to' set to node.
+    $this->sendMicropubRequest($reply);
+    $this->assertNodeCount(0, 'reply');
+    $this->assertCommentCount(5);
+
+    $cid = \Drupal::database()->query('SELECT cid FROM {comment_field_data} ORDER by cid DESC limit 1')->fetchField();
+    if ($cid) {
+      $comment = \Drupal::entityTypeManager()->getStorage('comment')->load($cid);
+      $comment->setPublished();
+      $comment->save();
+    }
+    else {
+      // Explicit failure.
+      $this->assertTrue($cid, 'No comment found');
+    }
+
+    $this->drupalGet('node/' . $article->id());
+    $this->assertSession()->responseContains('Reply with node target');
+
+    // Micropub reply request with 'in-reply-to' set to previous comment.
+    $previous_cid = $cid;
+    $reply['content'] = 'Reply with comment target';
+    $reply['in-reply-to'] = '/comment/indieweb/' . $previous_cid;
+    $this->sendMicropubRequest($reply);
+    $this->assertNodeCount(0, 'reply');
+    $this->assertCommentCount(6);
+
+    $cid = \Drupal::database()->query('SELECT cid FROM {comment_field_data} ORDER by cid DESC limit 1')->fetchField();
+    if ($cid) {
+      $comment = \Drupal::entityTypeManager()->getStorage('comment')->load($cid);
+      self::assertEquals($previous_cid, $comment->getParentComment()->id());
+      $comment->setPublished();
+      $comment->save();
+    }
+    else {
+      // Explicit failure.
+      $this->assertTrue($cid, 'No comment found');
+    }
+
+    $this->drupalGet('node/' . $article->id());
+    $this->assertSession()->responseContains('Reply with comment target');
+
+    // Micropub reply request with 'in-reply-to' set to previous webmention.
+    $reply['content'] = 'Reply with webmention target';
+    $reply['in-reply-to'] = '/admin/content/webmention/5';
+    $this->sendMicropubRequest($reply);
+    $this->assertNodeCount(0, 'reply');
+    $this->assertCommentCount(7);
+
+    $cid = \Drupal::database()->query('SELECT cid FROM {comment_field_data} ORDER by cid DESC limit 1')->fetchField();
+    if ($cid) {
+      $comment = \Drupal::entityTypeManager()->getStorage('comment')->load($cid);
+      self::assertEquals($webmention_cid, $comment->getParentComment()->id());
+
+      $link_field_value = NULL;
+      if (isset($comment->field_comment_link)) {
+        $link_field_value = $comment->get('field_comment_link')->uri;
+      }
+      self::assertEquals('https://twitter.com/jgmac1106/status/1039835297159282688', $link_field_value);
+
+      $comment->setPublished();
+      $comment->save();
+    }
+    else {
+      // Explicit failure.
+      $this->assertTrue($cid, 'No comment found');
+    }
+
+    $this->drupalGet('node/' . $article->id());
+    $this->assertSession()->responseContains('Reply with webmention target');
   }
 
   /**
@@ -204,6 +338,5 @@ class CommentsTest extends IndiewebBrowserTestBase {
     $comment_count = \Drupal::database()->query('SELECT count(cid) FROM {comment_field_data}')->fetchField();
     self::assertEquals($count, $comment_count);
   }
-
 
 }

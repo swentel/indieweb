@@ -207,6 +207,9 @@ indieweb.micropub:
     reply_upload_field:
       type: string
       label: 'The node upload field for the reply'
+    reply_create_comment:
+      type: boolean
+      label: 'Create comments if target is webmention url.'
     reply_uid:
       type: integer
       label: 'The user id of the reply'

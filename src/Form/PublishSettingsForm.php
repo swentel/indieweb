@@ -108,7 +108,7 @@ class PublishSettingsForm extends ConfigFormBase {
       '#title' => $this->t('Link fields on content'),
       '#options' => $link_fields,
       '#default_value' => explode('|', $config->get('publish_link_fields')),
-      '#description' => $this->t('When you have a "Reply" post type, or reply on a comment, add a link field to which you are replying too. This URL will be used then to send the webmention to.<br />You can also just use the custom field above of course. Do not select a field if you do not want to use this feature.'),
+      '#description' => $this->t('When you have a "Reply" post type, or reply on a comment, add a link field to which you are replying to. This URL will be used then to send the webmention to.<br />You can also just use the custom field above of course. Do not select a field if you do not want to use this feature.'),
     ];
 
     $form['custom_wrapper']['publish_comment_webmention_field'] = [

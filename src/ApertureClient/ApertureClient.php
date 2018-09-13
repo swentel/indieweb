@@ -30,6 +30,10 @@ class ApertureClient implements ApertureClientInterface {
         $properties['in-reply-to'] = [$base_url . $webmention->get('target')->value];
         $properties['content'] = [$webmention->get('content_text')->value];
         break;
+      case 'mention-of':
+        $properties['name'] = ['You were mentioned'];
+        $properties['content'] = [$webmention->get('content_text')->value];
+        break;
     }
 
     if (!empty($properties)) {

@@ -165,11 +165,11 @@ class FeedForm extends EntityForm {
 
     switch ($status) {
       case SAVED_NEW:
-        drupal_set_message($this->t('Created %label.', ['%label' => $feed->label(),]));
+        $this->messenger()->addMessage($this->t('Created %label.', ['%label' => $feed->label(),]));
         break;
 
       default:
-        drupal_set_message($this->t('Saved %label', ['%label' => $feed->label(),]));
+        $this->messenger()->addMessage($this->t('Saved %label', ['%label' => $feed->label(),]));
     }
     $form_state->setRedirectUrl($feed->toUrl('collection'));
 

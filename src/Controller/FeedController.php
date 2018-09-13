@@ -25,7 +25,7 @@ class FeedController extends ControllerBase {
    */
   public function updateItems(FeedInterface $indieweb_feed) {
     indieweb_update_feed_items($indieweb_feed);
-    drupal_set_message($this->t('Updated items for %feed', ['%feed' => $indieweb_feed->label()]));
+    $this->messenger()->addMessage($this->t('Updated items for %feed', ['%feed' => $indieweb_feed->label()]));
     return new RedirectResponse(Url::fromRoute('entity.indieweb_feed.collection')->toString());
   }
 

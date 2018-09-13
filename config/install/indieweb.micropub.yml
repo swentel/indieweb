@@ -37,6 +37,7 @@ reply_auto_send_webmention: false
 reply_tags_field: ''
 reply_upload_field: ''
 reply_uid: 1
+reply_create_comment: false
 repost_create_node: false
 repost_status: 1
 repost_node_type: ''

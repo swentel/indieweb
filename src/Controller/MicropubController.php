@@ -2,10 +2,12 @@
 
 namespace Drupal\indieweb\Controller;
 
+use Drupal\comment\Entity\Comment;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Language\LanguageInterface;
 use Drupal\Core\Url;
 use Drupal\datetime\Plugin\Field\FieldType\DateTimeItemInterface;
+use Drupal\indieweb\Entity\Webmention;
 use Drupal\node\Entity\Node;
 use Drupal\taxonomy\Entity\Term;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -56,6 +58,13 @@ class MicropubController extends ControllerBase {
    * @var \Drupal\node\NodeInterface
    */
   public $node = NULL;
+
+  /**
+   * The comment which is being created.
+   *
+   * @var \Drupal\comment\CommentInterface
+   */
+  public $comment = NULL;
 
   /**
    * Routing callback: micropub post endpoint.
@@ -238,6 +247,128 @@ class MicropubController extends ControllerBase {
 
       // Reply support.
       if ($this->createNodeFromPostType('reply') && $this->isHEntry() && $this->hasRequiredInput(['in-reply-to', 'content']) && $this->hasNoKeysSet(['rsvp'])) {
+
+        // Check if we should create a comment.
+        if ($this->config->get('reply_create_comment') && (($comment_config = \Drupal::config('indieweb.comment')) && $comment_config->get('comment_create_enable'))) {
+          $pid = 0;
+          $link_field_url = '';
+          $reply = $this->input['in-reply-to'][0];
+          $reply = str_replace(\Drupal::request()->getSchemeAndHttpHost(), '', $reply);
+          $path = \Drupal::service('path.alias_manager')->getPathByAlias($reply);
+          try {
+            $params = Url::fromUri("internal:" . $path)->getRouteParameters();
+
+            // This can be a reply on a webmention. Check if there is a comment
+            // connected with it.
+            if (key($params) == 'webmention_entity') {
+              /** @var \Drupal\indieweb\Entity\WebmentionInterface $webmention_target */
+              $comment_comment_webmention_field_name = $comment_config->get('comment_create_webmention_reference_field');
+              $table_name = 'comment__' . $comment_comment_webmention_field_name;
+              $webmention_target = \Drupal::entityTypeManager()->getStorage('webmention_entity')->load($params['webmention_entity']);
+              if ($webmention_target && $webmention_target->get('property')->value == 'in-reply-to') {
+                if (\Drupal::database()->schema()->tableExists($table_name)) {
+                  $cid = \Drupal::database()
+                    ->select($table_name, 'a')
+                    ->fields('a', ['entity_id'])
+                    ->condition($comment_comment_webmention_field_name . '_target_id', $webmention_target->id())
+                    ->execute()
+                    ->fetchField();
+
+                  if ($cid) {
+
+                    // Check url.
+                    $url = $webmention_target->get('url')->value;
+                    if (!empty($url)) {
+                      $link_field_url = $url;
+                    }
+
+                    $params = ['comment' => $cid];
+                  }
+                }
+              }
+            }
+
+            // This can be a reply on a comment, or set via a webmention in the
+            // previous if statement. Get the node to attach the comment there
+            // and set pid.
+            if (key($params) == 'comment') {
+              /** @var \Drupal\comment\CommentInterface $comment */
+              $comment = \Drupal::entityTypeManager()->getStorage('comment')->load($params['comment']);
+              if ($comment && $comment->getCommentedEntityTypeId() == 'node') {
+                $pid = $comment->id();
+                $params = ['node' => $comment->getCommentedEntityId()];
+              }
+            }
+
+            // Target is a node.
+            if (!empty($params) && key($params) == 'node') {
+
+              /** @var \Drupal\node\NodeInterface $node */
+              $node = $this->entityTypeManager()->getStorage('node')->load($params['node']);
+
+              $comment_type = $comment_config->get('comment_create_comment_type');
+              $comment_node_comment_field_name = $comment_config->get('comment_create_node_comment_field');
+              if ($node && $node->hasField($comment_node_comment_field_name) && $node->{$comment_node_comment_field_name}->status == 2) {
+
+                $subject = 'Auto created comment from reply micropub';
+
+                $values = [
+                  'subject' => $subject,
+                  // Since this is a micropub request, this can be published.
+                  'status' => 1,
+                  'uid' => $this->config->get('reply_uid'),
+                  'entity_id' => $node->id(),
+                  'entity_type' => 'node',
+                  'pid' => $pid,
+                  'comment_type' => $comment_type,
+                  'field_name' => $comment_node_comment_field_name,
+                  'comment_body' => [
+                    'value' => $this->input['content'][0],
+                    'format' => 'restricted_html',
+                  ],
+                ];
+
+                // Create comment.
+                $this->comment = Comment::create($values);
+
+                // Check link field.
+                if (!empty($link_field_url)) {
+                  $link_fields_string = \Drupal::config('indieweb.publish')->get('publish_link_fields');
+                  if (!empty($link_fields_string)) {
+                    $link_fields = explode('|', $link_fields_string);
+                    foreach ($link_fields as $field) {
+                      if ($this->comment->hasField($field)) {
+
+                        // Save link.
+                        $this->comment->set($field, ['uri' => $link_field_url, 'title' => '']);
+
+                        // Syndicate.
+                        if ($this->config->get('reply_auto_send_webmention')) {
+                          if (isset($this->input['mp-syndicate-to'])) {
+                            $this->input['mp-syndicate-to'][] = $link_field_url;
+                          }
+                          else {
+                            $this->input['mp-syndicate-to'] = [$link_field_url];
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+
+                $response = $this->saveComment();
+                if ($response instanceof Response) {
+                  return $response;
+                }
+              }
+            }
+          }
+          catch (\Exception $e) {
+            \Drupal::logger('indieweb_micropub')->notice('Error trying to create a comment from reply: @message', ['@message' => $e->getMessage()]);
+          }
+        }
+
+        // We got here, so it's a standard node.
         $this->createNode('In reply to ' . $this->input['in-reply-to'][0], 'reply', 'in-reply-to');
         $response = $this->saveNode();
         if ($response instanceof Response) {
@@ -522,12 +653,34 @@ class MicropubController extends ControllerBase {
     if ($this->node->id()) {
 
       // Syndicate.
-      $this->syndicateTo();
+      $this->syndicateToNode();
 
       // Allow modules to react after the node is saved.
       \Drupal::moduleHandler()->invokeAll('indieweb_micropub_node_saved', [$this->node, $this->values, $this->input, $this->payload_original]);
 
       header('Location: ' . $this->node->toUrl('canonical', ['absolute' => TRUE])->toString());
+      return new Response('', 201);
+    }
+
+  }
+
+  /**
+   * Saves the comment.
+   *
+   * @return \Symfony\Component\HttpFoundation\Response
+   *
+   * @throws \Drupal\Core\Entity\EntityStorageException
+   * @throws \Drupal\Core\Entity\EntityMalformedException
+   */
+  protected function saveComment() {
+
+    $this->comment->save();
+    if ($this->comment->id()) {
+
+      // Syndicate.
+      $this->syndicateToComment();
+
+      header('Location: ' . $this->comment->toUrl('canonical', ['absolute' => TRUE])->toString());
       return new Response('', 201);
     }
 
@@ -693,15 +846,27 @@ class MicropubController extends ControllerBase {
   }
 
   /**
-   * Syndicate to.
+   * Syndicate to for nodes.
    *
    * @throws \Drupal\Core\Entity\EntityMalformedException
    */
-  protected function syndicateTo() {
+  protected function syndicateToNode() {
     if (!empty($this->input['mp-syndicate-to']) && $this->node->isPublished()) {
       $source = $this->node->toUrl()->setAbsolute(TRUE)->toString();
       foreach ($this->input['mp-syndicate-to'] as $target) {
         indieweb_webmention_create_queue_item($source, $target, $this->node->id(), 'node');
+      }
+    }
+  }
+
+  /**
+   * Syndicate to for comments.
+   */
+  protected function syndicateToComment() {
+    if (!empty($this->input['mp-syndicate-to']) && $this->comment->isPublished()) {
+      $source = Url::fromRoute('indieweb.comment.canonical', ['comment' => $this->comment->id()], ['absolute' => TRUE])->toString();
+      foreach ($this->input['mp-syndicate-to'] as $target) {
+        indieweb_webmention_create_queue_item($source, $target, $this->comment->id(), 'comment');
       }
     }
   }

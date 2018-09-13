@@ -263,8 +263,8 @@ Note that you also need feeds to be enabled, see the Feeds section.
 
 If you use Aperture as your Microsub server, you can send a micropub post to one channel when a webmention is received 
 by this site. The canonical example is to label that channel name as "Notifications" so you can view incoming 
-webmentions on readers like Monocle or Indigenous. Following webmentions are send: likes, reposts, bookmarks and 
-replies.
+webmentions on readers like Monocle or Indigenous. Following webmentions are send: likes, reposts, bookmarks, mentions 
+and replies.
 
 ## Fediverse via Bridgy Fed
 

@@ -62,7 +62,7 @@ class MicrosubSettingsForm extends ConfigFormBase {
     $form['aperture'] = [
       '#type' => 'fieldset',
       '#title' => $this->t('Aperture'),
-      '#description' => $this->t('If you use <a href="https://aperture.p3k.io" target="_blank">Aperture</a> as your Microsub server, you can send a micropub post to one channel when a webmention is received by this site.<br />The canonical example is to label that channel name as "Notifications" so you can view incoming webmentions on readers like Monocle or Indigenous.<br />Following webmentions are send: likes, reposts, bookmarks and replies.</a>'),
+      '#description' => $this->t('If you use <a href="https://aperture.p3k.io" target="_blank">Aperture</a> as your Microsub server, you can send a micropub post to one channel when a webmention is received by this site.<br />The canonical example is to label that channel name as "Notifications" so you can view incoming webmentions on readers like Monocle or Indigenous.<br />Following webmentions are send: likes, reposts, bookmarks, mentions and replies.</a>'),
     ];
 
     $form['aperture']['aperture_enable_micropub'] = [

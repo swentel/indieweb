@@ -3,7 +3,6 @@
 namespace Drupal\Tests\indieweb\Functional;
 
 use Drupal\Core\Url;
-use Drupal\node\Entity\NodeType;
 use Drupal\node\NodeInterface;
 use Drupal\Tests\BrowserTestBase;
 
@@ -77,12 +76,22 @@ abstract class IndiewebBrowserTestBase extends BrowserTestBase {
 
   /**
    * Creates several node types that are useful for micropub, posting etc.
+   *
+   * @param $types
+   *   Only create those types.
    */
-  protected function createNodeTypes() {
+  protected function createNodeTypes($types = []) {
 
     $this->drupalLogin($this->adminUser);
 
     foreach (['like', 'bookmark', 'repost', 'reply', 'rsvp', 'event'] as $type) {
+
+      if (!empty($types)) {
+        if (!in_array($type, $types)) {
+          continue;
+        }
+      }
+
       $edit = ['name' => $type, 'type' => $type];
       $this->drupalPostForm('admin/structure/types/add', $edit, 'Save and manage fields');
 

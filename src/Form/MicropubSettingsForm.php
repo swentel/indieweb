@@ -197,6 +197,22 @@ class MicropubSettingsForm extends ConfigFormBase {
         ),
       ];
 
+      // Create comments if available on the reply post type.
+      if ($post_type == 'reply') {
+        $form[$post_type]['reply_create_comment'] = [
+          '#type' => 'checkbox',
+          '#title' => $this->t('Enable comment creation'),
+          '#description' => $this->t('If a reply post comes in and the reply-to-url is a node or comment on this site, or a webmention which target is a node or comment and property "in-reply-to", create a (child) comment from this reply.<br /><a href=":url">Comment creation</a> needs to be enabled and configured for this to work. In case the target is a webmention, the original url can be stored if a <a href=":url2">link field is configured</a> on the comment type.', [':url' => Url::fromRoute('indieweb.admin.comment_settings')->toString(), ':url2' => Url::fromRoute('indieweb.admin.publish_settings')->toString()]),
+          '#default_value' => $config->get('reply_create_comment'),
+          '#states' => array(
+            'visible' => array(
+              ':input[name="micropub_enable"]' => array('checked' => TRUE),
+              ':input[name="' . $post_type . '_create_node"]' => array('checked' => TRUE),
+            ),
+          ),
+        ];
+      }
+
       $form[$post_type][$post_type . '_status'] = [
         '#type' => 'radios',
         '#title' => $this->t('Status'),
@@ -393,6 +409,9 @@ class MicropubSettingsForm extends ConfigFormBase {
       ->set('micropub_me', $form_state->getValue('micropub_me'))
       ->set('micropub_log_payload', $form_state->getValue('micropub_log_payload'));
 
+
+    // Reply create comment.
+    $config->set('reply_create_comment', $form_state->getValue('reply_create_comment'));
 
     // Loop over post types.
     foreach ($this->getPostTypes() as $post_type => $configuration) {
