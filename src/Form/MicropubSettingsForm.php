@@ -110,7 +110,14 @@ class MicropubSettingsForm extends ConfigFormBase {
       '#title' => $this->t('Enable micropub'),
       '#type' => 'checkbox',
       '#default_value' => $config->get('micropub_enable'),
-      '#description' => $this->t('This will allow the endpoint to receive requests to create or update posts. Updating posts is currently limited to title, body and published status.')
+      '#description' => $this->t('This will allow the endpoint to receive requests.')
+    ];
+
+    $form['general']['micropub_enable_update'] = [
+      '#title' => $this->t('Allow post updates'),
+      '#type' => 'checkbox',
+      '#default_value' => $config->get('micropub_enable_update'),
+      '#description' => $this->t('Allow sending update requests to update any node or comment. Updating posts is currently limited to title, body and published status.'),
     ];
 
     $form['general']['micropub_add_header_link'] = [
@@ -404,6 +411,7 @@ class MicropubSettingsForm extends ConfigFormBase {
 
     $config
       ->set('micropub_enable', $form_state->getValue('micropub_enable'))
+      ->set('micropub_enable_update', $form_state->getValue('micropub_enable_update'))
       ->set('micropub_add_header_link', $form_state->getValue('micropub_add_header_link'))
       ->set('micropub_media_enable', $form_state->getValue('micropub_media_enable'))
       ->set('micropub_me', $form_state->getValue('micropub_me'))

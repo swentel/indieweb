@@ -1,4 +1,5 @@
 micropub_enable: false
+micropub_enable_update: false
 micropub_add_header_link: true
 micropub_media_enable: false
 micropub_me: ''

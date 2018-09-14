@@ -247,6 +247,14 @@ class MicropubTest extends IndiewebBrowserTestBase {
       ],
     ];
     $code = $this->sendMicropubRequest($update, 'is_in_valid', FALSE, 'json');
+    self::assertEquals(400, $code);
+
+    $this->drupalLogin($this->adminUser);
+    $edit = ['micropub_enable_update' => 1];
+    $this->drupalPostForm('admin/config/services/indieweb/micropub', $edit, 'Save configuration');
+    $this->drupalLogout();
+
+    $code = $this->sendMicropubRequest($update, 'is_in_valid', FALSE, 'json');
     self::assertEquals(403, $code);
 
     $code = $this->sendMicropubRequest($update, 'is_valid', FALSE, 'json');

@@ -176,7 +176,7 @@ class MicropubController extends ControllerBase {
 
     // Attempt to update a node or comment. This is currently limited to simply
     // update the published status via post-status.
-    if ($this->action == 'update' && !empty($this->object_url) && !empty($this->input['replace'])) {
+    if ($this->action == 'update' && $this->config->get('micropub_enable_update') && !empty($this->object_url) && !empty($this->input['replace'])) {
 
       // Get authorization header, response early if none found.
       $auth_header = $this->getAuthorizationHeader();
