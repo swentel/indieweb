@@ -2,6 +2,7 @@
 
 namespace Drupal\indieweb\ApertureClient;
 
+use Drupal\Core\Url;
 use Drupal\indieweb\Entity\WebmentionInterface;
 
 class ApertureClient implements ApertureClientInterface {
@@ -28,7 +29,27 @@ class ApertureClient implements ApertureClientInterface {
         break;
       case 'in-reply-to':
         $properties['in-reply-to'] = [$base_url . $webmention->get('target')->value];
-        $properties['content'] = [$webmention->get('content_text')->value];
+        $content = $webmention->get('content_text')->value;
+
+        // Add comment url if found.
+        if (($comment_config = \Drupal::config('indieweb.comment')) && $comment_config->get('comment_create_enable')) {
+          $comment_comment_webmention_field_name = $comment_config->get('comment_create_webmention_reference_field');
+          $table_name = 'comment__' . $comment_comment_webmention_field_name;
+          if (\Drupal::database()->schema()->tableExists($table_name)) {
+            $cid = \Drupal::database()
+              ->select($table_name, 'a')
+              ->fields('a', ['entity_id'])
+              ->condition($comment_comment_webmention_field_name . '_target_id', $webmention->id())
+              ->execute()
+              ->fetchField();
+
+            if ($cid) {
+              $content .= "\n\n" . t('Comment available at @comment_url', ['@comment_url' => Url::fromRoute('indieweb.comment.canonical', ['comment' => $cid])->toString()]);
+            }
+          }
+        }
+
+        $properties['content'] = [$content];
         break;
       case 'mention-of':
         $properties['name'] = ['You were mentioned'];
