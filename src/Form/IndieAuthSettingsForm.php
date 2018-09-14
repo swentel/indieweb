@@ -40,7 +40,7 @@ class IndieAuthSettingsForm extends ConfigFormBase {
     $form['login'] = [
       '#type' => 'fieldset',
       '#title' => $this->t('Login'),
-      '#description' => $this->t('Allow users to login into this site by using their domain. A "Web Sign-In" block is available where users can enter their domain to login.<br />After authentication a new user account will be created if this domain does not exist yet. The account will automatically be verified.<br />Users who login with their domain will not be able to change the username, password or set an e-mail address (yet).')
+      '#description' => $this->t('Allow users to login into this site by using their domain. A "Web Sign-In" block is available where users can enter their domain to login.<br />After authentication a new user account will be created if this domain does not exist yet. The account will automatically be verified.<br />Users who login with their domain will not be able to change the username, password or set an e-mail address (yet).<br />The <a href="https://www.drupal.org/project/realname" target="_blank">Real Name</a> module can help to have nicer display name for the user if wanted.')
     ];
 
     $form['login']['login_enable'] = [
