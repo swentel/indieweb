@@ -247,6 +247,13 @@ class MicropubTest extends IndiewebBrowserTestBase {
     $code = $this->sendMicropubRequest($update, 'is_in_valid', FALSE, 'json');
     self::assertEquals(403, $code);
 
+    $update = [
+      'action' => 'update',
+      'url' => $node->toUrl('canonical', ['absolute' => TRUE])->toString(),
+      'replace' => [
+        'post-status' => ['draft'],
+      ],
+    ];
     $code = $this->sendMicropubRequest($update, 'is_valid', FALSE, 'json');
     self::assertEquals(200, $code);
     $node_unpublished = \Drupal::entityTypeManager()->getStorage('node')->loadUnchanged($nid);
