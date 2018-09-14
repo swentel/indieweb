@@ -176,7 +176,7 @@ class MicropubController extends ControllerBase {
 
     // Attempt to update a node or comment. This is currently limited to simply
     // update the published status via post-status.
-    if ($this->action == 'update' && !empty($this->object_url) && !empty($this->input['replace']['post-status'][0])) {
+    if ($this->action == 'update' && !empty($this->object_url) && !empty($this->input['replace'])) {
 
       // Get authorization header, response early if none found.
       $auth_header = $this->getAuthorizationHeader();
@@ -195,22 +195,54 @@ class MicropubController extends ControllerBase {
         $params = Url::fromUri("internal:" . $path)->getRouteParameters();
 
         if (!empty($params) && in_array(key($params), ['comment', 'node'])) {
+
           /** @var \Drupal\Core\Entity\ContentEntityInterface $entity */
           $entity = $this->entityTypeManager()->getStorage(key($params))->load($params[key($params)]);
           if ($entity) {
-            $status = NULL;
-            if ($this->input['replace']['post-status'][0] == 'draft') {
-              $status = FALSE;
+            $update = FALSE;
+
+            // Post status.
+            if (!empty($this->input['replace']['post-status'][0])) {
+              $status = NULL;
+              if ($this->input['replace']['post-status'][0] == 'draft') {
+                $status = FALSE;
+              }
+              if ($this->input['replace']['post-status'][0] == 'published') {
+                $status = TRUE;
+              }
+
+              if (isset($status)) {
+                $update = TRUE;
+                $status ? $entity->setPublished() : $entity->setUnpublished();
+              }
             }
-            if ($this->input['replace']['post-status'][0] == 'published') {
-              $status = TRUE;
+
+            // Title.
+            if (!empty($this->input['replace']['name'][0])) {
+              $update = TRUE;
+              $label_field = 'title';
+              if ($entity->getEntityTypeId() == 'comment') {
+                $label_field = 'name';
+              }
+              $entity->set($label_field, $this->input['replace']['name'][0]);
             }
-            if (isset($status)) {
-              $status ? $entity->setPublished() : $entity->setUnpublished();
+
+            // Body.
+            if (!empty($this->input['replace']['content'][0])) {
+              $update = TRUE;
+              $label_field = 'body';
+              if ($entity->getEntityTypeId() == 'comment') {
+                $label_field = 'comment_body';
+              }
+              $entity->set($label_field, $this->input['replace']['content'][0]);
+            }
+
+            if ($update) {
               $entity->save();
-              $response_message = '';
-              $response_code = 200;
             }
+
+            $response_message = '';
+            $response_code = 200;
           }
         }
       }

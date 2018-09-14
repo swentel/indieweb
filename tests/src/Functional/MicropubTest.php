@@ -242,6 +242,8 @@ class MicropubTest extends IndiewebBrowserTestBase {
       'url' => '/node/' . $node->id(),
       'replace' => [
         'post-status' => ['draft'],
+        'name' => ['An updated title'],
+        'content' => ['Fixing content'],
       ],
     ];
     $code = $this->sendMicropubRequest($update, 'is_in_valid', FALSE, 'json');
@@ -251,6 +253,8 @@ class MicropubTest extends IndiewebBrowserTestBase {
     self::assertEquals(200, $code);
     $node_unpublished = \Drupal::entityTypeManager()->getStorage('node')->loadUnchanged($nid);
     self::assertFalse($node_unpublished->isPublished());
+    self::assertEquals('An updated title', $node_unpublished->label());
+    self::assertEquals('Fixing content', $node_unpublished->get('body')->value);
 
     $update['replace']['post-status'] = ['published'];
     $code = $this->sendMicropubRequest($update, 'is_valid', FALSE, 'json');
