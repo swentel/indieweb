@@ -110,7 +110,7 @@ class MicropubSettingsForm extends ConfigFormBase {
       '#title' => $this->t('Enable micropub'),
       '#type' => 'checkbox',
       '#default_value' => $config->get('micropub_enable'),
-      '#description' => $this->t('This will allow the endpoint to receive requests.')
+      '#description' => $this->t('This will allow the endpoint to receive requests to create or update posts. Updating posts is currently limited to title, body and published status.')
     ];
 
     $form['general']['micropub_add_header_link'] = [
@@ -129,7 +129,7 @@ class MicropubSettingsForm extends ConfigFormBase {
       '#title' => $this->t('Enable media endpoint'),
       '#type' => 'checkbox',
       '#default_value' => $config->get('micropub_media_enable'),
-      '#description' => $this->t('This will enable the micropub media endpoint to receive files, currently limited to images (jpg, png, gif). <br />The endpoint will look like <strong>https://@domain/indieweb/micropub/media</strong><br />')
+      '#description' => $this->t('This will enable the micropub media endpoint to receive files, currently limited to images (jpg, png, gif). <br />The endpoint will look like <strong>https://@domain/indieweb/micropub/media</strong><br />', ['@domain' => \Drupal::request()->getHttpHost()])
     ];
 
     $form['general']['micropub_me'] = [
