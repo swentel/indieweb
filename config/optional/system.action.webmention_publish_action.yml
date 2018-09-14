@@ -1,0 +1,10 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - indieweb
+id: webmention_publish_action
+label: 'Publish webmention'
+type: webmention_entity
+plugin: entity:publish_action:webmention_entity
+configuration: {  }

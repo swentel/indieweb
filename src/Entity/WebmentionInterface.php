@@ -2,6 +2,7 @@
 
 namespace Drupal\indieweb\Entity;
 
+use Drupal\Core\Entity\EntityPublishedInterface;
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\EntityChangedInterface;
 use Drupal\user\EntityOwnerInterface;
@@ -11,7 +12,7 @@ use Drupal\user\EntityOwnerInterface;
  *
  * @ingroup webmention
  */
-interface WebmentionInterface extends ContentEntityInterface, EntityChangedInterface, EntityOwnerInterface {
+interface WebmentionInterface extends ContentEntityInterface, EntityChangedInterface, EntityOwnerInterface, EntityPublishedInterface {
 
   /**
    * Gets the Webmention creation timestamp.
@@ -41,16 +42,5 @@ interface WebmentionInterface extends ContentEntityInterface, EntityChangedInter
    *   TRUE if the Webmention is published.
    */
   public function isPublished();
-
-  /**
-   * Sets the published status of a Webmention.
-   *
-   * @param bool $published
-   *   TRUE to set this Webmention to published, FALSE to set it to unpublished.
-   *
-   * @return \Drupal\indieweb\Entity\WebmentionInterface
-   *   The called Webmention entity.
-   */
-  public function setPublished($published);
 
 }
