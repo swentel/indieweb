@@ -46,6 +46,13 @@ class MicropubController extends ControllerBase {
   public $input = [];
 
   /**
+   * An object URL to act on.
+   *
+   * @var null
+   */
+  public $object_url = NULL;
+
+  /**
    * The original payload
    *
    * @var null
@@ -70,9 +77,11 @@ class MicropubController extends ControllerBase {
    * Routing callback: micropub post endpoint.
    *
    * @param \Symfony\Component\HttpFoundation\Request $request
+   *
    * @return \Symfony\Component\HttpFoundation\JsonResponse|\Symfony\Component\HttpFoundation\Response
    * @throws \Drupal\Core\Entity\EntityMalformedException
    * @throws \Drupal\Core\Entity\EntityStorageException
+   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
    */
   public function postEndpoint(Request $request) {
     $this->config = \Drupal::config('indieweb.micropub');
@@ -148,15 +157,69 @@ class MicropubController extends ControllerBase {
     $micropub_request = \p3k\Micropub\Request::create($input);
     if ($micropub_request instanceof \p3k\Micropub\Request && $micropub_request->action) {
       $this->action = $micropub_request->action;
-      $mf2 = $micropub_request->toMf2();
-      $this->object_type = !empty($mf2['type'][0]) ? $mf2['type'][0] : '';
-      $this->input = $mf2['properties'];
-      $this->input += $micropub_request->commands;
+
+      if ($this->action == 'update') {
+        $this->input = $micropub_request->update;
+        $this->object_url = $micropub_request->url;
+      }
+      else {
+        $mf2 = $micropub_request->toMf2();
+        $this->object_type = !empty($mf2['type'][0]) ? $mf2['type'][0] : '';
+        $this->input = $mf2['properties'];
+        $this->input += $micropub_request->commands;
+      }
     }
     else {
       $description = $micropub_request->error_description ? $micropub_request->error_description : 'Unknown error';
       $this->getLogger('indieweb_micropub')->notice('Error parsing incoming request: @message', ['@message' => $description]);
       return new JsonResponse('Bad request', 400);
+    }
+
+    // Attempt to update a node or comment. This is currently limited to simply
+    // update the published status via post-status.
+    if ($this->action == 'update' && !empty($this->object_url) && !empty($this->input['replace']['post-status'][0])) {
+
+      // Get authorization header, response early if none found.
+      $auth_header = $this->getAuthorizationHeader();
+      if (!$auth_header) {
+        return new JsonResponse('', 401);
+      }
+
+      // Validate token. Return early if it's not valid.
+      $valid_token = $this->isValidToken($auth_header);
+      if (!$valid_token) {
+        return new JsonResponse('', 403);
+      }
+
+      $path = str_replace(\Drupal::request()->getSchemeAndHttpHost(), '', $this->object_url);
+      try {
+        $params = Url::fromUri("internal:" . $path)->getRouteParameters();
+
+        if (!empty($params) && in_array(key($params), ['comment', 'node'])) {
+          /** @var \Drupal\Core\Entity\ContentEntityInterface $entity */
+          $entity = $this->entityTypeManager()->getStorage(key($params))->load($params[key($params)]);
+          if ($entity) {
+            $status = NULL;
+            if ($this->input['replace']['post-status'][0] == 'draft') {
+              $status = FALSE;
+            }
+            if ($this->input['replace']['post-status'][0] == 'published') {
+              $status = TRUE;
+            }
+            if (isset($status)) {
+              $status ? $entity->setPublished() : $entity->setUnpublished();
+              $entity->save();
+              $response_message = '';
+              $response_code = 200;
+            }
+          }
+        }
+      }
+      catch (\Exception $e) {
+        $this->getLogger('indieweb_micropub')->notice('Error in updating object: @message', ['@message' => $e->getMessage()]);
+      }
+
+      return new Response($response_message, $response_code);
     }
 
     // Attempt to create a node.
@@ -364,7 +427,7 @@ class MicropubController extends ControllerBase {
             }
           }
           catch (\Exception $e) {
-            \Drupal::logger('indieweb_micropub')->notice('Error trying to create a comment from reply: @message', ['@message' => $e->getMessage()]);
+            $this->getLogger('indieweb_micropub')->notice('Error trying to create a comment from reply: @message', ['@message' => $e->getMessage()]);
           }
         }
 
@@ -582,6 +645,8 @@ class MicropubController extends ControllerBase {
    *   The IndieWeb post type.
    * @param $link_input_name
    *   The name of the property in input for auto syndication.
+   *
+   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
    */
   protected function createNode($title, $post_type, $link_input_name = NULL) {
 

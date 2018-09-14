@@ -189,10 +189,9 @@ class MicropubTest extends IndiewebBrowserTestBase {
     $this->drupalLogin($this->adminUser);
     $edit = ['micropub_me' => 'https://indieweb.micropub.testdomain'];
     $this->drupalPostForm('admin/config/services/indieweb/micropub', $edit, 'Save configuration');
-
-    // Send request, first with invalid token, then with valid, we should have
-    // a note then.
     $this->drupalLogout();
+
+    // Send note request first with invalid token.
     $code = $this->sendMicropubRequest($this->note, 'invalid_token');
     self::assertEquals(403, $code);
     $this->assertNodeCount(0, 'page');
@@ -200,7 +199,7 @@ class MicropubTest extends IndiewebBrowserTestBase {
     $this->assertNodeCount(0, 'article');
     $this->assertNodeCount(0, 'bookmark');
 
-    // Check q=config - should be 403.
+    // Check q=config with invalid token, should be 403.
     $auth = 'Bearer invalid_token';
     $headers = [
       'Accept' => 'application/json',
@@ -209,7 +208,18 @@ class MicropubTest extends IndiewebBrowserTestBase {
     $this->drupalGet('indieweb/micropub', ['query' => ['q' => 'config']], $headers);
     $this->assertSession()->statusCodeEquals(403);
 
-    // With valid access token now.
+    // Check q=config with valid token, should contain media endpoint.
+    $auth = 'Bearer is_valid';
+    $headers = [
+      'Accept' => 'application/json',
+      'Authorization' => $auth,
+    ];
+    $this->drupalGet('indieweb/micropub', ['query' => ['q' => 'config']], $headers);
+    $this->assertSession()->statusCodeEquals(200);
+    $this->assertSession()->responseContains("media-endpoint");
+    $this->assertSession()->responseContains("\/indieweb\/micropub\/media");
+
+    // Create note with valid access token.
     $response_data = $this->sendMicropubRequest($this->note, 'is_valid', FALSE, 'form_params', TRUE);
     self::assertEquals(201, $response_data['code']);
     $this->assertNodeCount(1, 'page');
@@ -226,16 +236,32 @@ class MicropubTest extends IndiewebBrowserTestBase {
       $this->assertTrue($nid, 'No page node found');
     }
 
-    // Check q=config - should contain media endpoint.
-    $auth = 'Bearer is_valid';
-    $headers = [
-      'Accept' => 'application/json',
-      'Authorization' => $auth,
+    // Test update.
+    $update = [
+      'action' => 'update',
+      'url' => $node->toUrl('canonical', ['absolute' => TRUE])->toString(),
+      'replace' => [
+        'post-status' => ['draft'],
+      ],
     ];
-    $this->drupalGet('indieweb/micropub', ['query' => ['q' => 'config']], $headers);
-    $this->assertSession()->statusCodeEquals(200);
-    $this->assertSession()->responseContains("media-endpoint");
-    $this->assertSession()->responseContains("\/indieweb\/micropub\/media");
+    $code = $this->sendMicropubRequest($update, 'is_in_valid', FALSE, 'json');
+    self::assertEquals(403, $code);
+
+    $code = $this->sendMicropubRequest($update, 'is_valid', FALSE, 'json');
+    self::assertEquals(200, $code);
+    $node_unpublished = \Drupal::entityTypeManager()->getStorage('node')->loadUnchanged($nid);
+    self::assertFalse($node_unpublished->isPublished());
+    $update = [
+      'action' => 'update',
+      'url' => $node->toUrl('canonical', ['absolute' => TRUE])->toString(),
+      'replace' => [
+        'post-status' => ['published'],
+      ],
+    ];
+    $code = $this->sendMicropubRequest($update, 'is_valid', FALSE, 'json');
+    self::assertEquals(200, $code);
+    $node_published_again = \Drupal::entityTypeManager()->getStorage('node')->loadUnchanged($nid);
+    self::assertTrue($node_published_again->isPublished());
 
     // Try to send article, should be 400.
     $code = $this->sendMicropubRequest($this->article);

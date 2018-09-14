@@ -192,6 +192,8 @@ A media endpoint is also available where you can upload files, currently limited
 - Event: create an event
 - RSVP: create an rsvp
 
+Updating existing content is currently limited to change the published status of nodes and comments.
+
 You can configure this at /admin/config/services/indieweb/micropub
 
 ## Creating comments on nodes
