@@ -113,13 +113,6 @@ class MicropubSettingsForm extends ConfigFormBase {
       '#description' => $this->t('This will allow the endpoint to receive requests.')
     ];
 
-    $form['general']['micropub_enable_update'] = [
-      '#title' => $this->t('Allow post updates'),
-      '#type' => 'checkbox',
-      '#default_value' => $config->get('micropub_enable_update'),
-      '#description' => $this->t('Allow sending update requests to update any node or comment. Updating posts is currently limited to title, body and published status.'),
-    ];
-
     $form['general']['micropub_add_header_link'] = [
       '#title' => $this->t('Expose micropub endpoint header link'),
       '#type' => 'checkbox',
@@ -132,11 +125,40 @@ class MicropubSettingsForm extends ConfigFormBase {
       ),
     ];
 
+    $form['general']['micropub_enable_update'] = [
+      '#title' => $this->t('Enable post updates'),
+      '#type' => 'checkbox',
+      '#default_value' => $config->get('micropub_enable_update'),
+      '#description' => $this->t('Allow sending update requests to update any node or comment. Updating posts is currently limited to title, body and published status.'),
+      '#states' => array(
+        'visible' => array(
+          ':input[name="micropub_enable"]' => array('checked' => TRUE),
+        ),
+      ),
+    ];
+
+    $form['general']['micropub_enable_source'] = [
+      '#title' => $this->t('Enable post queries'),
+      '#type' => 'checkbox',
+      '#default_value' => $config->get('micropub_enable_source'),
+      '#description' => $this->t('Allow clients to query for posts via q=source. This is experimental, leave disabled if your client does not support it.'),
+      '#states' => array(
+        'visible' => array(
+          ':input[name="micropub_enable"]' => array('checked' => TRUE),
+        ),
+      ),
+    ];
+
     $form['general']['micropub_media_enable'] = [
       '#title' => $this->t('Enable media endpoint'),
       '#type' => 'checkbox',
       '#default_value' => $config->get('micropub_media_enable'),
-      '#description' => $this->t('This will enable the micropub media endpoint to receive files, currently limited to images (jpg, png, gif). <br />The endpoint will look like <strong>https://@domain/indieweb/micropub/media</strong><br />', ['@domain' => \Drupal::request()->getHttpHost()])
+      '#description' => $this->t('This will enable the micropub media endpoint to receive files, currently limited to images (jpg, png, gif). <br />The endpoint will look like <strong>https://@domain/indieweb/micropub/media</strong><br />', ['@domain' => \Drupal::request()->getHttpHost()]),
+      '#states' => array(
+        'visible' => array(
+          ':input[name="micropub_enable"]' => array('checked' => TRUE),
+        ),
+      ),
     ];
 
     $form['general']['micropub_me'] = [
@@ -144,12 +166,22 @@ class MicropubSettingsForm extends ConfigFormBase {
       '#title' => $this->t('Me'),
       '#default_value' => $config->get('micropub_me'),
       '#description' => $this->t('Every request will contain an access token which will be verified to make sure it is really you who is posting.<br />The response of the access token check request contains the "me" value which should match with your domain.<br />This is the value of your domain. Make sure there is a trailing slash, e.g. <strong>@domain/</strong>', ['@domain' => \Drupal::request()->getSchemeAndHttpHost()]),
+      '#states' => array(
+        'visible' => array(
+          ':input[name="micropub_enable"]' => array('checked' => TRUE),
+        ),
+      ),
     ];
 
     $form['general']['micropub_log_payload'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('Log the payload in watchdog on the micropub endpoint.'),
       '#default_value' => $config->get('micropub_log_payload'),
+      '#states' => array(
+        'visible' => array(
+          ':input[name="micropub_enable"]' => array('checked' => TRUE),
+        ),
+      ),
     ];
 
     // Collect fields.
@@ -412,6 +444,7 @@ class MicropubSettingsForm extends ConfigFormBase {
     $config
       ->set('micropub_enable', $form_state->getValue('micropub_enable'))
       ->set('micropub_enable_update', $form_state->getValue('micropub_enable_update'))
+      ->set('micropub_enable_source', $form_state->getValue('micropub_enable_source'))
       ->set('micropub_add_header_link', $form_state->getValue('micropub_add_header_link'))
       ->set('micropub_media_enable', $form_state->getValue('micropub_media_enable'))
       ->set('micropub_me', $form_state->getValue('micropub_me'))

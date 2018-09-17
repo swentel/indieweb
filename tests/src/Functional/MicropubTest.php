@@ -166,6 +166,8 @@ class MicropubTest extends IndiewebBrowserTestBase {
     $this->assertSession()->statusCodeEquals(401);
     $this->drupalGet('indieweb/micropub', ['query' => ['q' => 'config']]);
     $this->assertSession()->statusCodeEquals(401);
+    $this->drupalGet('indieweb/micropub', ['query' => ['q' => 'source']]);
+    $this->assertSession()->statusCodeEquals(404);
 
     $this->drupalLogout();
     $this->drupalGet('<front>');
@@ -235,6 +237,23 @@ class MicropubTest extends IndiewebBrowserTestBase {
       // Explicit failure.
       $this->assertTrue($nid, 'No page node found');
     }
+
+    // q=source tests.
+    $this->drupalLogin($this->adminUser);
+    $edit = ['micropub_enable_source' => 1];
+    $this->drupalPostForm('admin/config/services/indieweb/micropub', $edit, 'Save configuration');
+    $this->drupalLogout();
+
+    $auth = 'Bearer invalid_token';
+    $headers = ['Accept' => 'application/json', 'Authorization' => $auth,];
+    $this->drupalGet('indieweb/micropub', ['query' => ['q' => 'source']], $headers);
+    $this->assertSession()->statusCodeEquals(403);
+
+    $auth = 'Bearer is_valid';
+    $headers = ['Accept' => 'application/json', 'Authorization' => $auth,];
+    $this->drupalGet('indieweb/micropub', ['query' => ['q' => 'source']], $headers);
+    $this->assertSession()->statusCodeEquals(200);
+    $this->assertSession()->responseContains('items');
 
     // Test update.
     $update = [
@@ -848,6 +867,7 @@ class MicropubTest extends IndiewebBrowserTestBase {
       // Explicit failure.
       $this->assertTrue($nid, 'No article node found');
     }
+
   }
 
 }

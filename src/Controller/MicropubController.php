@@ -144,6 +144,33 @@ class MicropubController extends ControllerBase {
       return new JsonResponse($response_message, $response_code);
     }
 
+    // q=source request.
+    if (isset($_GET['q']) && $_GET['q'] == 'source') {
+
+      // Early response when this is not enabled.
+      if (!$this->config->get('micropub_enable_source')) {
+        return new JsonResponse('', 404);
+      }
+
+      // Get authorization header, response early if none found.
+      $auth_header = $this->getAuthorizationHeader();
+      if (!$auth_header) {
+        return new JsonResponse('', 401);
+      }
+
+      if ($this->isValidToken($auth_header)) {
+        $response_code = 200;
+        $response_message = [
+          'items' => $this->getPostItems(),
+        ];
+      }
+      else {
+        $response_code = 403;
+      }
+
+      return new JsonResponse($response_message, $response_code);
+    }
+
     // Indigenous sends POST vars along with multipart, we use all().
     if (strpos($request->headers->get('Content-Type'), 'multipart/form-data') !== FALSE) {
       $input = $request->request->all();
@@ -174,8 +201,7 @@ class MicropubController extends ControllerBase {
       return new JsonResponse('Bad request', 400);
     }
 
-    // Attempt to update a node or comment. This is currently limited to simply
-    // update the published status via post-status.
+    // Attempt to update a node or comment.
     if ($this->action == 'update' && $this->config->get('micropub_enable_update') && !empty($this->object_url) && !empty($this->input['replace'])) {
 
       // Get authorization header, response early if none found.
@@ -986,4 +1012,110 @@ class MicropubController extends ControllerBase {
 
     return $syndication_targets;
   }
+
+  /**
+   * Returns a list of post items. This is still experimental, so we keep the
+   * very limited for now.
+   *
+   * @see https://github.com/indieweb/micropub-extensions/issues/4
+   *
+   * @return array $items
+   *   A list of items.
+   *
+   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
+   * @throws \Drupal\Core\Entity\EntityMalformedException
+   */
+  protected function getPostItems() {
+    $items = [];
+    $offset = 0;
+    $range = 10;
+
+    $ids = \Drupal::entityQuery('node')
+      ->sort('created', 'DESC')
+      ->range($offset, $range)
+      ->execute();
+
+    // Add nodes.
+    if (\Drupal::moduleHandler()->moduleExists('node')) {
+      if (!empty($ids)) {
+        $nodes = $this->entityTypeManager()->getStorage('node')->loadMultiple($ids);
+        /** @var \Drupal\node\NodeInterface $node */
+        foreach ($nodes as $node) {
+
+          $item = new \stdClass();
+          $item->type = ['h-entry'];
+
+          $properties = [];
+          $properties['url'] = [$node->toUrl('canonical', ['absolute' => TRUE])->toString()];
+          $properties['name'] = [$node->label()];
+          if ($node->hasField('body')) {
+            if (!empty($node->get('body')->value)) {
+              $properties['content'] = [$node->get('body')->value];
+            }
+          }
+          $properties['post-status'] = [($node->isPublished() ? 'published' : 'draft')];
+          $properties['published'] = [\Drupal::service('date.formatter')->format($node->getCreatedTime(), 'html_datetime')];
+          $item->properties = (object) $properties;
+
+          $items[$node->getCreatedTime()] = $item;
+        }
+      }
+    }
+
+    // Add comments.
+    if (\Drupal::moduleHandler()->moduleExists('comment')) {
+      $ids = \Drupal::entityQuery('comment')
+        ->sort('created', 'DESC')
+        ->range($offset, $range)
+        ->execute();
+
+      if (!empty($ids)) {
+        $comments = $this->entityTypeManager()->getStorage('comment')->loadMultiple($ids);
+        /** @var \Drupal\comment\CommentInterface $comment */
+        foreach ($comments as $comment) {
+
+          $item = new \stdClass();
+          $item->type = ['h-entry'];
+
+          $properties = [];
+          $properties['url'] = [$comment->toUrl('canonical', ['absolute' => TRUE])->toString()];
+          $properties['name'] = [$comment->label()];
+          $content = '';
+          if ($comment->hasField('comment_body')) {
+            if (!empty($comment->comment_body->value)) {
+              $comment->get('comment_body')->value;
+            }
+          }
+          // Check if a webmention is connected, if so, get the text from in
+          // into content (currently hardcoded to field_webmention)
+          if (!empty($comment->field_webmention->target_id)) {
+            /** @var \Drupal\indieweb\Entity\WebmentionInterface $webmention */
+            $webmention = \Drupal::entityTypeManager()->getStorage('webmention_entity')->load($comment->field_webmention->target_id);
+            if ($webmention) {
+              if (!empty($webmention->content_text->value)) {
+                $content = check_markup($webmention->content_text->value, 'restricted_html');
+              }
+            }
+          }
+
+          $properties['content'] = [$content];
+          $properties['post-status'] = [($comment->isPublished() ? 'published' : 'draft')];
+          $properties['published'] = [\Drupal::service('date.formatter')->format($comment->getCreatedTime(), 'html_datetime')];
+          $item->properties = (object) $properties;
+
+          $items[$comment->getCreatedTime()] = $item;
+        }
+      }
+    }
+
+    krsort($items);
+    $return = [];
+    foreach ($items as $item) {
+      $return[] = $item;
+    }
+
+    return $return;
+  }
+
 }

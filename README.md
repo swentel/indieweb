@@ -193,6 +193,7 @@ A media endpoint is also available where you can upload files, currently limited
 - RSVP: create an rsvp
 
 Updating existing content is currently limited to change the published status, title and body of nodes and comments.
+You can also query for a list of posts. More functionality will be added when this part of the spec matures.
 
 You can configure this at /admin/config/services/indieweb/micropub
 

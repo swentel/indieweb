@@ -44,7 +44,7 @@ class ApertureClient implements ApertureClientInterface {
               ->fetchField();
 
             if ($cid) {
-              $content .= "\n\n" . t('Comment available at @comment_url', ['@comment_url' => Url::fromRoute('indieweb.comment.canonical', ['comment' => $cid])->toString()]);
+              $content .= "\n\n" . t('Comment available at @comment_url', ['@comment_url' => Url::fromRoute('indieweb.comment.canonical', ['comment' => $cid], ['absolute' => TRUE])->toString()]);
             }
           }
         }
