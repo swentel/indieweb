@@ -2,12 +2,14 @@
 
 namespace Drupal\indieweb\Controller;
 
+use Drupal\comment\CommentInterface;
 use Drupal\comment\Entity\Comment;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Language\LanguageInterface;
 use Drupal\Core\Url;
 use Drupal\datetime\Plugin\Field\FieldType\DateTimeItemInterface;
 use Drupal\node\Entity\Node;
+use Drupal\node\NodeInterface;
 use Drupal\taxonomy\Entity\Term;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -161,9 +163,7 @@ class MicropubController extends ControllerBase {
 
       if ($this->isValidToken($auth_header)) {
         $response_code = 200;
-        $response_message = [
-          'items' => $this->getPostItems(),
-        ];
+        $response_message = $this->getSourceResponse();
       }
       else {
         $response_code = 403;
@@ -1058,108 +1058,175 @@ class MicropubController extends ControllerBase {
   }
 
   /**
-   * Returns a list of post items. This is still experimental, so we keep the
-   * very limited for now.
+   * Returns the source response. This can either be a list of post items, or a
+   * single post with properties.
    *
    * @see https://github.com/indieweb/micropub-extensions/issues/4
    *
-   * @return array $items
-   *   A list of items.
+   * @return array $return.
+   *   Either list of posts or a single item with properties.
    *
    * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
    * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    * @throws \Drupal\Core\Entity\EntityMalformedException
    */
-  protected function getPostItems() {
-    $items = [];
-    $offset = 0;
-    $range = 10;
-
-    $ids = \Drupal::entityQuery('node')
-      ->sort('created', 'DESC')
-      ->range($offset, $range)
-      ->execute();
-
-    // Add nodes.
-    if (\Drupal::moduleHandler()->moduleExists('node')) {
-      if (!empty($ids)) {
-        $nodes = $this->entityTypeManager()->getStorage('node')->loadMultiple($ids);
-        /** @var \Drupal\node\NodeInterface $node */
-        foreach ($nodes as $node) {
-
-          $item = new \stdClass();
-          $item->type = ['h-entry'];
-
-          $properties = [];
-          $properties['url'] = [$node->toUrl('canonical', ['absolute' => TRUE])->toString()];
-          $properties['name'] = [$node->label()];
-          if ($node->hasField('body')) {
-            if (!empty($node->get('body')->value)) {
-              $properties['content'] = [$node->get('body')->value];
-            }
-          }
-          $properties['post-status'] = [($node->isPublished() ? 'published' : 'draft')];
-          $properties['published'] = [\Drupal::service('date.formatter')->format($node->getCreatedTime(), 'html_datetime')];
-          $item->properties = (object) $properties;
-
-          $items[$node->getCreatedTime()] = $item;
-        }
-      }
-    }
-
-    // Add comments.
-    if (\Drupal::moduleHandler()->moduleExists('comment')) {
-      $ids = \Drupal::entityQuery('comment')
-        ->sort('created', 'DESC')
-        ->range($offset, $range)
-        ->execute();
-
-      if (!empty($ids)) {
-        $comments = $this->entityTypeManager()->getStorage('comment')->loadMultiple($ids);
-        /** @var \Drupal\comment\CommentInterface $comment */
-        foreach ($comments as $comment) {
-
-          $item = new \stdClass();
-          $item->type = ['h-entry'];
-
-          $properties = [];
-          $properties['url'] = [$comment->toUrl('canonical', ['absolute' => TRUE])->toString()];
-          $properties['name'] = [$comment->label()];
-          $content = '';
-          if ($comment->hasField('comment_body')) {
-            if (!empty($comment->comment_body->value)) {
-              $comment->get('comment_body')->value;
-            }
-          }
-          // Check if a webmention is connected, if so, get the text from in
-          // into content (currently hardcoded to field_webmention)
-          if (!empty($comment->field_webmention->target_id)) {
-            /** @var \Drupal\indieweb\Entity\WebmentionInterface $webmention */
-            $webmention = \Drupal::entityTypeManager()->getStorage('webmention_entity')->load($comment->field_webmention->target_id);
-            if ($webmention) {
-              if (!empty($webmention->content_text->value)) {
-                $content = check_markup($webmention->content_text->value, 'restricted_html');
-              }
-            }
-          }
-
-          $properties['content'] = [$content];
-          $properties['post-status'] = [($comment->isPublished() ? 'published' : 'draft')];
-          $properties['published'] = [\Drupal::service('date.formatter')->format($comment->getCreatedTime(), 'html_datetime')];
-          $item->properties = (object) $properties;
-
-          $items[$comment->getCreatedTime()] = $item;
-        }
-      }
-    }
-
-    krsort($items);
+  protected function getSourceResponse() {
     $return = [];
-    foreach ($items as $item) {
-      $return[] = $item;
+
+    // Single URL.
+    if (isset($_GET['url'])) {
+
+      $path = str_replace(\Drupal::request()->getSchemeAndHttpHost(), '', $_GET['url']);
+      try {
+        $params = Url::fromUri("internal:" . $path)->getRouteParameters();
+        if (!empty($params) && in_array(key($params), ['comment', 'node'])) {
+
+          /** @var \Drupal\Core\Entity\ContentEntityInterface $entity */
+          $entity = $this->entityTypeManager()->getStorage(key($params))->load($params[key($params)]);
+          if ($entity) {
+
+            $properties = [];
+            switch ($entity->getEntityTypeId()) {
+              case 'node':
+                $properties = $this->getNodeProperties($entity);
+                break;
+              case 'comment':
+                $properties = $this->getCommentProperties($entity);
+                break;
+            }
+            $return = ['properties' => (object) $properties];
+          }
+        }
+      }
+      catch (\Exception $e) {
+        $this->getLogger('indieweb_micropub')->notice('Error in getting url post: @message', ['@message' => $e->getMessage()]);
+      }
+
+    }
+    // List of posts.
+    else {
+      $offset = 0;
+      $range = 10;
+      $items = [];
+
+      // Get nodes.
+      if (\Drupal::moduleHandler()->moduleExists('node')) {
+
+        $ids = \Drupal::entityQuery('node')
+          ->sort('created', 'DESC')
+          ->range($offset, $range)
+          ->execute();
+
+
+        if (!empty($ids)) {
+          $nodes = $this->entityTypeManager()
+            ->getStorage('node')
+            ->loadMultiple($ids);
+          /** @var \Drupal\node\NodeInterface $node */
+          foreach ($nodes as $node) {
+            $item = new \stdClass();
+            $item->type = ['h-entry'];
+            $item->properties = (object) $this->getNodeProperties($node);
+            $items[$node->getCreatedTime()] = $item;
+          }
+        }
+      }
+
+      // Get comments.
+      if (\Drupal::moduleHandler()->moduleExists('comment')) {
+
+        $ids = \Drupal::entityQuery('comment')
+          ->sort('created', 'DESC')
+          ->range($offset, $range)
+          ->execute();
+
+        if (!empty($ids)) {
+          $comments = $this->entityTypeManager()
+            ->getStorage('comment')
+            ->loadMultiple($ids);
+          /** @var \Drupal\comment\CommentInterface $comment */
+          foreach ($comments as $comment) {
+            $item = new \stdClass();
+            $item->type = ['h-entry'];
+            $item->properties = (object) $this->getCommentProperties($comment);
+            $items[$comment->getCreatedTime()] = $item;
+          }
+        }
+      }
+
+      krsort($items);
+      $return = [];
+      foreach ($items as $item) {
+        $return[] = $item;
+      }
+      $return = ['items' => $return];
     }
 
     return $return;
   }
 
+  /**
+   * Get node properties.
+   *
+   * @param \Drupal\node\NodeInterface $node
+   *
+   * @return array $properties
+   *
+   * @throws \Drupal\Core\Entity\EntityMalformedException
+   */
+  private function getNodeProperties(NodeInterface $node) {
+    $properties = [];
+
+    $properties['url'] = [$node->toUrl('canonical', ['absolute' => TRUE])->toString()];
+    $properties['name'] = [$node->label()];
+    if ($node->hasField('body')) {
+      if (!empty($node->get('body')->value)) {
+        $properties['content'] = [$node->get('body')->value];
+      }
+    }
+    $properties['post-status'] = [($node->isPublished() ? 'published' : 'draft')];
+    $properties['published'] = [\Drupal::service('date.formatter')->format($node->getCreatedTime(), 'html_datetime')];
+
+    return $properties;
+  }
+
+  /**
+   * Get comment properties.
+   *
+   * @param \Drupal\comment\CommentInterface $comment
+   *
+   * @return array $properties
+   *
+   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
+   * @throws \Drupal\Core\Entity\EntityMalformedException
+   */
+  private function getCommentProperties(CommentInterface $comment) {
+    $properties = [];
+    $properties['url'] = [$comment->toUrl('canonical', ['absolute' => TRUE])->toString()];
+    $properties['name'] = [$comment->label()];
+    $content = '';
+    if ($comment->hasField('comment_body')) {
+      if (!empty($comment->comment_body->value)) {
+        $comment->get('comment_body')->value;
+      }
+    }
+    // Check if a webmention is connected, if so, get the text from in
+    // into content (currently hardcoded to field_webmention)
+    if (!empty($comment->field_webmention->target_id)) {
+      /** @var \Drupal\indieweb\Entity\WebmentionInterface $webmention */
+      $webmention = \Drupal::entityTypeManager()->getStorage('webmention_entity')->load($comment->field_webmention->target_id);
+      if ($webmention) {
+        if (!empty($webmention->content_text->value)) {
+          $content = check_markup($webmention->content_text->value, 'restricted_html');
+        }
+      }
+    }
+
+    $properties['content'] = [$content];
+    $properties['post-status'] = [($comment->isPublished() ? 'published' : 'draft')];
+    $properties['published'] = [\Drupal::service('date.formatter')->format($comment->getCreatedTime(), 'html_datetime')];
+
+    return $properties;
+  }
 }
