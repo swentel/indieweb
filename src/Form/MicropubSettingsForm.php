@@ -137,6 +137,18 @@ class MicropubSettingsForm extends ConfigFormBase {
       ),
     ];
 
+    $form['general']['micropub_enable_delete'] = [
+      '#title' => $this->t('Enable post deletes'),
+      '#type' => 'checkbox',
+      '#default_value' => $config->get('micropub_enable_delete'),
+      '#description' => $this->t('Allow sending delete requests to delete any node, comment or webmention.'),
+      '#states' => array(
+        'visible' => array(
+          ':input[name="micropub_enable"]' => array('checked' => TRUE),
+        ),
+      ),
+    ];
+
     $form['general']['micropub_enable_source'] = [
       '#title' => $this->t('Enable post queries'),
       '#type' => 'checkbox',
@@ -444,6 +456,7 @@ class MicropubSettingsForm extends ConfigFormBase {
     $config
       ->set('micropub_enable', $form_state->getValue('micropub_enable'))
       ->set('micropub_enable_update', $form_state->getValue('micropub_enable_update'))
+      ->set('micropub_enable_delete', $form_state->getValue('micropub_enable_delete'))
       ->set('micropub_enable_source', $form_state->getValue('micropub_enable_source'))
       ->set('micropub_add_header_link', $form_state->getValue('micropub_add_header_link'))
       ->set('micropub_media_enable', $form_state->getValue('micropub_media_enable'))

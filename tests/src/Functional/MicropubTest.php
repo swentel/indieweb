@@ -868,6 +868,29 @@ class MicropubTest extends IndiewebBrowserTestBase {
       $this->assertTrue($nid, 'No article node found');
     }
 
+    // Test delete.
+    $delete = [
+      'action' => 'delete',
+      'url' => '/node/' . $nid,
+    ];
+    $code = $this->sendMicropubRequest($delete, 'is_in_valid', FALSE, 'json');
+    self::assertEquals(400, $code);
+
+    $this->drupalLogin($this->adminUser);
+    $edit = ['micropub_enable_delete' => 1];
+    $this->drupalPostForm('admin/config/services/indieweb/micropub', $edit, 'Save configuration');
+    $this->drupalLogout();
+
+    $code = $this->sendMicropubRequest($delete, 'is_in_valid', FALSE, 'json');
+    self::assertEquals(403, $code);
+
+    $nid = \Drupal::database()->query("SELECT nid FROM {node_field_data} WHERE nid = :nid", [':nid' => $nid])->fetchField();
+    self::assertTrue($nid);
+    $code = $this->sendMicropubRequest($delete, 'is_valid', FALSE, 'json');
+    self::assertEquals(200, $code);
+    $nid = \Drupal::database()->query("SELECT nid FROM {node_field_data} WHERE nid = :nid", [':nid' => $nid])->fetchField();
+    self::assertFalse($nid);
+
   }
 
 }

@@ -99,6 +99,9 @@ indieweb.micropub:
     micropub_enable_update:
       type: boolean
       label: 'Enable post updates'
+    micropub_enable_delete:
+      type: boolean
+      label: 'Enable post deletes'
     micropub_enable_source:
       type: boolean
       label: 'Enable post queries'

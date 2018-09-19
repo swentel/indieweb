@@ -81,6 +81,7 @@ class MicropubController extends ControllerBase {
    * @throws \Drupal\Core\Entity\EntityMalformedException
    * @throws \Drupal\Core\Entity\EntityStorageException
    * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    */
   public function postEndpoint(Request $request) {
     $this->config = \Drupal::config('indieweb.micropub');
@@ -188,6 +189,9 @@ class MicropubController extends ControllerBase {
         $this->input = $micropub_request->update;
         $this->object_url = $micropub_request->url;
       }
+      elseif ($this->action == 'delete') {
+        $this->object_url = $micropub_request->url;
+      }
       else {
         $mf2 = $micropub_request->toMf2();
         $this->object_type = !empty($mf2['type'][0]) ? $mf2['type'][0] : '';
@@ -199,6 +203,46 @@ class MicropubController extends ControllerBase {
       $description = $micropub_request->error_description ? $micropub_request->error_description : 'Unknown error';
       $this->getLogger('indieweb_micropub')->notice('Error parsing incoming request: @message', ['@message' => $description]);
       return new JsonResponse('Bad request', 400);
+    }
+
+    // Attempt to delete a node, comment or webmention.
+    if ($this->action == 'delete' && $this->config->get('micropub_enable_delete') && !empty($this->object_url)) {
+
+      // Get authorization header, response early if none found.
+      $auth_header = $this->getAuthorizationHeader();
+      if (!$auth_header) {
+        return new JsonResponse('', 401);
+      }
+
+      // Validate token. Return early if it's not valid.
+      $valid_token = $this->isValidToken($auth_header);
+      if (!$valid_token) {
+        return new JsonResponse('', 403);
+      }
+
+      $response_message = '';
+      $response_code = 404;
+
+      $path = str_replace(\Drupal::request()->getSchemeAndHttpHost(), '', $this->object_url);
+      try {
+        $params = Url::fromUri("internal:" . $path)->getRouteParameters();
+
+        if (!empty($params) && in_array(key($params), ['comment', 'node', 'webmention_entity'])) {
+
+          /** @var \Drupal\Core\Entity\ContentEntityInterface $entity */
+          $entity = $this->entityTypeManager()->getStorage(key($params))->load($params[key($params)]);
+          if ($entity) {
+            $response_message = '';
+            $response_code = 200;
+            $entity->delete();
+          }
+        }
+      }
+      catch (\Exception $e) {
+        $this->getLogger('indieweb_micropub')->notice('Error in deleting post: @message', ['@message' => $e->getMessage()]);
+      }
+
+      return new Response($response_message, $response_code);
     }
 
     // Attempt to update a node or comment.
