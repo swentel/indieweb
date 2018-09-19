@@ -135,6 +135,9 @@ class MicropubController extends ControllerBase {
           'syndicate-to' => $this->getSyndicationTargets(),
         ];
 
+        // Get post-types.
+        $response_message['post-types'] = $this->getPostTypes();
+
         // Check media endpoint.
         if ($this->config->get('micropub_media_enable')) {
           $response_message['media-endpoint'] = Url::fromRoute('indieweb.micropub.media.endpoint', [], ['absolute' => TRUE])->toString();
@@ -1035,6 +1038,36 @@ class MicropubController extends ControllerBase {
         indieweb_webmention_create_queue_item($source, $target, $this->comment->id(), 'comment');
       }
     }
+  }
+
+  /**
+   * Get post types.
+   */
+  protected function getPostTypes() {
+    $post_types = [];
+
+    foreach (['article', 'node', 'like', 'reply', 'repost', 'bookmark', 'event', 'rsvp'] as $type) {
+      if ($this->config->get($type . '_create_node')) {
+        $post_types[] = (object) array(
+          'type' => $type,
+          'name' => ucfirst($type),
+        );
+      }
+    }
+
+    $post_types[] = (object) array(
+      'type' => 'webmention',
+      'name' => t('Mentions'),
+    );
+
+    if (\Drupal::moduleHandler()->moduleExists('comment')) {
+      $post_types[] = (object) array(
+        'type' => 'comment',
+        'name' => t('Commments'),
+      );
+    }
+
+    return $post_types;
   }
 
   /**
