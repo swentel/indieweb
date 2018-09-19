@@ -985,6 +985,7 @@ function indieweb_webmention_entity_insert(WebmentionInterface $webmention) {
                 'entity_id' => $node->id(),
                 'entity_type' => 'node',
                 'pid' => $pid,
+                'created' > $webmention->getCreatedTime(),
                 'comment_type' => $comment_type,
                 'field_name' => $comment_node_comment_field_name,
                 $comment_comment_webmention_field_name => [
