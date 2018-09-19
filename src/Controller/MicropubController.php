@@ -1046,7 +1046,7 @@ class MicropubController extends ControllerBase {
   protected function getPostTypes() {
     $post_types = [];
 
-    foreach (['article', 'node', 'like', 'reply', 'repost', 'bookmark', 'event', 'rsvp'] as $type) {
+    foreach (['article', 'note', 'like', 'reply', 'repost', 'bookmark', 'event', 'rsvp'] as $type) {
       if ($this->config->get($type . '_create_node')) {
         $post_types[] = (object) array(
           'type' => $type,
@@ -1054,11 +1054,6 @@ class MicropubController extends ControllerBase {
         );
       }
     }
-
-    $post_types[] = (object) array(
-      'type' => 'webmention',
-      'name' => t('Mentions'),
-    );
 
     if (\Drupal::moduleHandler()->moduleExists('comment')) {
       $post_types[] = (object) array(
@@ -1141,15 +1136,40 @@ class MicropubController extends ControllerBase {
       $offset = 0;
       $range = 10;
       $items = [];
+      $filter = '';
+      $get_nodes = TRUE;
+      $get_comments = TRUE;
+
+      if (isset($_GET['post-type']) && !empty($_GET['post-type'])) {
+        $type = $_GET['post-type'];
+        if ($type == 'comment') {
+          $get_nodes = FALSE;
+          $filter = 'comment';
+        }
+        else {
+          $post_types = $this->getPostTypes();
+          foreach ($post_types as $post_type) {
+            if ($post_type->type == $type) {
+              $get_comments = FALSE;
+              $filter = $this->config->get($type . '_node_type');
+              break;
+            }
+          }
+        }
+      }
 
       // Get nodes.
-      if (\Drupal::moduleHandler()->moduleExists('node')) {
+      if (\Drupal::moduleHandler()->moduleExists('node') && $get_nodes) {
 
-        $ids = \Drupal::entityQuery('node')
+        $query = \Drupal::entityQuery('node')
           ->sort('created', 'DESC')
-          ->range($offset, $range)
-          ->execute();
+          ->range($offset, $range);
 
+        if ($filter) {
+          $query->condition('type', $filter);
+        }
+
+        $ids = $query->execute();
 
         if (!empty($ids)) {
           $nodes = $this->entityTypeManager()
@@ -1166,12 +1186,13 @@ class MicropubController extends ControllerBase {
       }
 
       // Get comments.
-      if (\Drupal::moduleHandler()->moduleExists('comment')) {
+      if (\Drupal::moduleHandler()->moduleExists('comment') && $get_comments) {
 
-        $ids = \Drupal::entityQuery('comment')
+        $query = \Drupal::entityQuery('comment')
           ->sort('created', 'DESC')
-          ->range($offset, $range)
-          ->execute();
+          ->range($offset, $range);
+
+        $ids = $query->execute();
 
         if (!empty($ids)) {
           $comments = $this->entityTypeManager()
