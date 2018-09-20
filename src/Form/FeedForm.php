@@ -3,7 +3,6 @@
 namespace Drupal\indieweb\Form;
 
 use Drupal\Core\Cache\Cache;
-use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\ContentEntityTypeInterface;
 use Drupal\Core\Entity\EntityForm;
 use Drupal\Core\Form\FormStateInterface;
@@ -87,6 +86,18 @@ class FeedForm extends EntityForm {
       '#title' => $this->t('Expose Atom feed'),
       '#default_value' => $feed->exposeAtomFeed(),
       '#description' => $this->t('This uses https://granary.io by default.'),
+    ];
+
+    $form['hub'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Use a hub'),
+      '#default_value' => $feed->useHub(),
+      '#description' => $this->t('This uses https://bridgy-fed.superfeedr.com/ by default.'),
+      '#states' => array(
+        'visible' => array(
+          ':input[name="atom"]' => array('checked' => TRUE),
+        ),
+      ),
     ];
 
     $form['jf2'] = [

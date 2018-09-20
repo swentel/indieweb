@@ -97,6 +97,13 @@ class Feed extends ConfigEntityBase implements FeedInterface {
   protected $atom;
 
   /**
+   * Whether to use a hub or not.
+   *
+   * @var bool
+   */
+  protected $hub;
+
+  /**
    * Whether to create a jf2 feed.
    *
    * @var bool
@@ -171,6 +178,13 @@ class Feed extends ConfigEntityBase implements FeedInterface {
    */
   public function exposeAtomHeaderLink() {
     return $this->relHeaderAtom;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function useHub() {
+    return $this->hub;
   }
 
   /**

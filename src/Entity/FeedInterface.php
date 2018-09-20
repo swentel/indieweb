@@ -45,6 +45,13 @@ interface FeedInterface extends ConfigEntityInterface {
   public function exposeAtomHeaderLink();
 
   /**
+   * Whether to use a hub.
+   *
+   * @return mixed
+   */
+  public function useHub();
+
+  /**
    * Whether to expose the application/jf2feed+json header link.
    *
    * @return bool

@@ -22,6 +22,9 @@ indieweb.indieweb_feed.*:
     atom:
       type: boolean
       label: 'Whether to expose an Atom feed'
+    hub:
+      type: boolean
+      label: 'Whether to use a hub'
     feedTitle:
       type: label
       label: 'Feed title'
