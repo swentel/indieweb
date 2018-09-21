@@ -1140,6 +1140,7 @@ class MicropubController extends ControllerBase {
       $get_nodes = TRUE;
       $get_comments = TRUE;
 
+      // Filter on post-type.
       if (isset($_GET['post-type']) && !empty($_GET['post-type'])) {
         $type = $_GET['post-type'];
         if ($type == 'comment') {
@@ -1156,6 +1157,11 @@ class MicropubController extends ControllerBase {
             }
           }
         }
+      }
+
+      // Override limit.
+      if (isset($_GET['limit']) && is_numeric($_GET['limit']) && $_GET['limit'] > 0 && $_GET['limit'] <= 100) {
+        $range = $_GET['limit'];
       }
 
       // Get nodes.
