@@ -316,12 +316,12 @@ function _indieweb_entity_form_alter(&$form, FormStateInterface $form_state) {
       '#group' => 'advanced',
     ];
 
-    $channels = indieweb_get_publishing_channels();
+    $channels = indieweb_get_publishing_channels(TRUE);
     $form['indieweb']['indieweb_publish_channels'] = [
       '#type' => 'checkboxes',
-      '#options' => indieweb_get_publishing_channels(),
-      '#default_value' => [],
-      '#access' => !empty($channels),
+      '#options' => isset($channels['options']) ? $channels['options'] : [],
+      '#default_value' => isset($channels['default']) ? $channels['default'] : [],
+      '#access' => !empty($channels['options']),
     ];
 
     $options = [];
@@ -1087,9 +1087,13 @@ function indieweb_get_syndications($entity_id, $entity_type_id) {
 /**
  * Returns the publishing channels.
  *
+ * @param boolean $return_options_and_defaults
+ *   Whether to return the channels as an array with 'options' key and
+ *   'default' key.
+ *
  * @return array
  */
-function indieweb_get_publishing_channels() {
+function indieweb_get_publishing_channels($return_options_and_defaults = FALSE) {
   $channels = [];
   $config = \Drupal::config('indieweb.publish')->get('channels');
   if (!empty($config)) {
@@ -1099,7 +1103,15 @@ function indieweb_get_publishing_channels() {
       if (!empty($line)) {
         $name_url = explode('|', $line);
         if (!empty($name_url[0]) && !empty($name_url[1])) {
-          $channels[$name_url[1]] = $name_url[0];
+          if ($return_options_and_defaults) {
+            $channels['options'][$name_url[1]] = $name_url[0];
+            if (isset($name_url[2]) && !empty($name_url[2]) && $name_url[2] == '1') {
+              $channels['default'][] = $name_url[1];
+            }
+          }
+          else {
+            $channels[$name_url[1]] = $name_url[0];
+          }
         }
       }
     }
