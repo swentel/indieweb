@@ -891,7 +891,7 @@ function _indieweb_extra_fields_display(array &$build, EntityInterface $entity, 
       }
 
       $build['indieweb_syndication'] = [
-        '#theme' => 'item_list',
+        '#theme' => 'item_list__indieweb_syndication',
         '#items' => $items,
         '#wrapper_attributes' => [
           'class' => ['indieweb-syndication-list'],
