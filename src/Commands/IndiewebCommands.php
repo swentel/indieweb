@@ -32,6 +32,7 @@ class IndiewebCommands extends DrushCommands {
    * @aliases iema,indieweb-externalauth-map-account
    *
    * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    */
   public function externalauthMapAccount($uid, $domain) {
     module_load_include('inc', 'indieweb', 'indieweb.drush');

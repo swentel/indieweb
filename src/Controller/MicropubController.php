@@ -1135,6 +1135,7 @@ class MicropubController extends ControllerBase {
     else {
       $offset = 0;
       $range = 10;
+      $after = 1;
       $items = [];
       $filter = '';
       $get_nodes = TRUE;
@@ -1162,6 +1163,12 @@ class MicropubController extends ControllerBase {
       // Override limit.
       if (isset($_GET['limit']) && is_numeric($_GET['limit']) && $_GET['limit'] > 0 && $_GET['limit'] <= 100) {
         $range = $_GET['limit'];
+      }
+
+      // Override offset.
+      if (isset($_GET['after']) && is_numeric($_GET['after'])) {
+        $offset = $range * $_GET['after'];
+        $after = $_GET['after'] + 1;
       }
 
       // Get nodes.
@@ -1215,11 +1222,15 @@ class MicropubController extends ControllerBase {
       }
 
       krsort($items);
-      $return = [];
+      $items_sorted = [];
       foreach ($items as $item) {
-        $return[] = $item;
+        $items_sorted[] = $item;
       }
-      $return = ['items' => $return];
+      $return['items'] = $items_sorted;
+
+      if (!empty($items_sorted)) {
+        $return['paging'] = (object) array('after' => $after);
+      }
     }
 
     return $return;

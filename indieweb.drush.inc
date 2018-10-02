@@ -39,6 +39,7 @@ function drush_indieweb_send_webmentions() {
  * @param string $domain
  *
  * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+ * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
  */
 function drush_indieweb_externalauth_map_account($uid = 0, $domain = '') {
 
