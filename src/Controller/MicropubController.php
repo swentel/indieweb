@@ -452,7 +452,7 @@ class MicropubController extends ControllerBase {
 
             // This can be a reply on a webmention. Check if there is a comment
             // connected with it.
-            if (key($params) == 'webmention_entity') {
+            if (!empty($params) && key($params) == 'webmention_entity') {
               /** @var \Drupal\indieweb\Entity\WebmentionInterface $webmention_target */
               $comment_comment_webmention_field_name = $comment_config->get('comment_create_webmention_reference_field');
               $table_name = 'comment__' . $comment_comment_webmention_field_name;
@@ -483,7 +483,7 @@ class MicropubController extends ControllerBase {
             // This can be a reply on a comment, or set via a webmention in the
             // previous if statement. Get the node to attach the comment there
             // and set pid.
-            if (key($params) == 'comment') {
+            if (!empty($params) && key($params) == 'comment') {
               /** @var \Drupal\comment\CommentInterface $comment */
               $comment = \Drupal::entityTypeManager()->getStorage('comment')->load($params['comment']);
               if ($comment && $comment->getCommentedEntityTypeId() == 'node') {
