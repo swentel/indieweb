@@ -173,6 +173,41 @@ class MicropubSettingsForm extends ConfigFormBase {
       ),
     ];
 
+    $vocabularies = [];
+    if ($taxonomy_module_enabled = \Drupal::moduleHandler()->moduleExists('taxonomy')) {
+      $all_vocabularies = \Drupal::entityTypeManager()->getStorage('taxonomy_vocabulary')->loadMultiple();
+      foreach ($all_vocabularies as $vocabulary) {
+        $vocabularies[$vocabulary->id()] = $vocabulary->label();
+      }
+    }
+    $form['general']['micropub_enable_category'] = [
+      '#title' => $this->t('Enable terms request'),
+      '#type' => 'checkbox',
+      '#default_value' => $config->get('micropub_enable_category'),
+      '#description' => $this->t('Allow sending a request to return a list of terms.'),
+      '#disabled' => !$taxonomy_module_enabled || empty($vocabularies),
+      '#states' => array(
+        'visible' => array(
+          ':input[name="micropub_enable"]' => array('checked' => TRUE),
+        ),
+      ),
+    ];
+
+    $form['general']['micropub_category_vocabulary'] = [
+      '#title' => $this->t('Vocabulary'),
+      '#type' => 'select',
+      '#options' => $vocabularies,
+      '#default_value' => $config->get('micropub_category_vocabulary'),
+      '#description' => $this->t('Select the vocabulary to return the terms from.'),
+      '#disabled' => !$taxonomy_module_enabled || empty($vocabularies),
+      '#states' => array(
+        'visible' => array(
+          ':input[name="micropub_enable"]' => array('checked' => TRUE),
+          ':input[name="micropub_enable_category"]' => array('checked' => TRUE),
+        ),
+      ),
+    ];
+
     $form['general']['micropub_me'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Me'),
@@ -460,6 +495,8 @@ class MicropubSettingsForm extends ConfigFormBase {
       ->set('micropub_enable_source', $form_state->getValue('micropub_enable_source'))
       ->set('micropub_add_header_link', $form_state->getValue('micropub_add_header_link'))
       ->set('micropub_media_enable', $form_state->getValue('micropub_media_enable'))
+      ->set('micropub_enable_category', $form_state->getValue('micropub_enable_category'))
+      ->set('micropub_category_vocabulary', $form_state->getValue('micropub_category_vocabulary'))
       ->set('micropub_me', $form_state->getValue('micropub_me'))
       ->set('micropub_log_payload', $form_state->getValue('micropub_log_payload'));
 

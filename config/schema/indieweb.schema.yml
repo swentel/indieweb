@@ -96,6 +96,9 @@ indieweb.micropub:
     micropub_enable:
       type: boolean
       label: 'Enable micropub endpoint'
+    micropub_add_header_link:
+      type: boolean
+      label: 'Expose micropub header link'
     micropub_enable_update:
       type: boolean
       label: 'Enable post updates'
@@ -105,9 +108,12 @@ indieweb.micropub:
     micropub_enable_source:
       type: boolean
       label: 'Enable post queries'
-    micropub_add_header_link:
+    micropub_enable_category:
       type: boolean
-      label: 'Expose micropub header link'
+      label: 'Enable category request'
+    micropub_category_vocabulary:
+      type: string
+      label: 'The vocabulary to get the terms for'
     micropub_media_enable:
       type: boolean
       label: 'Enable micropub media endpoint'

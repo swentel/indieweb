@@ -155,7 +155,7 @@ class MicropubTest extends IndiewebBrowserTestBase {
     $this->drupalGet('indieweb/micropub/media');
     $this->assertSession()->statusCodeEquals(404);
 
-    // Enable the endpoints.
+    // Enable the main micropub endpoint.
     $this->drupalLogin($this->adminUser);
     $this->drupalPostForm('admin/config/services/indieweb/micropub', ['micropub_enable' => 1, 'micropub_add_header_link' => 1, 'micropub_media_enable' => 1], 'Save configuration');
     $this->drupalGet('<front>');
@@ -167,6 +167,8 @@ class MicropubTest extends IndiewebBrowserTestBase {
     $this->drupalGet('indieweb/micropub', ['query' => ['q' => 'config']]);
     $this->assertSession()->statusCodeEquals(401);
     $this->drupalGet('indieweb/micropub', ['query' => ['q' => 'source']]);
+    $this->assertSession()->statusCodeEquals(404);
+    $this->drupalGet('indieweb/micropub', ['query' => ['q' => 'category']]);
     $this->assertSession()->statusCodeEquals(404);
 
     $this->drupalLogout();
@@ -200,6 +202,10 @@ class MicropubTest extends IndiewebBrowserTestBase {
     $this->assertNodeCount(0, 'like');
     $this->assertNodeCount(0, 'article');
     $this->assertNodeCount(0, 'bookmark');
+
+    // ----------------------------------------------------------------
+    // q=config tests.
+    // ----------------------------------------------------------------
 
     // Check q=config with invalid token, should be 403.
     $auth = 'Bearer invalid_token';
@@ -238,7 +244,10 @@ class MicropubTest extends IndiewebBrowserTestBase {
       $this->assertTrue($nid, 'No page node found');
     }
 
+    // ----------------------------------------------------------------
     // q=source tests.
+    // ----------------------------------------------------------------
+
     $this->drupalLogin($this->adminUser);
     $edit = ['micropub_enable_source' => 1];
     $this->drupalPostForm('admin/config/services/indieweb/micropub', $edit, 'Save configuration');
@@ -255,7 +264,10 @@ class MicropubTest extends IndiewebBrowserTestBase {
     $this->assertSession()->statusCodeEquals(200);
     $this->assertSession()->responseContains('items');
 
-    // Test update.
+    // ----------------------------------------------------------------
+    // Update tests.
+    // ----------------------------------------------------------------
+
     $update = [
       'action' => 'update',
       'url' => '/node/' . $node->id(),
@@ -289,11 +301,12 @@ class MicropubTest extends IndiewebBrowserTestBase {
     $node_published_again = \Drupal::entityTypeManager()->getStorage('node')->loadUnchanged($nid);
     self::assertTrue($node_published_again->isPublished());
 
+    // ----------------------------------------------------------------
+    // all post types
+    // ----------------------------------------------------------------
+
     // Try to send article, should be 400.
     $code = $this->sendMicropubRequest($this->article);
-    self::assertEquals(400, $code);
-    // Try to send like, should be 400.
-    $code = $this->sendMicropubRequest($this->like);
     self::assertEquals(400, $code);
 
     // Test articles.
@@ -745,7 +758,10 @@ class MicropubTest extends IndiewebBrowserTestBase {
       $this->assertTrue($nid, 'No event node found');
     }
 
-    // Test hooks.
+    // ----------------------------------------------------------------
+    // test hooks
+    // ----------------------------------------------------------------
+
     $this->drupalLogin($this->adminUser);
     $edit = [
       'note_status' => 1,
@@ -868,7 +884,33 @@ class MicropubTest extends IndiewebBrowserTestBase {
       $this->assertTrue($nid, 'No article node found');
     }
 
-    // Test delete.
+    // ----------------------------------------------------------------
+    // q=category tests.
+    // ----------------------------------------------------------------
+
+    $this->drupalLogin($this->adminUser);
+    // tags is the only vocabulary, so it will be selected automatically.
+    $edit = ['micropub_enable_category' => 1];
+    $this->drupalPostForm('admin/config/services/indieweb/micropub', $edit, 'Save configuration');
+    $this->drupalLogout();
+
+    $auth = 'Bearer invalid_token';
+    $headers = ['Accept' => 'application/json', 'Authorization' => $auth,];
+    $this->drupalGet('indieweb/micropub', ['query' => ['q' => 'category']], $headers);
+    $this->assertSession()->statusCodeEquals(403);
+
+    $auth = 'Bearer is_valid';
+    $headers = ['Accept' => 'application/json', 'Authorization' => $auth,];
+    $this->drupalGet('indieweb/micropub', ['query' => ['q' => 'category']], $headers);
+    $this->assertSession()->statusCodeEquals(200);
+    $this->assertSession()->responseContains('tag 1');
+    $this->assertSession()->responseContains('tag 2');
+    $this->assertSession()->responseContains('another tag');
+
+    // ----------------------------------------------------------------
+    // Delete tests.
+    // ----------------------------------------------------------------
+
     $delete = [
       'action' => 'delete',
       'url' => '/node/' . $nid,

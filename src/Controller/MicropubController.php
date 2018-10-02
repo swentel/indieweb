@@ -175,6 +175,31 @@ class MicropubController extends ControllerBase {
       return new JsonResponse($response_message, $response_code);
     }
 
+    // q=category request.
+    if (isset($_GET['q']) && $_GET['q'] == 'category') {
+
+      // Early response when this is not enabled.
+      if (!$this->config->get('micropub_enable_category')) {
+        return new JsonResponse('', 404);
+      }
+
+      // Get authorization header, response early if none found.
+      $auth_header = $this->getAuthorizationHeader();
+      if (!$auth_header) {
+        return new JsonResponse('', 401);
+      }
+
+      if ($this->isValidToken($auth_header)) {
+        $response_code = 200;
+        $response_message = $this->getCategoryResponse();
+      }
+      else {
+        $response_code = 403;
+      }
+
+      return new JsonResponse($response_message, $response_code);
+    }
+
     // Indigenous sends POST vars along with multipart, we use all().
     if (strpos($request->headers->get('Content-Type'), 'multipart/form-data') !== FALSE) {
       $input = $request->request->all();
@@ -1083,6 +1108,26 @@ class MicropubController extends ControllerBase {
     }
 
     return $syndication_targets;
+  }
+
+  /**
+   * Gets category response: return a list of terms.
+   *
+   * @return array $terms
+   *   A list of terms.
+   */
+  protected function getCategoryResponse() {
+    $vocabulary = $this->config->get('micropub_category_vocabulary');
+
+    $terms = \Drupal::database()
+      ->select('taxonomy_term_field_data', 't')
+      ->fields('t', ['name'])
+      ->condition('vid', $vocabulary)
+      ->orderBy('name', 'ASC')
+      ->execute()
+      ->fetchCol('name');
+
+    return $terms;
   }
 
   /**

@@ -1,9 +1,11 @@
 micropub_enable: false
+micropub_add_header_link: true
 micropub_enable_update: false
 micropub_enable_delete: false
 micropub_enable_source: false
-micropub_add_header_link: true
 micropub_media_enable: false
+micropub_enable_category: false
+micropub_category_vocabulary: ''
 micropub_me: ''
 micropub_log_payload: false
 note_create_node: false
