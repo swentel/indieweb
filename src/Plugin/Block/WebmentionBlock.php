@@ -24,6 +24,7 @@ class WebmentionBlock extends BlockBase {
     return [
       'show_likes' => TRUE,
       'show_reposts' => FALSE,
+      'show_replies' => FALSE,
       'show_avatar' => TRUE,
       'show_created' => FALSE,
       'number_of_posts' => 10,
@@ -52,18 +53,22 @@ class WebmentionBlock extends BlockBase {
       '#default_value' => $this->configuration['show_reposts'],
     ];
 
+    $form['webmentions']['show_replies'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Replies'),
+      '#default_value' => $this->configuration['show_replies'],
+    ];
+
     $form['webmentions']['show_avatar'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('Show avatar'),
       '#default_value' => $this->configuration['show_avatar'],
-      '#description' => $this->t('This will only show up if summary is enabled.'),
     ];
 
     $form['webmentions']['show_created'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('Show created time'),
       '#default_value' => $this->configuration['show_created'],
-      '#description' => $this->t('This will only show up if summary is enabled.'),
     ];
 
     $form['webmentions']['number_of_posts'] = [
@@ -83,6 +88,7 @@ class WebmentionBlock extends BlockBase {
     $values = $form_state->getValue('webmentions');
     $this->configuration['show_likes'] = $values['show_likes'];
     $this->configuration['show_reposts'] = $values['show_reposts'];
+    $this->configuration['show_replies'] = $values['show_replies'];
     $this->configuration['show_avatar'] = $values['show_avatar'];
     $this->configuration['show_created'] = $values['show_created'];
     $this->configuration['number_of_posts'] = $values['number_of_posts'];
@@ -97,7 +103,11 @@ class WebmentionBlock extends BlockBase {
     $types = [
       'like-of' => 'like-of',
       'repost-of' => 'repost-of',
+      'in-reply-to' => 'in-reply-to',
     ];
+    if (!$this->configuration['show_replies']) {
+      unset($types['in-reply-to']);
+    }
     if (!$this->configuration['show_likes']) {
       unset($types['like-of']);
     }
