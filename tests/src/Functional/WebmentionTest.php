@@ -116,6 +116,7 @@ class WebmentionTest extends IndiewebBrowserTestBase {
    * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
    * @throws \Drupal\Core\Entity\EntityMalformedException
    * @throws \Drupal\Core\Entity\EntityStorageException
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    */
   public function testSendingWebmention() {
 
@@ -252,10 +253,42 @@ class WebmentionTest extends IndiewebBrowserTestBase {
   }
 
   /**
+   * Test webmention notify block form.
+   *
+   * @throws \Behat\Mink\Exception\ExpectationException
+   */
+  public function testWebmentionNotifyBlock() {
+
+    $this->drupalLogin($this->adminUser);
+    $this->enableWebmention();
+    $this->placeBlock('system_messages_block', ['region' => 'content', 'label' => 'Messages', 'id' => 'messages']);
+    $this->placeBlock('indieweb_webmention_notify', ['region' => 'content', 'label' => 'Notify', 'id' => 'webmention_notify']);
+    $this->createPage();
+    $this->drupalLogout();
+
+    $this->drupalGet('node/1');
+    $this->assertSession()->responseContains('Have you written a response to this? Let me know the URL');
+
+    $edit = ['source' => 'https://example.com/webmention-source-url'];
+    $this->drupalPostForm('node/1', $edit, 'Send webmention');
+    $this->assertSession()->responseContains('Thanks for letting me know!');
+    $query = 'SELECT * FROM {queue} WHERE name = :name';
+    $records = \Drupal::database()->query($query, [':name' => WEBMENTION_QUEUE_NAME]);
+    foreach ($records as $record) {
+      $data = unserialize($record->data);
+      $this->assertTrue($data['source'] == $edit['source']);
+      $this->assertTrue(strpos($data['target'], 'node/1') !== FALSE);
+    }
+
+  }
+
+  /**
    * Get latest webmention.
    *
    * @return \Drupal\indieweb\Entity\WebmentionInterface|null
+   *
    * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    */
   protected function getLatestWebmention() {
     $webmention_id = \Drupal::database()->query("SELECT id FROM {webmention_entity} ORDER by id DESC limit 1")->fetchField();

@@ -56,7 +56,7 @@ class webmentionNotifyForm extends FormBase {
     $source = $form_state->getValue('source');
     $target = $form_state->getValue('target');
     indieweb_webmention_create_queue_item($source, $target);
-    $this->t('Thanks for letting me know!');
+    $this->messenger()->addMessage($this->t('Thanks for letting me know!'));
   }
 
 }
