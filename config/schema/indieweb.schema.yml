@@ -72,6 +72,9 @@ indieweb.microformats:
     e_content:
       type: boolean
       label: 'Enable microformat e-content class'
+    e_content_fields:
+      type: text
+      label: 'Other fields than body'
     e_content_comment:
       type: boolean
       label: 'Enable microformat e-content class on comment'

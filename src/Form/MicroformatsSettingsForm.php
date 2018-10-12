@@ -44,21 +44,21 @@ class MicroformatsSettingsForm extends ConfigFormBase {
 
     $form['classes']['h_entry'] = [
       '#type' => 'checkbox',
-      '#title' => $this->t('<em>h-entry</em> on node wrappers.'),
+      '#title' => $this->t('<em>h-entry</em> on node wrappers'),
       '#default_value' => $config->get('h_entry'),
       '#description' => $this->t('This will be added on full, teaser and microformat view mode.'),
     ];
 
     $form['classes']['h_entry_comment'] = [
       '#type' => 'checkbox',
-      '#title' => $this->t('<em>h-entry</em> on comment wrappers.'),
+      '#title' => $this->t('<em>h-entry</em> on comment wrappers'),
       '#default_value' => $config->get('h_entry_comment'),
       '#description' => $this->t('This will be added on the microformat view mode on comment/indieweb/id'),
     ];
 
     $form['classes']['h_event'] = [
       '#type' => 'select',
-      '#title' => $this->t('<em>h-event</em> on node wrappers.'),
+      '#title' => $this->t('<em>h-event</em> on node wrappers'),
       '#default_value' => $config->get('h_event'),
       '#options' => ['' => $this->t('No event')] + node_type_get_names(),
       '#description' => $this->t('h-event for an event node type. This will be added on full, teaser and microformat view mode.<br />This will also add dt-start and dt-end classes on the date range fields. (date fields are not supported)'),
@@ -66,20 +66,27 @@ class MicroformatsSettingsForm extends ConfigFormBase {
 
     $form['classes']['e_content'] = [
       '#type' => 'checkbox',
-      '#title' => $this->t('<em>e-content</em> on standard body fields.'),
+      '#title' => $this->t('<em>e-content</em> on standard body fields'),
       '#default_value' => $config->get('e_content'),
+    ];
+
+    $form['classes']['e_content_fields'] = [
+      '#type' => 'textarea',
+      '#title' => $this->t('<em>e-content</em> on other textarea fields'),
+      '#description' => $this->t('Use this to define other fields than "body" where the "e-content" class should be applied to.<br />Note, your content type should only contain one of those fields, including body!'),
+      '#default_value' => $config->get('e_content_fields'),
     ];
 
     $form['classes']['e_content_comment'] = [
       '#type' => 'checkbox',
-      '#title' => $this->t('<em>e-content</em> on standard comment body fields.'),
+      '#title' => $this->t('<em>e-content</em> on standard comment body fields'),
       '#default_value' => $config->get('e_content_comment'),
       '#access' => $comment_enabled,
     ];
 
     $form['classes']['u_photo'] = [
       '#type' => 'checkbox',
-      '#title' => $this->t('<em>u-photo</em> on image styles.'),
+      '#title' => $this->t('<em>u-photo</em> on image styles'),
       '#default_value' => $config->get('u_photo'),
     ];
 
@@ -99,7 +106,7 @@ class MicroformatsSettingsForm extends ConfigFormBase {
 
     $form['classes']['u_video'] = [
       '#type' => 'checkbox',
-      '#title' => $this->t('<em>u-video</em> on all videos.'),
+      '#title' => $this->t('<em>u-video</em> on all videos'),
       '#default_value' => $config->get('u_video'),
     ];
 
@@ -147,7 +154,8 @@ class MicroformatsSettingsForm extends ConfigFormBase {
       ->set('post_metadata', $form_state->getValue('post_metadata'))
       ->set('post_metadata_comment', $form_state->getValue('post_metadata_comment'))
       ->set('p_name_exclude_node_type', $form_state->getValue('p_name_exclude_node_type'))
-      ->set('e_content', $form_state->getValue('h_entry'))
+      ->set('e_content', $form_state->getValue('e_content'))
+      ->set('e_content_fields', $form_state->getValue('e_content_fields'))
       ->set('e_content_comment', $form_state->getValue('e_content_comment'))
       ->set('u_photo', $form_state->getValue('u_photo'))
       ->set('u_video', $form_state->getValue('u_video'))

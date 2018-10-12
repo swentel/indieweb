@@ -2,6 +2,7 @@ h_entry: false
 h_entry_comment: false
 h_event: ''
 e_content: false
+e_content_fields: ''
 e_content_comment: false
 u_photo: false
 u_video: false

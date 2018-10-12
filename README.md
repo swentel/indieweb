@@ -191,6 +191,7 @@ A media endpoint is also available where you can upload files, currently limited
 - Bookmark: bookmark a URL
 - Event: create an event
 - RSVP: create an rsvp
+- Issue: create an issue on a repo
 
 Updating existing content is currently limited to change the published status, title and body of nodes and comments.
 You can also query for a list of posts. More functionality will be added when this part of the spec matures.

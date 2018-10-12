@@ -103,6 +103,31 @@ class MicroformatsTest extends IndiewebBrowserTestBase {
     $this->drupalPostForm('node/add/page', $edit, 'Save');
     $this->assertMicroformats(['p-name'], TRUE, TRUE);
 
+    // Add new content type, but with other content field and delete the
+    // standard body field.
+    $edit = [
+      'name' => 'other',
+      'type' => 'other',
+    ];
+    $this->drupalPostForm('admin/structure/types/add', $edit, 'Save and manage fields');
+    $edit = ['new_storage_type' => 'string_long', 'label' => 'Other area', 'field_name' => 'other'];
+    $this->drupalPostForm('admin/structure/types/manage/other/fields/add-field', $edit, 'Save and continue');
+    $this->drupalPostForm(NULL, [], 'Save field settings');
+    $this->drupalPostForm(NULL, [], 'Save settings');
+    $this->drupalPostForm('admin/structure/types/manage/other/fields/node.other.body/delete', [], 'Delete');
+
+    // Configure other textarea field.
+    $edit = [
+      'e_content_fields' => 'field_other',
+    ];
+    $this->drupalPostForm('admin/config/services/indieweb/microformats', $edit, 'Save configuration');
+
+    $edit = [
+      'title[0][value]' => $this->title_text,
+      'field_other[0][value]' => 'This text will be via another field',
+    ];
+    $this->drupalPostForm('node/add/other', $edit, 'Save');
+    $this->assertSession()->responseContains('e-content');
   }
 
   /**
@@ -111,6 +136,8 @@ class MicroformatsTest extends IndiewebBrowserTestBase {
    * @param $formats
    * @param $visible
    * @param $all_off_or_e_content
+   *
+   * @throws \Behat\Mink\Exception\ExpectationException
    */
   protected function assertMicroformats($formats = [], $visible = TRUE, $all_off_or_e_content = FALSE) {
     foreach ($formats as $class) {

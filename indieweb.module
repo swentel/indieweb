@@ -677,8 +677,8 @@ function indieweb_preprocess_comment(&$variables) {
  */
 function indieweb_preprocess_field(&$variables) {
 
-  // Put e-content on body.
-  if ($variables['field_name'] == 'body' && \Drupal::config('indieweb.microformats')->get('e_content')) {
+  // Put e-content on textarea fields.
+  if ($variables['field_name'] == 'body' && \Drupal::config('indieweb.microformats')->get('e_content') || in_array($variables['field_name'], indieweb_get_content_fields())) {
     $variables['attributes']['class'][] = 'e-content';
 
     $exclude_p_name_node_type = \Drupal::config('indieweb.microformats')->get('p_name_exclude_node_type');
@@ -1242,6 +1242,23 @@ function indieweb_handle_webmention_queue() {
  */
 function indieweb_get_machine_name_from_url($url) {
   return 'indieweb_' . str_replace(['https://', 'http://', '/', '-', '.'], '', $url);
+}
+
+/**
+ * Get content fields for microformats.
+ *
+ * @return array
+ */
+function indieweb_get_content_fields() {
+  static $fields = [];
+  static $loaded = FALSE;
+
+  if (!$loaded) {
+    $loaded = TRUE;
+    $fields = explode("\n", \Drupal::config('indieweb.microformats')->get('e_content_fields'));
+  }
+
+  return $fields;
 }
 
 /**
