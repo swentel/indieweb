@@ -774,6 +774,16 @@ function indieweb_preprocess_file_entity_video(&$variables) {
 }
 
 /**
+ * Implements hook_ds_pre_render_alter().
+ */
+function indieweb_ds_pre_render_alter(array &$layout_render_array, array $context, array &$variables) {
+  if ($context['entity_type'] == 'node' && \Drupal::config('indieweb.microformats')->get('ds_node_support')) {
+    $variables['view_mode'] = $context['view_mode'];
+    indieweb_preprocess_node($variables);
+  }
+}
+
+/**
  * Implements hook_entity_extra_field_info().
  */
 function indieweb_entity_extra_field_info() {

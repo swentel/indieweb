@@ -132,6 +132,14 @@ class MicroformatsSettingsForm extends ConfigFormBase {
       '#description' => $this->t('This class is handy to limit the text to publish on social networks. Twitter has a limit of 280 chars, so by having a summary field, you can have better experience, especially for blog posts.<br />Enter the machine names of the fields line per line you want to use as summary fields.')
     ];
 
+    $form['classes']['ds_node_support'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Enable Display Suite node support'),
+      '#description' => $this->t('If a node is rendered with a Display Suite layout, add the classes like "h-entry", "h-event" on those layouts. You will need to alter the templates to add the metadata content.'),
+      '#default_value' => $config->get('ds_node_support'),
+      '#disabled' => !\Drupal::moduleHandler()->moduleExists('ds'),
+    ];
+
     $form['classes']['other'] = [
       '#type' => 'item',
       '#title' => $this->t('Formatters'),
@@ -161,6 +169,7 @@ class MicroformatsSettingsForm extends ConfigFormBase {
       ->set('u_video', $form_state->getValue('u_video'))
       ->set('p_summary', trim($form_state->getValue('p_summary')))
       ->set('p_bridgy_twitter_content', $form_state->getValue('p_bridgy_twitter_content'))
+      ->set('ds_node_support', $form_state->getValue('ds_node_support'))
       ->save();
 
     Cache::invalidateTags(['rendered']);

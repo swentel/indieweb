@@ -90,6 +90,9 @@ indieweb.microformats:
     p_bridgy_twitter_content:
       type: boolean
       label: 'p-bridgy-twitter-content'
+    ds_node_support:
+      type: boolean
+      label: 'Enable Display Suite node support'
 
 # schema for indieweb.micropub
 indieweb.micropub:
