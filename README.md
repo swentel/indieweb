@@ -273,8 +273,6 @@ and replies.
 
 ## Fediverse via Bridgy Fed
 
-Warning: experimental and not fully done yet!
-
 Bridgy Fed lets you interact with federated social networks like Mastodon and Hubzilla from your IndieWeb site. It
 translates replies, likes, and reposts from webmentions to federated social networking protocols like ActivityPub and
 OStatus, and vice versa. Bridgy Fed is open source so you can also host the service yourself. See https://fed.brid.gy/
@@ -282,9 +280,11 @@ OStatus, and vice versa. Bridgy Fed is open source so you can also host the serv
 Currently supports Mastodon, with more coming. You don't need any account at all on any of the social networks.
 
 Just add 'Fediverse|https://fed.brid.gy/' to the publishing channels and add the field on the manage display pages of
-content types or comments where needed. Currently 'like' and 'repost' work fine, replies aren't working yet.
+content types or comments where needed. Currently replies, likes and repost work fine.
 
-More to come later!
+- Check https://fed.brid.gy/#setup for additional setup for .htaccess.
+- You can create an Atom feed with the Feeds section at /admin/config/services/indieweb/feeds.
+- If you use a microsub server, you can subscribe to fediverse users through the microformats feed.
 
 ## Drush commands
 
