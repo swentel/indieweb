@@ -234,6 +234,7 @@ using https://granary.io/. You will need feeds when:
 - you want to allow IndieWeb readers (Monocle, Together, Indigenous) to subscribe to your content. These are alternate
   types which can either link to a page with microformat entries. It's advised to have an h-card on that page too as
   some parsers don't go to the homepage to fetch that content.
+- you use Bridgy fed to expose your site onto the fediverse! See Fediverse section for more information.
 
 Because content can be nodes, comments, etc. it isn't possible to use views. However, this module allows you to create a
 multiple feeds which aggregates all these content in a page and/or feed. The feeds are controlled by the
@@ -282,6 +283,7 @@ Just add 'Fediverse|https://fed.brid.gy/' to the publishing channels and add the
 content types or comments where needed. Currently replies, likes and repost work fine.
 
 - Check https://fed.brid.gy/#setup for additional setup for .htaccess.
+- You can create an Atom feed with the Feeds section at /admin/config/services/indieweb/feeds.
 - If you use a microsub server, you can subscribe to fediverse users through the microformats feed.
 
 ## Drush commands
