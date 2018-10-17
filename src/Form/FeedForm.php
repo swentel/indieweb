@@ -85,13 +85,24 @@ class FeedForm extends EntityForm {
       '#type' => 'checkbox',
       '#title' => $this->t('Expose Atom feed'),
       '#default_value' => $feed->exposeAtomFeed(),
-      '#description' => $this->t('This uses https://granary.io by default.'),
+      '#description' => $this->t('This uses https://granary.io to convert your content to an Atom feed.'),
     ];
 
     $form['hub'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('Use a hub'),
       '#default_value' => $feed->useHub(),
+      '#states' => array(
+        'visible' => array(
+          ':input[name="atom"]' => array('checked' => TRUE),
+        ),
+      ),
+    ];
+
+    $form['hubUrl'] = [
+      '#type' => 'textfield',
+      '#title' => $this->t('Hub URL'),
+      '#default_value' => $feed->getHubUrl(),
       '#description' => $this->t('This uses https://bridgy-fed.superfeedr.com/ by default.'),
       '#states' => array(
         'visible' => array(

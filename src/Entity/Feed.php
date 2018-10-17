@@ -104,6 +104,13 @@ class Feed extends ConfigEntityBase implements FeedInterface {
   protected $hub;
 
   /**
+   * The default hub URL.
+   *
+   * @var string
+   */
+  protected $hubUrl = 'https://bridgy-fed.superfeedr.com/';
+
+  /**
    * Whether to create a jf2 feed.
    *
    * @var bool
@@ -192,6 +199,13 @@ class Feed extends ConfigEntityBase implements FeedInterface {
    */
   public function exposeJf2HeaderLink() {
     return $this->relHeaderJf2;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getHubUrl() {
+    return $this->hubUrl;
   }
 
   /**

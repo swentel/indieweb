@@ -107,7 +107,7 @@ class FeedController extends ControllerBase {
     $atom_url = 'https://granary.io/url?url=' . $feed_url . '&input=html&output=atom';
 
     if ($indieweb_feed->useHub()) {
-      $atom_url .= "&hub=https://bridgy-fed.superfeedr.com/";
+      $atom_url .= "&hub=" . $indieweb_feed->getHubUrl();
     }
 
     header("Location: " . $atom_url, FALSE, 301);

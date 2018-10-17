@@ -47,9 +47,16 @@ interface FeedInterface extends ConfigEntityInterface {
   /**
    * Whether to use a hub.
    *
-   * @return mixed
+   * @return bool
    */
   public function useHub();
+
+  /**
+   * Returns the hub URL.
+   *
+   * @return string
+   */
+  public function getHubUrl();
 
   /**
    * Whether to expose the application/jf2feed+json header link.

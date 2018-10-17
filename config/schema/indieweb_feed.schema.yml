@@ -25,6 +25,9 @@ indieweb.indieweb_feed.*:
     hub:
       type: boolean
       label: 'Whether to use a hub'
+    hubUrl:
+      type: string
+      label: 'The URL of the hub'
     feedTitle:
       type: label
       label: 'Feed title'
