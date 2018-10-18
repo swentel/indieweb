@@ -563,7 +563,7 @@ function _indieweb_entity_feed_insert($entity, $feed) {
  * Implements hook_preprocess_node().
  */
 function indieweb_preprocess_node(&$variables) {
-  if ($variables['view_mode'] == 'full' || $variables['view_mode'] == 'teaser' || $variables['view_mode'] == 'indieweb_microformat') {
+  if (in_array($variables['view_mode'], indieweb_microformat_view_modes())) {
 
     // Add h-entry or h-event.
     $h_entry = FALSE;
@@ -676,6 +676,11 @@ function indieweb_preprocess_comment(&$variables) {
  * Implements hook_preprocess_field().
  */
 function indieweb_preprocess_field(&$variables) {
+
+  $view_mode = isset($variables['element']['#view_mode']) ? $variables['element']['#view_mode'] : '';
+  if (!empty($view_mode) && !in_array($view_mode, indieweb_microformat_view_modes())) {
+    return;
+  }
 
   // Put e-content on textarea fields.
   if ($variables['field_name'] == 'body' && \Drupal::config('indieweb.microformats')->get('e_content') || in_array($variables['field_name'], indieweb_get_content_fields())) {
@@ -1206,11 +1211,6 @@ function indieweb_handle_webmention_queue() {
             }
 
           }
-          else {
-            if (\Drupal::config('indieweb.publish')->get('publish_log_response')) {
-              \Drupal::logger('indieweb_publish')->notice('No 201 or location received when publishing for @source to @target: @response', ['@response' => print_r($response, 1), '@source' => $sourceURL, '@target' => $targetURL]);
-            }
-          }
         }
 
       }
@@ -1330,4 +1330,13 @@ function indieweb_is_silo_url($url) {
   }
 
   return $is_silo_url;
+}
+
+/**
+ * Returns the view modes on which Microformats should be applied to.
+ *
+ * @return array
+ */
+function indieweb_microformat_view_modes() {
+  return ['full', 'indieweb_microformat'];
 }

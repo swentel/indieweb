@@ -56,7 +56,7 @@ class WebmentionSettingsForm extends ConfigFormBase {
       '#title' => $this->t('Detect identical webmentions'),
       '#type' => 'checkbox',
       '#default_value' => $config->get('webmention_detect_identical'),
-      '#description' => $this->t('In some circumstances, it might be possible, multiple webmentions might be send from the same source with the same property. Enable this to detect this and not store multiple identical webmentions.'),
+      '#description' => $this->t('On some occasions it might be possible multiple webmentions are send with the same source and property. Enable to detect duplicates and not store those.'),
     ];
 
     $form['webmention']['webmention_endpoint'] = [

@@ -43,10 +43,10 @@ class MicroformatsSettingsForm extends ConfigFormBase {
     ];
 
     $form['classes']['h_entry'] = [
+      '#prefix' => '<p>' . $this->t('Microformats will be applied to the "full" and "Microformat" view mode of nodes and the "Microformat" view mode of comments which is available on /comment/indieweb/{cid}.') . '</p>',
       '#type' => 'checkbox',
       '#title' => $this->t('<em>h-entry</em> on node wrappers'),
       '#default_value' => $config->get('h_entry'),
-      '#description' => $this->t('This will be added on full, teaser and microformat view mode.'),
     ];
 
     $form['classes']['h_entry_comment'] = [
@@ -61,7 +61,7 @@ class MicroformatsSettingsForm extends ConfigFormBase {
       '#title' => $this->t('<em>h-event</em> on node wrappers'),
       '#default_value' => $config->get('h_event'),
       '#options' => ['' => $this->t('No event')] + node_type_get_names(),
-      '#description' => $this->t('h-event for an event node type. This will be added on full, teaser and microformat view mode.<br />This will also add dt-start and dt-end classes on the date range fields. (date fields are not supported)'),
+      '#description' => $this->t('h-event for an event node type.<br />This will also add dt-start and dt-end classes on the date range fields. (date fields are not supported)'),
     ];
 
     $form['classes']['e_content'] = [
@@ -93,14 +93,14 @@ class MicroformatsSettingsForm extends ConfigFormBase {
     $form['classes']['post_metadata'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('<em>dt-published</em>, <em>p-name</em>, <em>u-author</em> and <em>u-url</em> in a hidden span element on nodes.'),
-      '#description' => $this->t('This will be added on full, teaser and microformat view mode. Make sure \'Display author and date information\' is enabled, or put {{ metadata }} in your node template. Example:<br /><div class="indieweb-highlight-code">&lt;span class="hidden"&gt;&lt;a href="http://url" class="u-url"&gt;&lt;span class="p-name"&gt;title&lt;/span&gt;&lt;span class="dt-published"&gt;2018-01-31T20:38:25+01:00&lt;/span&gt;&lt;/a&gt;&lt;a class="u-author" href="/"&gt;&lt;/a&gt;&lt;/span&gt;</div>'),
+      '#description' => $this->t('Make sure \'Display author and date information\' is enabled, or put {{ metadata }} in your node template. Example:<br /><div class="indieweb-highlight-code">&lt;span class="hidden"&gt;&lt;a href="http://url" class="u-url"&gt;&lt;span class="p-name"&gt;title&lt;/span&gt;&lt;span class="dt-published"&gt;2018-01-31T20:38:25+01:00&lt;/span&gt;&lt;/a&gt;&lt;a class="u-author" href="/"&gt;&lt;/a&gt;&lt;/span&gt;</div>'),
       '#default_value' => $config->get('post_metadata'),
     ];
 
     $form['classes']['post_metadata_comment'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('<em>dt-published</em>, <em>u-author</em> and <em>u-url</em> in a hidden span element on comments.'),
-      '#description' => $this->t('This will be added on the microformat view mode. p-name will always be excluded. Example:<br /><div class="indieweb-highlight-code">&lt;span class="hidden"&gt;&lt;a href="http://url" class="u-url"&gt;&lt;span class="dt-published"&gt;2018-01-31T20:38:25+01:00&lt;/span&gt;&lt;/a&gt;&lt;a class="u-author" href="/"&gt;&lt;/a&gt;&lt;/span&gt;</div>'),
+      '#description' => $this->t('p-name will always be excluded. Example:<br /><div class="indieweb-highlight-code">&lt;span class="hidden"&gt;&lt;a href="http://url" class="u-url"&gt;&lt;span class="dt-published"&gt;2018-01-31T20:38:25+01:00&lt;/span&gt;&lt;/a&gt;&lt;a class="u-author" href="/"&gt;&lt;/a&gt;&lt;/span&gt;</div>'),
       '#default_value' => $config->get('post_metadata_comment'),
     ];
 
