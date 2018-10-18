@@ -28,6 +28,7 @@ class WebmentionBlock extends BlockBase {
       'show_avatar' => TRUE,
       'show_created' => FALSE,
       'number_of_posts' => 10,
+      'detect_identical' => FALSE,
     ];
   }
 
@@ -78,6 +79,13 @@ class WebmentionBlock extends BlockBase {
       '#default_value' => $this->configuration['number_of_posts'],
     ];
 
+    $form['webmentions']['detect_identical'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Detect identical mentions'),
+      '#description' => $this->t('It is possible that some webmentions with the same type and author exist, but from a different source. E.g. a like on twitter, but also on the author homepage. If you enable this, it will try to detect those so for example only one like shows up from that same author.'),
+      '#default_value' => $this->configuration['detect_identical'],
+    ];
+
     return $form;
   }
 
@@ -92,6 +100,7 @@ class WebmentionBlock extends BlockBase {
     $this->configuration['show_avatar'] = $values['show_avatar'];
     $this->configuration['show_created'] = $values['show_created'];
     $this->configuration['number_of_posts'] = $values['number_of_posts'];
+    $this->configuration['detect_identical'] = $values['detect_identical'];
   }
 
   /**
@@ -142,7 +151,18 @@ class WebmentionBlock extends BlockBase {
 
     $records = $query->execute();
 
+    $identical = [];
     foreach ($records as $record) {
+
+      if ($this->configuration['detect_identical']) {
+        if (!isset($identical[$record->author_name][$record->property])) {
+          $identical[$record->author_name][$record->property] = TRUE;
+        }
+        else {
+          continue;
+        }
+      }
+
       $items[] = [
         '#theme' => 'webmention',
         '#show_summary' => TRUE,

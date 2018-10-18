@@ -20,6 +20,9 @@ block.settings.indieweb_webmention:
     number_of_posts:
       type: integer
       label: 'Number of posts in block'
+    detect_identical:
+      type: boolean
+      label: 'Whether to detect identical mentions by author and type'
 
 block.settings.indieweb_rsvp:
   type: block_settings

@@ -140,6 +140,7 @@ class WebmentionController extends ControllerBase {
         $this->getLogger('indieweb_webmention_payload')->notice('object: @object', ['@object' => print_r($mention, 1)]);
       }
 
+      // Remove the base url
       $target = str_replace(\Drupal::request()->getSchemeAndHttpHost(), '', $mention['target']);
 
       // Check identical webmentions. If the source, target and property are the
@@ -160,7 +161,6 @@ class WebmentionController extends ControllerBase {
 
       $values = [
         'user_id' => $config->get('webmention_uid'),
-        // Remove the base url
         'target' => ['value' => $target],
         'source' => ['value' => $mention['source']],
         'type' => ['value' => $mention['post']['type']],
@@ -178,7 +178,10 @@ class WebmentionController extends ControllerBase {
       // Author info.
       foreach (['name', 'photo', 'url'] as $key) {
         if (!empty($mention['post']['author'][$key])) {
-          $values['author_' . $key] = ['value' => $mention['post']['author'][$key]];
+          $author_value = trim($mention['post']['author'][$key]);
+          if (!empty($author_value)) {
+            $values['author_' . $key] = ['value' => $author_value];
+          }
         }
       }
 
