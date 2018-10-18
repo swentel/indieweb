@@ -411,6 +411,9 @@ indieweb.webmention:
     webmention_enable:
       type: boolean
       label: 'Whether to allow webmentions'
+    webmention_detect_identical:
+      type: boolean
+      label: 'Whether to detect identical webmentions and not store them'
     pingback_enable:
       type: boolean
       label: 'Whether to allow pingbacks'

@@ -52,6 +52,13 @@ class WebmentionSettingsForm extends ConfigFormBase {
       '#default_value' => $config->get('webmention_enable'),
     ];
 
+    $form['webmention']['webmention_detect_identical'] = [
+      '#title' => $this->t('Detect identical webmentions'),
+      '#type' => 'checkbox',
+      '#default_value' => $config->get('webmention_detect_identical'),
+      '#description' => $this->t('In some circumstances, it might be possible, multiple webmentions might be send from the same source with the same property. Enable this to detect this and not store multiple identical webmentions.'),
+    ];
+
     $form['webmention']['webmention_endpoint'] = [
       '#title' => $this->t('Webmention endpoint'),
       '#type' => 'textfield',
@@ -128,6 +135,7 @@ class WebmentionSettingsForm extends ConfigFormBase {
       ->set('webmention_uid', $form_state->getValue('webmention_uid'))
       ->set('webmention_log_payload', $form_state->getValue('webmention_log_payload'))
       ->set('webmention_enable', $form_state->getValue('webmention_enable'))
+      ->set('webmention_detect_identical', $form_state->getValue('webmention_detect_identical'))
       ->set('webmention_endpoint', $form_state->getValue('webmention_endpoint'))
       ->set('webmention_secret', $form_state->getValue('webmention_secret'))
       ->set('pingback_enable', $form_state->getValue('pingback_enable'))

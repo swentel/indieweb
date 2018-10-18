@@ -84,7 +84,21 @@ class WebmentionTest extends IndiewebBrowserTestBase {
     self::assertEquals(202, $code);
     $webmentionEntity = $this->getLatestWebmention();
     self::assertEquals($this->adminUser->id(), $webmentionEntity->getOwnerId());
+    self::assertNumberOfWebmentions(1);
+    $this->sendWebmentionNotificationRequest($webmention);
+    self::assertNumberOfWebmentions(2);
 
+    // Now detect identical
+    $this->drupalLogin($this->adminUser);
+    $edit = [
+      'webmention_detect_identical' => TRUE,
+    ];
+    $this->drupalPostForm('admin/config/services/indieweb/webmention', $edit, 'Save configuration');
+    $this->drupalLogout();
+
+    // Identical on source.
+    $this->sendWebmentionNotificationRequest($webmention);
+    self::assertNumberOfWebmentions(2);
 
     // Test pingback.
     $pingback = [
@@ -293,6 +307,16 @@ class WebmentionTest extends IndiewebBrowserTestBase {
   protected function getLatestWebmention() {
     $webmention_id = \Drupal::database()->query("SELECT id FROM {webmention_entity} ORDER by id DESC limit 1")->fetchField();
     return \Drupal::entityTypeManager()->getStorage('webmention_entity')->load($webmention_id);
+  }
+
+  /**
+   * Assert the number of webmentions.
+   *
+   * @param $total
+   */
+  protected function assertNumberOfWebmentions($total) {
+    $total_query = \Drupal::database()->query('SELECT count(id) FROM {webmention_entity}')->fetchField();
+    $this->assertEquals($total, $total_query);
   }
 
 }
