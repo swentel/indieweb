@@ -1,0 +1,25 @@
+{#
+/**
+ * @file
+ * Implementation for an author h-card.
+ *
+ * Classes you need to preserve:
+ *   - h-card
+ *   - u-photo
+ *   - u-url
+ *   - p-name
+ *   - note
+ *
+ * Attributes you need to preserve
+ *   - rel="me" on the p-name element
+ */
+#}
+<div class="h-card">
+    {% if image %}
+        <div><img class="u-photo" src="{{ image }}" title="{{ name }}" /></div>
+    {% endif %}
+    <div><a class="u-url p-name" rel="me" href="{{ domain }}">{{ name }}</a></div>
+    <div class="note">
+        {{ note }}
+    </div>
+</div>

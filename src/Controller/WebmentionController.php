@@ -15,6 +15,7 @@ class WebmentionController extends ControllerBase {
    *
    * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
    * @throws \Drupal\Core\Entity\EntityMalformedException
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    */
   public function sendAdminOverview() {
     $build = $header = $rows = [];
@@ -139,14 +140,16 @@ class WebmentionController extends ControllerBase {
         $this->getLogger('indieweb_webmention_payload')->notice('object: @object', ['@object' => print_r($mention, 1)]);
       }
 
-      // Check identical webmentions. If the source and property are the same,
-      // ignore it.
+      $target = str_replace(\Drupal::request()->getSchemeAndHttpHost(), '', $mention['target']);
+
+      // Check identical webmentions. If the source, target and property are the
+      // same, ignore it.
       if ($config->get('webmention_detect_identical')) {
         $source = $mention['source'];
         $property = $mention['post']['wm-property'];
-        $exists = \Drupal::database()->query("SELECT id FROM {webmention_entity} WHERE source = :source AND property = :property ORDER by id DESC limit 1", [':source' => $source, ':property' => $property])->fetchField();
+        $exists = \Drupal::database()->query("SELECT id FROM {webmention_entity} WHERE source = :source AND target = :target AND property = :property ORDER by id DESC limit 1", [':source' => $source, ':target' => $target, ':property' => $property])->fetchField();
         if ($exists) {
-          $this->getLogger('indieweb_webmention_identical')->notice('Source @source and @property already exists.', ['@source' => $source, '@property' => $property]);
+          $this->getLogger('indieweb_webmention_identical')->notice('Source @source, target @target and @property already exists.', ['@source' => $source, '@target' => $target, '@property' => $property]);
           $response = ['result' => $response_message];
           return new JsonResponse($response, $response_code);
         }
@@ -158,7 +161,7 @@ class WebmentionController extends ControllerBase {
       $values = [
         'user_id' => $config->get('webmention_uid'),
         // Remove the base url
-        'target' => ['value' => str_replace(\Drupal::request()->getSchemeAndHttpHost(), '', $mention['target'])],
+        'target' => ['value' => $target],
         'source' => ['value' => $mention['source']],
         'type' => ['value' => $mention['post']['type']],
         'property' => ['value' => $mention['post']['wm-property']]

@@ -49,6 +49,14 @@ function indieweb_theme() {
         'author_name' => NULL,
       ]
     ],
+    'indieweb_author' => [
+      'variables' => [
+        'image' => NULL,
+        'note' => NULL,
+        'name' => NULL,
+        'domain' => NULL,
+      ]
+    ],
   ];
 }
 

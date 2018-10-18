@@ -149,7 +149,7 @@ class FeedForm extends EntityForm {
     $form['author'] = [
       '#type' => 'textarea',
       '#title' => $this->t('Author'),
-      '#description' => $this->t('Put the h-card in here for the author information (without span element). This will be printed in a hidden span. Example:<br /><span class="indieweb-highlight-code">&lt;span class="h-card hidden"&gt;&lt;a class="u-url p-name" href="/"&gt;Your name&lt;/a&gt;&lt;img src="https://example.com/image/avatar.png" class="u-photo hidden" alt="Your name"&gt;&lt;/span&gt;</span>'),
+      '#description' => $this->t('Put the h-card in here for the author information which will be printed in a hidden span. Leave empty if you already have an author element on the page. Example:<br /><span class="indieweb-highlight-code">&lt;a class="u-url p-name" href="/"&gt;Your name&lt;/a&gt;&lt;img src="https://example.com/image/avatar.png" class="u-photo hidden" alt="Your name"&gt;'),
       '#default_value' => $feed->getAuthor(),
     ];
 
