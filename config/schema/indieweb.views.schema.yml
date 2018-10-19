@@ -5,9 +5,5 @@ views.field.webmention_bulk_form:
   label: 'Webmention bulk form'
 
 views.filter.webmention_filter_select:
-  type: views.filter.in_operator
+  type: views.filter.many_to_one
   label: 'Webmention select'
-  mapping:
-    reduce_duplicates:
-      type: boolean
-      label: 'Reduce duplicate'

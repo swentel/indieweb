@@ -840,49 +840,6 @@ display:
           entity_type: webmention_entity
           entity_field: author_name
           plugin_id: string
-        type:
-          id: type
-          table: webmention_entity
-          field: type
-          relationship: none
-          group_type: group
-          admin_label: ''
-          operator: or
-          value: {  }
-          group: 1
-          exposed: true
-          expose:
-            operator_id: type_op
-            label: Type
-            description: ''
-            use_operator: false
-            operator: type_op
-            identifier: type
-            required: false
-            remember: false
-            multiple: false
-            remember_roles:
-              authenticated: authenticated
-              anonymous: '0'
-              administrator: '0'
-            reduce: 0
-            placeholder: ''
-          is_grouped: false
-          group_info:
-            label: ''
-            description: ''
-            identifier: ''
-            optional: true
-            widget: select
-            multiple: false
-            remember: false
-            default_group: All
-            default_group_multiple: {  }
-            group_items: {  }
-          reduce_duplicates: 0
-          entity_type: webmention_entity
-          entity_field: type
-          plugin_id: string
         property:
           id: property
           table: webmention_entity
@@ -908,8 +865,7 @@ display:
               authenticated: authenticated
               anonymous: '0'
               administrator: '0'
-            reduce: 0
-            placeholder: ''
+            reduce: false
           is_grouped: false
           group_info:
             label: ''
@@ -922,10 +878,52 @@ display:
             default_group: All
             default_group_multiple: {  }
             group_items: {  }
-          reduce_duplicates: 0
+          reduce_duplicates: false
           entity_type: webmention_entity
           entity_field: property
-          plugin_id: string
+          plugin_id: webmention_filter_select
+        type:
+          id: type
+          table: webmention_entity
+          field: type
+          relationship: none
+          group_type: group
+          admin_label: ''
+          operator: or
+          value: {  }
+          group: 1
+          exposed: true
+          expose:
+            operator_id: type_op
+            label: Type
+            description: ''
+            use_operator: false
+            operator: type_op
+            identifier: type
+            required: false
+            remember: false
+            multiple: false
+            remember_roles:
+              authenticated: authenticated
+              anonymous: '0'
+              administrator: '0'
+            reduce: false
+          is_grouped: false
+          group_info:
+            label: ''
+            description: ''
+            identifier: ''
+            optional: true
+            widget: select
+            multiple: false
+            remember: false
+            default_group: All
+            default_group_multiple: {  }
+            group_items: {  }
+          reduce_duplicates: false
+          entity_type: webmention_entity
+          entity_field: type
+          plugin_id: webmention_filter_select
       sorts:
         created:
           id: created
