@@ -14,6 +14,7 @@ use Drupal\Core\Entity\Display\EntityFormDisplayInterface;
 use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Site\Settings;
 use Drupal\Core\Url;
 use Drupal\indieweb\Entity\FeedInterface;
@@ -22,6 +23,66 @@ use Drupal\node\Entity\NodeType;
 use Drupal\node\NodeInterface;
 
 define('WEBMENTION_QUEUE_NAME', 'indieweb_webmention');
+
+/**
+ * Implements hook_help().
+ */
+function indieweb_help($route_name, RouteMatchInterface $route_match) {
+
+  $help = [
+    'indieweb.admin.webmention_settings' => [
+      'title' => 'Receiving webmentions',
+      'text' => '<p>' . t('The easiest way to start receiving webmentions and pingbacks for any page is by using <a href="https://webmention.io/" target="_blank">https://webmention.io</a>. <br />You have to create an account by signing in with your domain. For more information how to sign in with your domain, see the <a href=":link_indieauth">IndieAuth</a> tab.<br />Webmention.io is open source so you can also host the service yourself.<br /><br />All collected webmentions and pingbacks can be viewed on the <a href=":link_overview">overview page</a>.<br /><br /><strong>Blocks</strong><br />- Webmentions: show the likes and reposts of that url.<br />- Webmention notify form: let people submit a URL if the current page is mentioned there<br />- RSVP: shows people attending, interested etc. for an event<br />- Pingbacks: render all urls to site pinging back per page', [':link_indieauth' => Url::fromRoute('indieweb.admin.indieauth_settings')->toString(), ':link_overview' => Url::fromRoute('entity.webmention_entity.collection')->toString()]) . '</p>',
+    ],
+    'indieweb.admin.publish_settings' => [
+      'title' => 'Sending webmentions',
+      'text' => '<p>' . t('The easiest way to publish content on social networks is by using <a href="https://brid.gy/" target="_blank">https://brid.gy</a>. <br />You have to create an account by signing in with your preferred social network. Bridgy is open source so you can also host the service yourself.<br /><br />Publishing, which is nothing more than sending a webmention, can be done per node in the "Publish to" fieldset, which is protected with the "send webmentions" permission.<br />If no channels are configured, there is nothing to do. There is a syndication field on every node and comment type available to render your <a href=":syndication_link">syndications</a> for <a href="https://indieweb.org/posse-post-discovery" target="_blank">POSSE-Post-Discovery</a>.<br />If comments are enabled, put those fields only on the microformat view mode. The comment itself is available on comment/indieweb/cid and it is this URL that will be used for sending webmentions.', [':syndication_link' => Url::fromRoute('indieweb.syndications_list')->toString()]) . '</p>',
+    ],
+    'indieweb.admin.comment_settings' => [
+      'title' => 'Comments',
+      'text' => t("When a webmention is saved and is of property 'in-reply-to', it is possible to create a comment if the target of the webmention has comments enabled.<br />You have to create an entity reference field on your comment type which points to a webmention. This module ships with a comment webmention storage field, so it's easy to add.<br />On the 'Manage display' page of the comment you can set the formatter of that entity reference field to 'Webmention'.<br />The webmention preprocess formats the text content using the 'restricted_html' content format which comes default in Drupal 8<br />Every comment is available also at comment/indieweb/cid so this URL can also be a target for a webmention. If a webmention is send to this target, a comment will be created on the node, with the target cid as the parent.<br />Also, last but not least, don't forget to set permissions to view webmentions."),
+    ],
+    'indieweb.admin.microformats_settings' => [
+      'title' => 'Microformats',
+      'text' => '<p>' . t('Microformats are extensions to HTML for marking up people, organizations, events, locations, blog posts, products, reviews, resumes, recipes etc. Sites use microformats to publish a standard API that is consumed and used by search engines, aggregators, and other tools. See <a href="https://indieweb.org/microformats" target="_blank">https://indieweb.org/microformats</a> for more info. You will want to enable this if you want to publish or want other sites and readers to parse your content. The module will add classes on content, images etc. You can also add it to the markup yourself. Also read <a href="https://brid.gy/about#microformats">https://brid.gy/about#microformats</a> for details how Bridgy decides what to publish if you are using that service.<br /><br />Your homepage (at least, other pages are fine too) should also contain a h-card entry. An author block can be configured in the blocks section. Example markup:<br /><div class="indieweb-highlight-code">&lt;div class="h-card"&gt;My name is &lt;a class="u-url p-name" rel="me" href="/"&gt;Your name&lt;/a&gt;&lt;/div&gt;</div>') . '</p>',
+    ],
+    'entity.indieweb_feed.collection' => [
+      'title' => 'Feeds',
+      'text' => t('<p>Besides the standard RSS feed which you can create where readers can subscribe to, you can also create microformat feeds. These can either return HTML, Atom feed or jf2feed+json.<br />Because content can be nodes, comments etc, it isn\'t possible to use views. However, you can create multiple feeds which aggregate the content in a page and/or feed.<br />The feeds are controlled by the \'access content\' permission.<br />All items in the HTML feed will be rendered with the \'Microformat\' view mode.<br />If your homepage is a feed with microformats, you don\'t necessarily need this. Atom feeds are generated using https://granary.io/</p><p>You will need feeds when:</p><ul><li>you use Bridgy: the service will look for html link headers with rel="feed" and use those pages to crawl so it knows to which content it needs to send webmentions to.</li><li>you want to allow IndieWeb readers (Monocle, Together, Indigenous) to subscribe to your content. These are alternate types which can either link to a page with microformat entries. It\'s advised to have an h-card on that page too as some parsers don\'t go to the homepage to fetch that content.</li></ul>'),
+    ],
+    'indieweb.admin.micropub_settings' => [
+      'title' => 'Micropublishing',
+      'text' => '<p>' . t("Allow posting to your site. Before you can post, you need to authenticate and enable the IndieAuth Authentication API.<br />See <a href=':link_indieauth'>IndieAuth</a> to configure. More information about micropub: see <a href='https://indieweb.org/Micropub' target='_blank'>https://indieweb.org/Micropub</a>.", [':link_indieauth' => Url::fromRoute('indieweb.admin.indieauth_settings')->toString()]) . '</p><p>' . t("A very good client to test is <a href='https://quill.p3k.io' target='_blank'>https://quill.p3k.io</a>. A full list is available at <a href='https://indieweb.org/Micropub/Clients'>https://indieweb.org/Micropub/Clients</a>.<br />Indigenous (iOS and Android) are also microsub readers.") . '</p><p>Even if you do not decide to use the micropub endpoint, this screen gives you a good overview what kind of content types and fields you can create which can be used for sending webmentions or read by microformat parsers.</p>',
+    ],
+    'indieweb.admin.microsub_settings' => [
+      'title' => 'Readers',
+      'text' => '<p>' . t('Microsub is an early draft of a spec that provides a standardized way for clients to consume and interact with feeds collected by a server. <a href="https://indieweb.org/Microsub#Clients" target="_blank">Readers</a> are Indigenous (iOS and Android), Monocle and Together (both web) and many others to come. Servers are Aperture, Ekster etc. See <a href="https://indieweb.org/Microsub#Servers" target="_blank">https://indieweb.org/Microsub#Servers</a>. This modules does not expose itself as a microsub server, it mainly allows you to expose the microsub header link. Note that you also need feeds to be enabled, see the <a href=":feeds_link">Feeds section</a>.', [':feeds_link' => Url::fromRoute('entity.indieweb_feed.collection')->toString()]) . '</p>'
+    ],
+    'indieweb.admin.indieauth_settings' => [
+      'title' => 'IndieAuth',
+      'text' => '<p>' . t('IndieAuth is a way to use your own domain name to sign in to websites. Indieauth.com is a hosted service that does this for you and also adds Authentication API. It works by linking your website to one or more authentication providers such as Twitter or Google (RelMeAuth), then entering your domain name in the login form on websites that support IndieAuth. Indielogin.com and Indieauth.com is open source so you can also host the service yourself.<br /><br />The easy way is to add rel="me" links on your homepage which point to your social media accounts and on each of those services adding a link back to your home page. An author block is available which allows you to add rel="me" links in the note textarea. They can even be hidden. e.g.<div class="indieweb-highlight-code">&lt;a href="https://twitter.com/swentel" target="_blank" title="Twitter" rel="me"&gt;&lt;/a&gt;</div><br />You can also use a PGP key if you don\'t want to use a third party service. See <a href="https://indieauth.com/setup" target="_blank">https://indieauth.com/setup</a> for full details.') . '</p>'
+    ],
+    'indieweb.fediverse' => [
+      'title' => 'Fediverse',
+      'text' => 'Check the README file that comes with this module to know how to setup your site with the Fediverse via Bridgy fed.',
+    ],
+  ];
+
+  if ($route_name == 'help.page.indieweb') {
+
+    $output = '';
+    foreach ($help as $item) {
+      $output .= '<h3>' . $item['title'] . '</h3>';
+      $output .= $item['text'];
+    }
+
+    return $output;
+  }
+  elseif (isset($help[$route_name])) {
+    return $help[$route_name]['text'];
+  }
+
+}
 
 /**
  * Implements hook_theme().

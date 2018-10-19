@@ -32,9 +32,6 @@ class MicrosubSettingsForm extends ConfigFormBase {
 
     $config = $this->config('indieweb.microsub');
 
-    $form['info'] = [
-      '#markup' => '<p>' . $this->t('Microsub is an early draft of a spec that provides a standardized way for clients to consume and interact with feeds collected by a server. <a href="https://indieweb.org/Microsub#Clients" target="_blank">Readers</a> are Indigenous (iOS and Android), Monocle and Together (both web) and many others to come. Servers are Aperture, Ekster etc. See <a href="https://indieweb.org/Microsub#Servers" target="_blank">https://indieweb.org/Microsub#Servers</a>. This modules does not expose itself as a microsub server, it mainly allows you to expose the microsub header link. Note that you also need feeds to be enabled, see the <a href=":feeds_link">Feeds section</a>.', [':feeds_link' => Url::fromRoute('entity.indieweb_feed.collection')->toString()]) . '</p>'];
-
     $form['microsub'] = [
       '#type' => 'fieldset',
       '#title' => $this->t('Microsub'),

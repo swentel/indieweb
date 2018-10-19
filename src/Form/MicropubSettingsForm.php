@@ -88,14 +88,6 @@ class MicropubSettingsForm extends ConfigFormBase {
 
     $config = $this->config('indieweb.micropub');
 
-    $form['info'] = [
-      '#markup' => '<p>' . $this->t("Allow posting to your site. Before you can post, you need to authenticate and enable the IndieAuth Authentication API.<br />See <a href=':link_indieauth'>IndieAuth</a> to configure. More information about micropub: see <a href='https://indieweb.org/Micropub' target='_blank'>https://indieweb.org/Micropub</a>.",
-          [
-            ':link_indieauth' => Url::fromRoute('indieweb.admin.indieauth_settings')->toString(),
-          ]) .
-        '</p><p>' . $this->t("A very good client to test is <a href='https://quill.p3k.io' target='_blank'>https://quill.p3k.io</a>. A full list is available at <a href='https://indieweb.org/Micropub/Clients'>https://indieweb.org/Micropub/Clients</a>.<br />Indigenous (iOS and Android) are also microsub readers.") . '</p><p>Even if you do not decide to use the micropub endpoint, this screen gives you a good overview what kind of content types and fields you can create which can be used for sending webmentions or read by microformat parsers.</p>',
-    ];
-
     $form['micropub'] = [
       '#type' => 'vertical_tabs',
     ];

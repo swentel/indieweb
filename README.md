@@ -21,7 +21,7 @@ Current functionality:
 - Microsub link exposing
 - Fediverse integration
 
-This is only the tip of the iceberg and much more functionality will be added.
+More information is in this README and on the help pages.
 
 Development happens on github: https://github.com/swentel/indieweb
 

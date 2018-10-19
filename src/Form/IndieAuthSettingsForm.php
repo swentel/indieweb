@@ -32,9 +32,6 @@ class IndieAuthSettingsForm extends ConfigFormBase {
 
     $config = $this->config('indieweb.indieauth');
 
-    $form['info'] = [
-      '#markup' => '<p>' . $this->t('IndieAuth is a way to use your own domain name to sign in to websites. Indieauth.com is a hosted service that does this for you and also adds Authentication API. It works by linking your website to one or more authentication providers such as Twitter or Google (RelMeAuth), then entering your domain name in the login form on websites that support IndieAuth. Indielogin.com and Indieauth.com is open source so you can also host the service yourself.<br /><br />The easy way is to add rel="me" links on your homepage which point to your social media accounts and on each of those services adding a link back to your home page. An author block is available which allows you to add rel="me" links in the note textarea. They can even be hidden. e.g.<div class="indieweb-highlight-code">&lt;a href="https://twitter.com/swentel" target="_blank" title="Twitter" rel="me"&gt;&lt;/a&gt;</div><br /><br /> You can also use a PGP key if you don\'t want to use a third party service. See <a href="https://indieauth.com/setup" target="_blank">https://indieauth.com/setup</a> for full details.') . '</p>'];
-
     $externalauth_module_enabled = \Drupal::moduleHandler()->moduleExists('externalauth');
 
     $form['login'] = [
