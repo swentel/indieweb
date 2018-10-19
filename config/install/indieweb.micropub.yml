@@ -80,3 +80,12 @@ rsvp_rsvp_field: ''
 rsvp_tags_field: ''
 rsvp_upload_field: ''
 rsvp_uid: 1
+issue_create_node: false
+issue_status: 1
+issue_node_type: ''
+issue_content_field: ''
+issue_link_field: ''
+issue_upload_field: ''
+issue_auto_send_webmention: false
+issue_tags_field: ''
+issue_uid: 1

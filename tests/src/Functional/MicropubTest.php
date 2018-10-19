@@ -181,7 +181,9 @@ class MicropubTest extends IndiewebBrowserTestBase {
     $this->drupalPostForm('admin/config/services/indieweb/indieauth', $edit, 'Save configuration');
 
     // Configure note, but set 'me' to invalid domain.
-    $edit = ['note_create_node' => 1, 'note_node_type' => 'page', 'micropub_me' => 'https://indieweb.micropub.invalid.testdomain', 'note_uid' => $this->adminUser->id()];
+    // Also enable issue. It doesn't have an explicit test for properties,
+    // but just being enabled makes sure the order is ok.
+    $edit = ['note_create_node' => 1, 'note_node_type' => 'page', 'micropub_me' => 'https://indieweb.micropub.invalid.testdomain', 'note_uid' => $this->adminUser->id(), 'issue_node_type' => 'page'];
     $this->drupalPostForm('admin/config/services/indieweb/micropub', $edit, 'Save configuration');
 
     // Send request to create a note, will fail because the 'me' is wrong.

@@ -60,6 +60,11 @@ class MicropubSettingsForm extends ConfigFormBase {
         'link_field' => TRUE,
         'send_webmention' => TRUE,
       ],
+      'issue' => [
+        'description' => $this->t("An issue request contains 'content', 'name', a URL in 'in-reply-to' (which is the URL of a repository) and the 'h' value is 'entry'. The issue can also contain a 'mp-syndicate-to' value which will contain the channel you want to publish to, see the <a href=':link_send'>Send webmention screen</a> to configure this."),
+        'link_field' => TRUE,
+        'send_webmention' => TRUE,
+      ],
     ];
 
     return $post_types;

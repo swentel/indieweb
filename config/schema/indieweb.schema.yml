@@ -345,6 +345,33 @@ indieweb.micropub:
     rsvp_uid:
       type: integer
       label: 'The user id of the RSVP'
+    issue_create_node:
+      type: boolean
+      label: 'Enable issue'
+    issue_status:
+      type: integer
+      label: 'Whether the issue is published or not'
+    issue_node_type:
+      type: string
+      label: 'The node type for the issue'
+    issue_content_field:
+      type: string
+      label: 'The node content field for the issue'
+    issue_link_field:
+      type: string
+      label: 'The node link field for the issue'
+    issue_auto_send_webmention:
+      type: boolean
+      label: 'Whether to automatically send a webmention to the url found in the link field'
+    issue_upload_field:
+      type: string
+      label: 'The node upload field for the issue'
+    issue_tags_field:
+      type: string
+      label: 'The node tags field for the issue'
+    issue_uid:
+      type: integer
+      label: 'The user id of the issue'
 
 # schema for indieweb.microsub
 indieweb.microsub:

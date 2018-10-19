@@ -437,6 +437,15 @@ class MicropubController extends ControllerBase {
         }
       }
 
+      // Issue post type.
+      if ($this->createNodeFromPostType('issue') && $this->isHEntry() && $this->hasRequiredInput(['content', 'name', 'in-reply-to']) && $this->hasNoKeysSet(['bookmark-of', 'repost-of', 'like-of'])) {
+        $this->createNode($this->input['name'], 'issue');
+        $response = $this->saveNode();
+        if ($response instanceof Response) {
+          return $response;
+        }
+      }
+
       // Reply support.
       if ($this->createNodeFromPostType('reply') && $this->isHEntry() && $this->hasRequiredInput(['in-reply-to', 'content']) && $this->hasNoKeysSet(['rsvp'])) {
 
@@ -1084,7 +1093,7 @@ class MicropubController extends ControllerBase {
   protected function getPostTypes() {
     $post_types = [];
 
-    foreach (['article', 'note', 'like', 'reply', 'repost', 'bookmark', 'event', 'rsvp'] as $type) {
+    foreach (['article', 'note', 'like', 'reply', 'repost', 'bookmark', 'event', 'rsvp', 'issue'] as $type) {
       if ($this->config->get($type . '_create_node')) {
         $post_types[] = (object) array(
           'type' => $type,

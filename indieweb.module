@@ -530,7 +530,6 @@ function indieweb_entity_update(EntityInterface $entity) {
 function indieweb_entity_delete(EntityInterface $entity) {
 
   if ($entity instanceof ContentEntityInterface) {
-
     // Delete from syndication table.
     \Drupal::database()
       ->delete('webmention_syndication')
@@ -544,7 +543,6 @@ function indieweb_entity_delete(EntityInterface $entity) {
       ->condition('entity_id', $entity->id())
       ->condition('entity_type_id', $entity->getEntityTypeId())
       ->execute();
-
   }
 }
 
