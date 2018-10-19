@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Implements hook_drush_commands().
+ * Implements hook_drush_command().
  *
  * @return array
  */

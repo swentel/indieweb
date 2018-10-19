@@ -18,6 +18,7 @@ class FeedController extends ControllerBase {
    * Routing callback: update items for a feed.
    *
    * @param \Drupal\indieweb\Entity\FeedInterface $indieweb_feed
+   *
    * @return \Symfony\Component\HttpFoundation\RedirectResponse
    *
    * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
@@ -35,7 +36,9 @@ class FeedController extends ControllerBase {
    * @param \Drupal\indieweb\Entity\FeedInterface $indieweb_feed
    *
    * @return array|\Symfony\Component\HttpFoundation\Response
+   *
    * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    */
   public function feedMicroformat(FeedInterface $indieweb_feed) {
     $build = [];
@@ -145,7 +148,9 @@ class FeedController extends ControllerBase {
    * @param \Drupal\indieweb\Entity\FeedInterface $indieweb_feed
    *
    * @return array $entities
+   *
    * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    */
   protected function getItems(FeedInterface $indieweb_feed) {
     $entities = [];
