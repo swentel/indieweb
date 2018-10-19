@@ -24,6 +24,10 @@ class WebmentionViewsData extends EntityViewsData {
       ),
     );
 
+    // Change filter for type and property to our filter.
+    $data['webmention_entity']['type']['filter']['id'] = 'webmention_filter_select';
+    $data['webmention_entity']['property']['filter']['id'] = 'webmention_filter_select';
+
     return $data;
   }
 
