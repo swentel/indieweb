@@ -1093,7 +1093,7 @@ class MicropubController extends ControllerBase {
   protected function getPostTypes() {
     $post_types = [];
 
-    foreach (['article', 'note', 'like', 'reply', 'repost', 'bookmark', 'event', 'rsvp', 'issue'] as $type) {
+    foreach (indieweb_micropub_post_types() as $type) {
       if ($this->config->get($type . '_create_node')) {
         $post_types[] = (object) array(
           'type' => $type,

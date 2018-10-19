@@ -21,6 +21,7 @@ use Drupal\indieweb\Entity\FeedInterface;
 use Drupal\indieweb\Entity\WebmentionInterface;
 use Drupal\node\Entity\NodeType;
 use Drupal\node\NodeInterface;
+use Drupal\node\NodeTypeInterface;
 
 define('WEBMENTION_QUEUE_NAME', 'indieweb_webmention');
 
@@ -544,6 +545,23 @@ function indieweb_entity_delete(EntityInterface $entity) {
       ->condition('entity_type_id', $entity->getEntityTypeId())
       ->execute();
   }
+
+  // Fix micropub config.
+  if ($entity instanceof NodeTypeInterface) {
+    $save = FALSE;
+    $config = \Drupal::configFactory()->getEditable('indieweb.micropub');
+    foreach (indieweb_micropub_post_types() as $post_type) {
+      if ($config->get($post_type . '_node_type') == $entity->id()) {
+        $save = TRUE;
+        $config->set($post_type . '_node_type', '');
+      }
+    }
+
+    if ($save) {
+      $config->save();
+    }
+  }
+
 }
 
 /**
@@ -1406,4 +1424,13 @@ function indieweb_is_silo_url($url) {
  */
 function indieweb_microformat_view_modes() {
   return ['full', 'indieweb_microformat'];
+}
+
+/**
+ * Returns the supported micropub post types.
+ *
+ * @return array
+ */
+function indieweb_micropub_post_types() {
+  return ['article', 'note', 'like', 'reply', 'repost', 'bookmark', 'event', 'rsvp', 'issue'];
 }

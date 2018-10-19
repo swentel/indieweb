@@ -935,6 +935,18 @@ class MicropubTest extends IndiewebBrowserTestBase {
     $nid = \Drupal::database()->query("SELECT nid FROM {node_field_data} WHERE nid = :nid", [':nid' => $nid])->fetchField();
     self::assertFalse($nid);
 
+    // ----------------------------------------------------------------
+    // Delete node type.
+    // ----------------------------------------------------------------
+    $article = node_type_load('article');
+    $article->delete();
+
+    $node_type_name = \Drupal::config('indieweb.micropub')->get('article_node_type');
+    self::assertTrue(empty($node_type_name));
+    $node_type_name = \Drupal::config('indieweb.micropub')->get('note_node_type');
+    self::assertTrue($node_type_name == 'page');
+    $node_type_name = \Drupal::config('indieweb.micropub')->get('like_node_type');
+    self::assertTrue($node_type_name == 'like');
   }
 
 }

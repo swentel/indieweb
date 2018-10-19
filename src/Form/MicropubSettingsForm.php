@@ -329,7 +329,7 @@ class MicropubSettingsForm extends ConfigFormBase {
         '#type' => 'select',
         '#title' => $this->t('Node type'),
         '#description' => $this->t('Select the node type to use for creating a node'),
-        '#options' => node_type_get_names(),
+        '#options' => ['' => $this->t('Select a node type')] + node_type_get_names(),
         '#default_value' => $config->get($post_type . '_node_type'),
         '#states' => array(
           'visible' => array(
