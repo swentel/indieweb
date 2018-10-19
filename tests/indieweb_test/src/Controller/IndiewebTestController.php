@@ -42,6 +42,7 @@ class IndiewebTestController extends ControllerBase {
     if ($auth && preg_match('/Bearer\s(\S+)/', $auth, $matches) && strpos($auth, 'is_valid') !== FALSE) {
       $status = 200;
       $data['me'] = 'https://indieweb.micropub.testdomain';
+      $data['scope'] = 'create update delete';
     }
 
     return new JsonResponse($data, $status);

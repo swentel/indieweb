@@ -243,7 +243,7 @@ class MicropubController extends ControllerBase {
       }
 
       // Validate token. Return early if it's not valid.
-      $valid_token = $this->isValidToken($auth_header);
+      $valid_token = $this->isValidToken($auth_header, 'delete');
       if (!$valid_token) {
         return new JsonResponse('', 403);
       }
@@ -283,7 +283,7 @@ class MicropubController extends ControllerBase {
       }
 
       // Validate token. Return early if it's not valid.
-      $valid_token = $this->isValidToken($auth_header);
+      $valid_token = $this->isValidToken($auth_header, 'update');
       if (!$valid_token) {
         return new JsonResponse('', 403);
       }
@@ -361,7 +361,7 @@ class MicropubController extends ControllerBase {
       }
 
       // Validate token. Return early if it's not valid.
-      $valid_token = $this->isValidToken($auth_header);
+      $valid_token = $this->isValidToken($auth_header, 'create');
       if (!$valid_token) {
         return new JsonResponse('', 403);
       }
@@ -622,7 +622,7 @@ class MicropubController extends ControllerBase {
       return new JsonResponse('', 401);
     }
 
-    if ($this->isValidToken($auth_header)) {
+    if ($this->isValidToken($auth_header, 'media')) {
       $response_code = 200;
       $extensions = 'jpg jpeg gif png';
       $validators['file_validate_extensions'] = [];
@@ -688,10 +688,12 @@ class MicropubController extends ControllerBase {
    *
    * @param $auth_header
    *   The input.
+   * @param $scope_to_check
+   *   The scope needed for this request, optional.
    *
    * @return bool
    */
-  protected function isValidToken($auth_header) {
+  protected function isValidToken($auth_header, $scope_to_check = '') {
     $valid_token = FALSE;
 
     try {
@@ -704,7 +706,18 @@ class MicropubController extends ControllerBase {
       $response = $client->get(\Drupal::config('indieweb.indieauth')->get('token_endpoint'), ['headers' => $headers]);
       $json = json_decode($response->getBody());
       if (isset($json->me) && $json->me == $this->config->get('micropub_me')) {
+
+        // The token is valid.
         $valid_token = TRUE;
+
+        // Scope check.
+        if (!empty($scope_to_check)) {
+          $scopes = isset($json->scope) ? explode(' ', $json->scope) : [];
+          if (empty($scopes) || !in_array($scope_to_check, $scopes)) {
+            $valid_token = FALSE;
+            $this->getLogger('indieweb_micropub')->notice('Scope "@scope" insufficient', ['@scope' => $scope_to_check]);
+          }
+        }
       }
     }
     catch (\Exception $e) {
