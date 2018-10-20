@@ -285,6 +285,12 @@ content types or comments where needed. Currently replies, likes and repost work
 - Check https://fed.brid.gy/#setup for additional setup for .htaccess.
 - If you use a microsub server, you can subscribe to fediverse users through the microformats feed.
 
+This module exposes a Rabbit hole behavior plugin to return '410 Gone' response. This is useful when you want to delete
+a post on the fediverse via Bridgy Fed. The entity itself still needs to exist on the site.  
+Install https://www.drupal.org/project/rabbit_hole and the option will be available globally or per entity.
+
+For more background, see https://github.com/snarfed/bridgy-fed/issues/30 and https://indieweb.org/deleted
+
 ## Drush commands
 
 - indieweb-send-webmentions (isw): handles the queue for sending webmentions

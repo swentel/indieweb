@@ -25,6 +25,7 @@ markup after you\'ve done the configuration with this module (and optionally mor
     $modules = [
       'https://www.drupal.org/project/auto_entitylabel' => 'Automatic Entity Label',
       'https://www.drupal.org/project/realname' => 'Real Name',
+      'https://www.drupal.org/project/rabbit_hole' => 'Rabbit hole'
     ];
 
     foreach ($modules as $url => $label) {
