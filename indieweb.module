@@ -415,7 +415,7 @@ function _indieweb_entity_form_alter(&$form, FormStateInterface $form_state) {
     }
 
     // Comment webmention.
-    if ($entity->getEntityTypeId() == 'comment' && ($reference_field = \Drupal::config('indieweb.webmention')->get('comment_webmention_field')) && $entity->hasField($reference_field) && !empty($options)) {
+    if ($entity->getEntityTypeId() == 'comment' && ($reference_field = \Drupal::config('indieweb.webmention')->get('send_comment_webmention_field')) && $entity->hasField($reference_field) && !empty($options)) {
       /** @var \Drupal\comment\CommentInterface $comment */
       $comment = $entity;
 

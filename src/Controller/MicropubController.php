@@ -437,7 +437,7 @@ class MicropubController extends ControllerBase {
         }
       }
 
-      // Issue post type.
+      // Issue support.
       if ($this->createNodeFromPostType('issue') && $this->isHEntry() && $this->hasRequiredInput(['content', 'name', 'in-reply-to']) && $this->hasNoKeysSet(['bookmark-of', 'repost-of', 'like-of'])) {
         $this->createNode($this->input['name'], 'issue');
         $response = $this->saveNode();
