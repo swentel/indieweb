@@ -153,11 +153,11 @@ abstract class IndiewebBrowserTestBase extends BrowserTestBase {
     ];
 
     if ($publish) {
-      $edit['indieweb_publish_channels[' . $target_url . ']'] = TRUE;
+      $edit['indieweb_syndication_targets[' . $target_url . ']'] = TRUE;
     }
 
     if ($custom) {
-      $edit['indieweb_publish_custom_url'] = $target_url;
+      $edit['indieweb_send_custom_url'] = $target_url;
     }
 
     $this->drupalPostForm('node/add/page', $edit, 'Save');

@@ -35,9 +35,9 @@ function indieweb_help($route_name, RouteMatchInterface $route_match) {
       'title' => 'Receiving webmentions',
       'text' => '<p>' . t('The easiest way to start receiving webmentions and pingbacks for any page is by using <a href="https://webmention.io/" target="_blank">https://webmention.io</a>. <br />You have to create an account by signing in with your domain. For more information how to sign in with your domain, see the <a href=":link_indieauth">IndieAuth</a> tab.<br />Webmention.io is open source so you can also host the service yourself.<br /><br />All collected webmentions and pingbacks can be viewed on the <a href=":link_overview">overview page</a>.<br /><br /><strong>Blocks</strong><br />- Webmentions: show the likes and reposts of that url.<br />- Webmention notify form: let people submit a URL if the current page is mentioned there<br />- RSVP: shows people attending, interested etc. for an event<br />- Pingbacks: render all urls to site pinging back per page', [':link_indieauth' => Url::fromRoute('indieweb.admin.indieauth_settings')->toString(), ':link_overview' => Url::fromRoute('entity.webmention_entity.collection')->toString()]) . '</p>',
     ],
-    'indieweb.admin.publish_settings' => [
-      'title' => 'Sending webmentions',
-      'text' => '<p>' . t('The easiest way to publish content on social networks is by using <a href="https://brid.gy/" target="_blank">https://brid.gy</a>. <br />You have to create an account by signing in with your preferred social network. Bridgy is open source so you can also host the service yourself.<br /><br />Publishing, which is nothing more than sending a webmention, can be done per node in the "Publish to" fieldset, which is protected with the "send webmentions" permission.<br />If no channels are configured, there is nothing to do. There is a syndication field on every node and comment type available to render your <a href=":syndication_link">syndications</a> for <a href="https://indieweb.org/posse-post-discovery" target="_blank">POSSE-Post-Discovery</a>.<br />If comments are enabled, put those fields only on the microformat view mode. The comment itself is available on comment/indieweb/cid and it is this URL that will be used for sending webmentions.', [':syndication_link' => Url::fromRoute('indieweb.syndications_list')->toString()]) . '</p>',
+    'indieweb.admin.webmention_send_settings' => [
+      'title' => 'Sending webmentions and syndicating content',
+      'text' => '<p>' . t('The easiest way to syndicate content on social networks is by using <a href="https://brid.gy/" target="_blank">https://brid.gy</a>. <br />You have to create an account by signing in with your preferred social network. Bridgy is open source so you can also host the service yourself.<br /><br />Syndicating and sending webmentions can be done per node in the "Publish to" fieldset, which is protected with the "send webmentions" permission.<br />If no targets are configured, there is nothing to do. There is a syndication field on every node and comment type available to render your <a href=":syndication_link">syndications</a> for <a href="https://indieweb.org/posse-post-discovery" target="_blank">POSSE-Post-Discovery</a>.<br />If comments are enabled, put those fields only on the microformat view mode. The comment itself is available on comment/indieweb/cid and it is this URL that will be used for sending webmentions.', [':syndication_link' => Url::fromRoute('indieweb.syndications_list')->toString()]) . '</p>',
     ],
     'indieweb.admin.comment_settings' => [
       'title' => 'Comments',
@@ -386,16 +386,16 @@ function _indieweb_entity_form_alter(&$form, FormStateInterface $form_state) {
       '#group' => 'advanced',
     ];
 
-    $channels = indieweb_get_publishing_channels(TRUE);
-    $form['indieweb']['indieweb_publish_channels'] = [
+    $syndication_targets = indieweb_get_syndication_targets(TRUE);
+    $form['indieweb']['indieweb_syndication_targets'] = [
       '#type' => 'checkboxes',
-      '#options' => isset($channels['options']) ? $channels['options'] : [],
-      '#default_value' => isset($channels['default']) ? $channels['default'] : [],
-      '#access' => !empty($channels['options']),
+      '#options' => isset($syndication_targets['options']) ? $syndication_targets['options'] : [],
+      '#default_value' => isset($syndication_targets['default']) ? $syndication_targets['default'] : [],
+      '#access' => !empty($syndication_targets['options']),
     ];
 
     $options = [];
-    $link_fields_string = \Drupal::config('indieweb.publish')->get('publish_link_fields');
+    $link_fields_string = \Drupal::config('indieweb.webmention')->get('send_link_fields');
     if (!empty($link_fields_string)) {
       $link_fields = explode('|', $link_fields_string);
 
@@ -405,7 +405,7 @@ function _indieweb_entity_form_alter(&$form, FormStateInterface $form_state) {
         }
       }
 
-      $form['indieweb']['indieweb_publish_link_field'] = [
+      $form['indieweb']['indieweb_send_link_field'] = [
         '#title' => t('Link field'),
         '#type' => 'select',
         '#access' => !empty($options),
@@ -415,11 +415,11 @@ function _indieweb_entity_form_alter(&$form, FormStateInterface $form_state) {
     }
 
     // Comment webmention.
-    if ($entity->getEntityTypeId() == 'comment' && ($reference_field = \Drupal::config('indieweb.publish')->get('publish_comment_webmention_field')) && $entity->hasField($reference_field) && !empty($options)) {
+    if ($entity->getEntityTypeId() == 'comment' && ($reference_field = \Drupal::config('indieweb.webmention')->get('comment_webmention_field')) && $entity->hasField($reference_field) && !empty($options)) {
       /** @var \Drupal\comment\CommentInterface $comment */
       $comment = $entity;
 
-      if (\Drupal::config('indieweb.publish')->get('publish_comment_permission_fields')) {
+      if (\Drupal::config('indieweb.webmention')->get('send_comment_permission_fields')) {
         $form[$reference_field]['#access'] = \Drupal::currentUser()->hasPermission('send webmentions');
 
         foreach (array_keys($options) as $field_name) {
@@ -439,8 +439,8 @@ function _indieweb_entity_form_alter(&$form, FormStateInterface $form_state) {
       }
     }
 
-    if (\Drupal::config('indieweb.publish')->get('publish_custom_url')) {
-      $form['indieweb']['indieweb_publish_custom_url'] = [
+    if (\Drupal::config('indieweb.webmention')->get('send_custom_url')) {
+      $form['indieweb']['indieweb_send_custom_url'] = [
         '#type' => 'textfield',
         '#description' => t('Enter a custom URL'),
       ];
@@ -462,6 +462,8 @@ function _indieweb_entity_form_alter(&$form, FormStateInterface $form_state) {
  * @param \Drupal\Core\Form\FormStateInterface $form_state
  *
  * @see indieweb_form_node_form_alter()
+ *
+ * @throws \Drupal\Core\Entity\EntityMalformedException
  */
 function _indieweb_entity_content_form_submit($form, FormStateInterface $form_state) {
   /** @var \Drupal\Core\Entity\EntityInterface $entity */
@@ -477,9 +479,10 @@ function _indieweb_entity_content_form_submit($form, FormStateInterface $form_st
       $source = $entity->toUrl()->setAbsolute(TRUE)->toString();
     }
 
-    $publish_to = $form_state->getValue('indieweb_publish_channels');
-    if (!empty($publish_to)) {
-      foreach ($publish_to as $key => $value) {
+    // Syndicate to.
+    $syndicate_to = $form_state->getValue('indieweb_syndication_targets');
+    if (!empty($syndicate_to)) {
+      foreach ($syndicate_to as $key => $value) {
         if ($key === $value) {
           indieweb_webmention_create_queue_item($source, $key, $entity->id(), $entity->getEntityTypeId());
         }
@@ -487,7 +490,7 @@ function _indieweb_entity_content_form_submit($form, FormStateInterface $form_st
     }
 
     // Link fields.
-    $link_field = $form_state->getValue('indieweb_publish_link_field');
+    $link_field = $form_state->getValue('indieweb_send_link_field');
     if (!empty($link_field)) {
       if ($entity->hasField($link_field)) {
         $values = $entity->get($link_field)->getValue();
@@ -498,7 +501,7 @@ function _indieweb_entity_content_form_submit($form, FormStateInterface $form_st
     }
 
     // Custom URL.
-    $custom_url = $form_state->getValue('indieweb_publish_custom_url');
+    $custom_url = $form_state->getValue('indieweb_send_custom_url');
     if (!empty($custom_url)) {
       indieweb_webmention_create_queue_item($source, $custom_url, $entity->id(), $entity->getEntityTypeId());
     }
@@ -879,13 +882,13 @@ function indieweb_ds_pre_render_alter(array &$layout_render_array, array $contex
 function indieweb_entity_extra_field_info() {
   $extra = [];
 
-  $channels = indieweb_get_publishing_channels();
-  if (!empty($channels)) {
+  $syndication_targets = indieweb_get_syndication_targets();
+  if (!empty($syndication_targets)) {
 
     // Fields for node.
     if (\Drupal::moduleHandler()->moduleExists('node')) {
       foreach (NodeType::loadMultiple() as $bundle) {
-        foreach ($channels as $url => $name) {
+        foreach ($syndication_targets as $url => $name) {
           $machine_name = indieweb_get_machine_name_from_url($url);
           $extra['node'][$bundle->id()]['display'][$machine_name] = [
             'label' => $name,
@@ -906,7 +909,7 @@ function indieweb_entity_extra_field_info() {
     // Fields for comment.
     if (\Drupal::moduleHandler()->moduleExists('comment')) {
       foreach (CommentType::loadMultiple() as $bundle) {
-        foreach ($channels as $url => $name) {
+        foreach ($syndication_targets as $url => $name) {
           $machine_name = indieweb_get_machine_name_from_url($url);
           $extra['comment'][$bundle->id()]['display'][$machine_name] = [
             'label' => $name,
@@ -945,25 +948,25 @@ function indieweb_comment_view(array &$build, CommentInterface $comment, EntityV
 }
 
 /**
- * Renders extra fields like channels and syndication.
+ * Renders extra fields like targets and syndication.
  *
  * @param array $build
  * @param \Drupal\Core\Entity\EntityInterface $entity
  * @param \Drupal\Core\Entity\Display\EntityViewDisplayInterface $display
  */
 function _indieweb_extra_fields_display(array &$build, EntityInterface $entity, EntityViewDisplayInterface $display) {
-  // Channel fields.
-  $channels = indieweb_get_publishing_channels();
-  if (!empty($channels)) {
+  // Syndication targets fields.
+  $syndication_targets = indieweb_get_syndication_targets();
+  if (!empty($syndication_targets)) {
     $back_link = '';
-    $add_back_link = \Drupal::config('indieweb.publish')->get('back_link');
+    $add_back_link = \Drupal::config('indieweb.webmention')->get('bridgy_back_link');
     if ($add_back_link == 'never') {
       $back_link = ' class="p-bridgy-omit-link" value="true"';
     }
     elseif ($add_back_link == 'maybe') {
       $back_link = ' class="p-bridgy-omit-link" value="maybe"';
     }
-    foreach ($channels as $url => $name) {
+    foreach ($syndication_targets as $url => $name) {
       $machine_name = indieweb_get_machine_name_from_url($url);
       if ($display->getComponent($machine_name)) {
         $build[$machine_name] = [
@@ -1160,7 +1163,7 @@ function indieweb_mail($key, &$message, $params) {
  * Implements hook_cron().
  */
 function indieweb_cron() {
-  if (\Drupal::config('indieweb.publish')->get('publish_send_webmention_by') == 'cron') {
+  if (\Drupal::config('indieweb.webmention')->get('send_webmention_handler') == 'cron') {
     indieweb_handle_webmention_queue();
   }
 }
@@ -1185,17 +1188,17 @@ function indieweb_get_syndications($entity_id, $entity_type_id) {
 }
 
 /**
- * Returns the publishing channels.
+ * Returns the syndication targets.
  *
  * @param boolean $return_options_and_defaults
- *   Whether to return the channels as an array with 'options' key and
- *   'default' key.
+ *   Whether to return the syndication targets as an array with 'options' key
+ *   and 'default' key.
  *
  * @return array
  */
-function indieweb_get_publishing_channels($return_options_and_defaults = FALSE) {
-  $channels = [];
-  $config = \Drupal::config('indieweb.publish')->get('channels');
+function indieweb_get_syndication_targets($return_options_and_defaults = FALSE) {
+  $syndication_targets = [];
+  $config = \Drupal::config('indieweb.webmention')->get('syndication_targets');
   if (!empty($config)) {
     $lines = explode("\n", $config);
     foreach ($lines as $line) {
@@ -1204,20 +1207,20 @@ function indieweb_get_publishing_channels($return_options_and_defaults = FALSE) 
         $name_url = explode('|', $line);
         if (!empty($name_url[0]) && !empty($name_url[1])) {
           if ($return_options_and_defaults) {
-            $channels['options'][$name_url[1]] = $name_url[0];
+            $syndication_targets['options'][$name_url[1]] = $name_url[0];
             if (isset($name_url[2]) && !empty($name_url[2]) && $name_url[2] == '1') {
-              $channels['default'][] = $name_url[1];
+              $syndication_targets['default'][] = $name_url[1];
             }
           }
           else {
-            $channels[$name_url[1]] = $name_url[0];
+            $syndication_targets[$name_url[1]] = $name_url[0];
           }
         }
       }
     }
   }
 
-  return $channels;
+  return $syndication_targets;
 }
 
 /**
@@ -1256,7 +1259,7 @@ function indieweb_webmention_create_queue_item($source, $target, $entity_id = ''
  */
 function indieweb_handle_webmention_queue() {
   $end = time() + 15;
-  $channels = indieweb_get_publishing_channels();
+  $syndication_targets = indieweb_get_syndication_targets();
   while (time() < $end && ($item = \Drupal::queue(WEBMENTION_QUEUE_NAME)->claimItem())) {
     $data = $item->data;
     if (!empty($data['source']) && !empty($data['target'])) {
@@ -1271,8 +1274,9 @@ function indieweb_handle_webmention_queue() {
 
         $response = $client->sendWebmention($sourceURL, $targetURL);
 
-        // Store the syndication when the targetUrl is in the channels.
-        if (isset($channels[$targetURL])) {
+        // Store the syndication when the targetUrl is in the syndication
+        // targets.
+        if (isset($syndication_targets[$targetURL])) {
           if (!empty($response) && $response['code'] == 201 && !empty($response['headers']['Location'])) {
 
             if (!empty($data['entity_id']) && !empty($data['entity_type_id'])) {
@@ -1291,8 +1295,8 @@ function indieweb_handle_webmention_queue() {
             }
 
             // Log the response if configured.
-            if (\Drupal::config('indieweb.publish')->get('publish_log_response')) {
-              \Drupal::logger('indieweb_publish_response')->notice('response for @source to @target: @response', ['@response' => print_r($response, 1), '@source' => $sourceURL, '@target' => $targetURL]);
+            if (\Drupal::config('indieweb.webmention')->get('send_log_response')) {
+              \Drupal::logger('indieweb_send_response')->notice('response for @source to @target: @response', ['@response' => print_r($response, 1), '@source' => $sourceURL, '@target' => $targetURL]);
             }
 
           }

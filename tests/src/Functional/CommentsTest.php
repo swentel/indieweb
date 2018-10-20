@@ -96,11 +96,11 @@ class CommentsTest extends IndiewebBrowserTestBase {
     ];
     $this->drupalPostForm('admin/config/services/indieweb/comments', $edit, 'Save configuration');
 
-    // Set publish fields.
+    // Set send fields.
     $edit = [];
-    $edit['publish_custom_url'] = 1;
-    $edit['publish_link_fields[]'] = ['field_comment_link'];
-    $this->drupalPostForm('admin/config/services/indieweb/publish', $edit, 'Save configuration');
+    $edit['send_custom_url'] = 1;
+    $edit['send_link_fields[]'] = ['field_comment_link'];
+    $this->drupalPostForm('admin/config/services/indieweb/send', $edit, 'Save configuration');
     $this->assertSession()->responseNotContains('An illegal choice has been detected.');
 
     // Send again, we should have a comment now.
@@ -185,7 +185,7 @@ class CommentsTest extends IndiewebBrowserTestBase {
     $this->drupalLogin($this->adminUser);
     $edit = [
       'comment_body[0][value]' => "I know, isn't it!",
-      'indieweb_publish_custom_url' => 'https://brid-gy.appspot.com/comment/twitter/swentel/994117538731741185/994129251946418177',
+      'indieweb_send_custom_url' => 'https://brid-gy.appspot.com/comment/twitter/swentel/994117538731741185/994129251946418177',
     ];
     $this->drupalPostForm('comment/reply/node/1/comment/' . $comment->id(), $edit, 'Save');
     $this->drupalGet('node/1');

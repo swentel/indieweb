@@ -7,20 +7,20 @@ use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
 
-class PublishSettingsForm extends ConfigFormBase {
+class WebmentionSendSettingsForm extends ConfigFormBase {
 
   /**
    * {@inheritdoc}
    */
   protected function getEditableConfigNames() {
-    return ['indieweb.publish'];
+    return ['indieweb.webmention'];
   }
 
   /**
    * {@inheritdoc}
    */
   public function getFormId() {
-    return 'indieweb_publish_settings_form';
+    return 'indieweb_webmention_send_settings_form';
   }
 
   /**
@@ -30,25 +30,25 @@ class PublishSettingsForm extends ConfigFormBase {
 
     $form['#attached']['library'][] = 'indieweb/admin';
 
-    $config = $this->config('indieweb.publish');
+    $config = $this->config('indieweb.webmention');
 
-    $form['channels_wrapper'] = [
+    $form['syndication_targets_wrapper'] = [
       '#type' => 'fieldset',
-      '#title' => $this->t('Publishing channels')
+      '#title' => $this->t('Syndication targets')
     ];
 
-    $form['channels_wrapper']['channels'] = [
+    $form['syndication_targets_wrapper']['syndication_targets'] = [
       '#type' => 'textarea',
-      '#title' => $this->t('Publishing channels'),
+      '#title' => $this->t('Syndication targets'),
       '#title_display' => 'invisible',
-      '#default_value' => $config->get('channels'),
-      '#description' => $this->t('Enter every channel line by line if you want to publish content, in following format:<br /><br />Name|webmention_url|selected<br />selected is optional. Set to 1 to set as selected on the form.<br />Twitter (bridgy)|https://brid.gy/publish/twitter|1<br /><br />When you add or remove channels, extra fields will be enabled on the manage display screens of every node type (you will have to clear cache to see them showing up).<br />These need to be added on the page (usually on the "full" view mode) because bridgy will check for the url in the markup, along with the proper microformat classes.<br />The field will print them hidden in your markup, even if you do not publish to that channel, that will be altered later.<br />You can also add them yourself:<br /><div class="indieweb-highlight-code">&lt;a href="https://brid.gy/publish/twitter"&gt;&lt;/a&gt;</div><br />These channels are also used for the syndicate-to request if you are using micropub.<br />Consult the README file that comes with this module if you want to integrate with the Fediverse.')
+      '#default_value' => $config->get('syndication_targets'),
+      '#description' => $this->t('Enter every target line by line if you want to publish content, in following format:<br /><br />Name|webmention_url|selected<br />selected is optional. Set to 1 to set as selected on the form.<br />Twitter (bridgy)|https://brid.gy/publish/twitter|1<br /><br />When you add or remove channels, extra fields will be enabled on the manage display screens of every node type (you will have to clear cache to see them showing up).<br />These need to be added on the page (usually on the "full" view mode) because bridgy will check for the url in the markup, along with the proper microformat classes.<br />The field will print them hidden in your markup, even if you do not publish to that channel, that will be altered later.<br />You can also add them yourself:<br /><div class="indieweb-highlight-code">&lt;a href="https://brid.gy/publish/twitter"&gt;&lt;/a&gt;</div><br />These channels are also used for the syndicate-to request if you are using micropub.<br />Consult the README file that comes with this module if you want to integrate with the Fediverse.')
     ];
 
-    $form['channels_wrapper']['back_link'] = [
+    $form['syndication_targets_wrapper']['bridgy_back_link'] = [
       '#title' => $this->t('Bridgy back link'),
       '#type' => 'radios',
-      '#default_value' => $config->get('back_link'),
+      '#default_value' => $config->get('bridgy_back_link'),
       '#options' => [
         'always' => $this->t('Always'),
         'never' => $this->t('Never'),
@@ -91,37 +91,37 @@ class PublishSettingsForm extends ConfigFormBase {
       }
     }
 
-    $form['custom_wrapper']['publish_custom_url'] = [
+    $form['custom_wrapper']['send_custom_url'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('Expose textfield'),
       '#description' => $this->t('Add a textfield to enter a custom URL to send a webmention.'),
-      '#default_value' => $config->get('publish_custom_url'),
+      '#default_value' => $config->get('send_custom_url'),
     ];
 
-    $form['custom_wrapper']['publish_link_fields'] = [
+    $form['custom_wrapper']['send_link_fields'] = [
       '#type' => 'select',
       '#multiple' => TRUE,
       '#title' => $this->t('Link fields on content'),
       '#options' => $link_fields,
-      '#default_value' => explode('|', $config->get('publish_link_fields')),
+      '#default_value' => explode('|', $config->get('send_link_fields')),
       '#description' => $this->t('When you have a "Reply" post type, or reply on a comment, add a link field to which you are replying to. This URL will be used then to send the webmention to.<br />You can also just use the custom field above of course. Do not select a field if you do not want to use this feature.'),
     ];
 
-    $form['custom_wrapper']['publish_comment_webmention_field'] = [
+    $form['custom_wrapper']['send_comment_webmention_field'] = [
       '#type' => 'select',
       '#title' => $this->t('Webmention entity reference field'),
       '#options' => ['' => $this->t('Do not check')] + $reference_fields,
       '#description' => $this->t('Select the comment webmention reference field. When replying on a comment, the value of the webmention of the parent comment will be used to populate link fields on the comment.'),
       '#access' => $comment_enabled,
-      '#default_value' => $config->get('publish_comment_webmention_field'),
+      '#default_value' => $config->get('send_comment_webmention_field'),
     ];
 
-    $form['custom_wrapper']['publish_comment_permission_fields'] = [
+    $form['custom_wrapper']['send_comment_permission_fields'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('Block access to link and webmention fields on comments'),
       '#description' => $this->t('Webmention reference field and link fields will be hidden for users who do not have the "Send webmention" permission.'),
       '#access' => $comment_enabled,
-      '#default_value' => $config->get('publish_comment_permission_fields'),
+      '#default_value' => $config->get('send_comment_permission_fields'),
     ];
 
     $form['send_wrapper'] = [
@@ -129,8 +129,8 @@ class PublishSettingsForm extends ConfigFormBase {
       '#title' => $this->t('Sending webmentions')
     ];
 
-    $form['send_wrapper']['publish_send_webmention_by'] = [
-      '#title' => $this->t('Send publication'),
+    $form['send_wrapper']['send_webmention_handler'] = [
+      '#title' => $this->t('Send webmention'),
       '#title_display' => 'invisible',
       '#type' => 'radios',
       '#options' => [
@@ -138,14 +138,14 @@ class PublishSettingsForm extends ConfigFormBase {
         'cron' => $this->t('On cron run'),
         'drush' => $this->t('With drush'),
       ],
-      '#default_value' => $config->get('publish_send_webmention_by'),
+      '#default_value' => $config->get('send_webmention_handler'),
       '#description' => $this->t('Webmentions are not send immediately, but are stored in a queue when the content is published.<br />The drush command is <strong>indieweb-send-webmentions</strong>')
     ];
 
-    $form['send_wrapper']['publish_log_response'] = [
+    $form['send_wrapper']['send_log_response'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('Log the response in watchdog when the webmention is send.'),
-      '#default_value' => $config->get('publish_log_response'),
+      '#default_value' => $config->get('send_log_response'),
     ];
 
     return parent::buildForm($form, $form_state);
@@ -156,10 +156,10 @@ class PublishSettingsForm extends ConfigFormBase {
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
 
-    // Store publish_dynamic_fields as a simple string.
+    // Store link fields as a simple string.
     $link_fields_string = '';
     $link_fields_to_implode = [];
-    $link_fields = $form_state->getValue('publish_link_fields');
+    $link_fields = $form_state->getValue('send_link_fields');
     foreach ($link_fields as $key => $value) {
       if ($key === $value) {
         $link_fields_to_implode[] = $key;
@@ -169,15 +169,15 @@ class PublishSettingsForm extends ConfigFormBase {
       $link_fields_string = implode("|", $link_fields_to_implode);
     }
 
-    $this->config('indieweb.publish')
-      ->set('channels', $form_state->getValue('channels'))
-      ->set('back_link', $form_state->getValue('back_link'))
-      ->set('publish_send_webmention_by', $form_state->getValue('publish_send_webmention_by'))
-      ->set('publish_log_response', $form_state->getValue('publish_log_response'))
-      ->set('publish_custom_url', $form_state->getValue('publish_custom_url'))
-      ->set('publish_link_fields', $link_fields_string)
-      ->set('publish_comment_webmention_field', $form_state->getValue('publish_comment_webmention_field'))
-      ->set('publish_comment_permission_fields', $form_state->getValue('publish_comment_permission_fields'))
+    $this->config('indieweb.webmention')
+      ->set('syndication_targets', $form_state->getValue('syndication_targets'))
+      ->set('bridgy_back_link', $form_state->getValue('bridgy_back_link'))
+      ->set('send_webmention_handler', $form_state->getValue('send_webmention_handler'))
+      ->set('send_log_response', $form_state->getValue('send_log_response'))
+      ->set('send_custom_url', $form_state->getValue('send_custom_url'))
+      ->set('send_link_fields', $link_fields_string)
+      ->set('send_comment_webmention_field', $form_state->getValue('send_comment_webmention_field'))
+      ->set('send_comment_permission_fields', $form_state->getValue('send_comment_permission_fields'))
       ->save();
 
     Cache::invalidateTags(['rendered']);

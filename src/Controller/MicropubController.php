@@ -534,7 +534,7 @@ class MicropubController extends ControllerBase {
 
                 // Check link field.
                 if (!empty($link_field_url)) {
-                  $link_fields_string = \Drupal::config('indieweb.publish')->get('publish_link_fields');
+                  $link_fields_string = \Drupal::config('indieweb.webmention')->get('send_link_fields');
                   if (!empty($link_fields_string)) {
                     $link_fields = explode('|', $link_fields_string);
                     foreach ($link_fields as $field) {
@@ -1119,7 +1119,7 @@ class MicropubController extends ControllerBase {
    */
   protected function getSyndicationTargets() {
     $syndication_targets = [];
-    $channels = indieweb_get_publishing_channels();
+    $channels = indieweb_get_syndication_targets();
     if (!empty($channels)) {
       foreach ($channels as $url => $name) {
         $syndication_targets[] = [

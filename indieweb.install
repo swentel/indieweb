@@ -27,7 +27,7 @@ function indieweb_requirements($phase) {
       else {
         $description = t('The directory %directory does not exist.', ['%directory' => $directory]);
       }
-      $requirements['config directory ' . $type] = [
+      $requirements['micropub directory'] = [
         'title' => t('Micropub directory'),
         'description' => $description,
         'severity' => REQUIREMENT_ERROR,
@@ -247,4 +247,29 @@ function indieweb_update_8005() {
     $schema = indieweb_schema();
     \Drupal::database()->schema()->createTable('webmention_send', $schema['webmention_send']);
   }
+}
+
+/**
+ * Migrates indieweb.publish to indieweb.webmention.
+ */
+function indieweb_update_8006() {
+  $fields = [
+    'channels' => 'syndication_targets',
+    'back_link' => 'bridgy_back_link',
+    'publish_send_webmention_by' => 'send_webmention_handler',
+    'publish_custom_url' => 'send_custom_url',
+    'publish_link_fields' => 'send_link_fields',
+    'publish_log_response' => 'send_log_response',
+    'publish_comment_webmention_field' => 'send_comment_webmention_field',
+    'publish_comment_permission_fields' => 'send_comment_permission_fields',
+  ];
+
+  $publish = \Drupal::configFactory()->getEditable('indieweb.publish');
+  $webmention = \Drupal::configFactory()->getEditable('indieweb.webmention');
+  foreach ($fields as $key => $target) {
+    $value = $publish->get($key);
+    $webmention->set($target, $value);
+  }
+  $webmention->save();
+  $publish->delete();
 }

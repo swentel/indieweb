@@ -391,36 +391,6 @@ indieweb.microsub:
       type: string
       label: 'ApertureClient channel API key'
 
-# schema for indieweb.publish
-indieweb.publish:
-  type: config_object
-  label: 'Indieweb publish'
-  mapping:
-    channels:
-      type: text
-      label: 'Channels to publish to'
-    back_link:
-      type: string
-      label: 'How to handle Bridgy back links'
-    publish_custom_url:
-      type: boolean
-      label: 'Expose dynamic URL textfield'
-    publish_link_fields:
-      type: string
-      label: 'Fields to use'
-    publish_send_webmention_by:
-      type: string
-      label: 'How to handle the webmention send queue'
-    publish_log_response:
-      type: boolean
-      label: 'Whether to log the response of the publish call'
-    publish_comment_webmention_field:
-      type: string
-      label: 'The comment webmention field'
-    publish_comment_permission_fields:
-      type: boolean
-      label: 'Put fields under permission'
-
 # schema for indieweb.webmention
 indieweb.webmention:
   type: config_object
@@ -450,6 +420,30 @@ indieweb.webmention:
     webmention_log_payload:
       type: boolean
       label: 'Whether to log the payload'
+    syndication_targets:
+      type: text
+      label: 'Channels to publish to'
+    bridgy_back_link:
+      type: string
+      label: 'How to handle Bridgy back links'
+    send_custom_url:
+      type: boolean
+      label: 'Expose dynamic URL textfield'
+    send_link_fields:
+      type: string
+      label: 'Fields to use'
+    send_webmention_handler:
+      type: string
+      label: 'How to handle the webmention send queue'
+    send_log_response:
+      type: boolean
+      label: 'Whether to log the response of the publish call'
+    send_comment_webmention_field:
+      type: string
+      label: 'The comment webmention field'
+    send_comment_permission_fields:
+      type: boolean
+      label: 'Put fields under permission'
 
 # schema for webmention_delete_action
 action.configuration.webmention_delete_action:

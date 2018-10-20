@@ -13,9 +13,9 @@ indieweb.admin.webmention_settings_tab:
   route_name: indieweb.admin.webmention_settings
   parent_id: indieweb.admin.webmention_settings
 
-indieweb.admin.publish_settings:
+indieweb.admin.webmention_send_settings:
   title: 'Sending'
-  route_name: indieweb.admin.publish_settings
+  route_name: indieweb.admin.webmention_send_settings
   parent_id: indieweb.admin.webmention_settings
 
 indieweb.admin.comment_settings:

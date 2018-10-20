@@ -14,11 +14,11 @@ indieweb.admin.webmention_settings:
   requirements:
     _permission: 'administer indieweb'
 
-indieweb.admin.publish_settings:
-  path: '/admin/config/services/indieweb/publish'
+indieweb.admin.webmention_send_settings:
+  path: '/admin/config/services/indieweb/send'
   defaults:
-    _form: '\Drupal\indieweb\Form\PublishSettingsForm'
-    _title: 'Publish'
+    _form: '\Drupal\indieweb\Form\WebmentionSendSettingsForm'
+    _title: 'Send webmention'
   requirements:
     _permission: 'administer indieweb'
 

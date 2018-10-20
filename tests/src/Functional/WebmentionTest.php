@@ -144,8 +144,8 @@ class WebmentionTest extends IndiewebBrowserTestBase {
     $this->drupalLogin($this->adminUser);
     $this->enableWebmention(['webmention_endpoint' => $test_endpoint]);
 
-    $edit = ['publish_custom_url' => TRUE];
-    $this->drupalPostForm('admin/config/services/indieweb/publish', $edit, 'Save configuration');
+    $edit = ['send_custom_url' => TRUE];
+    $this->drupalPostForm('admin/config/services/indieweb/send', $edit, 'Save configuration');
 
     $node = $this->drupalCreateNode(['type' => 'page', 'title' => 'Best article ever']);
     $node_1_url = $node->toUrl('canonical', ['absolute' => TRUE])->toString();
@@ -161,23 +161,23 @@ class WebmentionTest extends IndiewebBrowserTestBase {
     $this->assertQueueItems([$node_1_url]);
 
     // Send by cron.
-    $edit = ['publish_send_webmention_by' => 'cron'];
-    $this->drupalPostForm('admin/config/services/indieweb/publish', $edit, 'Save configuration');
+    $edit = ['send_webmention_handler' => 'cron'];
+    $this->drupalPostForm('admin/config/services/indieweb/send', $edit, 'Save configuration');
     $this->runWebmentionQueue();
     $this->assertQueueItems();
 
     // Send by drush.
     $this->createPage($node_1_url, FALSE, TRUE);
     $this->assertQueueItems([$node_1_url]);
-    $edit = ['publish_send_webmention_by' => 'drush'];
-    $this->drupalPostForm('admin/config/services/indieweb/publish', $edit, 'Save configuration');
+    $edit = ['send_webmention_handler' => 'drush'];
+    $this->drupalPostForm('admin/config/services/indieweb/send', $edit, 'Save configuration');
     $this->runWebmentionQueue();
     $this->assertQueueItems();
 
-    // Put node 1 in channels, so it can be a publish URL, so we can test
-    // syndications.
-    $edit = ['channels' => 'Twitter (bridgy)|' . $node_1_url];
-    $this->drupalPostForm('admin/config/services/indieweb/publish', $edit, 'Save configuration');
+    // Put node 1 in syndication targets, so it can be a publish URL, so we can
+    // test syndications.
+    $edit = ['syndication_targets' => 'Twitter (bridgy)|' . $node_1_url];
+    $this->drupalPostForm('admin/config/services/indieweb/send', $edit, 'Save configuration');
 
     $this->createPage($node_1_url, TRUE);
     $this->assertQueueItems([$node_1_url]);

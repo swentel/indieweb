@@ -1,8 +1,0 @@
-channels: "Twitter (bridgy)|https://brid.gy/publish/twitter"
-back_link: always
-publish_send_webmention_by: disabled
-publish_custom_url: true
-publish_link_fields: ''
-publish_log_response: false
-publish_comment_webmention_field: ''
-publish_comment_permission_fields: true

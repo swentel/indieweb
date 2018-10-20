@@ -8,7 +8,7 @@ For more information about IndieWeb, see https://indieweb.org/.
 Current functionality:
 
 - Send and receive webmentions and pingbacks via Webmention.io
-- Publish content, likes etc via [brid.gy](https://brid.gy), store syndications
+- Syndicate content, likes etc via [brid.gy](https://brid.gy), store syndications
 - Microformats for content and images
 - Allow users to login and create accounts
 - IndieAuth for Authentication API
@@ -75,22 +75,23 @@ Webmentions are rendered through templates. Suggestions are available per proper
 
 ![ScreenShot](https://realize.be/sites/default/files/2018-03/webmention-basic.png)
 
-## Sending webmentions and pulling and publishing content with Bridgy
+## Sending webmentions and syndicating content with Bridgy
 
-Bridgy pulls comments, likes, and reshares on social networks back to your web site. You can also use it to post to
-social networks - or comment, like, reshare, or even RSVP - from your own web site. Bridgy is open source so you can
-also host the service yourself.
+Syndicating and sending webmentions can be done per node in the "Publish to" fieldset, which is protected with the 
+"send webmentions" permission.
 
-To receive content from those networks, bridgy will send a webmention, so you only need to enable the webmention
-endpoint.
-
-For publishing, a checkbox will be available on the node form for publishing your content per channel (e.g. twitter,
+For syndicating, a checkbox will be available on the node form for sending your content per target (e.g. twitter,
 etc). There is also a syndication field available to render your syndications for POSSE-Post-Discovery, see
 https://indieweb.org/posse-post-discovery. The full list of syndications is available at admin/content/syndication.
-When you toggle to publish, an entry is created in the queue which you can either handle with drush or by cron. This
+When you toggle to syndicate, an entry is created in the queue which you can either handle with drush or by cron. This
 will send a webmention to bridgy for instance.
 
 The drush command is 'indieweb-send-webmentions'
+
+Bridgy pulls comments, likes, and reshares on social networks back to your web site. You can also use it to post to
+social networks - or comment, like, reshare, or even RSVP - from your own web site. Bridgy is open source so you can
+also host the service yourself. To receive content from those networks, bridgy will send a webmention, so you only need 
+to enable the webmention endpoint.
 
 Your content needs to have proper microformat classes on your content, images etc and following snippet needs to
 available on the page you want to publish, e.g.
@@ -102,24 +103,24 @@ available on the page you want to publish, e.g.
 Note that Bridgy prefers p-summary over e-content, but for original tweets p-name first. See
 https://brid.gy/about#microformats. You can preview your posts on Bridgy to verify your markup is ok.
 
-The module ships with default Twitter and Facebook channels. More channels and other configuration can be configured at
-/admin/config/services/indieweb/publish. These channels are also used for the q=syndicate-to request for micropub, see
+The module ships with a default Twitter target. More targets and other configuration can be configured at
+/admin/config/services/indieweb/send. These targets are also used for the q=syndicate-to request for micropub, see
 micropub for more information.
 
-This module exposes per channel an extra field which you can configure on the 'Manage Display' pages of each node and
+This module exposes per target an extra field which you can configure on the 'Manage Display' pages of each node and
 comment type. That field exposes that snippet. See indieweb_node_view() and indieweb_comment_view(). More info about
-this at https://brid.gy/about#webmentions Currently this field will be printed, even if you do not publish to that
-channel, that will be altered later.
+this at https://brid.gy/about#webmentions. Currently this field will be printed, even if you do not syndicate to that
+target, that will be altered later.
 
-You can also configure to just enter a custom URL, or use a "link" field to publish to. On comments, these link fields
-can be pre-filled when replying when the parent comment has a webmention reference.
+You can also configure to just enter a custom URL, or use a "link" field to send a webmention to. On comments, these 
+link fields can be pre-filled when replying when the parent comment has a webmention reference.
 
 ## Microformats
 
 Microformats are extensions to HTML for marking up people, organizations, events, locations, blog posts, products,
 reviews, resumes, recipes etc. Sites use microformats to publish a standard API that is consumed and used by search
 engines, aggregators, and other tools. See https://indieweb.org/microformats for more info. You will want to enable this
-if you want to publish. Also read https://brid.gy/about#microformats for details how Bridgy decides what to publish if
+if you want to syndicate. Also read https://brid.gy/about#microformats for details how Bridgy decides what to publish if
 you are using that service.
 
 Your homepage should contain a h-card entry. This module does not expose this for you (yet). An example:
@@ -278,7 +279,7 @@ OStatus, and vice versa. Bridgy Fed is open source so you can also host the serv
 
 Currently supports Mastodon, with more coming. You don't need any account at all on any of the social networks.
 
-Just add 'Fediverse|https://fed.brid.gy/' to the publishing channels and add the field on the manage display pages of
+Just add 'Fediverse|https://fed.brid.gy/' as a syndication target and add the field on the manage display pages of
 content types or comments where needed. Currently replies, likes and repost work fine.
 
 - Check https://fed.brid.gy/#setup for additional setup for .htaccess.

@@ -17,11 +17,11 @@ class MicropubSettingsForm extends ConfigFormBase {
   protected function getPostTypes() {
     $post_types = [
       'article' => [
-        'description' => $this->t("An article request contains 'content', 'name' and the 'h' value is 'entry'. Think of it as a blog post. The article can also contain a 'mp-syndicate-to' value which will contain the channel you want to publish to, see the <a href=':link_send'>Send webmention screen</a> to configure this.", [':link_send' => Url::fromRoute('indieweb.admin.publish_settings')->toString(),]),
+        'description' => $this->t("An article request contains 'content', 'name' and the 'h' value is 'entry'. Think of it as a blog post. The article can also contain a 'mp-syndicate-to' value which will contain the channel you want to publish to, see the <a href=':link_send'>Send webmention screen</a> to configure this.", [':link_send' => Url::fromRoute('indieweb.admin.webmention_send_settings')->toString(),]),
         'geo_field' => TRUE,
       ],
       'note' => [
-        'description' => $this->t("A note request contains 'content', but no 'name' and the 'h' value is 'entry'. Think of it as a Tweet. The note can also contain a 'mp-syndicate-to' value which will contain the channel you want to publish to, see the <a href=':link_send'>Send webmention screen</a> to configure this.", [':link_send' => Url::fromRoute('indieweb.admin.publish_settings')->toString(),]),
+        'description' => $this->t("A note request contains 'content', but no 'name' and the 'h' value is 'entry'. Think of it as a Tweet. The note can also contain a 'mp-syndicate-to' value which will contain the channel you want to publish to, see the <a href=':link_send'>Send webmention screen</a> to configure this.", [':link_send' => Url::fromRoute('indieweb.admin.webmention_send_settings')->toString(),]),
         'geo_field' => TRUE,
       ],
       'like' => [
@@ -285,7 +285,7 @@ class MicropubSettingsForm extends ConfigFormBase {
         $form[$post_type]['reply_create_comment'] = [
           '#type' => 'checkbox',
           '#title' => $this->t('Enable comment creation'),
-          '#description' => $this->t('If a reply post comes in and the reply-to-url is a node or comment on this site, or a webmention which target is a node or comment and property "in-reply-to", create a (child) comment from this reply.<br /><a href=":url">Comment creation</a> needs to be enabled and configured for this to work. In case the target is a webmention, the original url can be stored if a <a href=":url2">link field is configured</a> on the comment type.', [':url' => Url::fromRoute('indieweb.admin.comment_settings')->toString(), ':url2' => Url::fromRoute('indieweb.admin.publish_settings')->toString()]),
+          '#description' => $this->t('If a reply post comes in and the reply-to-url is a node or comment on this site, or a webmention which target is a node or comment and property "in-reply-to", create a (child) comment from this reply.<br /><a href=":url">Comment creation</a> needs to be enabled and configured for this to work. In case the target is a webmention, the original url can be stored if a <a href=":url2">link field is configured</a> on the comment type.', [':url' => Url::fromRoute('indieweb.admin.comment_settings')->toString(), ':url2' => Url::fromRoute('indieweb.admin.webmention_send_settings')->toString()]),
           '#default_value' => $config->get('reply_create_comment'),
           '#states' => array(
             'visible' => array(

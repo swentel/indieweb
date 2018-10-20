@@ -6,3 +6,11 @@ webmention_detect_identical: false
 pingback_enable: false
 webmention_uid: 1
 webmention_log_payload: true
+syndication_targets: "Twitter (bridgy)|https://brid.gy/publish/twitter"
+bridgy_back_link: always
+send_webmention_handler: disabled
+send_custom_url: true
+send_link_fields: ''
+send_log_response: false
+send_comment_webmention_field: ''
+send_comment_permission_fields: true
