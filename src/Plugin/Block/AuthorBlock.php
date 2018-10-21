@@ -70,11 +70,10 @@ class AuthorBlock extends BlockBase {
    */
   public function build() {
 
-    $markup = 'ale jong';
     return [
       '#theme' => 'indieweb_author',
       '#name' => $this->configuration['name'],
-      '#note' => check_markup($markup, 'restricted_html'),
+      '#note' => check_markup($this->context['note'], 'restricted_html'),
       '#image' => $this->configuration['image'],
       '#domain' => \Drupal::request()->getSchemeAndHttpHost(),
     ];
