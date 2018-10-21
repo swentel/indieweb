@@ -49,6 +49,7 @@ class AuthorBlock extends BlockBase {
     $form['note'] = [
       '#title' => $this->t('Info'),
       '#type' => 'textarea',
+      '#default_value' => $this->configuration['note'],
       '#description' => t('Enter information about yourself. This is optional, the author h-card will still work.<br />You can also enter rel="me" links here for IndieAuth detection.<br />The content of this note will be rendered with the Restricted HTML content format that comes in Drupal 8.<br />For more information about h-card, see <a href="https://indieweb.org/h-card" target="_blank">https://indieweb.org/h-card</a>'),
     ];
 
@@ -73,7 +74,7 @@ class AuthorBlock extends BlockBase {
     return [
       '#theme' => 'indieweb_author',
       '#name' => $this->configuration['name'],
-      '#note' => check_markup($this->context['note'], 'restricted_html'),
+      '#note' => check_markup($this->configuration['note'], 'restricted_html'),
       '#image' => $this->configuration['image'],
       '#domain' => \Drupal::request()->getSchemeAndHttpHost(),
     ];
