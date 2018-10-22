@@ -261,8 +261,7 @@ For more information see
 - https://indieweb.org/Microsub
 - https://indieweb.org/Microsub-spec
 
-This modules does not expose itself as a microsub server, it mainly allows you to expose the microsub header link.
-Note that you also need feeds to be enabled, see the Feeds section.
+This module does not expose itself as a microsub server, it mainly allows you to expose the microsub header link.
 
 **Aperture**
 
