@@ -25,7 +25,19 @@ class IndieAuthLoginBlock extends BlockBase {
    */
   public function build() {
     $build = [];
-    $build['form'] = \Drupal::formBuilder()->getForm('Drupal\indieweb\Form\IndieAuthLoginForm');
+    $render_form = TRUE;
+
+    if (\Drupal::currentUser()->isAuthenticated()) {
+      /** @var \Drupal\externalauth\AuthmapInterface $external_authmap */
+      $external_authmap = \Drupal::service('externalauth.authmap');
+      if ($external_authmap && $external_authmap->get(\Drupal::currentUser()->id(), 'indieweb')) {
+        $render_form = FALSE;
+      }
+    }
+
+    if ($render_form) {
+      $build['form'] = \Drupal::formBuilder()->getForm('Drupal\indieweb\Form\IndieAuthLoginForm');
+    }
     return $build;
   }
 

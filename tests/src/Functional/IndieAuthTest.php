@@ -72,6 +72,8 @@ class IndieAuthTest extends IndiewebBrowserTestBase {
 
     // Use test login page.
     $edit = ['domain' => 'https://example.com'];
+    $this->drupalGet('indieauth-test/login');
+    $this->assertSession()->responseNotContains('Map your domain with your current user.');
     $this->drupalPostForm('indieauth-test/login', $edit, 'Sign in');
     $this->assertSession()->statusCodeEquals(200);
     $this->assertSession()->addressEquals('user/3');
@@ -84,6 +86,10 @@ class IndieAuthTest extends IndiewebBrowserTestBase {
     $this->drupalPostForm('indieauth-test/login', $edit, 'Sign in');
     $this->assertSession()->statusCodeEquals(200);
     $this->assertSession()->addressEquals('user/3');
+
+    // No map text.
+    $this->drupalGet('indieauth-test/login');
+    $this->assertSession()->responseNotContains('Map your domain with your current user.');
 
     // Now let's check the edit form as the indieauth user, you should not be
     // able to set the password or change your username as that is used for
@@ -126,6 +132,18 @@ class IndieAuthTest extends IndiewebBrowserTestBase {
     $this->drupalLogout();
     $this->drupalPostForm('user/login', ['name' => 'indieweb_example.com', 'pass' => ''], 'Log in');
     $this->assertSession()->responseContains('Password field is required');
+
+    // Map existing user with domain.
+    $this->drupalLogin($another);
+    $this->drupalGet('indieauth-test/login');
+    $this->assertSession()->responseContains('Map your domain with your current user.');
+    $edit = ['domain' => 'https://example-map.com/'];
+    $this->drupalPostForm('indieauth-test/login', $edit, '');
+    $this->assertSession()->statusCodeEquals(200);
+    $this->assertSession()->addressEquals('user/4');
+    $this->drupalGet('indieauth-test/login');
+    $this->assertSession()->responseNotContains('Map your domain with your current user.');
+
   }
 
 }

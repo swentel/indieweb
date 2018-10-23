@@ -55,7 +55,11 @@ class IndiewebTestController extends ControllerBase {
 
     // Redirect with code.
     if (!empty($_GET['state']) && !empty($_GET['redirect_uri']) && !empty($_GET['client_id'])) {
-      return new RedirectResponse($_GET['redirect_uri'] . '?state=' . $_GET['state'] . '&client_id=' . $_GET['client_id'] . '&code=1234');
+      $code = 1234;
+      if (!empty($_GET['me']) && $_GET['me'] == 'https://example-map.com/') {
+        $code = 12345;
+      }
+      return new RedirectResponse($_GET['redirect_uri'] . '?state=' . $_GET['state'] . '&client_id=' . $_GET['client_id'] . '&code=' . $code);
     }
 
     // Verify code request.
@@ -63,6 +67,9 @@ class IndiewebTestController extends ControllerBase {
 
       if ($_POST['code'] == '1234') {
         return new JsonResponse(['me' => 'https://example.com/'], 200);
+      }
+      elseif ($_POST['code'] == '12345') {
+        return new JsonResponse(['me' => 'https://example-map.com/'], 200);
       }
       else {
         return new JsonResponse(['error' => 'Invalid request', 'error_description' => 'The code was not valid.'], 400);

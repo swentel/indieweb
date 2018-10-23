@@ -53,15 +53,25 @@ class IndieAuthController extends ControllerBase {
         $this->getLogger('indieweb_indieauth')->notice('Error validating the code: @message', ['@message' => $e->getMessage()]);
       }
 
-      // We have a valid token. Let's authenticate the user. Create an account
-      // in case the user doesn't have an account yet.
+      // We have a valid token.
       if ($valid_code && !empty($domain)) {
 
-        /** @var \Drupal\externalauth\ExternalAuthInterface $external_auth */
-        $external_auth = \Drupal::service('externalauth.externalauth');
         $authname = str_replace(['https://', 'http://', '/'], '', $domain);
         try {
-          $account = $external_auth->loginRegister($authname, 'indieweb');
+
+          /** @var \Drupal\externalauth\ExternalAuthInterface $external_auth */
+          $external_auth = \Drupal::service('externalauth.externalauth');
+
+          // Map or login/register
+          if ($this->currentUser()->isAuthenticated()) {
+            /** @var \Drupal\user\UserInterface $account */
+            $account = $this->entityTypeManager()->getStorage('user')->load($this->currentUser()->id());
+            $external_auth->linkExistingAccount($authname, 'indieweb', $account);
+          }
+          // Login or register the user.
+          else {
+            $account = $external_auth->loginRegister($authname, 'indieweb');
+          }
           if ($account) {
             return new RedirectResponse($account->toUrl()->toString(), 302);
           }

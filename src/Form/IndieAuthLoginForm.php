@@ -24,6 +24,20 @@ class IndieAuthLoginForm extends FormBase {
     $form = [];
 
     if (\Drupal::config('indieweb.indieauth')->get('login_enable')) {
+
+      if ($this->currentUser()->isAuthenticated()) {
+        /** @var \Drupal\externalauth\AuthmapInterface $external_auth */
+        $external_authmap = \Drupal::service('externalauth.authmap');
+        if ($external_authmap && $external_authmap->get($this->currentUser()->id(), 'indieweb')) {
+          return [];
+        }
+        else {
+          $form['map'] = [
+            '#markup' => '<p>' . $this->t('Map your domain with your current user.') . '</p>',
+          ];
+        }
+      }
+
       $form['domain'] = [
         '#title' => $this->t('Web Address'),
         '#type' => 'textfield',
@@ -33,7 +47,7 @@ class IndieAuthLoginForm extends FormBase {
 
       $form['submit'] = [
         '#type' => 'submit',
-        '#value' => $this->t('Sign in'),
+        '#value' => $this->currentUser()->isAnonymous() ? $this->t('Sign in') : $this->t('Map account'),
       ];
     }
     else {
@@ -59,7 +73,7 @@ class IndieAuthLoginForm extends FormBase {
     $domain = $form_state->getValue('domain');
 
     // Add trailing slash if necessary.
-    if (substr($domain, -1, 0) != '/') {
+    if (substr($domain, -1, 1) != '/') {
       $domain .= '/';
     }
 
