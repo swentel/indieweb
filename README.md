@@ -168,6 +168,9 @@ can post via micropub or read via microsub, the easiest way to let those clients
 indieauth.com too and exchange access tokens for further requests. Only expose these header links if you want to use
 micropub or microsub.
 
+You can also allow users to register and login into this website. An account will created with the username based on the
+domain. Authenticated users can use the same "Web sign-in" block to map a domain with their account.
+
 ## Micropub
 
 Allow posting to your site. Before you can post, you need to authenticate and enable the IndieAuth Authentication API.
