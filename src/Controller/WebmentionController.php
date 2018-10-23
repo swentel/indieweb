@@ -140,8 +140,11 @@ class WebmentionController extends ControllerBase {
         $this->getLogger('indieweb_webmention_payload')->notice('object: @object', ['@object' => print_r($mention, 1)]);
       }
 
-      // Remove the base url
-      $target = str_replace(\Drupal::request()->getSchemeAndHttpHost(), '', $mention['target']);
+      // Remove the base url and protect against empty target.
+      $target = trim(str_replace(\Drupal::request()->getSchemeAndHttpHost(), '', $mention['target']));
+      if (empty($target)) {
+        $target = '/';
+      }
 
       // Check identical webmentions. If the source, target and property are the
       // same, ignore it.

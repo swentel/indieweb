@@ -19,6 +19,7 @@ use Drupal\user\UserInterface;
  *   id = "webmention_entity",
  *   label = @Translation("Webmention"),
  *   handlers = {
+ *     "storage_schema" = "Drupal\indieweb\Entity\Storage\WebmentionStorageSchema",
  *     "view_builder" = "Drupal\Core\Entity\EntityViewBuilder",
  *     "list_builder" = "Drupal\indieweb\WebmentionListBuilder",
  *     "views_data" = "Drupal\indieweb\Entity\WebmentionViewsData",
