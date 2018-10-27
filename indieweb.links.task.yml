@@ -38,14 +38,24 @@ indieweb.admin.micropub_settings:
   route_name: indieweb.admin.micropub_settings
   base_route: indieweb.admin.dashboard
 
-indieweb.admin.indieauth_settings:
-  title: 'IndieAuth'
-  route_name: indieweb.admin.indieauth_settings
-  base_route: indieweb.admin.dashboard
-
 indieweb.admin.microsub_settings:
   title: 'Microsub'
   route_name: indieweb.admin.microsub_settings
+  base_route: indieweb.admin.dashboard
+
+indieweb.admin.microsub_settings_tab:
+  title: 'Settings'
+  route_name: indieweb.admin.microsub_settings
+  parent_id: indieweb.admin.microsub_settings
+
+indieweb.admin.microsub_channels:
+  title: 'Channels and sources'
+  route_name: indieweb.admin.microsub_channels
+  parent_id: indieweb.admin.microsub_settings
+
+indieweb.admin.indieauth_settings:
+  title: 'IndieAuth'
+  route_name: indieweb.admin.indieauth_settings
   base_route: indieweb.admin.dashboard
 
 webmention_entity.list_tab:

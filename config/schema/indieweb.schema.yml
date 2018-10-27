@@ -123,9 +123,6 @@ indieweb.micropub:
     micropub_media_enable:
       type: boolean
       label: 'Enable micropub media endpoint'
-    micropub_me:
-      type: string
-      label: 'The url of your website'
     micropub_log_payload:
       type: boolean
       label: 'Whether to log the payload'
@@ -378,12 +375,18 @@ indieweb.microsub:
   type: config_object
   label: 'Indieweb microsub'
   mapping:
-    enable:
+    microsub_internal:
       type: boolean
-      label: 'Expose microsub endpoint'
+      label: 'Use built-in microsub server'
+    microsub_internal_handler:
+      type: string
+      label: 'How to fetch new items'
     microsub_endpoint:
       type: string
       label: 'Microsub endpoint'
+    microsub_add_header_link:
+      type: boolean
+      label: 'Expose microsub header link'
     aperture_enable_micropub:
       type: boolean
       label: 'Enable micropub post to Aperture'

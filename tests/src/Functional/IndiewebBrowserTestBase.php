@@ -302,6 +302,67 @@ abstract class IndiewebBrowserTestBase extends BrowserTestBase {
   }
 
   /**
+   * Sends a microsub request.
+   *
+   * @param $query
+   *   url params
+   * @param $type
+   *   either get or post
+   * @param $access_token
+   *   the access token
+   * @param $debug
+   *   Whether to debug or not.
+   *
+   * @return array|int
+   */
+  protected function sendMicrosubRequest($query = [], $type = 'get', $access_token = 'is_valid', $debug = FALSE) {
+    $body = '';
+
+    $auth = 'Bearer ' . $access_token;
+    $microsub_endpoint = Url::fromRoute('indieweb.microsub.endpoint', [], ['absolute' => TRUE])->toString();
+
+    $client = \Drupal::httpClient();
+    $headers = [
+      'Accept' => 'application/json',
+    ];
+
+    // Access token is always in the headers when using Request from p3k.
+    $headers['Authorization'] = $auth;
+
+    try {
+
+      if ($type == 'get') {
+        $response = $client->get($microsub_endpoint, ['headers' => $headers, 'query' => $query]);
+      }
+      else {
+        $response = $client->post($microsub_endpoint, ['query' => $query, 'headers' => $headers]);
+      }
+
+      $status_code = $response->getStatusCode();
+      $body = $response->getBody()->getContents();
+    }
+    catch (\Exception $e) {
+
+      // Default 400 on exception.
+      $status_code = 400;
+
+      if (strpos($e->getMessage(), '401') !== FALSE) {
+        $status_code = 401;
+      }
+
+      if (strpos($e->getMessage(), '403') !== FALSE) {
+        $status_code = 403;
+      }
+
+      if ($debug) {
+        debug($e->getMessage());
+      }
+    }
+
+    return ['body' => $body, 'code' => $status_code];
+  }
+
+  /**
    * Assert node count.
    *
    * @param $count

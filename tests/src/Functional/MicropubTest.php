@@ -180,24 +180,17 @@ class MicropubTest extends IndiewebBrowserTestBase {
     $edit = ['enable' => '1', 'expose' => 1, 'token_endpoint' => Url::fromRoute('indieweb_test.token_endpoint', [], ['absolute' => TRUE])->toString()];
     $this->drupalPostForm('admin/config/services/indieweb/indieauth', $edit, 'Save configuration');
 
-    // Configure note, but set 'me' to invalid domain.
-    // Also enable issue. It doesn't have an explicit test for properties,
-    // but just being enabled makes sure the order is ok.
-    $edit = ['note_create_node' => 1, 'note_node_type' => 'page', 'micropub_me' => 'https://indieweb.micropub.invalid.testdomain', 'note_uid' => $this->adminUser->id(), 'issue_node_type' => 'page'];
+    // Configure note and also enable issue. It doesn't have an explicit test
+    // for properties, but just being enabled makes sure the order is ok.
+    $edit = ['note_create_node' => 1, 'note_node_type' => 'page', 'note_uid' => $this->adminUser->id(), 'issue_node_type' => 'page'];
     $this->drupalPostForm('admin/config/services/indieweb/micropub', $edit, 'Save configuration');
+    $this->drupalLogout();
 
     // Send request to create a note, will fail because the 'me' is wrong.
-    $this->drupalLogout();
-    $code = $this->sendMicropubRequest($this->note);
+    $code = $this->sendMicropubRequest($this->note, 'return_wrong_me');
     self::assertEquals(403, $code);
 
-    // Set me right.
-    $this->drupalLogin($this->adminUser);
-    $edit = ['micropub_me' => 'https://indieweb.micropub.testdomain'];
-    $this->drupalPostForm('admin/config/services/indieweb/micropub', $edit, 'Save configuration');
-    $this->drupalLogout();
-
-    // Send note request first with invalid token.
+    // Send note request with invalid token.
     $code = $this->sendMicropubRequest($this->note, 'invalid_token');
     self::assertEquals(403, $code);
     $this->assertNodeCount(0, 'page');

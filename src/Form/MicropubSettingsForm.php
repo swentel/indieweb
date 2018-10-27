@@ -114,7 +114,7 @@ class MicropubSettingsForm extends ConfigFormBase {
       '#title' => $this->t('Expose micropub endpoint header link'),
       '#type' => 'checkbox',
       '#default_value' => $config->get('micropub_add_header_link'),
-      '#description' => $this->t('The endpoint will look like <strong>https://@domain/indieweb/micropub</strong><br />This link will be added on the front page. You can also add this manually to html.html.twig.<br /><div class="indieweb-highlight-code">&lt;link rel="micropub" href="https://@domain/indieweb/micropub" /&gt;</div>', ['@domain' => \Drupal::request()->getHttpHost()]),
+      '#description' => $this->t('The endpoint is available at <strong>https://@domain/indieweb/micropub</strong><br />This link will be added on the front page. You can also add this manually to html.html.twig.<br /><div class="indieweb-highlight-code">&lt;link rel="micropub" href="https://@domain/indieweb/micropub" /&gt;</div>', ['@domain' => \Drupal::request()->getHttpHost()]),
       '#states' => array(
         'visible' => array(
           ':input[name="micropub_enable"]' => array('checked' => TRUE),
@@ -201,18 +201,6 @@ class MicropubSettingsForm extends ConfigFormBase {
         'visible' => array(
           ':input[name="micropub_enable"]' => array('checked' => TRUE),
           ':input[name="micropub_enable_category"]' => array('checked' => TRUE),
-        ),
-      ),
-    ];
-
-    $form['general']['micropub_me'] = [
-      '#type' => 'textfield',
-      '#title' => $this->t('Me'),
-      '#default_value' => $config->get('micropub_me'),
-      '#description' => $this->t('Every request will contain an access token which will be verified to make sure it is really you who is posting.<br />The response of the access token check request contains the "me" value which should match with your domain.<br />This is the value of your domain. Make sure there is a trailing slash, e.g. <strong>@domain/</strong>', ['@domain' => \Drupal::request()->getSchemeAndHttpHost()]),
-      '#states' => array(
-        'visible' => array(
-          ':input[name="micropub_enable"]' => array('checked' => TRUE),
         ),
       ),
     ];
@@ -494,7 +482,6 @@ class MicropubSettingsForm extends ConfigFormBase {
       ->set('micropub_media_enable', $form_state->getValue('micropub_media_enable'))
       ->set('micropub_enable_category', $form_state->getValue('micropub_enable_category'))
       ->set('micropub_category_vocabulary', $form_state->getValue('micropub_category_vocabulary'))
-      ->set('micropub_me', $form_state->getValue('micropub_me'))
       ->set('micropub_log_payload', $form_state->getValue('micropub_log_payload'));
 
 

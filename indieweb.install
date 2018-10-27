@@ -273,3 +273,21 @@ function indieweb_update_8006() {
   $webmention->save();
   $publish->delete();
 }
+
+/**
+ * Removes 'micropub_me' entry.
+ */
+function indieweb_update_8007() {
+  $micropub = \Drupal::configFactory()->getEditable('indieweb.micropub');
+  $micropub->clear('micropub_me');
+  $micropub->save();
+}
+
+/**
+ * Cleans the microsub entries.
+ */
+function indieweb_update_8008() {
+  $micropub = \Drupal::configFactory()->getEditable('indieweb.microsub');
+  $micropub->clear('enable');
+  $micropub->save();
+}

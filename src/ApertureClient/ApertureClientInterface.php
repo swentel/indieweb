@@ -2,8 +2,6 @@
 
 namespace Drupal\indieweb\ApertureClient;
 
-use Drupal\indieweb\Entity\WebmentionInterface;
-
 interface ApertureClientInterface {
 
   /**
@@ -11,9 +9,9 @@ interface ApertureClientInterface {
    *
    * @param string $api_key
    *   The Aperture channel API key
-   * @param \Drupal\indieweb\Entity\WebmentionInterface $webmention
-   *   The incoming webmention.
+   * @param $post
+   *   The mf2 post
    */
-  public function sendPost($api_key, WebmentionInterface $webmention);
+  public function sendPost($api_key, $post);
 
 }

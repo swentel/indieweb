@@ -22,7 +22,7 @@ class IndiewebTestController extends ControllerBase {
   /**
    * IndieWeb test webmention endpoint.
    *
-   * Also acts as publish endpoint, so we'll always send 201 back.
+   * Also acts as syndication endpoint, so we'll always send 201 back.
    *
    * @see \Drupal\Tests\indieweb\Functional\WebmentionTest::testSendingWebmention();
    */
@@ -32,16 +32,22 @@ class IndiewebTestController extends ControllerBase {
   }
 
   /**
-   * IndieWeb test IndieAuth token endpoint
+   * IndieWeb test IndieAuth token endpoint.
    */
   public function testTokenEndpoint() {
     $data = [];
     $status = 400;
 
     $auth = \Drupal::request()->headers->get('Authorization');
-    if ($auth && preg_match('/Bearer\s(\S+)/', $auth, $matches) && strpos($auth, 'is_valid') !== FALSE) {
+    if ($auth && preg_match('/Bearer\s(\S+)/', $auth, $matches) && (strpos($auth, 'is_valid') !== FALSE || strpos($auth, 'return_wrong_me') !== FALSE)) {
       $status = 200;
-      $data['me'] = 'https://indieweb.micropub.testdomain';
+
+      $me = \Drupal::request()->getSchemeAndHttpHost();
+      if (strpos($auth, 'return_wrong_me') !== FALSE) {
+        $me = 'https://indieweb.micropub.invalid.testdomain';
+      }
+
+      $data['me'] = $me;
       $data['scope'] = 'create update delete';
     }
 

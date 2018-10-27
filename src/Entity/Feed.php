@@ -11,6 +11,7 @@ use Drupal\Core\Entity\EntityStorageInterface;
  * @ConfigEntityType(
  *   id = "indieweb_feed",
  *   label = @Translation("Feed"),
+ *   label_collection = @Translation("Feeds"),
  *   handlers = {
  *     "view_builder" = "Drupal\Core\Entity\EntityViewBuilder",
  *     "list_builder" = "Drupal\indieweb\FeedListBuilder",
@@ -20,7 +21,7 @@ use Drupal\Core\Entity\EntityStorageInterface;
  *       "delete" = "Drupal\indieweb\Form\FeedDeleteForm"
  *     },
  *     "route_provider" = {
- *      "html" = "Drupal\indieweb\FeedHtmlRouteProvider",
+ *       "html" = "Drupal\indieweb\FeedHtmlRouteProvider",
  *     },
  *   },
  *   config_prefix = "indieweb_feed",
@@ -31,7 +32,6 @@ use Drupal\Core\Entity\EntityStorageInterface;
  *     "uuid" = "uuid"
  *   },
  *   links = {
- *     "canonical" = "/admin/config/services/indieweb/feeds/{indieweb_feed}",
  *     "add-form" = "/admin/config/services/indieweb/feeds/add",
  *     "edit-form" = "/admin/config/services/indieweb/feeds/{indieweb_feed}/edit",
  *     "delete-form" = "/admin/config/services/indieweb/feeds/{indieweb_feed}/delete",

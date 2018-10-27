@@ -6,9 +6,6 @@ use Drupal\Core\Entity\EntityConfirmFormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
 
-/**
- * Builds the form to delete Feed entities.
- */
 class FeedDeleteForm extends EntityConfirmFormBase {
 
   /**

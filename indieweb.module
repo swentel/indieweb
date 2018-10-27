@@ -49,7 +49,7 @@ function indieweb_help($route_name, RouteMatchInterface $route_match) {
     ],
     'entity.indieweb_feed.collection' => [
       'title' => 'Feeds',
-      'text' => t('<p>Besides the standard RSS feed which you can create where readers can subscribe to, you can also create microformat feeds. These can either return HTML, Atom feed or jf2feed+json.<br />Because content can be nodes, comments etc, it isn\'t possible to use views. However, you can create multiple feeds which aggregate the content in a page and/or feed.<br />The feeds are controlled by the \'access content\' permission.<br />All items in the HTML feed will be rendered with the \'Microformat\' view mode.<br />If your homepage is a feed with microformats, you don\'t necessarily need this. Atom feeds are generated using https://granary.io/</p><p>You will need feeds when:</p><ul><li>you use Bridgy: the service will look for html link headers with rel="feed" and use those pages to crawl so it knows to which content it needs to send webmentions to.</li><li>you want to allow IndieWeb readers (Monocle, Together, Indigenous) to subscribe to your content. These are alternate types which can either link to a page with microformat entries. It\'s advised to have an h-card on that page too as some parsers don\'t go to the homepage to fetch that content.</li></ul>'),
+      'text' => t('<p>Generate feeds in Microformat 2 , Atom or jf2feed+json (last one is experimental though). Atom feeds are generated using https://granary.io/.<br />Because content can be nodes, comments etc, it isn\'t possible to use views. However, you can create multiple feeds which aggregate the content in a page and/or feed.<br />The feeds are controlled by the \'access content\' permission and all items in the HTML feed will be rendered with the \'Microformat\' view mode.</p><p>You will need feeds when:</p><ul><li>you use Bridgy: the service will look for html link headers with rel="feed" and use those pages to crawl so it knows to which content it needs to send webmentions to.</li><li>you want to allow IndieWeb readers (Monocle, Together, Indigenous) to subscribe to your content. These are alternate types which can either link to a page with microformat entries. It\'s advised to have an h-card on that page too as some parsers don\'t go to the homepage to fetch that content.</li></ul>'),
     ],
     'indieweb.admin.micropub_settings' => [
       'title' => 'Micropublishing',
@@ -57,7 +57,11 @@ function indieweb_help($route_name, RouteMatchInterface $route_match) {
     ],
     'indieweb.admin.microsub_settings' => [
       'title' => 'Readers',
-      'text' => '<p>' . t('Microsub is an early draft of a spec that provides a standardized way for clients to consume and interact with feeds collected by a server. <a href="https://indieweb.org/Microsub#Clients" target="_blank">Readers</a> are Indigenous (iOS and Android), Monocle and Together (both web) and many others to come. Servers are Aperture, Ekster etc. See <a href="https://indieweb.org/Microsub#Servers" target="_blank">https://indieweb.org/Microsub#Servers</a>. This module does not expose itself as a microsub server, it allows you to expose the microsub header link.') . '</p>'
+      'text' => '<p>' . t('Microsub is an early draft of a spec that provides a standardized way for clients to consume and interact with feeds collected by a server. <a href="https://indieweb.org/Microsub#Clients" target="_blank">Readers</a> are Indigenous (iOS and Android), Monocle and Together (both web) and many others to come. Servers are Aperture, Ekster etc. See <a href="https://indieweb.org/Microsub#Servers" target="_blank">https://indieweb.org/Microsub#Servers</a>. This module allows you to expose a microsub header link which can either be the built-in microsub server or set to an external service.') . '</p>'
+    ],
+    'indieweb.admin.microsub_channels' => [
+      'title' => 'Channels and sources',
+      'text' => '<p>Configure your channels and sources for the built-in Microsub server. In case the server is not enabled, no items will be fetched.',
     ],
     'indieweb.admin.indieauth_settings' => [
       'title' => 'IndieAuth',
@@ -248,8 +252,7 @@ function indieweb_page_attachments_alter(array &$attachments) {
         '#tag' => 'link',
         '#attributes' => [
           'rel' => 'micropub',
-          'href' => Url::fromRoute('indieweb.micropub.endpoint', [], ['absolute' => TRUE])
-            ->toString(),
+          'href' => Url::fromRoute('indieweb.micropub.endpoint', [], ['absolute' => TRUE])->toString(),
         ],
       ];
 
@@ -260,13 +263,20 @@ function indieweb_page_attachments_alter(array &$attachments) {
     }
 
     // Microsub.
-    if (($config = \Drupal::config('indieweb.microsub')) && $config->get('enable')) {
+    if (($config = \Drupal::config('indieweb.microsub')) && $config->get('microsub_add_header_link')) {
+
+      if ($config->get('microsub_internal')) {
+        $endpoint = Url::fromRoute('indieweb.microsub.endpoint', [], ['absolute' => TRUE])->toString();
+      }
+      else {
+        $endpoint = $config->get('microsub_endpoint');
+      }
 
       $link = [
         '#tag' => 'link',
         '#attributes' => [
           'rel' => 'microsub',
-          'href' => $config->get('microsub_endpoint'),
+          'href' => $endpoint,
         ],
       ];
 
@@ -1163,9 +1173,17 @@ function indieweb_mail($key, &$message, $params) {
  * Implements hook_cron().
  */
 function indieweb_cron() {
+
   if (\Drupal::config('indieweb.webmention')->get('send_webmention_handler') == 'cron') {
     indieweb_handle_webmention_queue();
   }
+
+  if (\Drupal::config('indieweb.microsub')->get('microsub_internal') &&
+    \Drupal::config('indieweb.microsub')->get('microsub_internal_handler') == 'cron') {
+
+    \Drupal::service('indieweb.microsub.client')->fetchItems();
+  }
+
 }
 
 /**

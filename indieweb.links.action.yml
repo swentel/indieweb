@@ -1,8 +1,21 @@
-entity.feed.add_form:
+indieweb.feed.add_form:
   route_name: entity.indieweb_feed.add_form
   title: 'Add Feed'
   appears_on:
     - entity.indieweb_feed.collection
+
+indieweb.microsub_channel.add_form:
+  route_name: entity.indieweb_microsub_channel.add_form
+  title: 'Add Channel'
+  appears_on:
+    - indieweb.admin.microsub_channels
+
+indieweb.microsub_source.add_form:
+  route_name: entity.indieweb_microsub_source.add_form
+  title: 'Add Source'
+  appears_on:
+    - indieweb.admin.microsub_channels
+    - indieweb.admin.microsub_sources
 
 indieweb.syndication.add_form:
   route_name: indieweb.syndication.form

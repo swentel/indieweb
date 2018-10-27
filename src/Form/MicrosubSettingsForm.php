@@ -38,20 +38,46 @@ class MicrosubSettingsForm extends ConfigFormBase {
       '#title_display' => 'hidden'
     ];
 
-    $form['microsub']['enable'] = [
-      '#title' => $this->t('Expose endpoint'),
+    $form['microsub']['microsub_internal'] = [
       '#type' => 'checkbox',
-      '#default_value' => $config->get('enable'),
+      '#title' => $this->t('Use built-in microsub endpoint'),
+      '#default_value' => $config->get('microsub_internal'),
+      '#description' => $this->t('The endpoint is available at <strong>https://@domain/indieweb/microsub</strong>', ['@domain' => \Drupal::request()->getHttpHost()]) . ' - not fully ready yet!',
+      //'#disabled' => TRUE,
+    ];
+
+    $form['microsub']['microsub_internal_handler'] = [
+      '#title' => $this->t('Fetch items'),
+      '#type' => 'radios',
+      '#options' => [
+        'disabled' => $this->t('Disabled'),
+        'cron' => $this->t('On cron run'),
+        'drush' => $this->t('With drush'),
+      ],
+      '#default_value' => $config->get('microsub_internal_handler'),
+      '#description' => $this->t('Fetch items either by cron or drush.<br />The drush command is <strong>indieweb-microsub-fetch-items</strong>'),
+      '#states' => array(
+        'visible' => array(
+          ':input[name="microsub_internal"]' => array('checked' => TRUE),
+        ),
+      ),
+    ];
+
+    $form['microsub']['microsub_add_header_link'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Expose microsub endpoint header link'),
+      '#default_value' => $config->get('microsub_add_header_link'),
+      '#description' => $this->t('This link will be added on the front page. You can also add this manually to html.html.twig.<br /><div class="indieweb-highlight-code">&lt;link rel="micropub" href="https://@domain/indieweb/microsub" /&gt;</div>', ['@domain' => \Drupal::request()->getHttpHost()]),
     ];
 
     $form['microsub']['microsub_endpoint'] = [
-      '#title' => $this->t('Microsub endpoint'),
+      '#title' => $this->t('External microsub endpoint'),
       '#type' => 'textfield',
       '#default_value' => $config->get('microsub_endpoint'),
-      '#description' => $this->t('This link will be added on the front page. You can also add it yourself to html.html.twig:<br /><div class="indieweb-highlight-code">&lt;link rel="microsub" href="https://example.com/example-endpoint" /&gt;</div>'),
+      '#description' => $this->t('Enter a custom microsub endpoint URL in case you do not use the built-in endpoint.'),
       '#states' => array(
         'visible' => array(
-          ':input[name="enable"]' => array('checked' => TRUE),
+          ':input[name="microsub_internal"]' => array('checked' => FALSE),
         ),
       ),
     ];
@@ -60,6 +86,11 @@ class MicrosubSettingsForm extends ConfigFormBase {
       '#type' => 'fieldset',
       '#title' => $this->t('Aperture'),
       '#description' => $this->t('If you use <a href="https://aperture.p3k.io" target="_blank">Aperture</a> as your Microsub server, you can send a micropub post to one channel when a webmention is received by this site.<br />The canonical example is to label that channel name as "Notifications" so you can view incoming webmentions on readers like Monocle or Indigenous.<br />Following webmentions are send: likes, reposts, bookmarks, mentions and replies.</a>'),
+      '#states' => array(
+        'visible' => array(
+          ':input[name="microsub_internal"]' => array('checked' => FALSE),
+        ),
+      ),
     ];
 
     $form['aperture']['aperture_enable_micropub'] = [
@@ -83,8 +114,10 @@ class MicrosubSettingsForm extends ConfigFormBase {
   public function submitForm(array &$form, FormStateInterface $form_state) {
 
     $this->config('indieweb.microsub')
-      ->set('enable', $form_state->getValue('enable'))
+      ->set('microsub_internal', $form_state->getValue('microsub_internal'))
+      ->set('microsub_internal_handler', $form_state->getValue('microsub_internal_handler'))
       ->set('microsub_endpoint', $form_state->getValue('microsub_endpoint'))
+      ->set('microsub_add_header_link', $form_state->getValue('microsub_add_header_link'))
       ->set('aperture_enable_micropub', $form_state->getValue('aperture_enable_micropub'))
       ->set('aperture_api_key', $form_state->getValue('aperture_api_key'))
       ->save();

@@ -11,6 +11,10 @@ function indieweb_drush_command() {
       'description' => 'Send webmentions',
       'aliases' => ['isw'],
     ],
+    'indieweb-microsub-fetch-items' => [
+      'description' => 'Microsub fetch new items',
+      'aliases' => ['imfi'],
+    ],
     'indieweb-externalauth-map-account' => [
       'description' => 'Maps an existing account with a domain.',
       'aliases' => ['iema'],
@@ -29,6 +33,16 @@ function indieweb_drush_command() {
 function drush_indieweb_send_webmentions() {
   if (\Drupal::config('indieweb.webmention')->get('send_webmention_handler') == 'drush') {
     indieweb_handle_webmention_queue();
+  }
+}
+
+/**
+ * Microsub fetch items.
+ */
+function drush_indieweb_microsub_fetch_items() {
+  if (\Drupal::config('indieweb.microsub')->get('microsub_internal') &&
+    \Drupal::config('indieweb.microsub')->get('microsub_internal_handler') == 'drush') {
+    \Drupal::service('indieweb.microsub.client')->fetchItems();
   }
 }
 

@@ -218,14 +218,11 @@ class WebmentionController extends ControllerBase {
       }
       catch (\Exception $ignored) {}
 
-      // Send micropub request to Aperture if configured.
+      // Send microsub notification.
       if (isset($webmention)) {
-        $microsub = \Drupal::config('indieweb.microsub');
-        if ($microsub->get('aperture_enable_micropub') && !empty($microsub->get('aperture_api_key'))) {
-          /** @var \Drupal\indieweb\ApertureClient\ApertureClientInterface $client */
-          $client = \Drupal::service('indieweb.aperture.client');
-          $client->sendPost($microsub->get('aperture_api_key'), $webmention);
-        }
+        /** @var \Drupal\indieweb\MicrosubClient\MicrosubClientInterface $client */
+        $client = \Drupal::service('indieweb.microsub.client');
+        $client->sendNotification($webmention);
       }
 
       // Clear cache.

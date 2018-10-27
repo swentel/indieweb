@@ -21,6 +21,17 @@ class IndiewebCommands extends DrushCommands {
   }
 
   /**
+   * Fetch microsub items.
+   *
+   * @command indieweb:microsub-fetch-items
+   * @aliases imfi,indieweb-microsub-fetch-items
+   */
+  public function microsubFetchItems() {
+    module_load_include('inc', 'indieweb', 'indieweb.drush');
+    drush_indieweb_microsub_fetch_items();
+  }
+
+  /**
    * Maps an existing account with a domain.
    *
    * @param $uid

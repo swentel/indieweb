@@ -4,7 +4,6 @@ namespace Drupal\indieweb\Controller;
 
 use Drupal\comment\CommentInterface;
 use Drupal\comment\Entity\Comment;
-use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Language\LanguageInterface;
 use Drupal\Core\Url;
 use Drupal\datetime\Plugin\Field\FieldType\DateTimeItemInterface;
@@ -15,10 +14,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
-class MicropubController extends ControllerBase {
-
-  /** @var  \Drupal\Core\Config\Config */
-  protected $config;
+class MicropubController extends MicroControllerBase {
 
   /**
    * The action of the request.
@@ -229,7 +225,7 @@ class MicropubController extends ControllerBase {
     }
     else {
       $description = $micropub_request->error_description ? $micropub_request->error_description : 'Unknown error';
-      $this->getLogger('indieweb_micropub')->notice('Error parsing incoming request: @message', ['@message' => $description]);
+      $this->getLogger('indieweb_micropub')->notice('Error parsing incoming request: @message - @input', ['@message' => $description, '@input' => print_r($input, 1)]);
       return new JsonResponse('Bad request', 400);
     }
 
@@ -660,21 +656,6 @@ class MicropubController extends ControllerBase {
   }
 
   /**
-   * Gets the Authorization header from the request.
-   *
-   * @return null|string|string[]
-   */
-  protected function getAuthorizationHeader() {
-    $auth = NULL;
-    $auth_header = \Drupal::request()->headers->get('Authorization');
-    if ($auth_header && preg_match('/Bearer\s(\S+)/', $auth_header, $matches)) {
-      $auth = $auth_header;
-    }
-
-    return $auth;
-  }
-
-  /**
    * Returns whether the input type is a h-entry.
    *
    * @return bool
@@ -690,50 +671,6 @@ class MicropubController extends ControllerBase {
    */
   protected function isHEvent() {
     return isset($this->object_type) && $this->object_type == 'h-event';
-  }
-
-  /**
-   * Check if there's a valid access token in the request.
-   *
-   * @param $auth_header
-   *   The input.
-   * @param $scope_to_check
-   *   The scope needed for this request, optional.
-   *
-   * @return bool
-   */
-  protected function isValidToken($auth_header, $scope_to_check = '') {
-    $valid_token = FALSE;
-
-    try {
-      $client = \Drupal::httpClient();
-      $headers = [
-        'Accept' => 'application/json',
-        'Authorization' => $auth_header,
-      ];
-
-      $response = $client->get(\Drupal::config('indieweb.indieauth')->get('token_endpoint'), ['headers' => $headers]);
-      $json = json_decode($response->getBody());
-      if (isset($json->me) && $json->me == $this->config->get('micropub_me')) {
-
-        // The token is valid.
-        $valid_token = TRUE;
-
-        // Scope check.
-        if (!empty($scope_to_check)) {
-          $scopes = isset($json->scope) ? explode(' ', $json->scope) : [];
-          if (empty($scopes) || !in_array($scope_to_check, $scopes)) {
-            $valid_token = FALSE;
-            $this->getLogger('indieweb_micropub')->notice('Scope "@scope" insufficient', ['@scope' => $scope_to_check]);
-          }
-        }
-      }
-    }
-    catch (\Exception $e) {
-      $this->getLogger('indieweb_micropub')->notice('Error validating the access token: @message', ['@message' => $e->getMessage()]);
-    }
-
-    return $valid_token;
   }
 
   /**
@@ -798,6 +735,7 @@ class MicropubController extends ControllerBase {
    *   The name of the property in input for auto syndication.
    *
    * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    */
   protected function createNode($title, $post_type, $link_input_name = NULL) {
 
@@ -968,6 +906,7 @@ class MicropubController extends ControllerBase {
    *   The config key for the tags field.
    *
    * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    */
   protected function handleCategories($config_key) {
     $tags_field_name = $this->config->get($config_key);

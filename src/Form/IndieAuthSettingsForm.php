@@ -66,7 +66,7 @@ class IndieAuthSettingsForm extends ConfigFormBase {
     $form['indieauth'] = [
       '#type' => 'fieldset',
       '#title' => $this->t('IndieAuth authentication API'),
-      '#description' => $this->t('If you use apps like Quill (https://quill.p3k.io - web) or Indigenous (Beta iOS, Alpha Android) or other clients which can post via micropub or read via microsub, the easiest way to let those clients log you in with your domain is by using indieauth.com too and exchange access tokens for further requests. Only expose those links if you want to use micropub or microsub. <br /><strong>Important: </strong> if you add the token endpoint manually, you still need to enter the URL here because it is used by the micropub endpoint.')];
+      '#description' => $this->t('If you use apps like Quill (https://quill.p3k.io - web) or Indigenous (Beta iOS, Alpha Android) or other clients which can post via micropub or read via microsub, the easiest way to let those clients log you in with your domain is by using indieauth.com too and exchange access tokens for further requests. Only expose those links if you want to use micropub or microsub. <br /><strong>Important: </strong> if you add the token endpoint manually, you still need to enter the URL here because it is used by the micropub and/or microsub endpoint.')];
 
     $form['indieauth']['enable'] = [
       '#title' => $this->t('Enable endpoints'),

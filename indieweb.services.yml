@@ -3,3 +3,5 @@ services:
     class: Drupal\indieweb\WebmentionClient\WebmentionClient
   indieweb.aperture.client:
     class: Drupal\indieweb\ApertureClient\ApertureClient
+  indieweb.microsub.client:
+    class: Drupal\indieweb\MicrosubClient\MicrosubClient

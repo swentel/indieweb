@@ -8,9 +8,6 @@ use Drupal\Core\Entity\EntityForm;
 use Drupal\Core\Form\FormStateInterface;
 use Exception;
 
-/**
- * Class FeedForm.
- */
 class FeedForm extends EntityForm {
 
   /**

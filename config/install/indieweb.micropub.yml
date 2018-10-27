@@ -6,7 +6,6 @@ micropub_enable_source: false
 micropub_media_enable: false
 micropub_enable_category: false
 micropub_category_vocabulary: ''
-micropub_me: ''
 micropub_log_payload: false
 note_create_node: false
 note_status: 1

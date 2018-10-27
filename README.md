@@ -9,7 +9,7 @@ Current functionality:
 
 - Send and receive webmentions and pingbacks via Webmention.io
 - Syndicate content, likes etc via [brid.gy](https://brid.gy), store syndications
-- Microformats for content and images
+- Microformats for content, images and more
 - Allow users to login and create accounts
 - IndieAuth for Authentication API
 - Create content via Micropub endpoint
@@ -17,8 +17,8 @@ Current functionality:
 - Auto-create comments from 'in-reply-to'
 - Reply on comments and send webmention
 - Feeds: microformats, atom and jf2
+- Microsub built-in server, or use external service
 - Send a micropub post to Aperture on incoming webmentions
-- Microsub link exposing
 - Fediverse integration
 
 More information is in this README and on the help pages.
@@ -229,9 +229,8 @@ Configuration still in settings.php
 
 ## Feeds
 
-Besides the standard RSS feed which you can create where readers can subscribe to, you can also create microformat2
-feeds. These can either return HTML, Atom feed or jf2feed+json (which is experimental though). Atom feeds are generated
-using https://granary.io/. You will need feeds when:
+Generate feeds in Microformat 2 , Atom or jf2feed+json (last one is experimental though). Atom feeds are generated using 
+https://granary.io/. You will need feeds when:
 
 - you use Bridgy: the service will look for html link headers with rel="feed" and use those pages to crawl so it knows
   to which content it needs to send webmentions to.
@@ -242,8 +241,6 @@ using https://granary.io/. You will need feeds when:
 Because content can be nodes, comments, etc. it isn't possible to use views. However, this module allows you to create a
 multiple feeds which aggregates all these content in a page and/or feed. The feeds are controlled by the
 'access content' permission.
-
-If your homepage is a feed with microformats, you don't necessarily need this.
 
 Configuration is at /admin/config/services/indieweb/feeds
 
@@ -264,7 +261,15 @@ For more information see
 - https://indieweb.org/Microsub
 - https://indieweb.org/Microsub-spec
 
-This module does not expose itself as a microsub server, it mainly allows you to expose the microsub header link.
+This module allows you to expose a microsub header link which can either be the built-in microsub server or set to an 
+external service. Channels and sources for the built-in server are managed at
+admin/config/services/indieweb/microsub/channels.
+
+Microsub actions implemented:
+
+- GET action=channels: retrieve the list of channels
+- GET action=timeline: retrieve the list of items in a channel
+- POST action=timeline: mark entries as read, or remove an entry from a channel
 
 **Aperture**
 

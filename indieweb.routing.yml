@@ -70,6 +70,23 @@ indieweb.admin.microsub_settings:
   requirements:
     _permission: 'administer indieweb'
 
+indieweb.admin.microsub_channels:
+  path: '/admin/config/services/indieweb/microsub/channels'
+  defaults:
+    _controller: '\Drupal\indieweb\Controller\MicrosubController::channelOverview'
+    _title: 'Channels'
+  requirements:
+    _permission: 'administer indieweb'
+
+indieweb.admin.microsub_sources:
+  path: '/admin/config/services/indieweb/microsub/channels/{indieweb_microsub_channel}/list'
+  defaults:
+    _controller: '\Drupal\indieweb\Controller\MicrosubController::sourcesOverview'
+    _title: 'Sources'
+  requirements:
+    _permission: 'administer indieweb'
+    indieweb_microsub_channel: \d+
+
 indieweb.webmention.notify:
   path: '/webmention/notify'
   defaults:
@@ -91,6 +108,14 @@ indieweb.micropub.media.endpoint:
   defaults:
    _controller: '\Drupal\indieweb\Controller\MicropubController::mediaEndpoint'
    _title: 'Micropub media endpoint'
+  requirements:
+   _access: 'TRUE'
+
+indieweb.microsub.endpoint:
+  path: '/indieweb/microsub'
+  defaults:
+   _controller: '\Drupal\indieweb\Controller\MicrosubController::endpoint'
+   _title: 'Microsub endpoint'
   requirements:
    _access: 'TRUE'
 
@@ -133,14 +158,6 @@ indieweb.comment.canonical:
   requirements:
     _entity_access: 'comment.view'
     comment: \d+
-
-entity.indieweb_feed.update_items:
-  path: '/admin/config/services/indieweb/feeds/{indieweb_feed}/update-items'
-  defaults:
-    _controller: '\Drupal\indieweb\Controller\FeedController::updateItems'
-    _title: 'Update items'
-  requirements:
-    _permission: 'administer indieweb'
 
 route_callbacks:
   - '\Drupal\indieweb\Routing\FeedRoutes::routes'

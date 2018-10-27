@@ -1,4 +1,6 @@
-enable: false
+microsub_internal: false
+microsub_internal_handler: 'disabled'
 microsub_endpoint: ''
+microsub_add_header_link: false
 aperture_enable_micropub: false
 aperture_api_key: ''
