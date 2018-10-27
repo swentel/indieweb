@@ -154,6 +154,12 @@ class MicrosubController extends MicroControllerBase {
       $items = [];
       $paging = [];
 
+      // Set pager.
+      $page = $this->request->get('after', 0);
+      if ($page > 0) {
+        \Drupal::request()->query->set('page', $page);
+      }
+
       /** @var \Drupal\indieweb\Entity\MicrosubItemInterface[] $microsub_items */
       $microsub_items = $this->entityTypeManager()->getStorage('indieweb_microsub_item')->loadByChannel($channel);
       foreach ($microsub_items as $item) {
@@ -161,6 +167,13 @@ class MicrosubController extends MicroControllerBase {
         $entry->_id = $item->id();
         $entry->_is_read = $item->isRead();
         $items[] = $entry;
+      }
+
+      // Calculate pager and after.
+      global $pager_total;
+      $page++;
+      if (isset($pager_total[0]) && $pager_total[0] > $page) {
+        $paging = ['after' => $page];
       }
 
       $response = ['items' => $items, 'paging' => (object) $paging];

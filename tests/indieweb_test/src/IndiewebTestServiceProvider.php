@@ -12,8 +12,10 @@ class IndiewebTestServiceProvider extends ServiceProviderBase {
    */
   public function alter(ContainerBuilder $container) {
     // Swap out the WebmentionClient service.
-    $definition = $container->getDefinition('indieweb.webmention.client');
-    $definition->setClass('Drupal\indieweb_test\WebmentionClient\WebmentionClientTest');
+    if ($container->has('indieweb.webmention.client')) {
+      $definition = $container->getDefinition('indieweb.webmention.client');
+      $definition->setClass('Drupal\indieweb_test\WebmentionClient\WebmentionClientTest');
+    }
   }
 
 }

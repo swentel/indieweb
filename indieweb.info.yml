@@ -2,5 +2,7 @@ name: IndieWeb
 type: module
 description: IndieWeb functionality for your site.
 core: 8.x
+dependencies:
+  - drupal:options
 test_dependencies:
   - externalauth:externalauth
