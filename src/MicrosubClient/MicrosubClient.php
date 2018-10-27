@@ -21,6 +21,7 @@ class MicrosubClient implements MicrosubClientInterface {
 
       $url = $source->label();
       $tries = $source->getTries();
+      $empty = $source->getItemCount() == 0;
       $tries++;
 
       if (strpos($url, 'internal:/') !== FALSE) {
@@ -43,7 +44,7 @@ class MicrosubClient implements MicrosubClientInterface {
           foreach ($items as $i => $item) {
             $source_id = $source->id();
             $channel_id = $source->getChannel();
-            $this->saveItem($item, $tries, $source_id, $channel_id);
+            $this->saveItem($item, $tries, $source_id, $channel_id, $empty);
           }
         }
 
@@ -63,15 +64,16 @@ class MicrosubClient implements MicrosubClientInterface {
    * Saves an item.
    *
    * @param $item
-   * @param $tries
-   * @param $source_id
-   * @param $channel_id
+   * @param int $tries
+   * @param int $source_id
+   * @param int $channel_id
+   * @param bool $empty
    *
    * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
    * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    * @throws \Drupal\Core\Entity\EntityStorageException
    */
-  protected function saveItem($item, &$tries = 0, $source_id = 0, $channel_id = 0) {
+  protected function saveItem($item, &$tries = 0, $source_id = 0, $channel_id = 0, $empty = FALSE) {
     // Prefer uid, then url, then hash the content
     if (isset($item['uid'])) {
       $guid = '@'.$item['uid'];
@@ -99,11 +101,17 @@ class MicrosubClient implements MicrosubClientInterface {
       'channel_id' => $channel_id,
       'data' => json_encode($item),
       'guid' => $guid,
+      'is_read' => $empty ? 1 : 0,
     ];
 
     if (isset($item['published'])) {
       $values['timestamp'] = strtotime($item['published']);
     }
+    else {
+      $values['timestamp'] = \Drupal::time()->getRequestTime();
+    }
+
+    $values['created'] = $empty ? $values['timestamp'] : \Drupal::time()->getRequestTime();
 
     $item = MicrosubItem::create($values);
     $item->save();
@@ -128,6 +136,7 @@ class MicrosubClient implements MicrosubClientInterface {
     if ($microsub->get('microsub_internal')) {
       $xray = new XRay();
       $url = $webmention->get('source')->value;
+      $target = \Drupal::request()->getSchemeAndHttpHost() . $webmention->get('target')->value;
 
       try {
 
@@ -141,6 +150,13 @@ class MicrosubClient implements MicrosubClientInterface {
         $parsed = $xray->parse($url, $body, ['expect'=>'feed']);
         if ($parsed && isset($parsed['data']['type']) && $parsed['data']['type'] == 'feed') {
             $item = $parsed['data']['items'][0];
+
+            foreach (['like-of', 'repost-of', 'bookmark-of', 'in-reply-to', 'mention-of'] as $item_url) {
+              if (isset($item[$item_url]) && !empty($item[$item_url][0])) {
+                $item[$item_url][0] = $target;
+              }
+            }
+
             $this->saveItem($item);
         }
 

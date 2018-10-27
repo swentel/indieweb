@@ -85,7 +85,13 @@ class MicrosubItem extends ContentEntityBase implements MicrosubItemInterface {
 
     $fields['timestamp'] = BaseFieldDefinition::create('created')
       ->setLabel(t('Posted on'))
+      ->setDefaultValue(0)
       ->setDescription(t('Posted date of the feed item, as a Unix timestamp.'));
+
+    $fields['created'] = BaseFieldDefinition::create('created')
+      ->setLabel(t('Created'))
+      ->setDefaultValue(0)
+      ->setDescription(t('Creation date of the feed item, as a Unix timestamp.'));
 
     $fields['guid'] = BaseFieldDefinition::create('string')
       ->setLabel(t('GUID'))

@@ -81,7 +81,8 @@ class MicrosubItemStorage extends SqlContentEntityStorage implements MicrosubIte
    *   An array of the microsub items.
    */
   protected function executeFeedItemQuery(QueryInterface $query, $limit) {
-    $query->sort('timestamp', 'DESC')
+    $query
+      ->sort('created', 'DESC')
       ->sort('mid', 'DESC');
     if (!empty($limit)) {
       $query->pager($limit);

@@ -34,6 +34,7 @@ class MicrosubItemStorageSchema extends SqlContentEntityStorageSchema {
     if ($table_name == $this->storage->getBaseTable()) {
       switch ($field_name) {
         case 'timestamp':
+        case 'created':
           $this->addSharedTableFieldIndex($storage_definition, $schema, TRUE);
           break;
       }
