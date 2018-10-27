@@ -18,4 +18,13 @@ interface MicrosubSourceStorageInterface extends ContentEntityStorageInterface {
    */
   public function getSourcesToRefresh();
 
+  /**
+   * Get the number of items.
+   *
+   * @param $source_id
+   *
+   * @return int
+   */
+  public function getItemCount($source_id);
+
 }

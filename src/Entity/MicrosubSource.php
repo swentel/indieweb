@@ -104,6 +104,13 @@ class MicrosubSource extends ContentEntityBase implements MicrosubSourceInterfac
   /**
    * {@inheritdoc}
    */
+  public function getNextFetch() {
+    return $this->get('fetch_next')->value;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function getTries() {
     return $this->get('fetch_tries')->value;
   }
@@ -113,6 +120,13 @@ class MicrosubSource extends ContentEntityBase implements MicrosubSourceInterfac
    */
   public function setTries($value) {
     $this->set('fetch_tries', $value);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getItemCount() {
+    return \Drupal::entityTypeManager()->getStorage('indieweb_microsub_source')->getItemCount($this->id());
   }
 
   /**

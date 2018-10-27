@@ -45,6 +45,8 @@ class MicrosubSourceListBuilder extends EntityListBuilder {
    */
   public function buildHeader() {
     $header['label'] = $this->t('Source');
+    $header['items'] = $this->t('Items');
+    $header['fetch_next'] = $this->t('Next update');
     return $header + parent::buildHeader();
   }
 
@@ -52,7 +54,17 @@ class MicrosubSourceListBuilder extends EntityListBuilder {
    * {@inheritdoc}
    */
   public function buildRow(EntityInterface $entity) {
+    /** @var \Drupal\indieweb\Entity\MicrosubSourceInterface */
     $row['label'] = $entity->label();
+    $row['items'] = $entity->getItemCount();
+    $next = $entity->getNextFetch();
+    if ($next < \Drupal::time()->getRequestTime()) {
+      $fetch_next = $this->t('imminently');
+    }
+    else {
+      $fetch_next = $this->t('%time left', ['%time' => \Drupal::service('date.formatter')->formatInterval($next - \Drupal::time()->getRequestTime())]);
+    }
+    $row['fetch_next'] = $fetch_next;
     return $row + parent::buildRow($entity);
   }
 

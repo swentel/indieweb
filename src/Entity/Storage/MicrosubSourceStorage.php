@@ -26,4 +26,16 @@ class MicrosubSourceStorage extends SqlContentEntityStorage implements MicrosubS
     return $this->loadMultiple($query->execute());
   }
 
+  /**
+   * {@inheritdoc}
+   */
+  public function getItemCount($source_id) {
+
+    $query = \Drupal::entityQuery('indieweb_microsub_item')
+      ->condition('source_id', $source_id)
+      ->count();
+
+    return $query->execute();
+  }
+
 }

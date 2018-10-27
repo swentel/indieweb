@@ -36,6 +36,13 @@ interface MicrosubSourceInterface extends ContentEntityInterface {
   public function setNextFetch();
 
   /**
+   * Get next fetch.
+   *
+   * @return int
+   */
+  public function getNextFetch();
+
+  /**
    * Get number of tries
    *
    * @return integer
@@ -48,5 +55,12 @@ interface MicrosubSourceInterface extends ContentEntityInterface {
    * @param $value
    */
   public function setTries($value);
+
+  /**
+   * Get the number of items.
+   *
+   * @return integer
+   */
+  public function getItemCount();
 
 }
