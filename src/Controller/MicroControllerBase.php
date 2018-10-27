@@ -6,7 +6,9 @@ use Drupal\Core\Controller\ControllerBase;
 
 class MicroControllerBase extends ControllerBase {
 
-  /** @var  \Drupal\Core\Config\Config */
+  /**
+   * @var  \Drupal\Core\Config\Config
+   */
   protected $config;
 
   /**

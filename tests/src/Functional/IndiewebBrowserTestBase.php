@@ -252,17 +252,14 @@ abstract class IndiewebBrowserTestBase extends BrowserTestBase {
    * @return array|int
    */
   protected function sendMicropubRequest($post, $access_token = 'is_valid', $debug = FALSE, $type = 'form_params', $return_array_response = FALSE) {
-    $auth = 'Bearer ' . $access_token;
     $location = '';
     $micropub_endpoint = Url::fromRoute('indieweb.micropub.endpoint', [], ['absolute' => TRUE])->toString();
 
     $client = \Drupal::httpClient();
     $headers = [
       'Accept' => 'application/json',
+      'Authorization' => 'Bearer ' . $access_token,
     ];
-
-    // Access token is always in the headers when using Request from p3k.
-    $headers['Authorization'] = $auth;
 
     try {
       $response = $client->post($micropub_endpoint, [$type => $post, 'headers' => $headers]);
@@ -318,28 +315,25 @@ abstract class IndiewebBrowserTestBase extends BrowserTestBase {
   protected function sendMicrosubRequest($query = [], $type = 'get', $access_token = 'is_valid', $debug = FALSE) {
     $body = '';
 
-    $auth = 'Bearer ' . $access_token;
-    $microsub_endpoint = Url::fromRoute('indieweb.microsub.endpoint', [], ['absolute' => TRUE])->toString();
-
-    $client = \Drupal::httpClient();
-    $headers = [
-      'Accept' => 'application/json',
-    ];
-
-    // Access token is always in the headers when using Request from p3k.
-    $headers['Authorization'] = $auth;
+    $headers = ['Accept' => 'application/json'];
+    if ($access_token != 'no_auth_header') {
+      $headers['Authorization'] = 'Bearer ' . $access_token;
+    }
 
     try {
 
       if ($type == 'get') {
-        $response = $client->get($microsub_endpoint, ['headers' => $headers, 'query' => $query]);
+        $this->drupalGet('indieweb/microsub', ['query' => $query], $headers);
+        $status_code = $this->getSession()->getStatusCode();
+        $body = $this->getSession()->getPage()->getContent();
       }
       else {
+        $client = \Drupal::httpClient();
+        $microsub_endpoint = Url::fromRoute('indieweb.microsub.endpoint', [], ['absolute' => TRUE])->toString();
         $response = $client->post($microsub_endpoint, ['query' => $query, 'headers' => $headers]);
+        $status_code = $response->getStatusCode();
       }
 
-      $status_code = $response->getStatusCode();
-      $body = $response->getBody()->getContents();
     }
     catch (\Exception $e) {
 

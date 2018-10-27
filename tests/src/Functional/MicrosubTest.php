@@ -44,21 +44,20 @@ class MicrosubTest extends IndiewebBrowserTestBase {
    *
    * @var string
    */
-  protected $timeline_path_1 = '/timeline/1';
+  protected $timeline_path_1 = '/microsub-timeline/1';
 
   /**
    * Timeline path.
    *
    * @var string
    */
-  protected $timeline_path_2 = '/timeline/2';
+  protected $timeline_path_2 = '/microsub-timeline/2';
 
   /**
-   * Tests microsub functionality.
-   *
-   * @throws \Behat\Mink\Exception\ExpectationException
+   * {@inheritdoc}
    */
-  public function testMicrosub() {
+  public function setUp() {
+    parent::setUp();
 
     // Create feeds, channels and sources.
     $this->drupalLogin($this->adminUser);
@@ -66,6 +65,16 @@ class MicrosubTest extends IndiewebBrowserTestBase {
     $this->createChannels();
     $this->createSources();
     $this->drupalLogout();
+
+    drupal_flush_all_caches();
+  }
+
+  /**
+   * Tests microsub functionality.
+   *
+   * @throws \Behat\Mink\Exception\ExpectationException
+   */
+  public function testMicrosub() {
 
     // ----------------------------------------------------------------
     // basic tests.
@@ -104,6 +113,17 @@ class MicrosubTest extends IndiewebBrowserTestBase {
     $edit = ['enable' => '1', 'expose' => 1, 'token_endpoint' => Url::fromRoute('indieweb_test.token_endpoint', [], ['absolute' => TRUE])->toString()];
     $this->drupalPostForm('admin/config/services/indieweb/indieauth', $edit, 'Save configuration');
 
+    // Set all microformats too.
+    $microformats = [
+      'h_entry' => 1,
+      'u_photo' => 1,
+      'e_content' => 1,
+      'post_metadata' => 1,
+      'p_name_exclude_node_type' => 'page',
+      'p_bridgy_twitter_content' => 1,
+    ];
+    $this->drupalPostForm('admin/config/services/indieweb/microformats', $microformats, 'Save configuration');
+
     $this->drupalGet('<front>');
     $this->assertSession()->responseContains($this->microsub_path);
     $this->drupalLogout();
@@ -127,16 +147,22 @@ class MicrosubTest extends IndiewebBrowserTestBase {
     ];
     $this->createNode($settings);
 
-    // TODO fix this
-    //$this->fetchItems();
-    //$this->assertItemCount('item', 1);
+    $this->fetchItems();
+    $this->assertItemCount('item', 1);
 
     // ----------------------------------------------------------------
     // channels and timeline
     // ----------------------------------------------------------------
 
-    /*$query = [];
+    $query = [];
     $type = 'get';
+    $response = $this->sendMicrosubRequest($query, $type, 'no_auth_header');
+    self::assertEqual($response['code'], 401);
+
+    $response = $this->sendMicrosubRequest($query, $type);
+    self::assertEqual($response['code'], 400);
+
+    $query = ['action' => 'timeline'];
     $response = $this->sendMicrosubRequest($query, $type, 'is_totally_invalid');
     self::assertEqual($response['code'], 403);
 
@@ -144,8 +170,10 @@ class MicrosubTest extends IndiewebBrowserTestBase {
     $response = $this->sendMicrosubRequest($query);
     self::assertEqual($response['code'], 200);
     $body = json_decode($response['body']);
-    self::assertTrue($body[0]['name'] == 'Channel 1');
-    self::assertTrue($body[1]['name'] == 'Channel 2');*/
+    self::assertEquals('Channel 1', $body->channels[1]->name);
+    self::assertEquals('Channel 2', $body->channels[2]->name);
+    self::assertEquals(1, $body->channels[1]->unread);
+    self::assertEquals(0, $body->channels[2]->unread);
 
     // TODO more tests
   }
@@ -170,7 +198,7 @@ class MicrosubTest extends IndiewebBrowserTestBase {
     $this->drupalPostForm('admin/config/services/indieweb/feeds/add', $edit, 'Save');
     $edit = [
       'label' => 'Timeline 2',
-      'id' => 'timeline',
+      'id' => 'timeline_2',
       'path' => $this->timeline_path_2,
       'feedTitle' => 'Timeline',
       'ownerId' => 1,
@@ -188,7 +216,6 @@ class MicrosubTest extends IndiewebBrowserTestBase {
    * Create channels.
    */
   protected function createChannels() {
-    $this->drupalLogin($this->adminUser);
     $edit = ['title' => 'Channel 1'];
     $this->drupalPostForm('admin/config/services/indieweb/microsub/channels/add-channel', $edit, 'Save');
     $edit = ['title' => 'Channel 2'];
@@ -199,10 +226,9 @@ class MicrosubTest extends IndiewebBrowserTestBase {
    * Create sources.
    */
   protected function createSources() {
-    $this->drupalLogin($this->adminUser);
-    $edit = ['url' => Url::fromUri('internal:/timeline/1', ['absolute' => TRUE])->toString(), 'channel_id' => '1'];
+    $edit = ['url' => 'internal:/microsub-timeline/1', 'channel_id' => '1'];
     $this->drupalPostForm('admin/config/services/indieweb/microsub/sources/add-source', $edit, 'Save');
-    $edit = ['url' => Url::fromUri('internal:/timeline/2', ['absolute' => TRUE])->toString(), 'channel_id' => '2'];
+    $edit = ['url' => 'internal:/microsub-timeline/2', 'channel_id' => '2'];
     $this->drupalPostForm('admin/config/services/indieweb/microsub/sources/add-source', $edit, 'Save');
   }
 

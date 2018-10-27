@@ -23,6 +23,10 @@ class MicrosubClient implements MicrosubClientInterface {
       $tries = $source->getTries();
       $tries++;
 
+      if (strpos($url, 'internal:/') !== FALSE) {
+        $url = Url::fromUri($url, ['absolute' => TRUE])->toString();
+      }
+
       try {
 
         // Get content.

@@ -72,6 +72,7 @@ class MicrosubController extends MicroControllerBase {
       }
     }
 
+    // POST actions.
     if ($request_method == 'POST') {
       switch ($action) {
         case 'timeline':
@@ -120,7 +121,7 @@ class MicrosubController extends MicroControllerBase {
     $channels[] = (object) [
       'uid' => 0,
       'name' => 'Notifications',
-      'unread' => $notifications,
+      'unread' => (int) $notifications,
     ];
 
     /** @var \Drupal\indieweb\Entity\MicrosubChannelInterface $channel */
