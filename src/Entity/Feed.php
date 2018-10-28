@@ -108,7 +108,7 @@ class Feed extends ConfigEntityBase implements FeedInterface {
    *
    * @var string
    */
-  protected $hubUrl = 'https://bridgy-fed.superfeedr.com/';
+  protected $hubUrl;
 
   /**
    * Whether to create a jf2 feed.

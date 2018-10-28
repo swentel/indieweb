@@ -23,6 +23,7 @@ markup after you\'ve done the configuration with this module (and optionally mor
 
     $items = [];
     $modules = [
+      'https://www.drupal.org/project/externalauth' => 'External Authentication',
       'https://www.drupal.org/project/auto_entitylabel' => 'Automatic Entity Label',
       'https://www.drupal.org/project/realname' => 'Real Name',
       'https://www.drupal.org/project/rabbit_hole' => 'Rabbit hole'

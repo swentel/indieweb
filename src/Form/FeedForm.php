@@ -100,7 +100,6 @@ class FeedForm extends EntityForm {
       '#type' => 'textfield',
       '#title' => $this->t('Hub URL'),
       '#default_value' => $feed->getHubUrl(),
-      '#description' => $this->t('This uses https://bridgy-fed.superfeedr.com/ by default.'),
       '#states' => array(
         'visible' => array(
           ':input[name="atom"]' => array('checked' => TRUE),
