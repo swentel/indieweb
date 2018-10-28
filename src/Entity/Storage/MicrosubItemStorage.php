@@ -30,7 +30,7 @@ class MicrosubItemStorage extends SqlContentEntityStorage implements MicrosubIte
    */
   public function removeItem($entry_id) {
     $this->database->delete('microsub_item')
-      ->condition('mid', $entry_id)
+      ->condition('id', $entry_id)
       ->execute();
   }
 
@@ -83,7 +83,7 @@ class MicrosubItemStorage extends SqlContentEntityStorage implements MicrosubIte
   protected function executeFeedItemQuery(QueryInterface $query, $limit) {
     $query
       ->sort('created', 'DESC')
-      ->sort('mid', 'DESC');
+      ->sort('id', 'DESC');
     if (!empty($limit)) {
       $query->pager($limit);
     }

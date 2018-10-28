@@ -135,20 +135,34 @@ class MicrosubTest extends IndiewebBrowserTestBase {
     // Fetch items
     // ----------------------------------------------------------------
 
-    // Create an article
-    $settings = [
+    // Create an article and page.
+    $settings_article = [
       'type' => 'article',
       'title' => 'An article',
       'body' => [
-        'value' => 'This is an article on the timeline feed',
+        'value' => 'This is an article on the first timeline feed',
         'format' => filter_default_format()
       ],
       'uid' => 1,
     ];
-    $this->createNode($settings);
+    $this->createNode($settings_article);
+
+    $settings_page = [
+      'type' => 'page',
+      'title' => 'A page',
+      'body' => [
+        'value' => 'This is a page on the second timeline feed',
+        'format' => filter_default_format()
+      ],
+      'uid' => 1,
+    ];
+    $this->createNode($settings_page);
+    $settings_page['title'] = 'Another page';
+    $settings_page['body']['value'] = 'This is another page on the second timeline feed';
+    $this->createNode($settings_page);
 
     $this->fetchItems();
-    $this->assertItemCount('item', 1);
+    $this->assertItemCount('item', 3);
 
     // ----------------------------------------------------------------
     // channels and timeline
@@ -172,10 +186,40 @@ class MicrosubTest extends IndiewebBrowserTestBase {
     $body = json_decode($response['body']);
     self::assertEquals('Channel 1', $body->channels[1]->name);
     self::assertEquals('Channel 2', $body->channels[2]->name);
-    self::assertEquals(1, $body->channels[1]->unread);
+    self::assertEquals(0, $body->channels[1]->unread);
     self::assertEquals(0, $body->channels[2]->unread);
 
-    // TODO more tests
+    $this->resetNextFetch(1);
+    $this->resetNextFetch(2);
+
+    $settings_page['title'] = 'Another page for second';
+    $settings_page['body']['value'] = 'This is another page on the second timeline feed which will be marked as unread';
+    $this->createNode($settings_page);
+    $this->fetchItems();
+    $this->assertItemCount('item', 4);
+
+    $response = $this->sendMicrosubRequest($query);
+    $body = json_decode($response['body']);
+    self::assertEquals(0, $body->channels[1]->unread);
+    self::assertEquals(1, $body->channels[2]->unread);
+
+    // Delete an item.
+    $query = ['action' => 'timeline', 'method' => 'remove', 'entry' => 4];
+    $this->sendMicrosubRequest($query, 'POST');
+    $this->assertItemCount('item', 3);
+
+    // Delete source.
+    $this->drupalLogin($this->adminUser);
+    $this->drupalPostForm('admin/config/services/indieweb/microsub/sources/1/delete', [], 'Delete');
+    $this->assertItemCount('item', 2);
+    $this->assertItemCount('channel', 2);
+    $this->assertItemCount('source', 1);
+
+    // Delete channel.
+    $this->drupalPostForm('admin/config/services/indieweb/microsub/channels/2/delete', [], 'Delete');
+    $this->assertItemCount('channel', 1);
+    $this->assertItemCount('source', 0);
+    $this->assertItemCount('item', 0);
   }
 
   /**
@@ -220,6 +264,12 @@ class MicrosubTest extends IndiewebBrowserTestBase {
     $this->drupalPostForm('admin/config/services/indieweb/microsub/channels/add-channel', $edit, 'Save');
     $edit = ['title' => 'Channel 2'];
     $this->drupalPostForm('admin/config/services/indieweb/microsub/channels/add-channel', $edit, 'Save');
+    // Order them too.
+    $edit = [
+      'entities[1][weight]' => -10,
+      'entities[2][weight]' => -9,
+    ];
+    $this->drupalPostForm('admin/config/services/indieweb/microsub/channels', $edit, 'Save');
   }
 
   /**
@@ -242,7 +292,7 @@ class MicrosubTest extends IndiewebBrowserTestBase {
    */
   protected function assertItemCount($type, $expected_total) {
     $table = 'microsub_' . $type;
-    $total = \Drupal::database()->query('SELECT count(mid) FROM {' . $table . '}')->fetchField();
+    $total = \Drupal::database()->query('SELECT count(id) FROM {' . $table . '}')->fetchField();
     self::assertEquals($expected_total, (int) $total);
   }
 

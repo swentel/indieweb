@@ -72,6 +72,7 @@ class MicrosubClient implements MicrosubClientInterface {
    * @throws \Drupal\Core\Entity\EntityStorageException
    */
   protected function saveItem($item, &$tries = 0, $source_id = 0, $channel_id = 0, $empty = FALSE) {
+
     // Prefer uid, then url, then hash the content
     if (isset($item['uid'])) {
       $guid = '@'.$item['uid'];
@@ -139,7 +140,7 @@ class MicrosubClient implements MicrosubClientInterface {
       try {
 
         // Get content.
-        $options = ['headers' => ['User-Agent' => 'IndieWeb Drupal Microsub server at ' . \Drupal::request()->getSchemeAndHttpHost()]];
+        $options = ['headers' => ['User-Agent' => 'IndieWeb Drupal Microsub server (+https://www.drupal.org/project/indieweb)']];
         $response = \Drupal::httpClient()->get($url, $options);
         $body = $response->getBody()->getContents();
 

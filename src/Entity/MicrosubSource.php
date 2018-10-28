@@ -132,6 +132,19 @@ class MicrosubSource extends ContentEntityBase implements MicrosubSourceInterfac
   /**
    * {@inheritdoc}
    */
+  public function delete() {
+
+    \Drupal::database()
+      ->delete('microsub_item')
+      ->condition('source_id', $this->id())
+      ->execute();
+
+    parent::delete();
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public static function baseFieldDefinitions(EntityTypeInterface $entity_type) {
     $fields = parent::baseFieldDefinitions($entity_type);
 

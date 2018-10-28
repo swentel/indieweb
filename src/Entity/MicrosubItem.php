@@ -26,7 +26,7 @@ use Drupal\Core\Field\BaseFieldDefinition;
  *   },
  *   base_table = "microsub_item",
  *   entity_keys = {
- *     "id" = "mid",
+ *     "id" = "id",
  *     "langcode" = "langcode",
  *   }
  * )
@@ -61,7 +61,7 @@ class MicrosubItem extends ContentEntityBase implements MicrosubItemInterface {
     /** @var \Drupal\Core\Field\BaseFieldDefinition[] $fields */
     $fields = parent::baseFieldDefinitions($entity_type);
 
-    $fields['mid']->setLabel(t('Microsub item ID'))
+    $fields['id']->setLabel(t('Microsub item ID'))
       ->setDescription(t('The ID of the item.'));
 
     $fields['langcode']->setLabel(t('Language code'))

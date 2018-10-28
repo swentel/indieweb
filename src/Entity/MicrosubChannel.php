@@ -109,6 +109,21 @@ class MicrosubChannel extends ContentEntityBase implements MicrosubChannelInterf
   /**
    * {@inheritdoc}
    */
+  public function delete() {
+    $ids = $this->getSources();
+    if ($ids) {
+      $sources = \Drupal::entityTypeManager()->getStorage('indieweb_microsub_source')->loadMultiple($ids);
+      foreach ($sources as $source) {
+        $source->delete();
+      }
+    }
+
+    parent::delete();
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public static function baseFieldDefinitions(EntityTypeInterface $entity_type) {
     $fields = parent::baseFieldDefinitions($entity_type);
 
