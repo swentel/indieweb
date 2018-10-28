@@ -29,7 +29,8 @@ class MicrosubItemStorage extends SqlContentEntityStorage implements MicrosubIte
    * {@inheritdoc}
    */
   public function removeItem($entry_id) {
-    $this->database->delete('microsub_item')
+    $this->database->update('microsub_item')
+      ->fields(['status' => 0])
       ->condition('id', $entry_id)
       ->execute();
   }
@@ -50,6 +51,7 @@ class MicrosubItemStorage extends SqlContentEntityStorage implements MicrosubIte
    */
   public function loadByChannel($channel_id, $limit = 20) {
     $query = \Drupal::entityQuery('indieweb_microsub_item')
+      ->condition('status', 1)
       ->condition('channel_id', $channel_id);
     return $this->executeFeedItemQuery($query, $limit);
   }

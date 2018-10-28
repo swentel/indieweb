@@ -79,6 +79,10 @@ class MicrosubItem extends ContentEntityBase implements MicrosubItemInterface {
       ->setDescription(t('The microsub channel entity associated with this item.'))
       ->setSetting('target_type', 'indieweb_microsub_channel');
 
+    $fields['status'] = BaseFieldDefinition::create('integer')
+      ->setLabel(t('Status of the item'))
+      ->setDefaultValue(1);
+
     $fields['data'] = BaseFieldDefinition::create('string_long')
       ->setLabel(t('data'))
       ->setDescription(t('The data of the item.'));

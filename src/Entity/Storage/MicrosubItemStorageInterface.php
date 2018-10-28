@@ -47,6 +47,10 @@ interface MicrosubItemStorageInterface extends ContentEntityStorageInterface {
   /**
    * Remove an item.
    *
+   * This does not delete the item from the storage, but sets
+   * the status to 0 so that when the feed is fetched again, the entry does
+   * not show up again.
+   *
    * @param $entry_id
    */
   public function removeItem($entry_id);
