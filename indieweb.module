@@ -851,6 +851,32 @@ function indieweb_preprocess_image_style(&$variables) {
 }
 
 /**
+ * Implements hook_preprocess_file_audio().
+ */
+function indieweb_preprocess_file_audio(&$variables) {
+  if (\Drupal::config('indieweb.microformats')->get('u_audio')) {
+    if (!empty($variables['files'])) {
+      foreach ($variables['files'] as $file) {
+        $file['source_attributes']->addClass('u-audio');
+      }
+    }
+  }
+}
+
+/**
+ * Implements hook_preprocess_file_entity_audio().
+ */
+function indieweb_preprocess_file_entity_audio(&$variables) {
+  if (\Drupal::config('indieweb.microformats')->get('u_audio')) {
+    if (!empty($variables['files'])) {
+      foreach ($variables['files'] as $file) {
+        $file['source_attributes']->addClass('u-audio');
+      }
+    }
+  }
+}
+
+/**
  * Implements hook_preprocess_file_video().
  */
 function indieweb_preprocess_file_video(&$variables) {

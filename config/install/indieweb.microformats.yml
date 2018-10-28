@@ -6,6 +6,7 @@ e_content_fields: ''
 e_content_comment: false
 u_photo: false
 u_video: false
+u_audio: false
 post_metadata: false
 post_metadata_comment: false
 p_name_exclude_node_type: ''
