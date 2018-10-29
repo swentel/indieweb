@@ -49,12 +49,16 @@ class MicrosubController extends MicroControllerBase {
       return new JsonResponse('', 401);
     }
 
-    if (!$this->isValidToken($auth_header)) {
-      return new JsonResponse('', 403);
-    }
-
+    $scope = NULL;
     $request_method = $request->getMethod();
     $action = $request->get('action');
+    if ($action == 'channels' || $action == 'timeline') {
+      $scope = 'read';
+    }
+
+    if (!$this->isValidToken($auth_header, $scope)) {
+      return new JsonResponse('', 403);
+    }
 
     // GET actions.
     if ($request_method == 'GET') {

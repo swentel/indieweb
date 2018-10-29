@@ -48,7 +48,7 @@ class IndiewebTestController extends ControllerBase {
       }
 
       $data['me'] = $me;
-      $data['scope'] = 'create update delete';
+      $data['scope'] = 'create update delete read';
     }
 
     return new JsonResponse($data, $status);

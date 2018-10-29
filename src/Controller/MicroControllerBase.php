@@ -36,7 +36,7 @@ class MicroControllerBase extends ControllerBase {
    *
    * @return bool
    */
-  protected function isValidToken($auth_header, $scope_to_check = '') {
+  protected function isValidToken($auth_header, $scope_to_check = NULL) {
     $valid_token = FALSE;
 
     try {

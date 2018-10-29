@@ -49,7 +49,7 @@ function indieweb_help($route_name, RouteMatchInterface $route_match) {
     ],
     'entity.indieweb_feed.collection' => [
       'title' => 'Feeds',
-      'text' => t('<p>Generate feeds in Microformat 2 , Atom or jf2feed+json (last one is experimental though). Atom feeds are generated using https://granary.io/.<br />Because content can be nodes, comments etc, it isn\'t possible to use views. However, you can create multiple feeds which aggregate the content in a page and/or feed.<br />The feeds are controlled by the \'access content\' permission and all items in the HTML feed will be rendered with the \'Microformat\' view mode.</p><p>You will need feeds when:</p><ul><li>you use Bridgy: the service will look for html link headers with rel="feed" and use those pages to crawl so it knows to which content it needs to send webmentions to.</li><li>you want to allow IndieWeb readers (Monocle, Together, Indigenous) to subscribe to your content. These are alternate types which can either link to a page with microformat entries. It\'s advised to have an h-card on that page too as some parsers don\'t go to the homepage to fetch that content.</li></ul>'),
+      'text' => t('<p>Generate feeds in Microformat 2 , Atom or jf2feed+json. Atom feeds are generated using https://granary.io/.<br />Because content can be nodes, comments etc, it isn\'t possible to use views. However, you can create multiple feeds which aggregate the content in a page and/or feed.<br />The feeds are controlled by the \'access content\' permission and all items in the HTML feed will be rendered with the \'Microformat\' view mode.</p><p>You will need feeds when:</p><ul><li>you use Bridgy: the service will look for html link headers with rel="feed" and use those pages to crawl so it knows to which content it needs to send webmentions to.</li><li>you want to allow IndieWeb readers (Monocle, Together, Indigenous) to subscribe to your content. These are alternate types which can either link to a page with microformat entries. It\'s advised to have an h-card on that page too as some parsers don\'t go to the homepage to fetch that content.</li></ul>'),
     ],
     'indieweb.admin.micropub_settings' => [
       'title' => 'Micropublishing',
@@ -352,7 +352,7 @@ function indieweb_form_node_form_alter(&$form, FormStateInterface $form_state) {
 }
 
 /**
- * Implements hook_form_alter().
+ * Implements hook_form_FORM_ID_alter().
  */
 function indieweb_form_user_form_alter(&$form, FormStateInterface $form_state, $form_id) {
   if (_indieweb_user_authenticated_with_domain_on_edit_form()) {

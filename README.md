@@ -229,8 +229,9 @@ Configuration still in settings.php
 
 ## Feeds
 
-Generate feeds in Microformat 2 , Atom or jf2feed+json (last one is experimental though). Atom feeds are generated using 
-https://granary.io/. You will need feeds when:
+Generate feeds in Microformat 2 , Atom or jf2feed+json. Atom feeds are generated using https://granary.io/. 
+
+You will need feeds when:
 
 - you use Bridgy: the service will look for html link headers with rel="feed" and use those pages to crawl so it knows
   to which content it needs to send webmentions to.
