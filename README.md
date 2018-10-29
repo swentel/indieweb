@@ -300,8 +300,9 @@ For more background, see https://github.com/snarfed/bridgy-fed/issues/30 and htt
 
 ## Drush commands
 
-- indieweb-send-webmentions (isw): handles the queue for sending webmentions
+- indieweb-send-webmentions (isw): handles the queue for sending webmentions.
 - indieweb-external-auth-map: maps an existing user account with a domain.
+- indieweb-microsub-fetch-items: fetch items for the built-in microsub server.
 
 ## Hooks
 

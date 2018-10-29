@@ -24,6 +24,7 @@ class MicrosubClient implements MicrosubClientInterface {
       $empty = $source->getItemCount() == 0;
       $tries++;
 
+      // Allow internal URL's, at the moment only for testing.
       if (strpos($url, 'internal:/') !== FALSE) {
         $url = Url::fromUri($url, ['absolute' => TRUE])->toString();
       }
@@ -35,15 +36,22 @@ class MicrosubClient implements MicrosubClientInterface {
         $response = \Drupal::httpClient()->get($url, $options);
         $body = $response->getBody()->getContents();
 
-        // Parse the body.
-        $parsed = $xray->parse($url, $body, ['expect'=>'feed']);
-        if ($parsed && isset($parsed['data']['type']) && $parsed['data']['type'] == 'feed') {
-          $items = array_reverse($parsed['data']['items']);
-          foreach ($items as $i => $item) {
-            $source_id = $source->id();
-            $channel_id = $source->getChannel();
-            $this->saveItem($item, $tries, $source_id, $channel_id, $empty);
+        $hash = md5($body);
+        if ($source->getHash() != $hash) {
+
+          // Parse the body.
+          $parsed = $xray->parse($url, $body, ['expect' => 'feed']);
+          if ($parsed && isset($parsed['data']['type']) && $parsed['data']['type'] == 'feed') {
+            $items = array_reverse($parsed['data']['items']);
+            foreach ($items as $i => $item) {
+              $source_id = $source->id();
+              $channel_id = $source->getChannel();
+              $this->saveItem($item, $tries, $source_id, $channel_id, $empty);
+            }
           }
+
+          // Set new hash.
+          $source->setHash($hash);
         }
 
         $source->setNextFetch();

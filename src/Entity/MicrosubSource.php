@@ -89,6 +89,20 @@ class MicrosubSource extends ContentEntityBase implements MicrosubSourceInterfac
   /**
    * {@inheritdoc}
    */
+  public function getHash() {
+    return $this->get('hash')->value;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setHash($hash) {
+    return $this->set('hash', $hash);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function getInterval() {
     return $this->get('fetch_interval')->value;
   }
@@ -168,6 +182,10 @@ class MicrosubSource extends ContentEntityBase implements MicrosubSourceInterfac
       ->setLabel(t('Channel'))
       ->setDescription(t('The channel id of this source.'))
       ->setSetting('target_type', 'indieweb_microsub_channel');
+
+    $fields['hash'] = BaseFieldDefinition::create('string')
+      ->setLabel(t('Hash'))
+      ->setSetting('max_length', 32);
 
     $intervals = [900, 1800, 3600, 7200, 10800, 21600, 32400, 43200, 64800, 86400, 172800, 259200, 604800, 1209600, 2419200];
     $period = array_map([\Drupal::service('date.formatter'), 'formatInterval'], array_combine($intervals, $intervals));

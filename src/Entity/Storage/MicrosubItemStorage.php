@@ -29,8 +29,7 @@ class MicrosubItemStorage extends SqlContentEntityStorage implements MicrosubIte
    * {@inheritdoc}
    */
   public function removeItem($entry_id) {
-    $this->database->update('microsub_item')
-      ->fields(['status' => 0])
+    $this->database->delete('microsub_item')
       ->condition('id', $entry_id)
       ->execute();
   }

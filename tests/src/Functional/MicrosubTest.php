@@ -207,7 +207,10 @@ class MicrosubTest extends IndiewebBrowserTestBase {
     $query = ['action' => 'timeline', 'method' => 'remove', 'entry' => 4];
     $this->sendMicrosubRequest($query, 'POST');
     $this->assertItemCount('item', 3);
-    $this->assertItemCount('item', 4, 0);
+    $this->resetNextFetch(1);
+    $this->resetNextFetch(2);
+    $this->fetchItems();
+    $this->assertItemCount('item', 3);
 
     // Delete source.
     $this->drupalLogin($this->adminUser);
@@ -290,18 +293,11 @@ class MicrosubTest extends IndiewebBrowserTestBase {
    *   Either channel, source or item.
    * @param $expected_total
    *   The total to expect
-   * @param $status
-   *   Check status.
    */
-  protected function assertItemCount($type, $expected_total, $status = 1) {
+  protected function assertItemCount($type, $expected_total) {
     $table = 'microsub_' . $type;
-    $params = [];
     $query = 'SELECT count(id) FROM {' . $table . '}';
-    if ($status) {
-      $params[':status'] = $status;
-      $query .= ' WHERE status = :status';
-    }
-    $total = \Drupal::database()->query($query, $params)->fetchField();
+    $total = \Drupal::database()->query($query)->fetchField();
     self::assertEquals($expected_total, (int) $total);
   }
 

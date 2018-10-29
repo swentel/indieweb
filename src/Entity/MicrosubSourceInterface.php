@@ -24,6 +24,20 @@ interface MicrosubSourceInterface extends ContentEntityInterface {
   public function getChannel();
 
   /**
+   * Returns the hash of the source.
+   *
+   * @return string
+   */
+  public function getHash();
+
+  /**
+   * Sets the hash of the source.
+   *
+   * @param string $hash
+   */
+  public function setHash($hash);
+
+  /**
    * Gets the interval.
    *
    * @return integer
