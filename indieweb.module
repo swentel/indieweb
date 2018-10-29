@@ -352,11 +352,20 @@ function indieweb_form_node_form_alter(&$form, FormStateInterface $form_state) {
 }
 
 /**
- * Implements hook_entity_form_display_alter().
+ * Implements hook_form_alter().
  */
-function indieweb_entity_form_display_alter(EntityFormDisplayInterface $form_display, array $context) {
+function indieweb_form_user_form_alter(&$form, FormStateInterface $form_state, $form_id) {
   if (_indieweb_user_authenticated_with_domain_on_edit_form()) {
-    $form_display->removeComponent('account');
+
+    // Hide password fields as it's not needed. We also hide the current pass
+    // so that the e-mail can be changed.
+    $form['account']['pass']['#access'] = FALSE;
+    $form['account']['current_pass']['#access'] = FALSE;
+
+    // Set user_pass_reset in form_state. Users can always change their email
+    // if wanted. The unique validation constraint will make sure they can not
+    // set it to an existing email.
+    $form_state->set('user_pass_reset', 1);
   }
 }
 

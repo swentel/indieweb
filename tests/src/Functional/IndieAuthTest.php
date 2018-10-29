@@ -127,6 +127,16 @@ class IndieAuthTest extends IndiewebBrowserTestBase {
     $this->assertSession()->responseNotContains('Required if you want to change the');
     $this->assertSession()->responseContains('To change the current user password, enter the new password in both fields.');
     $this->assertSession()->responseContains('Several special characters are allowed');
+    $this->drupalLogout();
+
+    // Change e-mail.
+    $edit = ['domain' => 'https://example.com'];
+    $this->drupalPostForm('indieauth-test/login', $edit, 'Sign in');
+    $edit = ['mail' => 'indieweb@example.com'];
+    $this->drupalPostForm('/user/3/edit', $edit, 'Save');
+    /** @var \Drupal\user\UserInterface $account_updated */
+    $account_updated = \Drupal::entityTypeManager()->getStorage('user')->loadUnchanged(3);
+    self::assertEquals('indieweb@example.com', $account_updated->getEmail());
 
     // Make sure you can't login with user 3 since it has no password.
     $this->drupalLogout();
