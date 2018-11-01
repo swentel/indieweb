@@ -113,9 +113,9 @@ class MicrosubSource extends ContentEntityBase implements MicrosubSourceInterfac
    */
   public function getPostContext() {
     $return = [];
-    $ref = $this->get('post_context')->value;
-    if (!empty($ref)) {
-      $values = @unserialize($ref);
+    $context = $this->get('post_context')->value;
+    if (!empty($context)) {
+      $values = @unserialize($context);
       if (is_array($values)) {
         foreach ($values as $key => $value) {
           if ($key === $value) {

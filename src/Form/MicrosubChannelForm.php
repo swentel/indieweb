@@ -25,6 +25,25 @@ class MicrosubChannelForm extends ContentEntityForm {
       '#required' => TRUE,
     ];
 
+    // contexts
+    $form['exclude_post_type'] = [
+      '#type' => 'checkboxes',
+      '#title' => $this->t('Exclude post types in timeline'),
+      '#options' => [
+        'reply' => $this->t('Replies'),
+        'like' => $this->t('Reposts'),
+        'repost' => $this->t('Bookmarks'),
+        'bookmark' => $this->t('Likes'),
+        'note' => $this->t('Notes'),
+        'article' => $this->t('Articles'),
+        'photo' => $this->t('Photos'),
+        'video' => $this->t('Videos'),
+        'checkin' => $this->t('Checkins'),
+        'rsvp' => $this->t('RSVPs'),
+      ],
+      '#default_value' => $channel->getPostTypesToExclude(),
+    ];
+
     $form['status'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('Enabled'),
@@ -39,6 +58,9 @@ class MicrosubChannelForm extends ContentEntityForm {
    */
   public function save(array $form, FormStateInterface $form_state) {
     $channel = $this->entity;
+
+    $channel->set('exclude_post_type', serialize($form_state->getValue('exclude_post_type')));
+
     $status = parent::save($form, $form_state);
 
     switch ($status) {

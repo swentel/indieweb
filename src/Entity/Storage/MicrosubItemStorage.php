@@ -49,9 +49,22 @@ class MicrosubItemStorage extends SqlContentEntityStorage implements MicrosubIte
    * {@inheritdoc}
    */
   public function loadByChannel($channel_id, $limit = 20) {
+    $exclude = [];
+
+    /** @var \Drupal\indieweb\Entity\MicrosubChannelInterface $channel */
+    $channel = \Drupal::entityTypeManager()->getStorage('indieweb_microsub_channel')->load($channel_id);
+    if ($channel) {
+      $exclude = $channel->getPostTypesToExclude();
+    }
+
     $query = \Drupal::entityQuery('indieweb_microsub_item')
       ->condition('status', 1)
       ->condition('channel_id', $channel_id);
+
+    if ($exclude) {
+      $query->condition('post_type', $exclude, 'NOT IN');
+    }
+
     return $this->executeFeedItemQuery($query, $limit);
   }
 

@@ -31,6 +31,13 @@ interface MicrosubChannelInterface extends ContentEntityInterface {
   public function getSources();
 
   /**
+   * Get the post types to exclude.
+   *
+   * @return array
+   */
+  public function getPostTypesToExclude();
+
+  /**
    * Get the count of unread items.
    *
    * @return int $count

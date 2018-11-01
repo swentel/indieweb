@@ -3,6 +3,7 @@
 namespace Drupal\indieweb\Entity;
 
 use Drupal\Core\Entity\ContentEntityBase;
+use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
 
@@ -81,6 +82,25 @@ class MicrosubChannel extends ContentEntityBase implements MicrosubChannelInterf
   /**
    * {@inheritdoc}
    */
+  public function getPostTypesToExclude() {
+    $return = [];
+    $post_types = $this->get('exclude_post_type')->value;
+    if (!empty($post_types)) {
+      $values = @unserialize($post_types);
+      if (is_array($values)) {
+        foreach ($values as $key => $value) {
+          if ($key === $value) {
+            $return[] = $key;
+          }
+        }
+      }
+    }
+    return $return;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function delete() {
     $ids = $this->getSources();
     if ($ids) {
@@ -117,6 +137,10 @@ class MicrosubChannel extends ContentEntityBase implements MicrosubChannelInterf
     $fields['weight'] = BaseFieldDefinition::create('integer')
       ->setLabel(t('Weight of the channel'))
       ->setDefaultValue(0);
+
+    $fields['exclude_post_type'] = BaseFieldDefinition::create('string')
+      ->setLabel(t('Exclude post type'))
+      ->setSetting('max_length', 255);
 
     return $fields;
   }

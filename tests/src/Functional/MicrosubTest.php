@@ -280,8 +280,19 @@ class MicrosubTest extends IndiewebBrowserTestBase {
     self::assertTrue(isset($body->items[0]->references->{$url}));
     self::assertTrue(!isset($body->items[1]->references));
 
-    // Delete source.
+    // Exclude replies from channel.
     $this->drupalLogin($this->adminUser);
+    $edit = ['exclude_post_type[reply]' => TRUE];
+    $this->drupalPostForm('admin/config/services/indieweb/microsub/channels/1/edit', $edit, 'Save');
+
+    $query = ['action' => 'timeline', 'channel' => 1];
+    $response = $this->sendMicrosubRequest($query);
+    $body = json_decode($response['body']);
+    self::assertTrue(count($body->items) == 1);
+    $type = 'post-type';
+    self::assertTrue($body->items[0]->{$type} == 'article');
+
+    // Delete source.
     $this->drupalPostForm('admin/config/services/indieweb/microsub/sources/1/delete', [], 'Delete');
     $this->assertItemCount('channel', 2);
     $this->assertItemCount('source', 1);
