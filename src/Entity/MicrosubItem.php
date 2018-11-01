@@ -11,7 +11,7 @@ use Drupal\Core\Field\BaseFieldDefinition;
  *
  * @ContentEntityType(
  *   id = "indieweb_microsub_item",
- *   label = @Translation("Microsub source item"),
+ *   label = @Translation("Microsub item"),
  *   label_collection = @Translation("Microsub source items"),
  *   label_singular = @Translation("Microsub source item"),
  *   label_plural = @Translation("aggregator source items"),

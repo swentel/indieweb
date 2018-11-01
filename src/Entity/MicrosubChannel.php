@@ -12,7 +12,7 @@ use Drupal\Core\Field\BaseFieldDefinition;
  *
  * @ContentEntityType(
  *   id = "indieweb_microsub_channel",
- *   label = @Translation("Channel"),
+ *   label = @Translation("Microsub channel"),
  *   label_collection = @Translation("Channels"),
  *   handlers = {
  *     "storage" = "Drupal\indieweb\Entity\Storage\MicrosubChannelStorage",

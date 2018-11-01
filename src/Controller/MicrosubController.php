@@ -2,9 +2,11 @@
 
 namespace Drupal\indieweb\Controller;
 
+use Drupal\Core\Url;
 use Drupal\indieweb\Entity\MicrosubChannelInterface;
 use Drupal\indieweb\Entity\MicrosubSourceInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 
 class MicrosubController extends MicroControllerBase {
@@ -244,6 +246,21 @@ class MicrosubController extends MicroControllerBase {
    */
   public function sourcesOverview(MicrosubChannelInterface $indieweb_microsub_channel) {
     return $this->entityManager()->getListBuilder('indieweb_microsub_source')->render($indieweb_microsub_channel);
+  }
+
+  /**
+   * Reset fetch next time for a source.
+   *
+   * @param \Drupal\indieweb\Entity\MicrosubSourceInterface $indieweb_microsub_source
+   *
+   * @return \Symfony\Component\HttpFoundation\RedirectResponse
+   *
+   * @throws \Drupal\Core\Entity\EntityStorageException
+   */
+  public function resetNextFetch(MicrosubSourceInterface $indieweb_microsub_source) {
+    $indieweb_microsub_source->setNextFetch(0)->save();
+    $this->messenger()->addMessage($this->t('Next update reset for %source', ['%source' => $indieweb_microsub_source->label()]));
+    return new RedirectResponse(Url::fromRoute('indieweb.admin.microsub_sources', ['indieweb_microsub_channel' => $indieweb_microsub_source->getChannel()])->toString());
   }
 
 }

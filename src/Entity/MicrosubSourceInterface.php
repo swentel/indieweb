@@ -46,8 +46,12 @@ interface MicrosubSourceInterface extends ContentEntityInterface {
 
   /**
    * Set time for next fetch.
+   *
+   * @param $next_fetch
+   *
+   * @return $this
    */
-  public function setNextFetch();
+  public function setNextFetch($next_fetch = NULL);
 
   /**
    * Get next fetch.

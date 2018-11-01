@@ -11,7 +11,7 @@ use Drupal\Core\Field\BaseFieldDefinition;
  *
  * @ContentEntityType(
  *   id = "indieweb_microsub_source",
- *   label = @Translation("Source"),
+ *   label = @Translation("Microsub source"),
  *   label_collection = @Translation("Sources"),
  *   handlers = {
  *     "storage" = "Drupal\indieweb\Entity\Storage\MicrosubSourceStorage",
@@ -23,7 +23,7 @@ use Drupal\Core\Field\BaseFieldDefinition;
  *       "delete" = "Drupal\indieweb\Form\MicrosubSourceDeleteForm"
  *     },
  *     "route_provider" = {
- *       "html" = "Drupal\Core\Entity\Routing\AdminHtmlRouteProvider",
+ *       "html" = "Drupal\indieweb\MicrosubSourceHtmlRouteProvider",
  *     },
  *   },
  *   base_table = "microsub_source",
@@ -38,7 +38,8 @@ use Drupal\Core\Field\BaseFieldDefinition;
  *   links = {
  *     "add-form" = "/admin/config/services/indieweb/microsub/sources/add-source",
  *     "edit-form" = "/admin/config/services/indieweb/microsub/sources/{indieweb_microsub_source}/edit",
- *     "delete-form" = "/admin/config/services/indieweb/microsub/sources/{indieweb_microsub_source}/delete"
+ *     "delete-form" = "/admin/config/services/indieweb/microsub/sources/{indieweb_microsub_source}/delete",
+ *     "reset-next-fetch" = "/admin/config/services/indieweb/microsub/sources/{indieweb_microsub_source}/reset-fetch-next",
  *   }
  * )
  */
@@ -82,9 +83,12 @@ class MicrosubSource extends ContentEntityBase implements MicrosubSourceInterfac
   /**
    * {@inheritdoc}
    */
-  public function setNextFetch() {
-    $fetch_next = \Drupal::time()->getRequestTime() + $this->getInterval();
-    $this->set('fetch_next', $fetch_next);
+  public function setNextFetch($next_fetch = NULL) {
+    if (!isset($next_fetch)) {
+      $next_fetch = \Drupal::time()->getRequestTime() + $this->getInterval();
+    }
+    $this->set('fetch_next', $next_fetch);
+    return $this;
   }
 
   /**

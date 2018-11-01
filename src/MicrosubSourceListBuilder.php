@@ -68,4 +68,18 @@ class MicrosubSourceListBuilder extends EntityListBuilder {
     return $row + parent::buildRow($entity);
   }
 
+    /**
+   * {@inheritdoc}
+   */
+  public function buildOperations(EntityInterface $entity) {
+    $operations = parent::buildOperations($entity);
+    $operations['#links']['reset_next_fetch'] =  [
+      'title' => $this->t('Reset next update'),
+      'weight' => 10,
+      'url' => $this->ensureDestination($entity->toUrl('reset-next-fetch')),
+    ];
+
+    return $operations;
+  }
+
 }
