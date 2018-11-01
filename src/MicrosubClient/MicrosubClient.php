@@ -18,6 +18,15 @@ class MicrosubClient implements MicrosubClientInterface {
     $post_context_handler = \Drupal::config('indieweb.context')->get('handler');
     $post_context_enabled = !empty($post_context_handler) && $post_context_handler != 'disabled';
 
+    // Cleanup old items.
+    $cleanup_old_items = \Drupal::config('indieweb.microsub')->get('microsub_internal_cleanup_items');
+    if ($cleanup_old_items) {
+      \Drupal::database()
+        ->delete('microsub_item')
+        ->condition('created', \Drupal::time()->getRequestTime() - $cleanup_old_items, '<')
+        ->execute();
+    }
+
     /** @var \Drupal\indieweb\Entity\MicrosubSourceInterface[] $sources */
     $sources = \Drupal::entityTypeManager()->getStorage('indieweb_microsub_source')->getSourcesToRefresh();
     foreach ($sources as $source) {

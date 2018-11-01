@@ -43,7 +43,22 @@ class MicrosubSettingsForm extends ConfigFormBase {
       '#title' => $this->t('Use built-in microsub endpoint'),
       '#default_value' => $config->get('microsub_internal'),
       '#description' => $this->t('The endpoint is available at <strong>https://@domain/indieweb/microsub</strong>', ['@domain' => \Drupal::request()->getHttpHost()]),
-      //'#disabled' => TRUE,
+    ];
+
+    $intervals = [86400, 172800, 259200, 604800, 1209600, 2419200, 7776000, 15552000];
+    $period = [0 => t('Never')] + array_map([\Drupal::service('date.formatter'), 'formatInterval'], array_combine($intervals, $intervals));
+
+    $form['microsub']['microsub_internal_cleanup_items'] = [
+      '#title' => $this->t('Cleanup items'),
+      '#type' => 'select',
+      '#options' => $period,
+      '#description' => $this->t('Items older than this period will be cleaned up.'),
+      '#default_value' => $config->get('microsub_internal_cleanup_items'),
+      '#states' => array(
+        'visible' => array(
+          ':input[name="microsub_internal"]' => array('checked' => TRUE),
+        ),
+      ),
     ];
 
     $form['microsub']['microsub_internal_handler'] = [
@@ -55,7 +70,7 @@ class MicrosubSettingsForm extends ConfigFormBase {
         'drush' => $this->t('With drush'),
       ],
       '#default_value' => $config->get('microsub_internal_handler'),
-      '#description' => $this->t('Fetch items either by cron or drush.<br />The drush command is <strong>indieweb-microsub-fetch-items</strong>'),
+      '#description' => $this->t('Fetch and cleanup items either by cron or drush.<br />The drush command is <strong>indieweb-microsub-fetch-items</strong>'),
       '#states' => array(
         'visible' => array(
           ':input[name="microsub_internal"]' => array('checked' => TRUE),
@@ -116,6 +131,7 @@ class MicrosubSettingsForm extends ConfigFormBase {
     $this->config('indieweb.microsub')
       ->set('microsub_internal', $form_state->getValue('microsub_internal'))
       ->set('microsub_internal_handler', $form_state->getValue('microsub_internal_handler'))
+      ->set('microsub_internal_cleanup_items', $form_state->getValue('microsub_internal_cleanup_items'))
       ->set('microsub_endpoint', $form_state->getValue('microsub_endpoint'))
       ->set('microsub_add_header_link', $form_state->getValue('microsub_add_header_link'))
       ->set('aperture_enable_micropub', $form_state->getValue('aperture_enable_micropub'))
