@@ -343,3 +343,12 @@ function indieweb_update_8009() {
     \Drupal::database()->schema()->createTable('indieweb_post_context', $schema['indieweb_post_context']);
   }
 }
+
+/**
+ * Renames the {indieweb_feed_items} table.
+ */
+function indieweb_update_8010() {
+  if (\Drupal::database()->schema()->tableExists('indieweb_feed_items')) {
+    \Drupal::database()->schema()->renameTable('indieweb_feed_items', 'indieweb_feed_item');
+  }
+}
