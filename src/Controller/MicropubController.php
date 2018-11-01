@@ -561,7 +561,11 @@ class MicropubController extends MicroControllerBase {
             }
           }
           catch (\Exception $e) {
-            $this->getLogger('indieweb_micropub')->notice('Error trying to create a comment from reply: @message', ['@message' => $e->getMessage()]);
+            // Ignore error messages when Url::fromUri can't detect this is an
+            // internal url.
+            if (strpos($e->getMessage(), 'internal:/foo') === FALSE) {
+              $this->getLogger('indieweb_micropub')->notice('Error trying to create a comment from reply: @message', ['@message' => $e->getMessage()]);
+            }
           }
         }
 
