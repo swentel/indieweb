@@ -384,6 +384,9 @@ indieweb.microsub:
     microsub_internal_handler:
       type: string
       label: 'How to fetch new items'
+    microsub_internal_cleanup_items:
+      type: integer
+      label: 'Remove items older than a certain period'
     microsub_endpoint:
       type: string
       label: 'Microsub endpoint'

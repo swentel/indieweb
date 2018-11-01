@@ -142,6 +142,22 @@ class MicrosubChannel extends ContentEntityBase implements MicrosubChannelInterf
       ->setLabel(t('Exclude post type'))
       ->setSetting('max_length', 255);
 
+    $fields['exclude_keyword'] = BaseFieldDefinition::create('string')
+      ->setLabel(t('Exclude keyword'))
+      ->setSetting('max_length', 255);
+
+    $fields['include_post_type'] = BaseFieldDefinition::create('string')
+      ->setLabel(t('Include post type'))
+      ->setSetting('max_length', 255);
+
+    $fields['include_keyword'] = BaseFieldDefinition::create('string')
+      ->setLabel(t('Include keyword'))
+      ->setSetting('max_length', 255);
+
+    $fields['read_indicator'] = BaseFieldDefinition::create('integer')
+      ->setLabel(t('Read indicator'))
+      ->setDefaultValue(0);
+
     return $fields;
   }
 
