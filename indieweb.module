@@ -1180,12 +1180,13 @@ function _indieweb_extra_fields_display(array &$build, EntityInterface $entity, 
   if ($display->getComponent('indieweb_post_context')) {
     $node_type = NodeType::load($entity->bundle());
     $post_type_class = $node_type->getThirdPartySetting('indieweb', 'post_context_post_type');
+    $suggestion = str_replace(['in-', '-to', '-of', 'u-'], '', $post_type_class);
     $contexts = indieweb_get_post_contexts($entity->id(), $entity->getEntityTypeId());
     foreach ($contexts as $context) {
       $text = isset($context['content']['content']->text) ? $context['content']['content']->text : '';
       $build['post_context'][] = [
         '#class' => $post_type_class,
-        '#theme' => 'indieweb_post_context',
+        '#theme' => 'indieweb_post_context__' . $suggestion,
         '#content' => ['#markup' => nl2br($text)],
         '#content_truncated' => ['#markup' => Unicode::truncate(nl2br($text), 300, TRUE, TRUE)],
         '#name' => isset($context['content']['name']) ? $context['content']['name'] : '',
