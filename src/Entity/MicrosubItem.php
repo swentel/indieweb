@@ -44,7 +44,30 @@ class MicrosubItem extends ContentEntityBase implements MicrosubItemInterface {
    * {@inheritdoc}
    */
   public function getData() {
-    return $this->get('data')->value;
+    $return = NULL;
+    $value = $this->get('data')->value;
+    if (!empty($value)) {
+      $return = json_decode($value);
+    }
+    return $return;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getContext() {
+    $return = NULL;
+    $value = $this->get('post_context')->value;
+    if (!empty($value)) {
+      $temp = json_decode($value);
+      if (isset($temp->url)) {
+        $return = new \stdClass();
+        $object = new \stdClass();
+        $object->content = $temp->content->text;
+        $return->{$temp->url} = $object;
+      }
+    }
+    return $return;
   }
 
   /**
@@ -84,8 +107,17 @@ class MicrosubItem extends ContentEntityBase implements MicrosubItemInterface {
       ->setDefaultValue(1);
 
     $fields['data'] = BaseFieldDefinition::create('string_long')
-      ->setLabel(t('data'))
+      ->setLabel(t('Data'))
       ->setDescription(t('The data of the item.'));
+
+    $fields['post_context'] = BaseFieldDefinition::create('string_long')
+      ->setLabel(t('Post context'))
+      ->setDescription(t('The post context for this item.'));
+
+    $fields['post_type'] = BaseFieldDefinition::create('string')
+      ->setLabel(t('Post type'))
+      ->setRequired(TRUE)
+      ->setSetting('max_length', 40);
 
     $fields['timestamp'] = BaseFieldDefinition::create('created')
       ->setLabel(t('Posted on'))

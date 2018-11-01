@@ -58,6 +58,11 @@ indieweb.admin.indieauth_settings:
   route_name: indieweb.admin.indieauth_settings
   base_route: indieweb.admin.dashboard
 
+indieweb.admin.context_settings:
+  title: 'Post context'
+  route_name: indieweb.admin.context_settings
+  base_route: indieweb.admin.dashboard
+
 webmention_entity.list_tab:
   title: 'Webmentions'
   route_name: entity.webmention_entity.collection

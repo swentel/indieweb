@@ -154,25 +154,25 @@ class WebmentionTest extends IndiewebBrowserTestBase {
     $this->assertSession()->responseContains($test_endpoint);
 
     $this->createPage($node_1_url, FALSE, TRUE);
-    $this->assertQueueItems([$node_1_url], 2);
+    $this->assertWebmentionQueueItems([$node_1_url], 2);
 
     // Handle queue, should not be send yet.
     $this->runWebmentionQueue();
-    $this->assertQueueItems([$node_1_url]);
+    $this->assertWebmentionQueueItems([$node_1_url]);
 
     // Send by cron.
     $edit = ['send_webmention_handler' => 'cron'];
     $this->drupalPostForm('admin/config/services/indieweb/send', $edit, 'Save configuration');
     $this->runWebmentionQueue();
-    $this->assertQueueItems();
+    $this->assertWebmentionQueueItems();
 
     // Send by drush.
     $this->createPage($node_1_url, FALSE, TRUE);
-    $this->assertQueueItems([$node_1_url]);
+    $this->assertWebmentionQueueItems([$node_1_url]);
     $edit = ['send_webmention_handler' => 'drush'];
     $this->drupalPostForm('admin/config/services/indieweb/send', $edit, 'Save configuration');
     $this->runWebmentionQueue();
-    $this->assertQueueItems();
+    $this->assertWebmentionQueueItems();
 
     // Put node 1 in syndication targets, so it can be a publish URL, so we can
     // test syndications.
@@ -180,9 +180,9 @@ class WebmentionTest extends IndiewebBrowserTestBase {
     $this->drupalPostForm('admin/config/services/indieweb/send', $edit, 'Save configuration');
 
     $this->createPage($node_1_url, TRUE);
-    $this->assertQueueItems([$node_1_url]);
+    $this->assertWebmentionQueueItems([$node_1_url]);
     $this->runWebmentionQueue();
-    $this->assertQueueItems();
+    $this->assertWebmentionQueueItems();
     $this->assertSyndication(4, $node_1_url);
 
     // Remove syndication.

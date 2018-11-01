@@ -397,6 +397,15 @@ indieweb.microsub:
       type: string
       label: 'ApertureClient channel API key'
 
+# schema for indieweb.context
+indieweb.context:
+  type: config_object
+  label: 'Indieweb post contexts'
+  mapping:
+    handler:
+      type: string
+      label: 'How to fetch post contexts'
+
 # schema for indieweb.webmention
 indieweb.webmention:
   type: config_object
@@ -482,3 +491,15 @@ field.formatter.settings.entity_reference_webmention:
     replace_comment_user_picture:
       type: string
       label: 'Replace comment user picture'
+
+# schema for indieweb node type settings
+node.type.*.third_party.indieweb:
+  type: mapping
+  label: 'Per-content type IndieWeb settings'
+  mapping:
+    post_context_link_field:
+      type: string
+      label: 'Link field'
+    post_context_post_type:
+      type: string
+      label: 'Type of post'

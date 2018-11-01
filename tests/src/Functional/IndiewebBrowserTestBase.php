@@ -384,12 +384,12 @@ abstract class IndiewebBrowserTestBase extends BrowserTestBase {
   }
 
   /**
-   * Assert queue items.
+   * Assert webmention queue items.
    *
    * @param array $urls
    * @param $id
    */
-  protected function assertQueueItems($urls = [], $id = NULL) {
+  protected function assertWebmentionQueueItems($urls = [], $id = NULL) {
     if ($urls) {
       $count = \Drupal::queue(WEBMENTION_QUEUE_NAME)->numberOfItems();
       $this->assertTrue($count == count($urls));
@@ -424,11 +424,77 @@ abstract class IndiewebBrowserTestBase extends BrowserTestBase {
   }
 
   /**
-   * Truncate the queue.
+   * Assert post context queue items.
+   *
+   * @param array $urls
+   * @param $id
    */
-  protected function clearQueue() {
-    \Drupal::database()->delete('queue')->condition('name', WEBMENTION_QUEUE_NAME)->execute();
-    $this->assertQueueItems();
+  protected function assertPostContextQueueItems($urls = [], $id = NULL) {
+    if ($urls) {
+      $count = \Drupal::queue(POST_CONTEXT_QUEUE_NAME)->numberOfItems();
+      $this->assertTrue($count == count($urls));
+
+      // We use a query here, don't want to use a while loop. When there's
+      // nothing in the queue yet, the table won't exist, so the query will
+      // fail. When the first item is inserted, we'll be fine.
+      try {
+        $query = 'SELECT * FROM {queue} WHERE name = :name';
+        $records = \Drupal::database()->query($query, [':name' => POST_CONTEXT_QUEUE_NAME]);
+        foreach ($records as $record) {
+          $data = unserialize($record->data);
+          $this->assertTrue(in_array($data['url'], $urls));
+          $this->assertTrue($data['id'] == $id);
+        }
+      }
+      catch (\Exception $ignored) {
+        //debug($ignored->getMessage());
+      }
+    }
+    else {
+      $count = \Drupal::queue(POST_CONTEXT_QUEUE_NAME)->numberOfItems();
+      $this->assertFalse($count);
+    }
+  }
+
+  /**
+   * Assert there are post context items for
+   *
+   * @param $type
+   *   Either node or microsub
+   * @param $id
+   *   The id
+   * @param $found
+   *   Whether there should be or not
+   */
+  protected function assertPostContextItem($type, $id, $found = TRUE) {
+    if ($type == 'node') {
+      $entry = \Drupal::database()->query('SELECT content FROM {indieweb_post_context} WHERE entity_id = :id', [':id' => $id])->fetchField();
+      if ($found) {
+        self::assertTrue($entry);
+      }
+      else {
+        self::assertFalse($entry);
+      }
+    }
+  }
+
+  /**
+   * Runs the post context queue. Both calls cron and drush.
+   */
+  protected function runPostContextQueue() {
+    module_load_include('inc', 'indieweb', 'indieweb.drush');
+    drush_indieweb_fetch_post_contexts();
+    indieweb_cron();
+  }
+
+  /**
+   * Truncates a queue.
+   *
+   * @param $queue_name
+   */
+  protected function clearQueue($queue_name = WEBMENTION_QUEUE_NAME) {
+    \Drupal::database()->delete('queue')->condition('name', $queue_name)->execute();
+    $this->assertWebmentionQueueItems();
   }
 
   /**

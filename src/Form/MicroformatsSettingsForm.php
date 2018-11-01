@@ -107,7 +107,7 @@ class MicroformatsSettingsForm extends ConfigFormBase {
 
     $form['classes']['u_audio'] = [
       '#type' => 'checkbox',
-      '#title' => $this->t('<em>u-video</em> on all audio'),
+      '#title' => $this->t('<em>u-audio</em> on all audio'),
       '#default_value' => $config->get('u_audio'),
     ];
 

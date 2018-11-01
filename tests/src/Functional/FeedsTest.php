@@ -196,10 +196,10 @@ class FeedsTest extends IndiewebBrowserTestBase {
    */
   protected function assertFeedItems($total_feed, $total_nid, $entity_id, $feed = 'timeline') {
 
-    $total = \Drupal::database()->query('SELECT count(id) FROM {indieweb_feed_items} WHERE feed = :feed AND entity_id = :entity_id', [':feed' => $feed, ':entity_id' => $entity_id])->fetchField();
+    $total = \Drupal::database()->query('SELECT count(id) FROM {indieweb_feed_item} WHERE feed = :feed AND entity_id = :entity_id', [':feed' => $feed, ':entity_id' => $entity_id])->fetchField();
     $this->assertEquals($total_nid, $total);
 
-    $total = \Drupal::database()->query('SELECT count(id) FROM {indieweb_feed_items} WHERE feed = :feed', [':feed' => $feed])->fetchField();
+    $total = \Drupal::database()->query('SELECT count(id) FROM {indieweb_feed_item} WHERE feed = :feed', [':feed' => $feed])->fetchField();
     $this->assertEquals($total_feed, $total);
 
   }

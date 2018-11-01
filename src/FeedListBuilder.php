@@ -26,7 +26,7 @@ class FeedListBuilder extends ConfigEntityListBuilder {
   public function buildRow(EntityInterface $entity) {
     $row['label'] = $entity->label();
     $row['path'] = $entity->getPath();
-    $row['items'] = \Drupal::database()->query('SELECT count(id) FROM {indieweb_feed_items} WHERE feed = :feed', [':feed' => $entity->id()])->fetchField();
+    $row['items'] = \Drupal::database()->query('SELECT count(id) FROM {indieweb_feed_item} WHERE feed = :feed', [':feed' => $entity->id()])->fetchField();
     return $row + parent::buildRow($entity);
   }
 

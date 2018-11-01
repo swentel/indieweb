@@ -69,7 +69,7 @@ class WebmentionSendTest extends IndiewebBrowserTestBase {
     $this->assertSession()->statusCodeEquals(200);
     $this->assertSession()->pageTextContains($this->body_text);
     $this->assertSyndicationTargetFieldsOnNodeView($syndication_targets, FALSE);
-    $this->assertQueueItems([]);
+    $this->assertWebmentionQueueItems([]);
 
     // Configure manage display to display the fields.
     $edit = [];
@@ -110,7 +110,7 @@ class WebmentionSendTest extends IndiewebBrowserTestBase {
       $edit['indieweb_syndication_targets[' . $url . ']'] = TRUE;
     }
     $this->drupalPostForm('node/1/edit', $edit, 'Save');
-    $this->assertQueueItems($targets_queued, 1);
+    $this->assertWebmentionQueueItems($targets_queued, 1);
   }
 
   /**

@@ -190,7 +190,7 @@ class CommentsTest extends IndiewebBrowserTestBase {
     $this->drupalPostForm('comment/reply/node/1/comment/' . $comment->id(), $edit, 'Save');
     $this->drupalGet('node/1');
     $this->assertSession()->responseContains("I know, isn't it!");
-    $this->assertQueueItems(['https://brid-gy.appspot.com/comment/twitter/swentel/994117538731741185/994129251946418177' => 'https://brid-gy.appspot.com/comment/twitter/swentel/994117538731741185/994129251946418177'], 3);
+    $this->assertWebmentionQueueItems(['https://brid-gy.appspot.com/comment/twitter/swentel/994117538731741185/994129251946418177' => 'https://brid-gy.appspot.com/comment/twitter/swentel/994117538731741185/994129251946418177'], 3);
 
     $this->drupalGet('/comment/indieweb/3');
     $this->assertSession()->responseContains("I know, isn't it!");

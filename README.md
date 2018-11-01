@@ -12,13 +12,17 @@ Current functionality:
 - Microformats for content, images and more
 - Allow users to login and create accounts
 - IndieAuth for Authentication API
-- Create content via Micropub endpoint
-  (note, article, event, rsvp, reply, like, repost, bookmark)
+- Micropub
+  - Create content note, article, event, rsvp, reply, like, repost, bookmark and issue
+  - Updating content is currently limited to changing the published status, title and body of nodes and comments
+  - Delete a node, comment or webmention
+  - q=category can be configured and q=source is also experimentally available to get a list of posts
 - Auto-create comments from 'in-reply-to'
 - Reply on comments and send webmention
 - Feeds: microformats, atom and jf2
 - Microsub built-in server, or use external service
 - Send a micropub post to Aperture on incoming webmentions
+- Fetch post context for content or microsub items
 - Fediverse integration
 
 More information is in this README and on the help pages.
@@ -272,12 +276,25 @@ Microsub actions implemented:
 - GET action=timeline: retrieve the list of items in a channel
 - POST action=timeline: mark entries as read, or remove an entry from a channel
 
+Want to follow twitter in your reader, checkout granary.io!
+
 **Aperture**
 
-If you use Aperture as your Microsub server, you can send a micropub post to one channel when a webmention is received 
-by this site. The canonical example is to label that channel name as "Notifications" so you can view incoming 
-webmentions on readers like Monocle or Indigenous. Following webmentions are send: likes, reposts, bookmarks, mentions 
+If you use Aperture as your Microsub server, you can send a micropub post to one channel when a webmention is received
+by this site. The canonical example is to label that channel name as "Notifications" so you can view incoming
+webmentions on readers like Monocle or Indigenous. Following webmentions are send: likes, reposts, bookmarks, mentions
 and replies.
+
+## Post contexts
+
+When you create a post with a link which is a reply, like, repost or bookmark of an external post, you can fetch content 
+from that URL so you can render more context. To enable this feature for node types, go to the node type settings screen 
+and select a link field. Then on the manage display pages, you can add the post context field to the display. 
+For microsub items, you can configure this per source.
+
+The content for post contexts is fetched either by cron or drush. It's stored in the queue so it can be handled later.
+This can be configured at /admin/config/services/indieweb/post-context.  
+Note: post contexts only work right now if the site for which you want to get the context supports microformats.
 
 ## Fediverse via Bridgy Fed
 
@@ -304,6 +321,7 @@ For more background, see https://github.com/snarfed/bridgy-fed/issues/30 and htt
 - indieweb-send-webmentions (isw): handles the queue for sending webmentions.
 - indieweb-external-auth-map: maps an existing user account with a domain.
 - indieweb-microsub-fetch-items: fetch items for the built-in microsub server.
+- indieweb-fetch-post-contexts: fetches context for a post
 
 ## Hooks
 

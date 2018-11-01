@@ -80,6 +80,48 @@ function indieweb_schema() {
     ],
   ];
 
+  $schema['indieweb_post_context'] = [
+    'description' => 'Stores the context for a post.',
+    'fields' => [
+      'id' => array(
+        'description' => 'The primary identifier for a context.',
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'entity_id' => [
+        'description' => 'The id to which the context belongs.',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ],
+      'entity_type_id' => [
+        'description' => 'The entity type id.',
+        'type' => 'varchar',
+        'length' => 40,
+        'not null' => TRUE,
+        'default' => '',
+      ],
+      'url' => [
+        'description' => 'The external post url.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ],
+      'content' => [
+        'description' => 'The context content, stored as mf2 json.',
+        'type' => 'text',
+        'size' => 'big',
+        'not null' => TRUE,
+      ],
+    ],
+    'primary key' => ['id'],
+    'indexes' => [
+      'entity_id__entity_type_id' => ['entity_id', 'entity_type_id']
+    ],
+  ];
+
   $schema['webmention_send'] = [
     'description' => 'Stores the (send) webmentions.',
     'fields' => [
@@ -129,7 +171,7 @@ function indieweb_schema() {
     ],
   ];
 
-  $schema['indieweb_feed_items'] = [
+  $schema['indieweb_feed_item'] = [
     'description' => 'Stores items for the feeds.',
     'fields' => [
       'id' => array(
@@ -230,12 +272,12 @@ function indieweb_update_8003() {
 }
 
 /**
- * Installs the {indieweb_feed_items} table.
+ * Installs the {indieweb_feed_item} table.
  */
 function indieweb_update_8004() {
-  if (!\Drupal::database()->schema()->tableExists('indieweb_feed_items')) {
+  if (!\Drupal::database()->schema()->tableExists('indieweb_feed_item')) {
     $schema = indieweb_schema();
-    \Drupal::database()->schema()->createTable('indieweb_feed_items', $schema['indieweb_feed_items']);
+    \Drupal::database()->schema()->createTable('indieweb_feed_item', $schema['indieweb_feed_item']);
   }
 }
 
@@ -290,4 +332,14 @@ function indieweb_update_8008() {
   $micropub = \Drupal::configFactory()->getEditable('indieweb.microsub');
   $micropub->clear('enable');
   $micropub->save();
+}
+
+/**
+ * Installs the {indieweb_post_context} table.
+ */
+function indieweb_update_8009() {
+  if (!\Drupal::database()->schema()->tableExists('indieweb_post_context')) {
+    $schema = indieweb_schema();
+    \Drupal::database()->schema()->createTable('indieweb_post_context', $schema['indieweb_post_context']);
+  }
 }

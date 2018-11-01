@@ -42,7 +42,7 @@ class MicrosubSettingsForm extends ConfigFormBase {
       '#type' => 'checkbox',
       '#title' => $this->t('Use built-in microsub endpoint'),
       '#default_value' => $config->get('microsub_internal'),
-      '#description' => $this->t('The endpoint is available at <strong>https://@domain/indieweb/microsub</strong>', ['@domain' => \Drupal::request()->getHttpHost()]) . ' - not fully ready yet!',
+      '#description' => $this->t('The endpoint is available at <strong>https://@domain/indieweb/microsub</strong>', ['@domain' => \Drupal::request()->getHttpHost()]),
       //'#disabled' => TRUE,
     ];
 

@@ -45,6 +45,19 @@ class MicrosubSourceForm extends ContentEntityForm {
       '#default_value' => $source->getChannel(),
     ];
 
+    // contexts
+    $form['post_context'] = [
+      '#type' => 'checkboxes',
+      '#title' => $this->t('Get post context for'),
+      '#options' => [
+        'reply' => $this->t('Replies'),
+        'like' => $this->t('Reposts'),
+        'repost' => $this->t('Bookmarks'),
+        'bookmark' => $this->t('Likes'),
+      ],
+      '#default_value' => $source->getPostContext(),
+    ];
+
     return $form;
   }
 
@@ -54,6 +67,9 @@ class MicrosubSourceForm extends ContentEntityForm {
   public function save(array $form, FormStateInterface $form_state) {
     /** @var \Drupal\indieweb\Entity\MicrosubItemInterface $source */
     $source = $this->entity;
+
+    $source->set('post_context', serialize($form_state->getValue('post_context')));
+
     $status = parent::save($form, $form_state);
 
     // TODO move items to different channel if channel has changed

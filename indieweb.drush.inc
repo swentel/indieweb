@@ -11,6 +11,10 @@ function indieweb_drush_command() {
       'description' => 'Send webmentions',
       'aliases' => ['isw'],
     ],
+    'indieweb-fetch-post-contexts' => [
+      'description' => 'Fetch post contexts',
+      'aliases' => ['ifpr'],
+    ],
     'indieweb-microsub-fetch-items' => [
       'description' => 'Microsub fetch new items',
       'aliases' => ['imfi'],
@@ -33,6 +37,15 @@ function indieweb_drush_command() {
 function drush_indieweb_send_webmentions() {
   if (\Drupal::config('indieweb.webmention')->get('send_webmention_handler') == 'drush') {
     indieweb_handle_webmention_queue();
+  }
+}
+
+/**
+ * Fetch post contexts in queue.
+ */
+function drush_indieweb_fetch_post_contexts() {
+  if (\Drupal::config('indieweb.context')->get('handler') == 'drush') {
+    indieweb_handle_post_context_queue();
   }
 }
 

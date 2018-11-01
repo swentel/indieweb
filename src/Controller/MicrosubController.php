@@ -168,9 +168,16 @@ class MicrosubController extends MicroControllerBase {
       /** @var \Drupal\indieweb\Entity\MicrosubItemInterface[] $microsub_items */
       $microsub_items = $this->entityTypeManager()->getStorage('indieweb_microsub_item')->loadByChannel($channel);
       foreach ($microsub_items as $item) {
-        $entry = json_decode($item->getData());
+
+        $entry = $item->getData();
         $entry->_id = $item->id();
         $entry->_is_read = $item->isRead();
+
+        // Context or not.
+        if ($context = $item->getContext()) {
+          $entry->references = $context;
+        }
+
         $items[] = $entry;
       }
 

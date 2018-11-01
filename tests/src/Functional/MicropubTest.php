@@ -375,7 +375,7 @@ class MicropubTest extends IndiewebBrowserTestBase {
     self::assertEquals(201, $code);
     $this->assertNodeCount(1, 'like');
     $nid = $this->getLastNid('like');
-    $this->assertQueueItems([$this->like['like-of']], $nid);
+    $this->assertWebmentionQueueItems([$this->like['like-of']], $nid);
     if ($nid) {
       /** @var \Drupal\node\NodeInterface $node */
       $node = \Drupal::entityTypeManager()->getStorage('node')->load($nid);
@@ -401,7 +401,7 @@ class MicropubTest extends IndiewebBrowserTestBase {
     $code = $this->sendMicropubRequest($this->like_silo);
     self::assertEquals(201, $code);
     $this->assertNodeCount(2, 'like');
-    $this->assertQueueItems();
+    $this->assertWebmentionQueueItems();
 
     // Configure to not auto send a webmention.
     $this->drupalLogin($this->adminUser);
@@ -411,7 +411,7 @@ class MicropubTest extends IndiewebBrowserTestBase {
     $code = $this->sendMicropubRequest($this->like);
     self::assertEquals(201, $code);
     $this->assertNodeCount(3, 'like');
-    $this->assertQueueItems();
+    $this->assertWebmentionQueueItems();
 
     // Test bookmarks.
     $code = $this->sendMicropubRequest($this->bookmark);
@@ -426,7 +426,7 @@ class MicropubTest extends IndiewebBrowserTestBase {
     self::assertEquals(201, $code);
     $this->assertNodeCount(1, 'bookmark');
     $nid = $this->getLastNid('bookmark');
-    $this->assertQueueItems([$this->bookmark['bookmark-of']], $nid);
+    $this->assertWebmentionQueueItems([$this->bookmark['bookmark-of']], $nid);
     if ($nid) {
       /** @var \Drupal\node\NodeInterface $node */
       $node = \Drupal::entityTypeManager()->getStorage('node')->load($nid);
@@ -452,7 +452,7 @@ class MicropubTest extends IndiewebBrowserTestBase {
     $code = $this->sendMicropubRequest($this->bookmark);
     self::assertEquals(201, $code);
     $this->assertNodeCount(2, 'bookmark');
-    $this->assertQueueItems();
+    $this->assertWebmentionQueueItems();
 
     // Test reposts.
     $code = $this->sendMicropubRequest($this->repost);
@@ -467,7 +467,7 @@ class MicropubTest extends IndiewebBrowserTestBase {
     self::assertEquals(201, $code);
     $this->assertNodeCount(1, 'repost');
     $nid = $this->getLastNid('repost');
-    $this->assertQueueItems([$this->repost['repost-of']], $nid);
+    $this->assertWebmentionQueueItems([$this->repost['repost-of']], $nid);
     if ($nid) {
       /** @var \Drupal\node\NodeInterface $node */
       $node = \Drupal::entityTypeManager()->getStorage('node')->load($nid);
@@ -493,7 +493,7 @@ class MicropubTest extends IndiewebBrowserTestBase {
     $code = $this->sendMicropubRequest($this->repost);
     self::assertEquals(201, $code);
     $this->assertNodeCount(2, 'repost');
-    $this->assertQueueItems();
+    $this->assertWebmentionQueueItems();
 
     // Test replies.
     $code = $this->sendMicropubRequest($this->reply);
@@ -508,7 +508,7 @@ class MicropubTest extends IndiewebBrowserTestBase {
     self::assertEquals(201, $code);
     $this->assertNodeCount(1, 'reply');
     $nid = $this->getLastNid('reply');
-    $this->assertQueueItems([$this->reply['in-reply-to']], $nid);
+    $this->assertWebmentionQueueItems([$this->reply['in-reply-to']], $nid);
     if ($nid) {
       /** @var \Drupal\node\NodeInterface $node */
       $node = \Drupal::entityTypeManager()->getStorage('node')->load($nid);
@@ -535,7 +535,7 @@ class MicropubTest extends IndiewebBrowserTestBase {
     $code = $this->sendMicropubRequest($this->reply);
     self::assertEquals(201, $code);
     $this->assertNodeCount(2, 'reply');
-    $this->assertQueueItems();
+    $this->assertWebmentionQueueItems();
 
     // Test RSVP.
     $code = $this->sendMicropubRequest($this->rsvp);
@@ -550,7 +550,7 @@ class MicropubTest extends IndiewebBrowserTestBase {
     self::assertEquals(201, $code);
     $this->assertNodeCount(1, 'rsvp');
     $nid = $this->getLastNid('rsvp');
-    $this->assertQueueItems([$this->rsvp['in-reply-to']], $nid);
+    $this->assertWebmentionQueueItems([$this->rsvp['in-reply-to']], $nid);
     if ($nid) {
       /** @var \Drupal\node\NodeInterface $node */
       $node = \Drupal::entityTypeManager()->getStorage('node')->load($nid);
@@ -583,7 +583,7 @@ class MicropubTest extends IndiewebBrowserTestBase {
     $code = $this->sendMicropubRequest($this->rsvp);
     self::assertEquals(201, $code);
     $this->assertNodeCount(2, 'rsvp');
-    $this->assertQueueItems();
+    $this->assertWebmentionQueueItems();
 
     // Set default status to unpublished for all post types.
     // Turn on auto webmentions too.
@@ -657,7 +657,7 @@ class MicropubTest extends IndiewebBrowserTestBase {
       // Explicit failure.
       $this->assertTrue($nid, 'No like node found');
     }
-    $this->assertQueueItems();
+    $this->assertWebmentionQueueItems();
 
     // Add content to the bookmark too.
     $post = $this->bookmark;
@@ -676,7 +676,7 @@ class MicropubTest extends IndiewebBrowserTestBase {
       // Explicit failure.
       $this->assertTrue($nid, 'No bookmark node found');
     }
-    $this->assertQueueItems();
+    $this->assertWebmentionQueueItems();
 
     // Add content to the repost too.
     $post = $this->repost;
@@ -695,7 +695,7 @@ class MicropubTest extends IndiewebBrowserTestBase {
       // Explicit failure.
       $this->assertTrue($nid, 'No repost node found');
     }
-    $this->assertQueueItems();
+    $this->assertWebmentionQueueItems();
 
     // Unpublished reply
     $post = $this->reply;
@@ -714,7 +714,7 @@ class MicropubTest extends IndiewebBrowserTestBase {
       // Explicit failure.
       $this->assertTrue($nid, 'No reply node found');
     }
-    $this->assertQueueItems();
+    $this->assertWebmentionQueueItems();
 
     // Unpublished rsvp
     $post = $this->rsvp;
@@ -733,7 +733,7 @@ class MicropubTest extends IndiewebBrowserTestBase {
       // Explicit failure.
       $this->assertTrue($nid, 'No rsvp node found');
     }
-    $this->assertQueueItems();
+    $this->assertWebmentionQueueItems();
 
     // Unpublished event
     $post = $this->event;
@@ -828,7 +828,7 @@ class MicropubTest extends IndiewebBrowserTestBase {
     $post = $this->note;
     $post['mp-syndicate-to'] = ['https://brid.gy/publish/twitter'];
     $this->sendMicropubRequest($post);
-    $this->assertQueueItems();
+    $this->assertWebmentionQueueItems();
 
     // Set note default to published again.
     $this->drupalLogin($this->adminUser);
@@ -842,7 +842,7 @@ class MicropubTest extends IndiewebBrowserTestBase {
     $post = $this->note;
     $post['mp-syndicate-to'] = ['https://brid.gy/publish/twitter'];
     $this->sendMicropubRequest($post);
-    $this->assertQueueItems($post['mp-syndicate-to']);
+    $this->assertWebmentionQueueItems($post['mp-syndicate-to']);
 
     // Test post-status
     $post = $this->note;

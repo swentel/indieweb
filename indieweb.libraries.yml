@@ -3,3 +3,11 @@ admin:
   css:
     theme:
       css/indieweb.admin.css: {  }
+
+node-form:
+  version: 1.x
+  js:
+    js/indieweb-node-form.js: {  }
+  dependencies:
+    - core/jquery
+

@@ -77,4 +77,11 @@ interface MicrosubSourceInterface extends ContentEntityInterface {
    */
   public function getItemCount();
 
+  /**
+   * Get context.
+   *
+   * @return array().
+   */
+  public function getPostContext();
+
 }

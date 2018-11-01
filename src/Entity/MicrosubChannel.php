@@ -46,45 +46,17 @@ use Drupal\Core\Field\BaseFieldDefinition;
 class MicrosubChannel extends ContentEntityBase implements MicrosubChannelInterface {
 
   /**
-   * The channel ID.
-   *
-   * @var string
-   */
-  protected $id;
-
-  /**
-   * The channel label.
-   *
-   * @var string
-   */
-  protected $label;
-
-  /**
-   * The channel status.
-   *
-   * @var integer
-   */
-  protected $status = 1;
-
-  /**
-   * The channel weight.
-   *
-   * @var integer
-   */
-  protected $weight = 0;
-
-  /**
    * {@inheritdoc}
    */
   public function getWeight() {
-    return $this->weight;
+    return $this->get('weight')->value;
   }
 
   /**
    * {@inheritdoc}
    */
   public function getStatus() {
-    return $this->status;
+    return $this->get('status')->value;
   }
 
   /**

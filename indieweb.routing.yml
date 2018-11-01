@@ -46,6 +46,14 @@ indieweb.admin.indieauth_settings:
   requirements:
     _permission: 'administer indieweb'
 
+indieweb.admin.context_settings:
+  path: '/admin/config/services/indieweb/post-context'
+  defaults:
+    _form: '\Drupal\indieweb\Form\ContextSettingsForm'
+    _title: 'Post context'
+  requirements:
+    _permission: 'administer indieweb'
+
 indieweb.indieauth.login.redirect:
   path: '/indieauth/login/redirect'
   defaults:

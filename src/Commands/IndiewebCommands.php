@@ -21,6 +21,17 @@ class IndiewebCommands extends DrushCommands {
   }
 
   /**
+   * Fetch post contexts
+   *
+   * @command indieweb:fetch-post-contexts
+   * @aliases ifpc,indieweb-fetch-post-contexts
+   */
+  public function fetchPostContexts() {
+    module_load_include('inc', 'indieweb', 'indieweb.drush');
+    drush_indieweb_fetch_post_contexts();
+  }
+
+  /**
    * Fetch microsub items.
    *
    * @command indieweb:microsub-fetch-items

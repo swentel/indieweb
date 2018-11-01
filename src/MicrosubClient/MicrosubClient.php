@@ -15,6 +15,9 @@ class MicrosubClient implements MicrosubClientInterface {
   public function fetchItems() {
     $xray = new XRay();
 
+    $post_context_handler = \Drupal::config('indieweb.context')->get('handler');
+    $post_context_enabled = !empty($post_context_handler) && $post_context_handler != 'disabled';
+
     /** @var \Drupal\indieweb\Entity\MicrosubSourceInterface[] $sources */
     $sources = \Drupal::entityTypeManager()->getStorage('indieweb_microsub_source')->getSourcesToRefresh();
     foreach ($sources as $source) {
@@ -39,6 +42,9 @@ class MicrosubClient implements MicrosubClientInterface {
         $hash = md5($body);
         if ($source->getHash() != $hash) {
 
+          // Context.
+          $context = $post_context_enabled ? $source->getPostContext() : [];
+
           // Parse the body.
           $parsed = $xray->parse($url, $body, ['expect' => 'feed']);
           if ($parsed && isset($parsed['data']['type']) && $parsed['data']['type'] == 'feed') {
@@ -46,7 +52,7 @@ class MicrosubClient implements MicrosubClientInterface {
             foreach ($items as $i => $item) {
               $source_id = $source->id();
               $channel_id = $source->getChannel();
-              $this->saveItem($item, $tries, $source_id, $channel_id, $empty);
+              $this->saveItem($item, $tries, $source_id, $channel_id, $empty, $context);
             }
           }
 
@@ -74,12 +80,13 @@ class MicrosubClient implements MicrosubClientInterface {
    * @param int $source_id
    * @param int $channel_id
    * @param bool $empty
+   * @param array $context
    *
    * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
    * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    * @throws \Drupal\Core\Entity\EntityStorageException
    */
-  protected function saveItem($item, &$tries = 0, $source_id = 0, $channel_id = 0, $empty = FALSE) {
+  protected function saveItem($item, &$tries = 0, $source_id = 0, $channel_id = 0, $empty = FALSE, $context = []) {
 
     // Prefer uid, then url, then hash the content
     if (isset($item['uid'])) {
@@ -107,8 +114,10 @@ class MicrosubClient implements MicrosubClientInterface {
       'source_id' => $source_id,
       'channel_id' => $channel_id,
       'data' => json_encode($item),
+      'context' => '',
       'guid' => $guid,
       'is_read' => $empty ? 1 : 0,
+      'post_type' => isset($item['post-type']) ? $item['post-type'] : 'unknown',
     ];
 
     if (isset($item['published'])) {
@@ -120,8 +129,33 @@ class MicrosubClient implements MicrosubClientInterface {
 
     $values['created'] = $empty ? $values['timestamp'] : \Drupal::time()->getRequestTime();
 
-    $item = MicrosubItem::create($values);
-    $item->save();
+    $microsub_item = MicrosubItem::create($values);
+    $microsub_item->save();
+
+    // Save post context in queue.
+    if (!empty($context) && in_array($values['post_type'], $context)) {
+      foreach ($context as $post_type) {
+        $key = '';
+        switch ($post_type) {
+          case 'reply':
+            $key = 'in-reply-to';
+            break;
+          case 'like':
+            $key = 'like-of';
+            break;
+          case 'bookmark':
+            $key = 'bookmark-of';
+            break;
+          case 'repost':
+            $key = 'repost-of';
+            break;
+        }
+
+        if ($key && !empty($item[$key][0])) {
+          indieweb_post_context_create_queue_item($item[$key][0], $microsub_item->id(), 'microsub_item');
+        }
+      }
+    }
   }
 
   /**
@@ -135,11 +169,12 @@ class MicrosubClient implements MicrosubClientInterface {
       if ($post = $this->getPost($webmention)) {
         /** @var \Drupal\indieweb\ApertureClient\ApertureClientInterface $client */
         $client = \Drupal::service('indieweb.aperture.client');
+        // TODO kill this function and use the same as underneath
         $client->sendPost($microsub->get('aperture_api_key'), $webmention);
       }
     }
 
-    // So to internal notifications channel.
+    // Send to internal notifications channel.
     if ($microsub->get('microsub_internal')) {
       $xray = new XRay();
       $url = $webmention->get('source')->value;
@@ -148,7 +183,7 @@ class MicrosubClient implements MicrosubClientInterface {
       try {
 
         // Get content.
-        $options = ['headers' => ['User-Agent' => 'IndieWeb Drupal Microsub server (+https://www.drupal.org/project/indieweb)']];
+        $options = ['headers' => ['User-Agent' => 'IndieWeb Drupal Microsub server at ' . \Drupal::request()->getSchemeAndHttpHost()]];
         $response = \Drupal::httpClient()->get($url, $options);
         $body = $response->getBody()->getContents();
 
@@ -160,6 +195,13 @@ class MicrosubClient implements MicrosubClientInterface {
               if (isset($item[$item_url]) && !empty($item[$item_url][0])) {
                 $item[$item_url][0] = $target;
               }
+            }
+
+            // Set url to canonical webmention for in-reply-to. This makes sure
+            // that you can  reply to it from a reader as the micropub endpoint
+            // will get the right node or comment.
+            if (isset($item['in-reply-to']) && !empty($item['in-reply-to'][0])) {
+              $item['url'] = $webmention->toUrl('canonical', ['absolute' => TRUE])->toString();
             }
 
             $this->saveItem($item);

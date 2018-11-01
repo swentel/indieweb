@@ -45,34 +45,6 @@ use Drupal\Core\Field\BaseFieldDefinition;
 class MicrosubSource extends ContentEntityBase implements MicrosubSourceInterface {
 
   /**
-   * The source ID.
-   *
-   * @var string
-   */
-  protected $id;
-
-  /**
-   * The source label.
-   *
-   * @var string
-   */
-  protected $label;
-
-  /**
-   * The source weight.
-   *
-   * @var integer
-   */
-  protected $weight = 0;
-
-  /**
-   * The source status.
-   *
-   * @var integer
-   */
-  protected $status = 1;
-
-  /**
    * {@inheritdoc}
    */
   public function getStatus() {
@@ -139,6 +111,25 @@ class MicrosubSource extends ContentEntityBase implements MicrosubSourceInterfac
   /**
    * {@inheritdoc}
    */
+  public function getPostContext() {
+    $return = [];
+    $ref = $this->get('post_context')->value;
+    if (!empty($ref)) {
+      $values = @unserialize($ref);
+      if (is_array($values)) {
+        foreach ($values as $key => $value) {
+          if ($key === $value) {
+            $return[] = $key;
+          }
+        }
+      }
+    }
+    return $return;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function getItemCount() {
     return \Drupal::entityTypeManager()->getStorage('indieweb_microsub_source')->getItemCount($this->id());
   }
@@ -182,6 +173,10 @@ class MicrosubSource extends ContentEntityBase implements MicrosubSourceInterfac
       ->setLabel(t('Channel'))
       ->setDescription(t('The channel id of this source.'))
       ->setSetting('target_type', 'indieweb_microsub_channel');
+
+    $fields['post_context'] = BaseFieldDefinition::create('string')
+      ->setLabel(t('Post context'))
+      ->setSetting('max_length', 255);
 
     $fields['hash'] = BaseFieldDefinition::create('string')
       ->setLabel(t('Hash'))

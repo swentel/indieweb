@@ -23,13 +23,6 @@ class MicrosubTest extends IndiewebBrowserTestBase {
    *
    * @var string
    */
-  protected $header_link_external = '<link rel="microsub" href="https://example.com/microsub" />';
-
-  /**
-   * The external header link
-   *
-   * @var string
-   */
   protected $header_link = '<link rel="microsub" href="https://example.com/microsub" />';
 
   /**
@@ -59,11 +52,35 @@ class MicrosubTest extends IndiewebBrowserTestBase {
   public function setUp() {
     parent::setUp();
 
+    $this->createNodeTypes(['reply']);
+
+    // Set microformat class to in-reply-to
+    $display = entity_get_display('node', 'reply', 'default');
+    $options = [
+      'region' => 'content',
+      'type' => 'link_microformat',
+      'settings' => [
+        'microformat_class' => 'u-in-reply-to',
+        'trim_length' => 80,
+        'url_only' => FALSE,
+        'url_plain' => FALSE,
+        'rel' => 0,
+        'target' => 0,
+      ]
+    ];
+    $display->setComponent('field_reply_link', $options);
+    $display->save();
+
     // Create feeds, channels and sources.
     $this->drupalLogin($this->adminUser);
     $this->createFeeds();
     $this->createChannels();
     $this->createSources();
+
+    // Post context handler.
+    $edit = ['handler' => 'drush'];
+    $this->drupalPostForm('admin/config/services/indieweb/post-context', $edit, 'Save configuration');
+
     $this->drupalLogout();
 
     drupal_flush_all_caches();
@@ -91,11 +108,11 @@ class MicrosubTest extends IndiewebBrowserTestBase {
     $this->drupalPostForm('admin/config/services/indieweb/microsub', $edit, 'Save configuration');
 
     $this->drupalGet('<front>');
-    $this->assertSession()->responseContains($this->header_link_external);
+    $this->assertSession()->responseContains($this->header_link);
 
     $this->drupalLogout();
     $this->drupalGet('<front>');
-    $this->assertSession()->responseContains($this->header_link_external);
+    $this->assertSession()->responseContains($this->header_link);
 
     $this->drupalGet($this->microsub_path);
     $this->assertSession()->statusCodeEquals(404);
@@ -161,11 +178,14 @@ class MicrosubTest extends IndiewebBrowserTestBase {
     $settings_page['body']['value'] = 'This is another page on the second timeline feed';
     $this->createNode($settings_page);
 
+    $this->drupalGet($this->timeline_path_1);
+    $this->drupalGet($this->timeline_path_2);
+
     $this->fetchItems();
     $this->assertItemCount('item', 3);
 
     // ----------------------------------------------------------------
-    // channels and timeline
+    // channels, timeline and post contexts.
     // ----------------------------------------------------------------
 
     $query = [];
@@ -212,12 +232,60 @@ class MicrosubTest extends IndiewebBrowserTestBase {
     $this->fetchItems();
     $this->assertItemCount('item', 3);
 
+    // Test post context.
+    $page = $this->createNode(['type' => 'page', 'title' => 'microsub page', 'body' => ['value' => 'This should be a context for a microsub item']]);
+    $reply_settings = [
+      'type' => 'reply',
+      'title' => 'Wow, that works !',
+      'body' => ['value' => 'Nicely done man!'],
+      // Use an external link so xray can see it as an 'in-reply-to'.
+      'field_reply_link' => ['uri' => 'https://example.com/fetch-content']
+    ];
+    $this->createNode($reply_settings);
+    $this->drupalGet($this->timeline_path_1);
+    $this->resetNextFetch(1);
+    $this->resetNextFetch(2);
+
+    $this->fetchItems();
+    $this->assertItemCount('item', 6);
+    $id = \Drupal::database()->query('SELECT id FROM {microsub_item} where post_type = :reply', [':reply' => 'reply'])->fetchField();
+    $item = \Drupal::entityTypeManager()->getStorage('indieweb_microsub_item')->loadUnchanged($id);
+    $this->assertPostContextQueueItems(['https://example.com/fetch-content'], $item->id());
+
+    // Change the item to the page url
+    $record = \Drupal::database()->query('SELECT item_id, data FROM {queue}')->fetchObject();
+    $data = unserialize($record->data);
+    $data['url'] = $page->toUrl('canonical', ['absolute' => TRUE])->toString();
+    \Drupal::database()
+      ->update('queue')
+      ->fields(['data' => serialize($data)])
+      ->condition('item_id', $record->item_id)
+      ->execute();
+
+    $this->runPostContextQueue();
+    $this->assertPostContextQueueItems();
+    $item = \Drupal::entityTypeManager()->getStorage('indieweb_microsub_item')->loadUnchanged($id);
+    self::assertTrue(!empty($item->get('post_context')->value));
+    $context_data = json_decode($item->get('post_context')->value);
+    self::assertEqual($page->get('body')->value, $context_data->content->text);
+    $url = $page->toUrl('canonical', ['absolute' => TRUE])->toString();
+    $context_data->url = $url;
+    $item->set('post_context', json_encode($context_data));
+    $item->save();
+
+    $query = ['action' => 'timeline', 'channel' => 1];
+    $response = $this->sendMicrosubRequest($query);
+    $body = json_decode($response['body']);
+    self::assertTrue(isset($body->items[0]->references));
+    self::assertTrue(isset($body->items[0]->references->{$url}));
+    self::assertTrue(!isset($body->items[1]->references));
+
     // Delete source.
     $this->drupalLogin($this->adminUser);
     $this->drupalPostForm('admin/config/services/indieweb/microsub/sources/1/delete', [], 'Delete');
-    $this->assertItemCount('item', 2);
     $this->assertItemCount('channel', 2);
     $this->assertItemCount('source', 1);
+    $this->assertItemCount('item', 4);
 
     // Delete channel.
     $this->drupalPostForm('admin/config/services/indieweb/microsub/channels/2/delete', [], 'Delete');
@@ -240,7 +308,8 @@ class MicrosubTest extends IndiewebBrowserTestBase {
       'limit' => 10,
       'author' => '<a class="u-url p-name" href="/">Your name</a><img src="https://example.com/image/avatar.png" class="u-photo hidden" alt="Your name">',
       'bundles[]' => [
-        'node|article' => 'node|article'
+        'node|article' => 'node|article',
+        'node|reply' => 'node|reply',
       ],
     ];
     $this->drupalPostForm('admin/config/services/indieweb/feeds/add', $edit, 'Save');
@@ -254,7 +323,7 @@ class MicrosubTest extends IndiewebBrowserTestBase {
       'limit' => 10,
       'author' => '<a class="u-url p-name" href="/">Your name</a><img src="https://example.com/image/avatar.png" class="u-photo hidden" alt="Your name">',
       'bundles[]' => [
-        'node|page' => 'node|page'
+        'node|page' => 'node|page',
       ],
     ];
     $this->drupalPostForm('admin/config/services/indieweb/feeds/add', $edit, 'Save');
@@ -280,7 +349,7 @@ class MicrosubTest extends IndiewebBrowserTestBase {
    * Create sources.
    */
   protected function createSources() {
-    $edit = ['url' => 'internal:/microsub-timeline/1', 'channel_id' => '1'];
+    $edit = ['url' => 'internal:/microsub-timeline/1', 'channel_id' => '1', 'post_context[reply]' => TRUE];
     $this->drupalPostForm('admin/config/services/indieweb/microsub/sources/add-source', $edit, 'Save');
     $edit = ['url' => 'internal:/microsub-timeline/2', 'channel_id' => '2'];
     $this->drupalPostForm('admin/config/services/indieweb/microsub/sources/add-source', $edit, 'Save');

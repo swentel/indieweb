@@ -155,7 +155,7 @@ class FeedController extends ControllerBase {
   protected function getItems(FeedInterface $indieweb_feed) {
     $entities = [];
     $query = \Drupal::database()
-      ->select('indieweb_feed_items', 'ifi')
+      ->select('indieweb_feed_item', 'ifi')
       ->extend('\Drupal\Core\Database\Query\PagerSelectExtender');
     $query->fields('ifi');
     $query->condition('feed', $indieweb_feed->id());
