@@ -27,4 +27,13 @@ interface MicrosubSourceStorageInterface extends ContentEntityStorageInterface {
    */
   public function getItemCount($source_id);
 
+  /**
+   * Delete all items for a source.
+   *
+   * @param $source_id
+   *
+   * @return int
+   */
+  public function deleteItems($source_id);
+
 }

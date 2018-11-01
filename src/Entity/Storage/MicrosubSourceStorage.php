@@ -38,4 +38,11 @@ class MicrosubSourceStorage extends SqlContentEntityStorage implements MicrosubS
     return $query->execute();
   }
 
+  /**
+   * {@inheritdoc}
+   */
+  public function deleteItems($source_id) {
+    \Drupal::database()->delete('microsub_item')->condition('source_id', $source_id)->execute();
+  }
+
 }

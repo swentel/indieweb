@@ -39,7 +39,8 @@ use Drupal\Core\Field\BaseFieldDefinition;
  *     "add-form" = "/admin/config/services/indieweb/microsub/sources/add-source",
  *     "edit-form" = "/admin/config/services/indieweb/microsub/sources/{indieweb_microsub_source}/edit",
  *     "delete-form" = "/admin/config/services/indieweb/microsub/sources/{indieweb_microsub_source}/delete",
- *     "reset-next-fetch" = "/admin/config/services/indieweb/microsub/sources/{indieweb_microsub_source}/reset-fetch-next",
+ *     "reset-next-fetch" = "/admin/config/services/indieweb/microsub/sources/{indieweb_microsub_source}/reset-next-fetch",
+ *     "delete-items" = "/admin/config/services/indieweb/microsub/sources/{indieweb_microsub_source}/delete-items",
  *   }
  * )
  */
