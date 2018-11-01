@@ -284,6 +284,10 @@ class MicrosubTest extends IndiewebBrowserTestBase {
     $this->drupalLogin($this->adminUser);
     $edit = ['exclude_post_type[reply]' => TRUE];
     $this->drupalPostForm('admin/config/services/indieweb/microsub/channels/1/edit', $edit, 'Save');
+    \Drupal::database()->update('microsub_item')->fields(['is_read' => 0])->condition('channel_id', 1)->execute();
+    $channel = \Drupal::entityTypeManager()->getStorage('indieweb_microsub_channel')->load(1);
+    $unread = (int) $channel->getUnreadCount();
+    self::assertEquals(1, $unread);
 
     $query = ['action' => 'timeline', 'channel' => 1];
     $response = $this->sendMicrosubRequest($query);
