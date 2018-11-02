@@ -1388,7 +1388,6 @@ function indieweb_cron() {
 
   if (\Drupal::config('indieweb.microsub')->get('microsub_internal') &&
     \Drupal::config('indieweb.microsub')->get('microsub_internal_handler') == 'cron') {
-
     \Drupal::service('indieweb.microsub.client')->fetchItems();
   }
 

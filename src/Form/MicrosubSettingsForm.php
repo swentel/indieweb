@@ -51,6 +51,7 @@ class MicrosubSettingsForm extends ConfigFormBase {
     $form['microsub']['microsub_internal_cleanup_items'] = [
       '#title' => $this->t('Cleanup items'),
       '#type' => 'select',
+      '#access' => FALSE,
       '#options' => $period,
       '#description' => $this->t('Items older than this period will be cleaned up.'),
       '#default_value' => $config->get('microsub_internal_cleanup_items'),
