@@ -31,6 +31,13 @@ class IndieAuthTest extends IndiewebBrowserTestBase {
   protected $indiewebAuthorizedUser;
 
   /**
+   * Another indieweb authorized user.
+   *
+   * @var \Drupal\Core\Session\AccountInterface
+   */
+  protected $indiewebAuthorizedUser2;
+
+  /**
    * {@inheritdoc}
    */
   public function setUp() {
@@ -209,11 +216,14 @@ class IndieAuthTest extends IndiewebBrowserTestBase {
     $this->httpClient = $this->container->get('http_client_factory')
       ->fromOptions(['base_uri' => $this->baseUrl]);
 
-    // IndieWeb authorized user.
+    // IndieWeb authorized users.
     $role = $this->drupalCreateRole(['authorize with indieauth']);
     $this->indiewebAuthorizedUser = $this->drupalCreateUser();
     $this->indiewebAuthorizedUser->addRole($role);
     $this->indiewebAuthorizedUser->save();
+    $this->indiewebAuthorizedUser2 = $this->drupalCreateUser();
+    $this->indiewebAuthorizedUser2->addRole($role);
+    $this->indiewebAuthorizedUser2->save();
 
     // Normal user.
     $this->authUser = $this->drupalCreateUser();
@@ -333,8 +343,12 @@ class IndieAuthTest extends IndiewebBrowserTestBase {
     // -------------------------------------------------------
     // Authorize as a user which is authenticated already.
     // -------------------------------------------------------
-    // TODO
 
+    $this->drupalLogout();
+    $this->drupalLogin($this->indiewebAuthorizedUser2);
+    $this->drupalGet($auth_path, $options);
+    // Simply seeing the authorize screen is good enough.
+    $this->assertSession()->responseContains('would like to access your site');
   }
 
   /**
