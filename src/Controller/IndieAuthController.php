@@ -320,6 +320,7 @@ class IndieAuthController extends ControllerBase {
       // We have a valid token.
       if ($valid_code && !empty($domain)) {
 
+        // Create authname. Strip schemes.
         $authname = str_replace(['https://', 'http://', '/'], '', $domain);
         try {
 
@@ -334,7 +335,15 @@ class IndieAuthController extends ControllerBase {
           }
           // Login or register the user.
           else {
-            $account = $external_auth->loginRegister($authname, 'indieweb');
+            // The username can only be 60 chars long. Provide it ourselves as
+            // external auth prefixes it with the provider by default. Since
+            // we try to login first, there's no possibility of clashing
+            // usernames.
+            $username = $authname;
+            if (strlen($username) > 60) {
+              $username = substr($username, 0, 60);
+            }
+            $account = $external_auth->loginRegister($authname, 'indieweb', ['name' => $username]);
           }
           if ($account) {
             return new RedirectResponse($account->toUrl()->toString(), 302);
@@ -344,7 +353,8 @@ class IndieAuthController extends ControllerBase {
           }
         }
         catch (\Exception $e) {
-          $message = $this->t('Unknown user, please try again.');
+          $this->getLogger('indieweb_indieauth_login')->notice('Error on login: @message', ['@message' => $e->getMessage()]);
+          $message = $this->t('Unknown user, please try again. : @message');
         }
       }
       else {

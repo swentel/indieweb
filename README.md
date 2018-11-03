@@ -10,7 +10,7 @@ Current functionality:
 - Send and receive webmentions and pingbacks via Webmention.io
 - Syndicate content, likes etc via [brid.gy](https://brid.gy), store syndications
 - Microformats for content, images and more
-- Allow users to login and create accounts
+- Allow users to login and create accounts with IndieAuth
 - Internal or external IndieAuth Authentication API
 - Micropub
   - Create content note, article, event, rsvp, reply, like, repost, bookmark and issue

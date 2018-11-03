@@ -108,15 +108,16 @@ class IndieAuthTest extends IndiewebBrowserTestBase {
     $this->assertSession()->addressEquals('user/login');
 
     // Use test login page.
+    $authorization_endpoint = Url::fromRoute('indieweb_test.indieauth.login.endpoint', [], ['absolute' => TRUE])->toString();
     $domain = Url::fromroute('indieweb_test.indieauth.discover_page_one', [], ['absolute' => TRUE])->toString();
+    $this->drupalGet($domain);
+    $this->assertSession()->responseContains($authorization_endpoint);
     $edit = ['domain' => $domain];
     $this->drupalGet('indieauth-test/login');
     $this->assertSession()->responseNotContains('Map your domain with your current user.');
     $this->drupalPostForm('indieauth-test/login', $edit, 'Sign in');
     $this->assertSession()->statusCodeEquals(200);
     $this->assertSession()->addressEquals('user/3');
-    $this->assertSession()->responseContains('indieauth-testdiscoverone');
-    $this->assertSession()->responseNotContains('indieauth-testdiscoverone/');
 
     // Login again, should be same user.
     $this->drupalLogout();
