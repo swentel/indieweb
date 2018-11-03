@@ -117,6 +117,9 @@ class MicrosubClient implements MicrosubClientInterface {
     // Reset tries.
     $tries = 0;
 
+    // Cleanup data.
+    $item = $this->cleanupData($item);
+
     // Save the entry.
     $values = [
       'langcode' => 'en',
@@ -165,6 +168,23 @@ class MicrosubClient implements MicrosubClientInterface {
         }
       }
     }
+  }
+
+  /**
+   * Cleans up data.
+   *
+   * @param $item
+   *
+   * @return mixed
+   */
+  protected function cleanupData($item) {
+
+    // Author names sometimes have newlines in the name, remove them.
+    if (!empty($item['author']['name'])) {
+      $item['author']['name'] = preg_replace('/\s+/', ' ', trim($item['author']['name']));
+    }
+
+    return $item;
   }
 
   /**
