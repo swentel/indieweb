@@ -31,9 +31,9 @@ class MicrosubChannelForm extends ContentEntityForm {
       '#title' => $this->t('Exclude post types in timeline'),
       '#options' => [
         'reply' => $this->t('Replies'),
-        'like' => $this->t('Reposts'),
-        'repost' => $this->t('Bookmarks'),
-        'bookmark' => $this->t('Likes'),
+        'repost' => $this->t('Reposts'),
+        'bookmark' => $this->t('Bookmarks'),
+        'like' => $this->t('Likes'),
         'note' => $this->t('Notes'),
         'article' => $this->t('Articles'),
         'photo' => $this->t('Photos'),
