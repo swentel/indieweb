@@ -11,7 +11,7 @@ Current functionality:
 - Syndicate content, likes etc via [brid.gy](https://brid.gy), store syndications
 - Microformats for content, images and more
 - Allow users to login and create accounts
-- IndieAuth for Authentication API
+- Internal or external IndieAuth Authentication API
 - Micropub
   - Create content note, article, event, rsvp, reply, like, repost, bookmark and issue
   - Updating content is currently limited to changing the published status, title and body of nodes and comments
@@ -41,6 +41,7 @@ Another good tool is http://xray.p3k.io, which displays the results in JSON.
 ## To install
 
 - composer require indieweb/mention-client
+- composer require indieauth/client
 - composer require p3k/xray
 - composer require p3k/Micropub
 - go to admin/modules and toggle 'IndieWeb' to enable the module.
@@ -167,10 +168,13 @@ You can also use a PGP key if you don't want to use a third party service. See h
 details. This module does not expose any of these links or help you with the PGP setup, you will have to manage this
 yourself.
 
-If you use apps like Quill (https://quill.p3k.io - web) or Indigenous (Beta iOS, Alpha Android) or other clients which
+If you use apps like Quill (https://quill.p3k.io - web) or Indigenous (iOS, Android) or other clients which
 can post via micropub or read via microsub, the easiest way to let those clients log you in with your domain is by using
 indieauth.com too and exchange access tokens for further requests. Only expose these header links if you want to use
 micropub or microsub.
+
+You can also use the built-in auth and token endpoints. You then authorize yourself with a Drupal user. The user needs
+the 'Authorize with IndieAuth' permission.
 
 You can also allow users to register and login into this website. An account will created with the username based on the
 domain. Authenticated users can use the same "Web sign-in" block to map a domain with their account.

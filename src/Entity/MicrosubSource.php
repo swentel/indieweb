@@ -7,7 +7,7 @@ use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
 
 /**
- * Defines the IndieWeb Microsub source entity.
+ * Defines the Microsub source entity.
  *
  * @ContentEntityType(
  *   id = "indieweb_microsub_source",

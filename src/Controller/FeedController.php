@@ -3,14 +3,11 @@
 namespace Drupal\indieweb\Controller;
 
 use Drupal\Core\Controller\ControllerBase;
-use Drupal\Core\Routing\TrustedRedirectResponse;
 use Drupal\Core\Url;
 use Drupal\indieweb\Entity\FeedInterface;
-use FeedWriter\ATOM;
 use p3k\XRay;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
-use Symfony\Component\HttpFoundation\Response;
 
 class FeedController extends ControllerBase {
 

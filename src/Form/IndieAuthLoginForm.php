@@ -7,6 +7,8 @@ use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Routing\TrustedRedirectResponse;
 use Drupal\Core\Url;
+use IndieAuth\Client;
+use p3k\HTTP;
 
 class IndieAuthLoginForm extends FormBase {
 
@@ -77,19 +79,36 @@ class IndieAuthLoginForm extends FormBase {
       $domain .= '/';
     }
 
-    // Start a session.
-    $_SESSION['started'] = TRUE;
-    $_SESSION['domain'] = $domain;
+    // Get the authorization endpoint for the domain. The IndieAuth client
+    // does an HTTP request and has no idea it might be in a simpletest
+    // environment, so check whether we are in a test or not. If so, set the
+    // User-Agent.
+    $client = new Client();
+    if ($test_prefix = drupal_valid_test_ua()) {
+      $httpClient = new HTTP();
+      $httpClient->set_user_agent(drupal_generate_test_ua($test_prefix));
+      $client::$http = $httpClient;
+    }
+    $authorization_endpoint = $client::discoverAuthorizationEndpoint($domain);
 
-    $url = \Drupal::config('indieweb.indieauth')->get('login_endpoint');
-    $url .= '?redirect_uri=' . Url::fromroute('indieweb.indieauth.login.redirect', [], ['absolute' => TRUE])->toString();
-    $url .= '&client_id=' . \Drupal::request()->getSchemeAndHttpHost();
-    $url .= '&me=' . $domain;
-    $url .= '&state=' . session_id();
+    if (!empty($authorization_endpoint)) {
 
-    // Redirect to login provider.
-    $response = new TrustedRedirectResponse($url);
-    $form_state->setResponse($response);
+      $_SESSION['indieauth_domain'] = $domain;
+      $_SESSION['indieauth_authorization_endpoint'] = $authorization_endpoint;
+
+      $url = $authorization_endpoint;
+      $url .= '?redirect_uri=' . Url::fromroute('indieweb.indieauth.login.redirect', [], ['absolute' => TRUE])->toString();
+      $url .= '&client_id=' . \Drupal::request()->getSchemeAndHttpHost();
+      $url .= '&me=' . $domain;
+      $url .= '&state=' . session_id();
+
+      // Redirect to auth provider.
+      $response = new TrustedRedirectResponse($url);
+      $form_state->setResponse($response);
+    }
+    else {
+      $this->messenger()->addMessage($this->t('No authorization endpoint found.'));
+    }
   }
 
 }

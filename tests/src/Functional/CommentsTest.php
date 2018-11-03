@@ -2,7 +2,6 @@
 
 namespace Drupal\Tests\indieweb\Functional;
 
-use Drupal\Core\Url;
 use Drupal\user\Entity\Role;
 use Drupal\user\RoleInterface;
 
@@ -215,11 +214,7 @@ class CommentsTest extends IndiewebBrowserTestBase {
     $this->drupalPostForm('admin/config/services/indieweb/micropub', $edit, 'Save configuration');
 
     // Set IndieAuth token endpoint.
-    $this->drupalLogin($this->adminUser);
-    $edit = ['enable' => '1', 'expose' => 1, 'token_endpoint' => Url::fromRoute('indieweb_test.token_endpoint', [], ['absolute' => TRUE])->toString()];
-    $this->drupalPostForm('admin/config/services/indieweb/indieauth', $edit, 'Save configuration');
-
-    $this->drupalLogout();
+    $this->setIndieAuthEndPoints(TRUE, TRUE);
 
     // Create an article.
     $article = $this->createNode(['type' => 'article', 'title' => 'Test generating comments via micropub', 'body' => ['value' => 'This will be awesome when it works!']]);

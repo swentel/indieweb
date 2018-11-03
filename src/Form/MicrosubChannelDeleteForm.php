@@ -11,13 +11,6 @@ class MicrosubChannelDeleteForm extends ContentEntityDeleteForm {
   /**
    * {@inheritdoc}
    */
-  public function getQuestion() {
-    return $this->t('Are you sure you want to delete %name?', ['%name' => $this->entity->label()]);
-  }
-
-  /**
-   * {@inheritdoc}
-   */
   public function getDescription() {
     return $this->t('This will also delete all sources and items in this channel. This action cannot be undone.');
   }

@@ -27,12 +27,12 @@ indieweb.indieauth:
   type: config_object
   label: 'Indieweb indieauth'
   mapping:
-    enable:
+    auth_internal:
       type: boolean
       label: 'Enable IndieAuth support'
-    expose:
+    expose_endpoint_link:
       type: boolean
-      label: 'Expose IndieAuth headers'
+      label: 'Expose IndieAuth links'
     authorization_endpoint:
       type: string
       label: 'IndieAuth authorization endpoint'
@@ -42,9 +42,6 @@ indieweb.indieauth:
     login_enable:
       type: boolean
       label: 'Enable login support'
-    login_endpoint:
-      type: string
-      label: 'Login endpoint'
 
 # schema for indieweb.microformats
 indieweb.microformats:

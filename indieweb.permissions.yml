@@ -31,3 +31,8 @@ send webmentions:
 
 allow rsvp:
   title: 'Allow users to RSVP on an event'
+
+authorize with indieauth:
+  title: 'Authorize with IndieAuth'
+  description: 'Allow users to use the built-in authorization and token endpoints'
+  restrict access: true

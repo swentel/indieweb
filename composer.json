@@ -1,6 +1,6 @@
 {
   "name": "drupal/indieweb",
-  "description": "Indieweb functionality for your site.",
+  "description": "IndieWeb functionality for your site.",
   "type": "drupal-module",
   "homepage": "http://drupal.org/project/indieweb",
   "authors": [
@@ -14,9 +14,10 @@
   "license": "GPL-2.0+",
   "minimum-stability": "dev",
   "require": {
-    "indieweb/mention-client": "^1.1",
-    "p3k/xray": "^1.4",
-    "p3k/Micropub": "^0.0.2"
+    "indieweb/mention-client": "^1.2",
+    "p3k/xray": "^1.7",
+    "p3k/Micropub": "^0.0.2",
+    "indieauth/client": "^0.4.1"
   },
   "extra": {
     "drush": {

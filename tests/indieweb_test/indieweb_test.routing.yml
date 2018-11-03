@@ -2,7 +2,15 @@ indieweb_test.front:
   path: '/indieweb-test-front'
   defaults:
     _controller: '\Drupal\indieweb_test\Controller\IndiewebTestController::front'
-    _title: 'Indieweb test front'
+    _title: 'IndieWeb test front'
+  requirements:
+    _permission: 'access content'
+
+indieweb_test.auth_redirect:
+  path: '/indieweb-auth-redirect'
+  defaults:
+    _controller: '\Drupal\indieweb_test\Controller\IndiewebTestController::authRedirect'
+    _title: 'IndieWeb auth redirect'
   requirements:
     _permission: 'access content'
 
@@ -10,7 +18,7 @@ indieweb_test.token_endpoint:
   path: '/test-token-endpoint'
   defaults:
     _controller: '\Drupal\indieweb_test\Controller\IndiewebTestController::testTokenEndpoint'
-    _title: 'Indieweb test token endpoint'
+    _title: 'IndiewWb test token endpoint'
   requirements:
     _access: 'TRUE'
 
@@ -18,7 +26,7 @@ indieweb_test.webmention_endpoint:
   path: '/test-webmention-endpoint'
   defaults:
     _controller: '\Drupal\indieweb_test\Controller\IndiewebTestController::testWebmentionEndpoint'
-    _title: 'Indieweb test webmention endpoint'
+    _title: 'IndieWeb test webmention endpoint'
   requirements:
     _access: 'TRUE'
 
@@ -27,6 +35,22 @@ indieweb_test.indieauth.login.page:
   defaults:
     _form: '\Drupal\indieweb\Form\IndieAuthLoginForm'
     _title: 'Login endpoint'
+  requirements:
+    _access: 'TRUE'
+
+indieweb_test.indieauth.discover_page_one:
+  path: '/indieauth-test/discover/one'
+  defaults:
+    _controller: '\Drupal\indieweb_test\Controller\IndiewebTestController::testDiscoverPage'
+    _title: 'Discover page one'
+  requirements:
+    _access: 'TRUE'
+
+indieweb_test.indieauth.discover_page_two:
+  path: '/indieauth-test/discover/two'
+  defaults:
+    _controller: '\Drupal\indieweb_test\Controller\IndiewebTestController::testDiscoverPage'
+    _title: 'Discover page two'
   requirements:
     _access: 'TRUE'
 

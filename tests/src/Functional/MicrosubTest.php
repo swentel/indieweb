@@ -2,8 +2,6 @@
 
 namespace Drupal\Tests\indieweb\Functional;
 
-use Drupal\Core\Url;
-
 /**
  * Tests integration of microsub.
  *
@@ -125,10 +123,8 @@ class MicrosubTest extends IndiewebBrowserTestBase {
     $edit = ['microsub_internal' => TRUE];
     $this->drupalPostForm('admin/config/services/indieweb/microsub', $edit, 'Save configuration');
 
-    // Set IndieAuth token endpoint.
-    $this->drupalLogin($this->adminUser);
-    $edit = ['enable' => '1', 'expose' => 1, 'token_endpoint' => Url::fromRoute('indieweb_test.token_endpoint', [], ['absolute' => TRUE])->toString()];
-    $this->drupalPostForm('admin/config/services/indieweb/indieauth', $edit, 'Save configuration');
+    // Set IndieAuth token endpoints.
+    $this->setIndieAuthEndPoints();
 
     // Set all microformats too.
     $microformats = [

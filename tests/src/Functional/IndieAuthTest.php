@@ -3,9 +3,11 @@
 namespace Drupal\Tests\indieweb\Functional;
 
 use Drupal\Core\Url;
+use GuzzleHttp\Exception\ClientException;
+use GuzzleHttp\Exception\ServerException;
 
 /**
- * Tests integration of indieauth.
+ * Tests integration of IndieAuth.
  *
  * @group indieweb
  */
@@ -15,9 +17,41 @@ class IndieAuthTest extends IndiewebBrowserTestBase {
   protected $header_link_token_endpoint = '<link rel="token_endpoint" href="https://tokens.indieauth.com/token" />';
 
   /**
+   * The HTTP client.
+   *
+   * @var \GuzzleHttp\ClientInterface
+   */
+  protected $httpClient;
+
+  /**
+   * An indieweb authorized user.
+   *
+   * @var \Drupal\Core\Session\AccountInterface
+   */
+  protected $indiewebAuthorizedUser;
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setUp() {
+    parent::setUp();
+
+    // Page content type.
+    $this->createContentType(['type' => 'page']);
+  }
+
+  /**
    * Tests indieauth functionality.
+   *
+   * @throws \Behat\Mink\Exception\ExpectationException
+   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    */
   public function testIndieAuth() {
+
+    // ------------------------------------------------------------------------
+    // Header link expose.
+    // ------------------------------------------------------------------------
 
     $this->drupalGet('<front>');
     $this->assertSession()->responseNotContains($this->header_link_auth_endpoint);
@@ -27,7 +61,7 @@ class IndieAuthTest extends IndiewebBrowserTestBase {
     $this->assertSession()->statusCodeEquals(403);
 
     $this->drupalLogin($this->adminUser);
-    $edit = ['enable' => '1', 'expose' => 1];
+    $edit = ['expose_endpoint_link' => 1];
     $this->drupalPostForm('admin/config/services/indieweb/indieauth', $edit, 'Save configuration');
 
     $this->drupalGet('<front>');
@@ -41,7 +75,7 @@ class IndieAuthTest extends IndiewebBrowserTestBase {
 
     // Do not expose.
     $this->drupalLogin($this->adminUser);
-    $edit = ['enable' => '1', 'expose' => 0];
+    $edit = ['expose_endpoint_link' => 0];
     $this->drupalPostForm('admin/config/services/indieweb/indieauth', $edit, 'Save configuration');
 
     $this->drupalGet('<front>');
@@ -53,7 +87,10 @@ class IndieAuthTest extends IndiewebBrowserTestBase {
     $this->assertSession()->responseNotContains($this->header_link_auth_endpoint);
     $this->assertSession()->responseNotContains($this->header_link_token_endpoint);
 
+    // ------------------------------------------------------------------------
     // Test the user sign in. We use a custom login endpoint for authentication.
+    // ------------------------------------------------------------------------
+
     $this->drupalGet('indieauth-test/login');
     $this->assertSession()->responseContains('Web Sign-In is not enabled');
 
@@ -62,7 +99,7 @@ class IndieAuthTest extends IndiewebBrowserTestBase {
     $this->assertSession()->statusCodeEquals(404);
 
     $this->drupalLogin($this->adminUser);
-    $edit = ['login_enable' => '1', 'login_endpoint' => Url::fromRoute('indieweb_test.indieauth.login.endpoint', [], ['absolute' => TRUE])->toString()];
+    $edit = ['login_enable' => '1'];
     $this->drupalPostForm('admin/config/services/indieweb/indieauth', $edit, 'Save configuration');
     $this->drupalLogout();
 
@@ -71,18 +108,19 @@ class IndieAuthTest extends IndiewebBrowserTestBase {
     $this->assertSession()->addressEquals('user/login');
 
     // Use test login page.
-    $edit = ['domain' => 'https://example.com'];
+    $domain = Url::fromroute('indieweb_test.indieauth.discover_page_one', [], ['absolute' => TRUE])->toString();
+    $edit = ['domain' => $domain];
     $this->drupalGet('indieauth-test/login');
     $this->assertSession()->responseNotContains('Map your domain with your current user.');
     $this->drupalPostForm('indieauth-test/login', $edit, 'Sign in');
     $this->assertSession()->statusCodeEquals(200);
     $this->assertSession()->addressEquals('user/3');
-    $this->assertSession()->responseContains('indieweb_example.com');
-    $this->assertSession()->responseNotContains('indieweb_example.com/');
+    $this->assertSession()->responseContains('indieauth-testdiscoverone');
+    $this->assertSession()->responseNotContains('indieauth-testdiscoverone/');
 
     // Login again, should be same user.
     $this->drupalLogout();
-    $edit = ['domain' => 'https://example.com'];
+    $edit = ['domain' => $domain];
     $this->drupalPostForm('indieauth-test/login', $edit, 'Sign in');
     $this->assertSession()->statusCodeEquals(200);
     $this->assertSession()->addressEquals('user/3');
@@ -130,30 +168,202 @@ class IndieAuthTest extends IndiewebBrowserTestBase {
     $this->drupalLogout();
 
     // Change e-mail.
-    $edit = ['domain' => 'https://example.com'];
+    $edit = ['domain' => $domain];
     $this->drupalPostForm('indieauth-test/login', $edit, 'Sign in');
     $edit = ['mail' => 'indieweb@example.com'];
     $this->drupalPostForm('/user/3/edit', $edit, 'Save');
     /** @var \Drupal\user\UserInterface $account_updated */
     $account_updated = \Drupal::entityTypeManager()->getStorage('user')->loadUnchanged(3);
     self::assertEquals('indieweb@example.com', $account_updated->getEmail());
-
-    // Make sure you can't login with user 3 since it has no password.
     $this->drupalLogout();
-    $this->drupalPostForm('user/login', ['name' => 'indieweb_example.com', 'pass' => ''], 'Log in');
-    $this->assertSession()->responseContains('Password field is required');
 
     // Map existing user with domain.
     $this->drupalLogin($another);
     $this->drupalGet('indieauth-test/login');
     $this->assertSession()->responseContains('Map your domain with your current user.');
-    $edit = ['domain' => 'https://example-map.com/'];
+    $map_domain = Url::fromroute('indieweb_test.indieauth.discover_page_two', [], ['absolute' => TRUE])->toString();
+    $edit = ['domain' => $map_domain];
     $this->drupalPostForm('indieauth-test/login', $edit, '');
     $this->assertSession()->statusCodeEquals(200);
     $this->assertSession()->addressEquals('user/4');
     $this->drupalGet('indieauth-test/login');
     $this->assertSession()->responseNotContains('Map your domain with your current user.');
 
+  }
+
+  /**
+   * Tests the built-in IndieAuth functionality.
+   *
+   * The authorization is handled inline. When we want to get the access token
+   * we'll do the request ourselves by fetching the code from the url and so on.
+   *
+   * @throws \Behat\Mink\Exception\ExpectationException
+   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
+   * @throws \Drupal\Core\Entity\EntityStorageException
+   * @throws \GuzzleHttp\Exception\GuzzleException
+   */
+  public function testBuiltInServer() {
+
+    $this->httpClient = $this->container->get('http_client_factory')
+      ->fromOptions(['base_uri' => $this->baseUrl]);
+
+    // IndieWeb authorized user.
+    $role = $this->drupalCreateRole(['authorize with indieauth']);
+    $this->indiewebAuthorizedUser = $this->drupalCreateUser();
+    $this->indiewebAuthorizedUser->addRole($role);
+    $this->indiewebAuthorizedUser->save();
+
+    // Normal user.
+    $this->authUser = $this->drupalCreateUser();
+
+    $this->drupalLogin($this->adminUser);
+    $edit = ['micropub_enable' => 1, 'note_create_node' => 1, 'note_node_type' => 'page', 'note_uid' => $this->adminUser->id(), 'issue_node_type' => 'page'];
+    $this->drupalPostForm('admin/config/services/indieweb/micropub', $edit, 'Save configuration');
+    $this->drupalLogout();
+
+    $auth_path = 'indieauth/auth';
+    $token_path = Url::fromRoute('indieweb.indieauth.token', [], ['absolute' => TRUE])->toString();
+    $me = Url::fromRoute('indieweb_test.indieauth.discover_page_one', [], ['absolute' => TRUE])->toString();
+    $redirect_uri = Url::fromRoute('indieweb_test.auth_redirect', [], ['absolute' => TRUE])->toString();
+
+    // -------------------------------------------------------
+    // Not enabled
+    // -------------------------------------------------------
+
+    $this->drupalGet($auth_path);
+    $this->assertSession()->statusCodeEquals(404);
+    $this->drupalGet($token_path);
+    $this->assertSession()->statusCodeEquals(404);
+
+    // Enable internal.
+    $this->setIndieAuthInternal();
+
+    // -------------------------------------------------------
+    // Try to authorize as a normal user with no permission
+    // -------------------------------------------------------
+
+    $this->drupalGet($auth_path);
+    $this->assertSession()->responseContains('Invalid request, missing parameters');
+
+    $state = $this->randomGenerator->name(10);
+
+    $options = [
+      'query' => [
+        'response_type' => 'code',
+        'redirect_uri' => $redirect_uri,
+        'client_id' => 'Indigenous Android',
+        'me' => $me,
+        'scope' => 'read create',
+        'state' => $state,
+      ]
+    ];
+    $this->drupalGet($auth_path, $options);
+    $this->assertSession()->responseContains('Login first with your account. You will be redirected to the authorize screen on success.');
+
+    $edit = ['name' => $this->authUser->getAccountName(), 'pass' => $this->authUser->pass_raw];
+    $this->drupalPostForm(NULL, $edit, 'Log in');
+    $this->assertSession()->responseContains('You do not have permission to authorize.');
+    $this->drupalLogout();
+
+    // -------------------------------------------------------
+    // Authorize as a user with permission
+    // -------------------------------------------------------
+
+    $this->drupalGet($auth_path, $options);
+    $this->assertSession()->responseContains('Login first with your account. You will be redirected to the authorize screen on success.');
+
+    $edit = ['name' => $this->indiewebAuthorizedUser->getAccountName(), 'pass' => $this->indiewebAuthorizedUser->pass_raw];
+    $this->drupalPostForm(NULL, $edit, 'Log in');
+    $this->assertSession()->responseContains('would like to access your site');
+    $this->drupalPostForm(NULL, [], 'Authorize');
+    $url = parse_url($this->getUrl());
+    $query = [];
+    parse_str($url['query'],$query);
+    self::assertEquals($query['state'], $state);
+    $code = $query['code'];
+
+    // Call token endpoint for an access token now.
+    $params = [
+      'code' => $code,
+      'me' => $me,
+      'redirect_uri' => $redirect_uri,
+      'client_id' => 'Indigenous Android',
+      'grant_type' => 'authorization_code',
+    ];
+
+    // some failing ones first.
+    $post = $params;
+    unset($post['me']);
+    $response = $this->postToUrl($post, $token_path);
+    self::assertEquals(400, $response->getStatusCode());
+
+    $post = $params;
+    $post['code'] = 'random';
+    $response = $this->postToUrl($post, $token_path);
+    self::assertEquals(404, $response->getStatusCode());
+
+    // Now a good one.
+    $response = $this->postToUrl($params, $token_path);
+    $body_response = $response->getBody()->__toString();
+    $body = @json_decode($body_response);
+    self::assertTrue(isset($body->access_token));
+    self::assertEquals(200, $response->getStatusCode());
+
+    // Verify the authorization code is gone.
+    /** @var \Drupal\indieweb\Entity\IndieAuthAuthorizationCodeInterface $authorization_code */
+    $authorization_code = \Drupal::entityTypeManager()->getStorage('indieweb_indieauth_code')->getIndieAuthAuthorizationCode($params['code']);
+    self::assertFalse($authorization_code);
+
+    // Now do a micropub request with the access token.
+    $post = [
+      'h' => 'entry',
+      'content' => 'A note content',
+    ];
+    $code = $this->sendMicropubRequest($post, $body->access_token);
+    self::assertEquals(201, $code);
+
+    $code = $this->sendMicropubRequest($post, 'unknown');
+    self::assertEquals(403, $code);
+
+    $this->drupalGet($token_path);
+    $this->assertSession()->statusCodeEquals(404);
+
+    // -------------------------------------------------------
+    // Authorize as a user which is authenticated already.
+    // -------------------------------------------------------
+    // TODO
+
+  }
+
+  /**
+   * Post to a URL.
+   *
+   * @param $params
+   * @param $url
+   *
+   * @return \Psr\Http\Message\ResponseInterface
+   *   The request response.
+   *
+   * @throws \GuzzleHttp\Exception\GuzzleException
+   */
+  protected function postToUrl($params, $url) {
+
+    $headers = [
+      'Accept' => 'application/json',
+    ];
+
+    try {
+      $response = $this->httpClient->request('post', $url, ['form_params' => $params, 'headers' => $headers]);
+    }
+    catch (ClientException $e) {
+      $response = $e->getResponse();
+    }
+    catch (ServerException $e) {
+      $response = $e->getResponse();
+    }
+
+    return $response;
   }
 
 }

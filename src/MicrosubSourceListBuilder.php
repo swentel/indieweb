@@ -8,8 +8,6 @@ use Drupal\indieweb\Entity\MicrosubChannelInterface;
 
 /**
  * Defines a class to build a listing of microsub source entities.
- *
- * @see \Drupal\block\Entity\Block
  */
 class MicrosubSourceListBuilder extends EntityListBuilder {
 
@@ -45,6 +43,7 @@ class MicrosubSourceListBuilder extends EntityListBuilder {
    */
   public function buildHeader() {
     $header['label'] = $this->t('Source');
+    $header['status'] = $this->t('Status');
     $header['items'] = $this->t('Items');
     $header['fetch_next'] = $this->t('Next update');
     return $header + parent::buildHeader();
@@ -56,6 +55,7 @@ class MicrosubSourceListBuilder extends EntityListBuilder {
   public function buildRow(EntityInterface $entity) {
     /** @var \Drupal\indieweb\Entity\MicrosubSourceInterface */
     $row['label'] = $entity->label();
+    $row['status'] = $entity->get('status')->value ? t('Enabled') : t('Disabled');
     $row['items'] = $entity->getItemCount();
     $next = $entity->getNextFetch();
     if ($next < \Drupal::time()->getRequestTime()) {

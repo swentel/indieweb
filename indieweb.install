@@ -352,3 +352,16 @@ function indieweb_update_8010() {
     \Drupal::database()->schema()->renameTable('indieweb_feed_items', 'indieweb_feed_item');
   }
 }
+
+/**
+ * Cleanup of indieweb.indieauth configuration.
+ */
+function indieweb_update_8011() {
+  $indieauth = \Drupal::configFactory()->getEditable('indieweb.indieauth');
+  $indieauth->set('expose_endpoint_link', $indieauth->get('expose'));
+  $indieauth->clear('enable');
+  $indieauth->clear('expose');
+  $indieauth->clear('login_endpoint');
+  $indieauth->set('auth_internal', FALSE);
+  $indieauth->save();
+}

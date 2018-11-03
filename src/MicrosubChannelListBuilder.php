@@ -42,6 +42,7 @@ class MicrosubChannelListBuilder extends IndieWebDraggableListBuilder {
    */
   public function buildHeader() {
     $header['label'] = $this->t('Channel name');
+    $header['enable'] = $this->t('Status');
     $header['sources'] = $this->t('Sources');
     return $header + parent::buildHeader();
   }
@@ -51,7 +52,7 @@ class MicrosubChannelListBuilder extends IndieWebDraggableListBuilder {
    */
   public function buildRow(EntityInterface $entity) {
     $row['label'] = $entity->label();
-
+    $row['status'] = ['#markup' => $entity->get('status')->value ? t('Enabled') : t('Disabled')];
     /** @var \Drupal\indieweb\Entity\MicrosubChannelInterface $entity */
     $sources = $entity->getSources();
     $row['sources'] = ['#markup' => Link::fromTextAndUrl(

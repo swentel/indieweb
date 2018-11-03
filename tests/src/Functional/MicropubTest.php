@@ -2,8 +2,6 @@
 
 namespace Drupal\Tests\indieweb\Functional;
 
-use Drupal\Core\Url;
-
 /**
  * Tests integration of micropub.
  *
@@ -146,6 +144,12 @@ class MicropubTest extends IndiewebBrowserTestBase {
 
   /**
    * Tests micropub functionality.
+   *
+   * @throws \Behat\Mink\Exception\ExpectationException
+   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
+   * @throws \Drupal\Core\Entity\EntityMalformedException
+   * @throws \Drupal\Core\Entity\EntityStorageException
    */
   public function testMicropub() {
     $this->drupalGet('<front>');
@@ -177,8 +181,7 @@ class MicropubTest extends IndiewebBrowserTestBase {
 
     // Set IndieAuth token endpoint.
     $this->drupalLogin($this->adminUser);
-    $edit = ['enable' => '1', 'expose' => 1, 'token_endpoint' => Url::fromRoute('indieweb_test.token_endpoint', [], ['absolute' => TRUE])->toString()];
-    $this->drupalPostForm('admin/config/services/indieweb/indieauth', $edit, 'Save configuration');
+    $this->setIndieAuthEndPoints();
 
     // Configure note and also enable issue. It doesn't have an explicit test
     // for properties, but just being enabled makes sure the order is ok.
@@ -878,6 +881,17 @@ class MicropubTest extends IndiewebBrowserTestBase {
       // Explicit failure.
       $this->assertTrue($nid, 'No article node found');
     }
+
+    // ----------------------------------------------------------------
+    // Test with internal indieauth server.
+    // ----------------------------------------------------------------
+
+    $this->setIndieAuthInternal(TRUE, 'create');
+    $post = $this->note;
+    $post['content'] = 'Using the internal indieauth functionality';
+    $code = $this->sendMicropubRequest($post, 'internal_indieauth_server');
+    self::assertEquals(201, $code);
+    $this->setIndieAuthExternal();
 
     // ----------------------------------------------------------------
     // q=category tests.

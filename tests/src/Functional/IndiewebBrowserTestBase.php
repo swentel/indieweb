@@ -33,7 +33,7 @@ abstract class IndiewebBrowserTestBase extends BrowserTestBase {
   /**
    * A simple authenticated user.
    *
-   * @var
+   * @var \Drupal\Core\Session\AccountInterface
    */
   protected $authUser;
 
@@ -553,6 +553,87 @@ abstract class IndiewebBrowserTestBase extends BrowserTestBase {
       ->insert('webmention_syndication')
       ->fields($values)
       ->execute();
+  }
+
+  /**
+   * Set IndieAuth endpoint.
+   *
+   * @param $login
+   * @param $logout
+   *
+   * This function assumes you are authenticated already.
+   */
+  protected function setIndieAuthEndPoints($login = FALSE, $logout = FALSE) {
+    if ($login) {
+      $this->drupalLogin($this->adminUser);
+    }
+
+    $edit = ['expose_endpoint_link' => 1, 'token_endpoint' => Url::fromRoute('indieweb_test.token_endpoint', [], ['absolute' => TRUE])->toString()];
+    $this->drupalPostForm('admin/config/services/indieweb/indieauth', $edit, 'Save configuration');
+
+    if ($logout) {
+      $this->drupalLogout();
+    }
+  }
+
+  /**
+   * Use the internal IndieAuth token endpoint.
+   *
+   * @param null $createToken
+   *   Whether to create a token or not.
+   * @param string $scopes
+   *
+   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
+   * @throws \Drupal\Core\Entity\EntityStorageException
+   */
+  protected function setIndieAuthInternal($createToken = FALSE, $scopes = '') {
+    $this->drupalLogin($this->adminUser);
+
+    $edit = [
+      'auth_internal' => TRUE,
+      'expose_endpoint_link' => TRUE,
+    ];
+    $this->drupalPostForm('admin/config/services/indieweb/indieauth', $edit, 'Save configuration');
+
+    if ($createToken) {
+      $this->createIndieAuthToken($scopes);
+    }
+
+    $this->drupalLogout();
+  }
+
+  /**
+   * Creates an IndieAuth token.
+   *
+   * @param $scopes
+   *
+   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
+   * @throws \Drupal\Core\Entity\EntityStorageException
+   */
+  protected function createIndieAuthToken($scopes) {
+    $values = [
+      'access_token' => 'internal_indieauth_server',
+      'client' => 'test',
+      'uid' => 1,
+      'expire' => 0,
+      'scope' => $scopes,
+    ];
+    $new_token = \Drupal::entityTypeManager()->getStorage('indieweb_indieauth_token')->create($values);
+    $new_token->save();
+  }
+
+  /**
+   * Set IndieAuth to use the external endpoint.
+   */
+  protected function setIndieAuthExternal() {
+    $this->drupalLogin($this->adminUser);
+    $edit = [
+      'auth_internal' => FALSE,
+    ];
+    $this->drupalPostForm('admin/config/services/indieweb/indieauth', $edit, 'Save configuration');
+    $this->drupalLogout();
   }
 
 }

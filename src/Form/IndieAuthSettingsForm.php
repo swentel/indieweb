@@ -51,33 +51,23 @@ class IndieAuthSettingsForm extends ConfigFormBase {
       $form['login']['login_enable']['#description'] = $this->t('You need to install the <a href="https://www.drupal.org/project/externalauth" target="_blank">External Authentication</a> module for this feature to work.');
     }
 
-    $form['login']['login_endpoint'] = [
-      '#title' => $this->t('Login endpoint'),
-      '#type' => 'textfield',
-      '#default_value' => $config->get('login_endpoint'),
-      '#description' => $this->t('The login endpoint. Defaults to https://indielogin.com/auth.<br />The redirect callback is automatically set to :redirect.', [':redirect' => Url::fromRoute('indieweb.indieauth.login.redirect', [], ['absolute' => TRUE])->toString()]),
-      '#states' => array(
-        'visible' => array(
-          ':input[name="login_enable"]' => array('checked' => TRUE),
-        ),
-      ),
-    ];
-
-    $form['indieauth'] = [
+    $form['auth'] = [
       '#type' => 'fieldset',
-      '#title' => $this->t('IndieAuth authentication API'),
-      '#description' => $this->t('If you use apps like Quill (https://quill.p3k.io - web) or Indigenous (Beta iOS, Alpha Android) or other clients which can post via micropub or read via microsub, the easiest way to let those clients log you in with your domain is by using indieauth.com too and exchange access tokens for further requests. Only expose those links if you want to use micropub or microsub. <br /><strong>Important: </strong> if you add the token endpoint manually, you still need to enter the URL here because it is used by the micropub and/or microsub endpoint.')];
+      '#title' => $this->t('Authentication API'),
+      '#description' => $this->t('If you use apps like Quill (https://quill.p3k.io - web) or Indigenous (iOS, Android) or other clients which can post via micropub or read via microsub, the easiest way to let those clients log you in with your domain is by using indieauth.com and exchange access tokens for further requests. Only expose those links if you want to use micropub or microsub. <br /><strong>Important: </strong> if you add the token endpoint manually, and the endpoint is an external service, you still need to enter the URL here because it is used by the micropub and/or microsub endpoint.')];
 
-    $form['indieauth']['enable'] = [
-      '#title' => $this->t('Enable endpoints'),
+    $form['auth']['auth_internal'] = [
+      '#title' => $this->t('Use built-in authentication endpoint'),
       '#type' => 'checkbox',
-      '#default_value' => $config->get('enable'),
+      '#default_value' => $config->get('auth_internal'),
+      '#description' => $this->t("Use the internal authorize and token endpoints to authenticate with a Drupal user. The user needs the 'Authorize with IndieAuth' permission.<br />The endpoints are available at <strong>https://@domain/indieauth/auth</strong> and <strong>https://@domain/indieauth/token</strong>", ['@domain' => \Drupal::request()->getHttpHost()])
     ];
 
-    $form['indieauth']['expose'] = [
+    $form['auth']['expose_endpoint_link'] = [
       '#title' => $this->t('Expose authentication API header links'),
       '#type' => 'checkbox',
-      '#default_value' => $config->get('expose'),
+      '#default_value' => $config->get('expose_endpoint_link'),
+      '#description' => $this->t('The links will be added on the front page. You can also add them yourself to html.html.twig e.g.:<br /><div class="indieweb-highlight-code">&lt;link rel="authorization_endpoint" href="https://indieauth.com/auth" /&gt;</div><br /><div class="indieweb-highlight-code">&lt;link rel="token_endpoint" href="https://tokens.indieauth.com/token" /&gt;</div>'),
       '#states' => array(
         'visible' => array(
           ':input[name="enable"]' => array('checked' => TRUE),
@@ -85,26 +75,24 @@ class IndieAuthSettingsForm extends ConfigFormBase {
       ),
     ];
 
-    $form['indieauth']['authorization_endpoint'] = [
-      '#title' => $this->t('Authorization endpoint'),
+    $form['auth']['authorization_endpoint'] = [
+      '#title' => $this->t('External authorization endpoint'),
       '#type' => 'textfield',
       '#default_value' => $config->get('authorization_endpoint'),
-      '#description' => $this->t('This link will be added on the front page. You can also add it yourself to html.html.twig:<br /><div class="indieweb-highlight-code">&lt;link rel="authorization_endpoint" href="https://indieauth.com/auth" /&gt;</div>'),
       '#states' => array(
         'visible' => array(
-          ':input[name="enable"]' => array('checked' => TRUE),
+          ':input[name="auth_internal"]' => array('checked' => FALSE),
         ),
       ),
     ];
 
-    $form['indieauth']['token_endpoint'] = [
-      '#title' => $this->t('Token endpoint'),
+    $form['auth']['token_endpoint'] = [
+      '#title' => $this->t('External token endpoint'),
       '#type' => 'textfield',
       '#default_value' => $config->get('token_endpoint'),
-      '#description' => $this->t('This link will be added on the front page. You can also add it yourself to html.html.twig:<br /><div class="indieweb-highlight-code">&lt;link rel="token_endpoint" href="https://tokens.indieauth.com/token" /&gt;</div>'),
       '#states' => array(
         'visible' => array(
-          ':input[name="enable"]' => array('checked' => TRUE),
+          ':input[name="auth_internal"]' => array('checked' => FALSE),
         ),
       ),
     ];
@@ -118,12 +106,11 @@ class IndieAuthSettingsForm extends ConfigFormBase {
   public function submitForm(array &$form, FormStateInterface $form_state) {
 
     $this->config('indieweb.indieauth')
-      ->set('enable', $form_state->getValue('enable'))
-      ->set('expose', $form_state->getValue('expose'))
+      ->set('auth_internal', $form_state->getValue('auth_internal'))
+      ->set('expose_endpoint_link', $form_state->getValue('expose_endpoint_link'))
       ->set('authorization_endpoint', $form_state->getValue('authorization_endpoint'))
       ->set('token_endpoint', $form_state->getValue('token_endpoint'))
       ->set('login_enable', $form_state->getValue('login_enable'))
-      ->set('login_endpoint', $form_state->getValue('login_endpoint'))
       ->save();
 
     Cache::invalidateTags(['rendered']);

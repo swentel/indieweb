@@ -14,7 +14,7 @@ use Drupal\Core\Field\BaseFieldDefinition;
  *   label = @Translation("Microsub item"),
  *   label_collection = @Translation("Microsub source items"),
  *   label_singular = @Translation("Microsub source item"),
- *   label_plural = @Translation("aggregator source items"),
+ *   label_plural = @Translation("Microsub source items"),
  *   label_count = @PluralTranslation(
  *     singular = "@count microsub source item",
  *     plural = "@count microsub source items",

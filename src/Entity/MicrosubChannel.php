@@ -8,7 +8,7 @@ use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
 
 /**
- * Defines the IndieWeb Microsub channel entity.
+ * Defines the Microsub channel entity.
  *
  * @ContentEntityType(
  *   id = "indieweb_microsub_channel",

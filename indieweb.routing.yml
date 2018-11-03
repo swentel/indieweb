@@ -62,6 +62,22 @@ indieweb.indieauth.login.redirect:
   requirements:
     _access: 'TRUE'
 
+indieweb.indieauth.auth:
+  path: '/indieauth/auth'
+  defaults:
+    _controller: '\Drupal\indieweb\Controller\IndieAuthController::auth'
+    _title: 'Authorize'
+  requirements:
+    _access: 'TRUE'
+
+indieweb.indieauth.token:
+  path: '/indieauth/token'
+  defaults:
+    _controller: '\Drupal\indieweb\Controller\IndieAuthController::token'
+    _title: 'Token'
+  requirements:
+    _access: 'TRUE'
+
 indieweb.admin.comment_settings:
   path: '/admin/config/services/indieweb/comments'
   defaults:
