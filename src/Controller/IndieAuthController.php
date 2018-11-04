@@ -58,27 +58,19 @@ class IndieAuthController extends ControllerBase {
     }
 
     $reason = '';
+    $params = [];
     $valid_request = TRUE;
 
     // ------------------------------------------------------------------------
     // Redirect to user login if this is an anonymous user. Start a session so
     // we don't expose the details of the request on the user login page.
     // ------------------------------------------------------------------------
-
     if ($this->currentUser()->isAnonymous()) {
-      self::checkRequiredAuthorizeParameters($request, $reason, $valid_request);
-      if ($valid_request) {
 
-        $session_params = [];
-        foreach (self::$auth_parameters as $parameter) {
-          if ($parameter == 'response_type') {
-            $session_params['response_type'] = 'code';
-          }
-          else {
-            $session_params[$parameter] = $request->query->get($parameter);
-          }
-        }
-        $_SESSION['indieauth'] = $session_params;
+      self::validateAuthorizeRequestParameters($request, $reason, $valid_request, FALSE, $params);
+
+      if ($valid_request) {
+        $_SESSION['indieauth'] = $params;
         $this->messenger()->addMessage($this->t('Login first with your account. You will be redirected to the authorize screen on success.'));
         return new RedirectResponse(Url::fromRoute('user.login', [], ['query' => ['destination' => Url::fromRoute('indieweb.indieauth.auth')->toString()]])->toString());
       }
@@ -86,18 +78,15 @@ class IndieAuthController extends ControllerBase {
       $this->getLogger('indieweb_indieauth')->notice('Missing or invalid parameters to authorize as anonymous: @reason', ['@reason' => $reason]);
       return ['#markup' => 'Invalid request, missing parameters.', '#cache' => ['max-age' => 0]];
     }
-    // Store in session in case the indieauth key does not exist yet.
+
+    // ------------------------------------------------------------------------
+    // Authenticated user: Store in session in case the indieauth key does not
+    // exist yet.
+    // ------------------------------------------------------------------------
+
     elseif (!isset($_SESSION['indieauth'])) {
-      $session_params = [];
-      foreach (self::$auth_parameters as $parameter) {
-        if ($parameter == 'response_type') {
-          $session_params['response_type'] = 'code';
-        }
-        else {
-          $session_params[$parameter] = $request->query->get($parameter);
-        }
-      }
-      $_SESSION['indieauth'] = $session_params;
+      self::validateAuthorizeRequestParameters($request, $reason, $valid_request, FALSE, $params);
+      $_SESSION['indieauth'] = $params;
     }
 
     // ------------------------------------------------------------------------
@@ -108,7 +97,7 @@ class IndieAuthController extends ControllerBase {
       return ['#markup' => 'You do not have permission to authorize.', '#cache' => ['max-age' => 0]];
     }
 
-    self::checkRequiredAuthorizeParameters($request, $reason, $valid_request, TRUE);
+    self::validateAuthorizeRequestParameters($request, $reason, $valid_request, TRUE);
     if (!$valid_request) {
       $this->getLogger('indieweb_indieauth')->notice('Missing or invalid parameters to authorize as user: @reason', ['@reason' => $reason]);
       return ['#markup' => 'Invalid request, missing parameters', '#cache' => ['max-age' => 0]];
@@ -124,7 +113,9 @@ class IndieAuthController extends ControllerBase {
   }
 
   /**
-   * Check required parameters for an IndieAuth authorize request.
+   * Check request parameters for an IndieAuth authorize request.
+   *
+   * response_type and code are optional.
    *
    * @param $request
    * @param $reason
@@ -132,67 +123,60 @@ class IndieAuthController extends ControllerBase {
    * @param $in_session
    * @param $params
    */
-  public static function checkRequiredAuthorizeParameters(Request $request, &$reason, &$valid_request, $in_session = FALSE, &$params = NULL) {
+  public static function validateAuthorizeRequestParameters(Request $request, &$reason, &$valid_request, $in_session = FALSE, &$params = NULL) {
+
     foreach (self::$auth_parameters as $parameter) {
 
-      // response_type is optional, so check that it's really there.
-      if ($parameter == 'response_type') {
-        $check = $in_session ? (isset($_SESSION['indieauth']['response_type']) ? $_SESSION['indieauth']['response_type'] : '') : $request->query->get('response_type');
-        if (!empty($check) && $check != 'code') {
+      $value = $in_session ? (isset($_SESSION['indieauth'][$parameter]) ? $_SESSION['indieauth'][$parameter] : '') : $request->query->get($parameter);
+      if (empty($value) && !in_array($parameter, ['response_type', 'scope'])) {
+        $reason = "$parameter is empty";
+        $valid_request = FALSE;
+        break;
+      }
+      elseif ($parameter == 'response_type') {
+        if (!empty($value) && $value != 'code') {
           $valid_request = FALSE;
           $reason = "response type is not code";
           break;
         }
-        if (is_array($params)) {
-          $params['response_type'] = 'code';
-        }
+        // Set default value in case it was empty.
+        $value = 'code';
       }
-      else {
-        $check = $in_session ? (isset($_SESSION['indieauth'][$parameter]) ? $_SESSION['indieauth'][$parameter] : '') : $request->query->get($parameter);
-        if (empty($check)) {
-          $reason = "$parameter is empty";
-          $valid_request = FALSE;
-          break;
-        }
-        if (is_array($params)) {
-          $params[$parameter] = $check;
-        }
+
+      // Store the params.
+      if (is_array($params) && !empty($value)) {
+        $params[$parameter] = $value;
       }
     }
   }
 
   /**
-   * Check required parameters for an IndieAuth code request.
+   * Check request parameters for an IndieAuth code request.
    *
    * @param $request
    * @param $reason
    * @param $valid_request
    * @param $params
    */
-  public static function checkRequiredCodeParameters(Request $request, &$reason, &$valid_request, &$params = NULL) {
+  public static function validateAuthorizeCodeRequestParameters(Request $request, &$reason, &$valid_request, &$params = NULL) {
     foreach (self::$code_parameters as $parameter) {
-      if ($parameter == 'grant_type') {
 
-        $check = $request->request->get('grant_type');
-        if ($check != 'authorization_code') {
-          $valid_request = FALSE;
-          $reason = "grant_type is not authorization_code";
-          break;
-        }
-        if (is_array($params)) {
-          $params['grant_type'] = 'authorization_code';
-        }
+      $check = $request->request->get($parameter);
+
+      if (empty($check)) {
+        $reason = "$parameter is empty";
+        $valid_request = FALSE;
+        break;
       }
-      else {
-        $check = $request->request->get($parameter);
-        if (empty($check)) {
-          $reason = "$parameter is empty";
-          $valid_request = FALSE;
-          break;
-        }
-        if (is_array($params)) {
-          $params[$parameter] = $check;
-        }
+      elseif ($parameter == 'grant_type' && $check != 'authorization_code') {
+        $reason = "grant_type is not authorization_code";
+        $valid_request = FALSE;
+        break;
+      }
+
+      // Store the params.
+      if (is_array($params) && !empty($check)) {
+        $params[$parameter] = $check;
       }
     }
   }
@@ -224,7 +208,7 @@ class IndieAuthController extends ControllerBase {
 
     $params = [];
     $valid_request = TRUE;
-    self::checkRequiredCodeParameters($request, $reason, $valid_request, $params);
+    self::validateAuthorizeCodeRequestParameters($request, $reason, $valid_request, $params);
     if (!$valid_request) {
       $this->getLogger('indieweb_indieauth')->notice('Missing or invalid parameters to obtain code: @reason', ['@reason' => $reason]);
       return new JsonResponse('', 400);

@@ -27,7 +27,7 @@ class IndieAuthAuthorizeForm extends FormBase {
     $params = [];
     $reason = '';
     $valid_request = TRUE;
-    IndieAuthController::checkRequiredAuthorizeParameters(\Drupal::request(),  $reason, $valid_request, TRUE, $params );
+    IndieAuthController::validateAuthorizeRequestParameters(\Drupal::request(),  $reason, $valid_request, TRUE, $params );
 
     if (!$valid_request) {
       $this->getLogger('indieweb_indieauth')->notice('Missing or invalid parameters to authorize on form: @reason', ['@reason' => $reason]);
@@ -43,8 +43,10 @@ class IndieAuthAuthorizeForm extends FormBase {
     ];
 
     $scopes = [];
-    foreach (explode(' ', $params['scope']) as $s) {
-      $scopes[$s] = $s;
+    if (isset($params['scope'])) {
+      foreach (explode(' ', $params['scope']) as $s) {
+        $scopes[$s] = $s;
+      }
     }
     $form['scope'] = [
       '#title' => $this->t('The app is requesting the following <a href="https://indieweb.org/scope" target="_blank">scopes</a>'),
@@ -97,7 +99,7 @@ class IndieAuthAuthorizeForm extends FormBase {
     $params = $form_state->getValue('params');
 
     $scopes = [];
-    $scope = $form_state->getValue('scope');
+    $scope = $form_state->getValue('scope', []);
     foreach ($scope as $key => $value) {
       if ($key === $value) {
         $scopes[] = $key;
