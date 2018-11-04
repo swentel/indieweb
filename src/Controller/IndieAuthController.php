@@ -134,10 +134,11 @@ class IndieAuthController extends ControllerBase {
    */
   public static function checkRequiredAuthorizeParameters(Request $request, &$reason, &$valid_request, $in_session = FALSE, &$params = NULL) {
     foreach (self::$auth_parameters as $parameter) {
-      if ($parameter == 'response_type') {
 
+      // response_type is optional, so check that it's really there.
+      if ($parameter == 'response_type') {
         $check = $in_session ? (isset($_SESSION['indieauth']['response_type']) ? $_SESSION['indieauth']['response_type'] : '') : $request->query->get('response_type');
-        if ($check != 'code') {
+        if (!empty($check) && $check != 'code') {
           $valid_request = FALSE;
           $reason = "response type is not code";
           break;
