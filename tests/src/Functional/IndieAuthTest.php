@@ -54,7 +54,7 @@ class IndieAuthTest extends IndiewebBrowserTestBase {
    * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
    * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    */
-  public function testIndieAuth() {
+  public function _testIndieAuth() {
 
     // ------------------------------------------------------------------------
     // Header link expose.
@@ -370,6 +370,82 @@ class IndieAuthTest extends IndiewebBrowserTestBase {
     $options['query']['response_type'] = 'invalid_value_for_response_type';
     $this->drupalGet($auth_path, $options);
     $this->assertSession()->responseContains('Invalid request, missing parameters');
+
+    // -------------------------------------------------------
+    // Do the authentication dance, this flow asks for an
+    // authorization code, and a post request is made back to
+    // the auth endpoint to verify the user.
+    // -------------------------------------------------------
+
+    $options = [
+      'query' => [
+        'redirect_uri' => $redirect_uri,
+        'client_id' => 'Indigenous Android',
+        'me' => $me,
+        'state' => $state,
+      ]
+    ];
+    $this->drupalGet($auth_path, $options);
+
+    $edit = ['name' => $this->indiewebAuthorizedUser->getAccountName(), 'pass' => $this->indiewebAuthorizedUser->pass_raw];
+    $this->drupalPostForm(NULL, $edit, 'Log in');
+    $this->assertSession()->responseContains('would like to access your site');
+    $this->drupalPostForm(NULL, [], 'Authorize');
+    $url = parse_url($this->getUrl());
+    $query = [];
+    parse_str($url['query'],$query);
+    self::assertEquals($query['state'], $state);
+    $code = $query['code'];
+
+    // Call auth endpoint token now.
+    $params = [
+      'code' => $code,
+      'redirect_uri' => $redirect_uri,
+      'client_id' => 'Indigenous Android',
+    ];
+
+    // First with bad or missing client_id, code or redirect_uri
+    $post = $params;
+    $post['code'] = 'random';
+    $response = $this->postToUrl($post, $auth_path);
+    self::assertEquals(404, $response->getStatusCode());
+
+    $post = $params;
+    $post['redirect_uri'] = 'not matching';
+    $response = $this->postToUrl($post, $auth_path);
+    self::assertEquals(403, $response->getStatusCode());
+
+    $post = $params;
+    $post['client_id'] = 'another client';
+    $response = $this->postToUrl($post, $auth_path);
+    self::assertEquals(403, $response->getStatusCode());
+
+    $post = $params;
+    unset($post['code']);
+    $response = $this->postToUrl($post, $auth_path);
+    self::assertEquals(400, $response->getStatusCode());
+
+    $post = $params;
+    unset($post['client_id']);
+    $response = $this->postToUrl($post, $auth_path);
+    self::assertEquals(400, $response->getStatusCode());
+
+    $post = $params;
+    unset($post['redirect_uri']);
+    $response = $this->postToUrl($post, $auth_path);
+    self::assertEquals(400, $response->getStatusCode());
+
+    // Now a valid one.
+    $response = $this->postToUrl($params, $auth_path);
+    $body_response = $response->getBody()->__toString();
+    $body = @json_decode($body_response);
+    self::assertTrue(isset($body->me) && $body->me == $me);
+    self::assertEquals(200, $response->getStatusCode());
+
+    // Verify the authorization code is gone.
+    /** @var \Drupal\indieweb\Entity\IndieAuthAuthorizationCodeInterface $authorization_code */
+    $authorization_code = \Drupal::entityTypeManager()->getStorage('indieweb_indieauth_code')->getIndieAuthAuthorizationCode($params['code']);
+    self::assertFalse($authorization_code);
   }
 
   /**

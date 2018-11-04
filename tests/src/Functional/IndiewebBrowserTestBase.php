@@ -615,7 +615,7 @@ abstract class IndiewebBrowserTestBase extends BrowserTestBase {
   protected function createIndieAuthToken($scopes) {
     $values = [
       'access_token' => 'internal_indieauth_server',
-      'client' => 'test',
+      'client_id' => 'test',
       'uid' => 1,
       'expire' => 0,
       'scope' => $scopes,

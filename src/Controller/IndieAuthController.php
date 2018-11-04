@@ -3,6 +3,7 @@
 namespace Drupal\indieweb\Controller;
 
 use Drupal\Component\Utility\Random;
+use Drupal\Component\Utility\UrlHelper;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Url;
 use Drupal\indieweb\Entity\IndieAuthTokenInterface;
@@ -28,11 +29,22 @@ class IndieAuthController extends ControllerBase {
   ];
 
   /**
-   * The parameters needed for a code request.
+   * The parameters needed for a authentication verification request.
    *
    * @var array
    */
-  static $code_parameters = [
+  static $auth_verify_parameters = [
+    'client_id',
+    'code',
+    'redirect_uri',
+  ];
+
+  /**
+   * The parameters needed for a token request.
+   *
+   * @var array
+   */
+  static $token_parameters = [
     'code',
     'me',
     'redirect_uri',
@@ -46,8 +58,103 @@ class IndieAuthController extends ControllerBase {
    * @param \Symfony\Component\HttpFoundation\Request $request
    *
    * @return array|\Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
+   *
+   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
+   * @throws \Drupal\Core\Entity\EntityStorageException
    */
   public function auth(Request $request) {
+
+    $config = \Drupal::config('indieweb.indieauth');
+    $auth_enabled = $config->get('auth_internal');
+
+    // Early return when internal server is not enabled.
+    if (!$auth_enabled) {
+      return new Response($this->t('Page not found'), 404);
+    }
+
+    // Get the method.
+    $method = $request->getMethod();
+
+    // ------------------------------------------------------------------------
+    // POST request: verify a authentication request.
+    // See https://indieauth.spec.indieweb.org/#authorization-code-verification
+    // ------------------------------------------------------------------------
+
+    if ($method == 'POST') {
+
+      $reason = '';
+      $params = [];
+      $valid_request = TRUE;
+      self::validateAuthenticationRequestParameters($request, $reason, $valid_request, $params);
+      if (!$valid_request) {
+        $this->getLogger('indieweb_indieauth')->notice('Missing or invalid parameters to authentication request: @reason', ['@reason' => $reason]);
+        return new JsonResponse('', 400);
+      }
+
+      // Get authorization code.
+      /** @var \Drupal\indieweb\Entity\IndieAuthAuthorizationCodeInterface $authorization_code */
+      $authorization_code = $this->entityTypeManager()->getStorage('indieweb_indieauth_code')->getIndieAuthAuthorizationCode($params['code']);
+
+      if (!$authorization_code) {
+        $this->getLogger('indieweb_indieauth')->notice('No Authorization code found for @code', ['@code' => $params['code']]);
+        return new JsonResponse('', 404);
+      }
+
+      if (!$authorization_code->isValid()) {
+        $this->getLogger('indieweb_indieauth')->notice('Authorization expired for @code', ['@code' => $params['code']]);
+        return new JsonResponse('', 403);
+      }
+
+      // Verify the data from the request matches with the stored data.
+      $stored_data = [];
+      foreach (self::$auth_verify_parameters as $parameter) {
+        $stored = $authorization_code->get($parameter)->value;
+        $stored_data[] = $stored;
+        if ($stored != $params[$parameter]) {
+          $valid_request = FALSE;
+          break;
+        }
+      }
+
+      if (!$valid_request) {
+        $this->getLogger('indieweb_indieauth')->notice('Stored values do not match with request values: @stored_data -  @request', ['@stored_values' => $stored_data, '@request' => print_r($params, 1)]);
+        return new JsonResponse('', 403);
+      }
+
+      // Got to go.
+      $response = [
+        'me' => $authorization_code->get('me')->value,
+      ];
+
+      // Remove old code.
+      $authorization_code->delete();
+
+      return new JsonResponse($response, 200);
+    }
+
+    // ------------------------------------------------------------------------
+    // GET request: redirect to the auth/form url. We work like this since
+    // submitting the 'Authorize' form, we get into a POST request, which gets
+    // into the this controller again and we want to verify authorization
+    // requests here as well.
+    // See https://indieauth.spec.indieweb.org/#authentication-request
+    // ------------------------------------------------------------------------
+
+    if ($method == 'GET') {
+      $auth_form_path = Url::fromRoute('indieweb.indieauth.auth_form', [], ['query' => UrlHelper::filterQueryParameters($request->query->all())])->toString();
+      return new RedirectResponse($auth_form_path);
+    }
+  }
+
+  /**
+   * Authorize form screen.
+   *
+   * @param \Symfony\Component\HttpFoundation\Request $request
+   *
+   * @return array|\Symfony\Component\HttpFoundation\Response
+   */
+  public function authForm(Request $request) {
 
     $config = \Drupal::config('indieweb.indieauth');
     $auth_enabled = $config->get('auth_internal');
@@ -72,7 +179,7 @@ class IndieAuthController extends ControllerBase {
       if ($valid_request) {
         $_SESSION['indieauth'] = $params;
         $this->messenger()->addMessage($this->t('Login first with your account. You will be redirected to the authorize screen on success.'));
-        return new RedirectResponse(Url::fromRoute('user.login', [], ['query' => ['destination' => Url::fromRoute('indieweb.indieauth.auth')->toString()]])->toString());
+        return new RedirectResponse(Url::fromRoute('user.login', [], ['query' => ['destination' => Url::fromRoute('indieweb.indieauth.auth_form')->toString()]])->toString());
       }
 
       $this->getLogger('indieweb_indieauth')->notice('Missing or invalid parameters to authorize as anonymous: @reason', ['@reason' => $reason]);
@@ -113,6 +220,30 @@ class IndieAuthController extends ControllerBase {
   }
 
   /**
+   * Validate authentication verification request.
+   *
+   * @param \Symfony\Component\HttpFoundation\Request $request
+   * @param $reason
+   * @param $valid_request
+   * @param $params
+   */
+  public static function validateAuthenticationRequestParameters(Request $request, &$reason, &$valid_request, &$params) {
+    foreach (self::$auth_verify_parameters as $parameter) {
+      $check = $request->request->get($parameter);
+      if (empty($check)) {
+        $reason = "$parameter is empty";
+        $valid_request = FALSE;
+        break;
+      }
+
+      // Store the params.
+      if (is_array($params)) {
+        $params[$parameter] = $check;
+      }
+    }
+  }
+
+  /**
    * Check request parameters for an IndieAuth authorize request.
    *
    * response_type and code are optional.
@@ -134,13 +265,14 @@ class IndieAuthController extends ControllerBase {
         break;
       }
       elseif ($parameter == 'response_type') {
-        if (!empty($value) && $value != 'code') {
+        if (!empty($value) && ($value != 'code' && $value != 'id')) {
           $valid_request = FALSE;
-          $reason = "response type is not code";
+          $reason = "response type is not code or id ($value)";
           break;
         }
         // Set default value in case it was empty.
-        $value = 'code';
+        // See https://indieauth.spec.indieweb.org/#authentication-request
+        $value = 'id';
       }
 
       // Store the params.
@@ -158,8 +290,8 @@ class IndieAuthController extends ControllerBase {
    * @param $valid_request
    * @param $params
    */
-  public static function validateAuthorizeCodeRequestParameters(Request $request, &$reason, &$valid_request, &$params = NULL) {
-    foreach (self::$code_parameters as $parameter) {
+  public static function validateTokenRequestParameters(Request $request, &$reason, &$valid_request, &$params = NULL) {
+    foreach (self::$token_parameters as $parameter) {
 
       $check = $request->request->get($parameter);
 
@@ -208,7 +340,7 @@ class IndieAuthController extends ControllerBase {
 
     $params = [];
     $valid_request = TRUE;
-    self::validateAuthorizeCodeRequestParameters($request, $reason, $valid_request, $params);
+    self::validateTokenRequestParameters($request, $reason, $valid_request, $params);
     if (!$valid_request) {
       $this->getLogger('indieweb_indieauth')->notice('Missing or invalid parameters to obtain code: @reason', ['@reason' => $reason]);
       return new JsonResponse('', 400);
@@ -234,7 +366,7 @@ class IndieAuthController extends ControllerBase {
       'expire' => 0,
       'changed' => 0,
       'access_token' => $random->name(128),
-      'client' => $authorization_code->get('client')->value,
+      'client_id' => $authorization_code->get('client_id')->value,
       'uid' => $authorization_code->get('uid')->target_id,
       'scope' => implode(' ', $authorization_code->getScopes()),
     ];
@@ -248,6 +380,7 @@ class IndieAuthController extends ControllerBase {
 
     $data = [
       'me' => $params['me'],
+      'token_type' => 'Bearer',
       'scope' => $token->getScopesAsString(),
       'access_token' => $token->getAccessToken(),
     ];

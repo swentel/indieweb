@@ -110,13 +110,23 @@ class IndieAuthAuthorizationCode extends ContentEntityBase implements IndieAuthA
       ->setRequired(TRUE)
       ->setSetting('max_length', 255);
 
+    $fields['me'] = BaseFieldDefinition::create('string')
+      ->setLabel(t('The url owner'))
+      ->setRequired(FALSE)
+      ->setSetting('max_length', 255);
+
     $fields['scope'] = BaseFieldDefinition::create('string')
       ->setLabel(t('Scopes'))
       ->setRequired(FALSE)
       ->setSetting('max_length', 255);
 
-    $fields['client'] = BaseFieldDefinition::create('string')
-      ->setLabel(t('client'))
+    $fields['client_id'] = BaseFieldDefinition::create('string')
+      ->setLabel(t('The client ID'))
+      ->setRequired(FALSE)
+      ->setSetting('max_length', 255);
+
+    $fields['redirect_uri'] = BaseFieldDefinition::create('string')
+      ->setLabel(t('redirect_uri'))
       ->setRequired(FALSE)
       ->setSetting('max_length', 255);
 

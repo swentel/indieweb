@@ -31,7 +31,7 @@ class IndieAuthAuthorizationCodeListBuilder extends EntityListBuilder {
     $row['status'] = $entity->get('status')->value ? t('Active') : t('Revoked');
     $expires = $entity->get('expire')->value ? \Drupal::service('date.formatter')->format($entity->get('expire')->value, 'short') : t('Never');
     $row['expire'] = $expires;
-    $row['client'] = $entity->get('client')->value;
+    $row['client'] = $entity->get('client_id')->value;
     return $row + parent::buildRow($entity);
   }
 

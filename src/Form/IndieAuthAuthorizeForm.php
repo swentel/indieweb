@@ -108,16 +108,16 @@ class IndieAuthAuthorizeForm extends FormBase {
 
     // Generate code.
     $random = new Random();
-    // TODO encrypt the code ?
     $code = $random->name(120);
     $values = [
       'code' => $code,
-      // TODO does it expire anyway ?
-      'expire' => \Drupal::time()->getRequestTime() + 3600,
-      'uid' => $this->currentUser()->id(),
       'status' => 1,
-      'client' => $params['client_id'],
+      'me' => $params['me'],
+      'uid' => $this->currentUser()->id(),
+      'client_id' => $params['client_id'],
       'scope' => implode(' ', $scopes),
+      'redirect_uri' => $params['redirect_uri'],
+      'expire' => \Drupal::time()->getRequestTime() + 3600,
     ];
     $authorization_code = \Drupal::entityTypeManager()->getStorage('indieweb_indieauth_code')->create($values);
     $authorization_code->save();

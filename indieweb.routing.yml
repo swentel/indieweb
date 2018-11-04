@@ -70,6 +70,14 @@ indieweb.indieauth.auth:
   requirements:
     _access: 'TRUE'
 
+indieweb.indieauth.auth_form:
+  path: '/indieauth/auth/form'
+  defaults:
+    _controller: '\Drupal\indieweb\Controller\IndieAuthController::authForm'
+    _title: 'Authorize form'
+  requirements:
+    _access: 'TRUE'
+
 indieweb.indieauth.token:
   path: '/indieauth/token'
   defaults:
