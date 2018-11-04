@@ -114,8 +114,8 @@ indieweb.admin.microsub_sources:
 indieweb.webmention.notify:
   path: '/webmention/notify'
   defaults:
-    _controller: '\Drupal\indieweb\Controller\WebmentionController::endpoint'
-    _title: 'Pingback and Webmention endpoint'
+    _controller: '\Drupal\indieweb\Controller\WebmentionController::webhook'
+    _title: 'Pingback and Webmention webhook endpoint'
   requirements:
     _access: 'TRUE'
 

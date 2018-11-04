@@ -1602,8 +1602,7 @@ function indieweb_handle_post_context_queue() {
       // TODO we should make a helper service here, as microsub client does this
       // as well (in various ways :/)
       try {
-        $options = ['headers' => ['User-Agent' => 'IndieWeb Drupal Microsub server at ' . \Drupal::request()->getSchemeAndHttpHost()]];
-        $response = \Drupal::httpClient()->get($data['url'], $options);
+        $response = \Drupal::httpClient()->get($data['url']);
         $body = $response->getBody()->getContents();
 
         $parsed = $xray->parse($data['url'], $body, ['expect'=>'feed']);

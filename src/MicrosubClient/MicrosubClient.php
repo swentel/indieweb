@@ -44,8 +44,7 @@ class MicrosubClient implements MicrosubClientInterface {
       try {
 
         // Get content.
-        $options = ['headers' => ['User-Agent' => 'IndieWeb Drupal Microsub server at ' . \Drupal::request()->getSchemeAndHttpHost()]];
-        $response = \Drupal::httpClient()->get($url, $options);
+        $response = \Drupal::httpClient()->get($url);
         $body = $response->getBody()->getContents();
 
         $hash = md5($body);
@@ -212,8 +211,7 @@ class MicrosubClient implements MicrosubClientInterface {
       try {
 
         // Get content.
-        $options = ['headers' => ['User-Agent' => 'IndieWeb Drupal Microsub server at ' . \Drupal::request()->getSchemeAndHttpHost()]];
-        $response = \Drupal::httpClient()->get($url, $options);
+        $response = \Drupal::httpClient()->get($url);
         $body = $response->getBody()->getContents();
 
         $parsed = $xray->parse($url, $body, ['expect'=>'feed']);

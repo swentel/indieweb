@@ -87,12 +87,12 @@ class WebmentionController extends ControllerBase {
   }
 
   /**
-   * Routing callback: receive webmentions and pingbacks.
+   * Routing callback: receive webmentions and pingbacks from an external
+   * service, most likely being webmention.io
    *
-   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
-   * @throws \Drupal\Core\Entity\EntityStorageException
+   * @return \Symfony\Component\HttpFoundation\JsonResponse
    */
-  public function endpoint() {
+  public function webhook() {
     $valid = FALSE;
 
     $config = \Drupal::config('indieweb.webmention');
