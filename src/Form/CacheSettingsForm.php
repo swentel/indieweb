@@ -41,13 +41,9 @@ class CacheSettingsForm extends ConfigFormBase {
       '#description' => $this->t('Leave this disabled if you are not using the built-in webmention or microsub endpoint.')
     ];
 
-    $imagecache_external_module_enabled = $module_handler->moduleExists('imagecache_external');
-    $form['cache']['use_imagecache_external'] = [
-      '#type' => 'checkbox',
-      '#default_value' => $config->get('use_imagecache_external'),
-      '#title' => $this->t('Use imagecache external'),
-      '#disabled' => !$imagecache_external_module_enabled,
-      '#description' => $this->t('Uses the Imagecache external module to download image files locally. This is applied to author avatars and images in microsub posts.'),
+    $form['imagecache_external'] = [
+      '#type' => 'fieldset',
+      '#title' => $this->t('Imagecache external'),
       '#states' => array(
         'visible' => array(
           ':input[name="enable"]' => array('checked' => TRUE),
@@ -55,7 +51,16 @@ class CacheSettingsForm extends ConfigFormBase {
       ),
     ];
 
-    $form['cache']['image_style_avatar'] = [
+    $imagecache_external_module_enabled = $module_handler->moduleExists('imagecache_external');
+    $form['imagecache_external']['use_imagecache_external'] = [
+      '#type' => 'checkbox',
+      '#default_value' => $config->get('use_imagecache_external'),
+      '#title' => $this->t('Use imagecache external'),
+      '#disabled' => !$imagecache_external_module_enabled,
+      '#description' => $this->t('Uses the Imagecache external module to download image files locally. This is applied to author avatars and images in microsub posts.'),
+    ];
+
+    $form['imagecache_external']['image_style_avatar'] = [
       '#type' => 'select',
       '#options' => image_style_options(),
       '#default_value' => $config->get('image_style_avatar'),
@@ -65,12 +70,11 @@ class CacheSettingsForm extends ConfigFormBase {
       '#states' => array(
         'visible' => array(
           ':input[name="use_imagecache_external"]' => array('checked' => TRUE),
-          ':input[name="enable"]' => array('checked' => TRUE),
         ),
       ),
     ];
 
-    $form['cache']['image_style_photo'] = [
+    $form['imagecache_external']['image_style_photo'] = [
       '#type' => 'select',
       '#options' => image_style_options(),
       '#default_value' => $config->get('image_style_photo'),
@@ -80,23 +84,21 @@ class CacheSettingsForm extends ConfigFormBase {
       '#states' => array(
         'visible' => array(
           ':input[name="use_imagecache_external"]' => array('checked' => TRUE),
-          ':input[name="enable"]' => array('checked' => TRUE),
         ),
       ),
     ];
 
     if (!$imagecache_external_module_enabled) {
-      $form['cache']['use_imagecache_external']['#description'] = $this->t('You need to install the <a href="https://www.drupal.org/project/imagecache_external" target="_blank">Imagecache external</a> module for this feature to work.');
+      $form['imagecache_external']['use_imagecache_external']['#description'] = $this->t('You need to install the <a href="https://www.drupal.org/project/imagecache_external" target="_blank">Imagecache external</a> module for this feature to work.');
     }
 
-    $form['cache']['ignore_webmention_io'] = [
+    $form['imagecache_external']['ignore_webmention_io'] = [
       '#title' => $this->t('Ignore Webmention IO'),
       '#type' => 'checkbox',
       '#default_value' => $config->get('ignore_webmention_io'),
       '#description' => $this->t('If you previously used Webmention IO, the images for author avatars already are cached in a proxy there. Toggle this to keep using that proxy.'),
       '#states' => array(
         'visible' => array(
-          ':input[name="enable"]' => array('checked' => TRUE),
           ':input[name="use_imagecache_external"]' => array('checked' => TRUE),
         ),
       ),
