@@ -414,21 +414,39 @@ indieweb.webmention:
     webmention_endpoint:
       type: string
       label: 'Webmention endpoint'
+    webmention_notify:
+      type: boolean
+      label: 'Whether to enable the notify endpoint'
     webmention_secret:
       type: string
       label: 'Webmention secret'
-    pingback_endpoint:
-      type: string
-      label: 'Pingback endpoint'
-    webmention_enable:
+    webmention_internal:
       type: boolean
-      label: 'Whether to allow webmentions'
+      label: 'Whether to use the internal endpoint'
+    webmention_internal_handler:
+      type: 'string'
+      label: 'Internal handler to process the webmention'
+    webmention_log_processing:
+      type: boolean
+      label: 'Whether to log the processing of received webmentions'
     webmention_detect_identical:
       type: boolean
       label: 'Whether to detect identical webmentions and not store them'
-    pingback_enable:
+    webmention_expose_header_link:
       type: boolean
-      label: 'Whether to allow pingbacks'
+      label: 'Whether to expose the webmention header link'
+    pingback_internal:
+      type: boolean
+      label: 'Whether to use the internal pingback endpoint'
+    pingback_expose_header_link:
+      type: boolean
+      label: 'Whether to expose the pingback header link'
+    pingback_notify:
+      type: boolean
+      label: 'Whether to use the notification pingback endpoint'
+    pingback_endpoint:
+      type: string
+      label: 'Pingback endpoint'
     webmention_uid:
       type: integer
       label: 'The user id of the article'

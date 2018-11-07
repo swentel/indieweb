@@ -9,6 +9,24 @@ use Drupal\node\Entity\Node;
 use Drupal\node\NodeInterface;
 
 /**
+ * Implements hook_theme().
+ */
+function indieweb_test_theme($existing, $type, $theme, $path) {
+  return [
+    'post_type_like_twitter' => ['variables' => ['target_url' => NULL]],
+    'post_type_like_site' => ['variables' => ['target_url' => NULL]],
+    'post_type_reply_twitter' => ['variables' => ['target_url' => NULL]],
+    'post_type_reply_site' => ['variables' => ['target_url' => NULL]],
+    'post_type_reply_fediverse' => ['variables' => ['target_url' => NULL]],
+    'post_type_repost_twitter' => ['variables' => ['target_url' => NULL]],
+    'post_type_mention_twitter' => ['variables' => ['target_url' => NULL]],
+    'post_type_bookmark_site' => ['variables' => ['target_url' => NULL]],
+    'post_type_follow_fediverse' => ['variables' => ['target_url' => NULL]],
+    'post_type_rsvp_site' => ['variables' => ['target_url' => NULL]],
+  ];
+}
+
+/**
  * Implements hook_indieweb_micropub_node_pre_create_alter().
  */
 function indieweb_test_indieweb_micropub_node_pre_create_alter(&$values, &$payload) {

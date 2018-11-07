@@ -61,3 +61,112 @@ indieweb_test.indieauth.login.endpoint:
     _title: 'Login endpoint'
   requirements:
     _access: 'TRUE'
+
+indieweb_test.webmention_like_twitter:
+  path: '/webmention-like-twitter/{theme}/{nid}'
+  defaults:
+    _controller: '\Drupal\indieweb_test\Controller\IndiewebTestController::webmentionPostType'
+    _title: 'Webmention like twitter'
+    theme: 'post_type_like_twitter'
+    nid: 1
+  requirements:
+    _access: 'TRUE'
+
+indieweb_test.webmention_like_site:
+  path: '/webmention-like-site/{theme}/{nid}'
+  defaults:
+    _controller: '\Drupal\indieweb_test\Controller\IndiewebTestController::webmentionPostType'
+    _title: 'Webmention like site'
+    theme: 'post_type_like_site'
+    nid: 1
+  requirements:
+    _access: 'TRUE'
+
+indieweb_test.webmention_reply_twitter:
+  path: '/webmention-reply-twitter/{theme}/{nid}'
+  defaults:
+    _controller: '\Drupal\indieweb_test\Controller\IndiewebTestController::webmentionPostType'
+    _title: 'Webmention reply twitter'
+    theme: 'post_type_reply_twitter'
+    nid: 1
+  requirements:
+    _access: 'TRUE'
+
+indieweb_test.webmention_reply_site:
+  path: '/webmention-reply-site/{theme}/{nid}'
+  defaults:
+    _controller: '\Drupal\indieweb_test\Controller\IndiewebTestController::webmentionPostType'
+    _title: 'Webmention reply site'
+    theme: 'post_type_reply_site'
+    nid: 1
+  requirements:
+    _access: 'TRUE'
+
+indieweb_test.webmention_reply_fediverse:
+  path: '/webmention-reply-fediverse/{theme}/{nid}'
+  defaults:
+    _controller: '\Drupal\indieweb_test\Controller\IndiewebTestController::webmentionPostType'
+    _title: 'Webmention reply fediverse'
+    theme: 'post_type_reply_fediverse'
+    nid: 1
+  requirements:
+    _access: 'TRUE'
+
+indieweb_test.webmention_repost_twitter:
+  path: '/webmention-repost-twitter/{theme}/{nid}'
+  defaults:
+    _controller: '\Drupal\indieweb_test\Controller\IndiewebTestController::webmentionPostType'
+    _title: 'Webmention repost twitter'
+    theme: 'post_type_repost_twitter'
+    nid: 1
+  requirements:
+    _access: 'TRUE'
+
+indieweb_test.webmention_mention_twitter:
+  path: '/webmention-mention-twitter/{theme}/{nid}'
+  defaults:
+    _controller: '\Drupal\indieweb_test\Controller\IndiewebTestController::webmentionPostType'
+    _title: 'Webmention mention twitter'
+    theme: 'post_type_mention_twitter'
+    nid: 0
+  requirements:
+    _access: 'TRUE'
+
+indieweb_test.webmention_bookmark_site:
+  path: '/webmention-bookmark-site/{theme}/{nid}'
+  defaults:
+    _controller: '\Drupal\indieweb_test\Controller\IndiewebTestController::webmentionPostType'
+    _title: 'Webmention bookmark site'
+    theme: 'post_type_bookmark_site'
+    nid: 1
+  requirements:
+    _access: 'TRUE'
+
+indieweb_test.webmention_rsvp_site:
+  path: '/webmention-rsvp-site/{theme}/{nid}'
+  defaults:
+    _controller: '\Drupal\indieweb_test\Controller\IndiewebTestController::webmentionPostType'
+    _title: 'Webmention rsvp site'
+    theme: 'post_type_rsvp_site'
+    nid: 1
+  requirements:
+    _access: 'TRUE'
+
+indieweb_test.webmention_follow_fediverse:
+  path: '/webmention-follow-fediverse/{theme}/{nid}'
+  defaults:
+    _controller: '\Drupal\indieweb_test\Controller\IndiewebTestController::webmentionPostType'
+    _title: 'Webmention follow fediverse'
+    theme: 'post_type_follow_fediverse'
+    nid: 1
+  requirements:
+    _access: 'TRUE'
+
+indieweb_test.webmention_exception:
+  path: '/webmention-exception'
+  defaults:
+    _controller: '\Drupal\indieweb_test\Controller\IndiewebTestController::webmentionPostTypeException'
+    _title: 'Webmention exception'
+  requirements:
+    _access: 'TRUE'
+

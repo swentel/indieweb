@@ -15,7 +15,8 @@ interface MicrosubClientInterface {
    * Send notification from a webmention.
    *
    * @param \Drupal\indieweb\Entity\WebmentionInterface $webmention
+   * @param $parsed
    */
-  public function sendNotification(WebmentionInterface $webmention);
+  public function sendNotification(WebmentionInterface $webmention, $parsed = NULL);
 
 }

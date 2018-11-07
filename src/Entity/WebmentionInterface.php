@@ -43,4 +43,18 @@ interface WebmentionInterface extends ContentEntityInterface, EntityChangedInter
    */
   public function isPublished();
 
+  /**
+   * Returns the source.
+   *
+   * @return string
+   */
+  public function getSource();
+
+  /**
+   * Returns the target.
+   *
+   * @return string
+   */
+  public function getTarget();
+
 }

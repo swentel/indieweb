@@ -1,9 +1,15 @@
 webmention_endpoint: ''
 webmention_secret: ''
-pingback_endpoint: ''
-webmention_enable: false
+webmention_internal: false
+webmention_internal_handler: 'disabled'
+webmention_log_processing: false
+webmention_notify: false
+webmention_expose_header_link: false
 webmention_detect_identical: false
-pingback_enable: false
+pingback_internal: false
+pingback_notify: false
+pingback_endpoint: ''
+pingback_expose_header_link: false
 webmention_uid: 1
 webmention_log_payload: true
 syndication_targets: "Twitter (bridgy)|https://brid.gy/publish/twitter"

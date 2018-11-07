@@ -365,3 +365,25 @@ function indieweb_update_8011() {
   $indieauth->set('auth_internal', FALSE);
   $indieauth->save();
 }
+
+/**
+ * Cleanup of indieweb.webmention configuration.
+ */
+function indieweb_update_8012() {
+  $webmention = \Drupal::configFactory()->getEditable('indieweb.webmention');
+
+  // Webmention cleanup
+  $webmention->set('webmention_notify', $webmention->get('webmention_enable'));
+  $webmention->set('webmention_expose_header_link', !empty($webmention->get('webmention_endpoint') && $webmention->get('webmention_enable')));
+  $webmention->clear('webmention_enable');
+  $webmention->set('webmention_internal', FALSE);
+  $webmention->set('webmention_internal_handler', 'disabled');
+
+  // Pingback cleanup
+  $webmention->set('pingback_notify', $webmention->get('pingback_enable'));
+  $webmention->set('pingback_expose_header_link', !empty($webmention->get('pingback_endpoint') && $webmention->get('pingback_enable')));
+  $webmention->clear('pingback_enable');
+  $webmention->set('pingback_internal', FALSE);
+
+  $webmention->save();
+}

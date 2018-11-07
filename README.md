@@ -7,11 +7,12 @@ For more information about IndieWeb, see https://indieweb.org/.
 
 Current functionality:
 
-- Send and receive webmentions and pingbacks via Webmention.io
-- Syndicate content, likes etc via [brid.gy](https://brid.gy), store syndications
+- Receive webmentions and pingbacks via Webmention.io or internal endpoint
+- Send webmentions and syndicate content, likes etc via [brid.gy](https://brid.gy), store syndications
 - Microformats for content, images and more
 - Allow users to login and create accounts with IndieAuth
-- Internal or external IndieAuth Authentication API
+- Built-in IndieAuth Authorization and Authentication API, or use external service
+- Microsub built-in server or use external service
 - Micropub
   - Create content note, article, event, rsvp, reply, like, repost, bookmark and issue
   - Updating content is currently limited to changing the published status, title and body of nodes and comments
@@ -20,9 +21,9 @@ Current functionality:
 - Auto-create comments from 'in-reply-to'
 - Reply on comments and send webmention
 - Feeds: microformats, atom and jf2
-- Microsub built-in server, or use external service
 - Send a micropub post to Aperture on incoming webmentions
 - Fetch post context for content or microsub items
+- Blocks for rendering webmentions, RSVP, signing in
 - Fediverse integration
 
 More information is in this README and on the help pages.
@@ -63,6 +64,8 @@ links is available at admin/content/webmentions.
 To create an account, you need to authenticate with https://indieauth.com/ which requires you to add the "rel=me"
 attribute on links to your social accounts. See https://indieauth.com/setup for full instructions. See also Indieauth
 further below.
+
+You can also use the built-in endpoint so you don't need to rely on external services.
 
 - Configuration is at /admin/config/services/indieweb/webmention
 - Overview of all collected webmentions and pingbacks are at /admin/content/webmention

@@ -11,6 +11,10 @@ function indieweb_drush_command() {
       'description' => 'Send webmentions',
       'aliases' => ['isw'],
     ],
+    'indieweb-process-webmentions' => [
+      'description' => 'Process webmentions',
+      'aliases' => ['ipw'],
+    ],
     'indieweb-fetch-post-contexts' => [
       'description' => 'Fetch post contexts',
       'aliases' => ['ifpr'],
@@ -37,6 +41,15 @@ function indieweb_drush_command() {
 function drush_indieweb_send_webmentions() {
   if (\Drupal::config('indieweb.webmention')->get('send_webmention_handler') == 'drush') {
     indieweb_handle_webmention_queue();
+  }
+}
+
+/**
+ * Process webmentions.
+ */
+function drush_indieweb_process_webmentions() {
+  if (\Drupal::config('indieweb.webmention')->get('webmention_internal_handler') == 'drush') {
+    \Drupal::service('indieweb.webmention.client')->processWebmentions();
   }
 }
 

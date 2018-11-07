@@ -117,6 +117,20 @@ class Webmention extends ContentEntityBase implements WebmentionInterface {
   /**
    * {@inheritdoc}
    */
+  public function getSource() {
+    return $this->get('source')->value;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getTarget() {
+    return $this->get('target')->value;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public static function baseFieldDefinitions(EntityTypeInterface $entity_type) {
     $fields = parent::baseFieldDefinitions($entity_type);
 

@@ -5,6 +5,8 @@ namespace Drupal\Tests\indieweb\Functional;
 use Drupal\Core\Url;
 use Drupal\node\NodeInterface;
 use Drupal\Tests\BrowserTestBase;
+use GuzzleHttp\Exception\ClientException;
+use GuzzleHttp\Exception\ServerException;
 
 /**
  * Provides the base class for web tests for Indieweb.
@@ -57,6 +59,13 @@ abstract class IndiewebBrowserTestBase extends BrowserTestBase {
    * @var string
    */
   protected $summary_text = 'A summary';
+
+  /**
+   * The HTTP client.
+   *
+   * @var \GuzzleHttp\ClientInterface
+   */
+  protected $httpClient;
 
   /**
    * {@inheritdoc}
@@ -123,17 +132,21 @@ abstract class IndiewebBrowserTestBase extends BrowserTestBase {
   }
 
   /**
-   * Enable webmention functionality in the UI.
+   * Configures webmention functionality in the UI.
    *
    * @param $edit
    */
-  protected function enableWebmention($edit = []) {
+  protected function configureWebmention($edit = []) {
     $edit += [
-      'webmention_enable' => 1,
-      'pingback_enable' => 1,
+      'webmention_internal' => FALSE,
+      'webmention_notify' => TRUE,
+      'webmention_expose_header_link' => TRUE,
       'webmention_uid' => $this->adminUser->id(),
       'webmention_secret' => 'valid_secret',
       'webmention_endpoint' => 'https://webmention.io/example.com/webmention',
+      'pingback_notify' => TRUE,
+      'pingback_expose_header_link' => TRUE,
+      'pingback_internal' => FALSE,
       'pingback_endpoint' => 'https://webmention.io/webmention?forward=http://example.com/webmention/notify',
     ];
     $this->drupalPostForm('admin/config/services/indieweb/webmention', $edit, 'Save configuration');
@@ -177,15 +190,25 @@ abstract class IndiewebBrowserTestBase extends BrowserTestBase {
     $this->drupalLogout();
   }
 
+    /**
+   * Assert comment count.
+   *
+   * @param $count
+   */
+  protected function assertCommentCount($count) {
+    $comment_count = \Drupal::database()->query('SELECT count(cid) FROM {comment_field_data}')->fetchField();
+    self::assertEquals($count, $comment_count);
+  }
+
   /**
-   * Gets a minimum webmention payload.
+   * Gets a minimum webmention notification payload.
    *
    * @param $node
    * @param string $secret
    *
    * @return array
    */
-  protected function getWebmentionPayload(NodeInterface $node, $secret = 'in_valid_secret') {
+  protected function getWebmentionNotificationPayload(NodeInterface $node, $secret = 'in_valid_secret') {
 
     $webmention = [
       'secret' => $secret,
@@ -204,7 +227,7 @@ abstract class IndiewebBrowserTestBase extends BrowserTestBase {
   }
 
   /**
-   * Sends a webmention request.
+   * Sends a webmention notification request.
    *
    * @param $post
    * @param $json
@@ -237,6 +260,68 @@ abstract class IndiewebBrowserTestBase extends BrowserTestBase {
     }
 
     return $status_code;
+  }
+
+  /**
+   * Sends a pingback request.
+   *
+   * @param $post
+   * @param $internal = FALSE
+   *
+   * @return int $status_code
+   */
+  protected function sendPingbackRequest($post = [], $internal = FALSE) {
+
+    $endpoint = Url::fromRoute('indieweb.pingback.notify', [], ['absolute' => TRUE])->toString();
+    if ($internal) {
+      $endpoint = Url::fromRoute('indieweb.pingback.internal', [], ['absolute' => TRUE])->toString();
+    }
+
+    $client = \Drupal::httpClient();
+    try {
+      $response = $client->post($endpoint, ['form_params' => $post]);
+      $status_code = $response->getStatusCode();
+    }
+    catch (\Exception $e) {
+      $status_code = 400;
+      if (strpos($e->getMessage(), '404 Not Found') !== FALSE) {
+        $status_code = 404;
+      }
+    }
+
+    return $status_code;
+  }
+
+  /**
+   * Sends an internal webmention request.
+   *
+   * @param $source_url
+   * @param $target_url
+   *
+   * @return null|\Psr\Http\Message\ResponseInterface
+   *
+   * @throws \GuzzleHttp\Exception\GuzzleException
+   */
+  protected function sendWebmentionInternalRequest($source_url, $target_url) {
+
+    $post = [
+      'source' => $source_url,
+      'target' => $target_url,
+    ];
+
+    $url = Url::fromRoute('indieweb.webmention.internal')->toString();
+
+    try {
+      $response = $this->httpClient->request('post', $url, ['form_params' => $post]);
+    }
+    catch (ClientException $e) {
+      $response = $e->getResponse();
+    }
+    catch (ServerException $e) {
+      $response = $e->getResponse();
+    }
+
+    return $response;
   }
 
   /**

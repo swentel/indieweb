@@ -21,6 +21,17 @@ class IndiewebCommands extends DrushCommands {
   }
 
   /**
+   * Process webmentions
+   *
+   * @command indieweb:process-webmentions
+   * @aliases ipw,indieweb-process-webmentions
+   */
+  public function processWebmentions() {
+    module_load_include('inc', 'indieweb', 'indieweb.drush');
+    drush_indieweb_process_webmentions();
+  }
+
+  /**
    * Fetch post contexts
    *
    * @command indieweb:fetch-post-contexts

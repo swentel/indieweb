@@ -189,7 +189,7 @@ class MicrosubClient implements MicrosubClientInterface {
   /**
    * {@inheritdoc}
    */
-  public function sendNotification(WebmentionInterface $webmention) {
+  public function sendNotification(WebmentionInterface $webmention, $parsed = NULL) {
     $microsub = \Drupal::config('indieweb.microsub');
 
     // Send to aperture.
@@ -210,12 +210,14 @@ class MicrosubClient implements MicrosubClientInterface {
 
       try {
 
-        // Get content.
-        $response = \Drupal::httpClient()->get($url);
-        $body = $response->getBody()->getContents();
+        // Get content if parsed is not set.
+        if (!isset($parsed)) {
+          $response = \Drupal::httpClient()->get($url);
+          $body = $response->getBody()->getContents();
+          $parsed = $xray->parse($url, $body);
+        }
 
-        $parsed = $xray->parse($url, $body, ['expect'=>'feed']);
-        if ($parsed && isset($parsed['data']['type']) && $parsed['data']['type'] == 'feed') {
+        if ($parsed && isset($parsed['data']['type']) && $parsed['data']['type'] == 'entry') {
             $item = $parsed['data']['items'][0];
 
             foreach (['like-of', 'repost-of', 'bookmark-of', 'in-reply-to', 'mention-of'] as $item_url) {

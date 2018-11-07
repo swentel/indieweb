@@ -119,11 +119,35 @@ indieweb.admin.microsub_sources:
     _permission: 'administer indieweb'
     indieweb_microsub_channel: \d+
 
+indieweb.webmention.internal:
+  path: '/webmention/receive'
+  defaults:
+    _controller: '\Drupal\indieweb\Controller\WebmentionController::webmentionInternal'
+    _title: 'Webmention internal endpoint'
+  requirements:
+    _access: 'TRUE'
+
 indieweb.webmention.notify:
   path: '/webmention/notify'
   defaults:
-    _controller: '\Drupal\indieweb\Controller\WebmentionController::webhook'
-    _title: 'Pingback and Webmention webhook endpoint'
+    _controller: '\Drupal\indieweb\Controller\WebmentionController::webmentionNotify'
+    _title: 'Webmention notification endpoint'
+  requirements:
+    _access: 'TRUE'
+
+indieweb.pingback.internal:
+  path: '/pingback/receive'
+  defaults:
+    _controller: '\Drupal\indieweb\Controller\WebmentionController::pingbackInternal'
+    _title: 'Pingback internal endpoint'
+  requirements:
+    _access: 'TRUE'
+
+indieweb.pingback.notify:
+  path: '/pingback/notify'
+  defaults:
+    _controller: '\Drupal\indieweb\Controller\WebmentionController::pingbackNotify'
+    _title: 'Pingback notification endpoint'
   requirements:
     _access: 'TRUE'
 

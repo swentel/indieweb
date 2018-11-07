@@ -113,4 +113,30 @@ class IndiewebTestController extends ControllerBase {
     return new Response('Page not found', 404);
   }
 
+  /**
+   * Webmention post type callback.
+   *
+   * @param $theme
+   * @param $nid
+   *
+   * @return array
+   */
+  public function webmentionPostType($theme, $nid) {
+    if ($nid) {
+      $url = Url::fromRoute('entity.node.canonical', ['node' => $nid], ['absolute' => TRUE])->toString();
+    }
+    else {
+      $url = \Drupal::request()->getSchemeAndHttpHost() . '/';
+    }
+    return ['#theme' => $theme, '#target_url' => $url];
+  }
+
+  /**
+   * Webmention post type callback with exception
+   */
+  public function webmentionPostTypeException($theme, $nid) {
+    // Intentionally return a string, so that it fatals in Drupal.
+    return 'exception';
+  }
+
 }

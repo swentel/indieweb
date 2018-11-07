@@ -2,8 +2,6 @@
 
 namespace Drupal\Tests\indieweb\Functional;
 
-use Drupal\Core\Url;
-use Drupal\indieweb_test\WebmentionClient\WebmentionClientTest;
 use Drupal\user\Entity\Role;
 use Drupal\user\RoleInterface;
 
@@ -27,22 +25,28 @@ class RsvpTest extends IndiewebBrowserTestBase {
 
   /**
    * Tests RSVP block and allow authenticated users to RSVP
+   *
+   * @throws \Behat\Mink\Exception\ExpectationException
+   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    */
   public function testRsvpBlockAndAuthenticatedUsers() {
 
     $this->drupalLogin($this->adminUser);
-    $this->enableWebmention();
+    $this->configureWebmention();
 
     $this->placeBlock('indieweb_rsvp', ['region' => 'content', 'label' => 'RSVP title block', 'id' => 'rsvp']);
     $this->createPage();
     $this->createPage();
+
+    /** @var \Drupal\node\NodeInterface $node */
     $node = \Drupal::entityTypeManager()->getStorage('node')->load(1);
     $this->drupalLogout();
 
     $this->drupalGet('node/1');
     $this->assertSession()->responseNotContains('RSVP title block');
 
-    $webmention = $this->getWebmentionPayload($node, 'valid_secret');
+    $webmention = $this->getWebmentionNotificationPayload($node, 'valid_secret');
     $webmention['target'] = '/node/' . $node->id();
     $webmention['post']['rsvp'] = 'yes';
     $webmention['post']['wm-property'] = 'rsvp';

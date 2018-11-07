@@ -36,7 +36,7 @@ function indieweb_help($route_name, RouteMatchInterface $route_match) {
   $help = [
     'indieweb.admin.webmention_settings' => [
       'title' => 'Receiving webmentions',
-      'text' => '<p>' . t('The easiest way to start receiving webmentions and pingbacks for any page is by using <a href="https://webmention.io/" target="_blank">https://webmention.io</a>. <br />You have to create an account by signing in with your domain. For more information how to sign in with your domain, see the <a href=":link_indieauth">IndieAuth</a> tab.<br />Webmention.io is open source so you can also host the service yourself.<br /><br />All collected webmentions and pingbacks can be viewed on the <a href=":link_overview">overview page</a>.<br /><br /><strong>Blocks</strong><br />- Webmentions: show the likes and reposts of that url.<br />- Webmention notify form: let people submit a URL if the current page is mentioned there<br />- RSVP: shows people attending, interested etc. for an event<br />- Pingbacks: render all urls to site pinging back per page', [':link_indieauth' => Url::fromRoute('indieweb.admin.indieauth_settings')->toString(), ':link_overview' => Url::fromRoute('entity.webmention_entity.collection')->toString()]) . '</p>',
+      'text' => '<p>' . t('The easiest way to start receiving webmentions and pingbacks for any page is by using <a href="https://webmention.io/" target="_blank">https://webmention.io</a>. <br />You have to create an account by signing in with your domain. For more information how to sign in with your domain, see the <a href=":link_indieauth">IndieAuth</a> tab.<br />Webmention.io is open source so you can also host the service yourself.<br />You can also use the built-in webmention endpoint to receive webmentions.<br />All collected webmentions and pingbacks can be viewed on the <a href=":link_overview">overview page</a>.<br /><br /><strong>Blocks</strong><br />- Webmentions: show the likes and reposts of that url.<br />- Webmention notify form: let people submit a URL if the current page is mentioned there<br />- RSVP: shows people attending, interested etc. for an event<br />- Pingbacks: render all urls to site pinging back per page', [':link_indieauth' => Url::fromRoute('indieweb.admin.indieauth_settings')->toString(), ':link_overview' => Url::fromRoute('entity.webmention_entity.collection')->toString()]) . '</p>',
     ],
     'indieweb.admin.webmention_send_settings' => [
       'title' => 'Sending webmentions and syndicating content',
@@ -203,26 +203,48 @@ function indieweb_page_attachments_alter(array &$attachments) {
   if (!$is_admin) {
 
     $config = \Drupal::config('indieweb.webmention');
-    if ($config->get('webmention_enable') && ($end_point = $config->get('webmention_endpoint'))) {
-      $link = [
-        '#tag' => 'link',
-        '#attributes' => [
-          'rel' => 'webmention',
-          'href' => $end_point,
-        ],
-      ];
-      $attachments['#attached']['html_head'][] = [$link, 'webmention'];
+    if ($config->get('webmention_expose_header_link')) {
+
+      $endpoint = '';
+      if ($config->get('webmention_internal')) {
+        $endpoint = Url::fromRoute('indieweb.webmention.internal', [], ['absolute' => TRUE])->toString();
+      }
+      elseif ($config->get('webmention_notify')) {
+        $endpoint = $config->get('webmention_endpoint');
+      }
+
+      if (!empty($endpoint)) {
+        $link = [
+          '#tag' => 'link',
+          '#attributes' => [
+            'rel' => 'webmention',
+            'href' => $endpoint,
+          ],
+        ];
+        $attachments['#attached']['html_head'][] = [$link, 'webmention'];
+      }
     }
 
-    if ($config->get('pingback_enable') && ($end_point = $config->get('pingback_endpoint'))) {
-      $link = [
-        '#tag' => 'link',
-        '#attributes' => [
-          'rel' => 'pingback',
-          'href' => $end_point,
-        ],
-      ];
-      $attachments['#attached']['html_head'][] = [$link, 'pingback'];
+    if ($config->get('pingback_expose_header_link')) {
+
+      $endpoint = '';
+      if ($config->get('pingback_internal')) {
+        $endpoint = Url::fromRoute('indieweb.pingback.internal', [], ['absolute' => TRUE])->toString();
+      }
+      elseif ($config->get('pingback_notify')) {
+        $endpoint = $config->get('pingback_endpoint');
+      }
+
+      if (!empty($endpoint)) {
+        $link = [
+          '#tag' => 'link',
+          '#attributes' => [
+            'rel' => 'pingback',
+            'href' => $endpoint,
+          ],
+        ];
+        $attachments['#attached']['html_head'][] = [$link, 'pingback'];
+      }
     }
   }
 
@@ -1247,110 +1269,6 @@ function indieweb_form_comment_form_alter(&$form, FormStateInterface $form_state
 }
 
 /**
- * Implements hook_ENTITY_TYPE_insert().
- */
-function indieweb_webmention_entity_insert(WebmentionInterface $webmention) {
-
-  // Comment creation.
-  if (($config = \Drupal::config('indieweb.comment')) && $config->get('comment_create_enable')) {
-
-    // This can be simplified when config validation is ok
-    if (
-    !empty($config->get('comment_create_comment_type')) &&
-    !empty($config->get('comment_create_webmention_reference_field')) &&
-    !empty($config->get('comment_create_node_comment_field')) &&
-    $webmention->get('property')->value == 'in-reply-to' &&
-    !empty($webmention->get('content_text')->value)) {
-
-      $pid = 0;
-      $path = \Drupal::service('path.alias_manager')->getPathByAlias($webmention->get('target')->value);
-      try {
-        $params = Url::fromUri("internal:" . $path)->getRouteParameters();
-
-        // This can be a reply on a comment. Get the node to attach the comment
-        // there and set pid.
-        if (!empty($params) && key($params) == 'comment') {
-          /** @var \Drupal\comment\CommentInterface $comment */
-          $comment = \Drupal::entityTypeManager()->getStorage('comment')->load($params['comment']);
-          if ($comment && $comment->getCommentedEntityTypeId() == 'node') {
-            $pid = $comment->id();
-            $params = ['node' => $comment->getCommentedEntityId()];
-          }
-        }
-
-        // We currently support only comments on nodes.
-        if (!empty($params) && key($params) == 'node') {
-          $entity_type = key($params);
-
-          $storage = \Drupal::entityTypeManager()->getStorage($entity_type);
-          if ($storage) {
-
-            $comment_type = $config->get('comment_create_comment_type');
-            $comment_comment_webmention_field_name = $config->get('comment_create_webmention_reference_field');
-            $comment_node_comment_field_name = $config->get('comment_create_node_comment_field');
-
-            /** @var \Drupal\node\NodeInterface $node */
-            $node = $storage->load($params[$entity_type]);
-            if ($node && $node->hasField($comment_node_comment_field_name) && $node->{$comment_node_comment_field_name}->status == 2) {
-
-              // Last check now is to make sure we do not create the same
-              // comment again.
-              if (indieweb_source_exists_as_syndication($webmention)) {
-                return;
-              }
-
-              $subject = 'Auto created comment from webmention';
-
-              $values = [
-                'subject' => $subject,
-                'status' => $config->get('comment_create_default_status'),
-                'entity_id' => $node->id(),
-                'entity_type' => 'node',
-                'pid' => $pid,
-                'created' > $webmention->getCreatedTime(),
-                'comment_type' => $comment_type,
-                'field_name' => $comment_node_comment_field_name,
-                $comment_comment_webmention_field_name => [
-                  'target_id' => $webmention->id(),
-                ],
-              ];
-
-              // Match authors if possible.
-              $authors = Settings::get('indieweb_comment_authors', []);
-              $author_name = $webmention->get('author_name')->value;
-              $values['name'] = $author_name;
-              if (isset($authors[$author_name])) {
-                $values['uid'] = $authors[$author_name];
-              }
-
-              $comment = Comment::create($values);
-              $comment->save();
-
-              // Send mail notification.
-              if ($config->get('comment_create_mail_notification')) {
-                $mailManager = \Drupal::service('plugin.manager.mail');
-                $module = 'indieweb';
-                $key = 'webmention_comment_created';
-                $to = $config->get('comment_create_mail_notification');
-                $params['comment'] = $comment;
-                $params['comment_webmention_body'] = $webmention->get('content_text')->value;
-                $langcode = \Drupal::currentUser()->getPreferredLangcode();
-                $mailManager->mail($module, $key, $to, $langcode, $params, NULL);
-              }
-            }
-          }
-        }
-      }
-      catch (Exception $e) {
-        \Drupal::logger('indieweb_comment')->notice('Failed to create a comment: @message', ['@message' => $e->getMessage()]);
-      }
-    }
-
-  }
-
-}
-
-/**
  * Implements hook_mail.
  *
  * @param $key
@@ -1384,10 +1302,12 @@ function indieweb_mail($key, &$message, $params) {
 function indieweb_cron() {
 
   if (\Drupal::config('indieweb.webmention')->get('send_webmention_handler') == 'cron') {
+  // TODO move to service!
     indieweb_handle_webmention_queue();
   }
 
   if (\Drupal::config('indieweb.context')->get('handler') == 'cron') {
+  // TODO move to service!
     indieweb_handle_post_context_queue();
   }
 
@@ -1396,6 +1316,10 @@ function indieweb_cron() {
     \Drupal::service('indieweb.microsub.client')->fetchItems();
   }
 
+  if (\Drupal::config('indieweb.webmention')->get('webmention_internal') &&
+    \Drupal::config('indieweb.webmention')->get('webmention_internal_handler') == 'cron') {
+    \Drupal::service('indieweb.webmention.client')->processWebmentions();
+  }
 }
 
 /**
@@ -1527,7 +1451,6 @@ function indieweb_handle_webmention_queue() {
 
         /** @var \Drupal\indieweb\WebmentionClient\WebmentionClientInterface $client */
         $client = \Drupal::service('indieweb.webmention.client');
-
         $response = $client->sendWebmention($sourceURL, $targetURL);
 
         // Store the syndication when the targetUrl is in the syndication
@@ -1600,6 +1523,7 @@ function indieweb_handle_post_context_queue() {
 
       // Get content.
       // TODO we should make a helper service here, as microsub client does this
+      // TODO make a service if from it as well
       // as well (in various ways :/)
       try {
         $response = \Drupal::httpClient()->get($data['url']);

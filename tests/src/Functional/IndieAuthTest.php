@@ -17,13 +17,6 @@ class IndieAuthTest extends IndiewebBrowserTestBase {
   protected $header_link_token_endpoint = '<link rel="token_endpoint" href="https://tokens.indieauth.com/token" />';
 
   /**
-   * The HTTP client.
-   *
-   * @var \GuzzleHttp\ClientInterface
-   */
-  protected $httpClient;
-
-  /**
    * An indieweb authorized user.
    *
    * @var \Drupal\Core\Session\AccountInterface
@@ -54,7 +47,7 @@ class IndieAuthTest extends IndiewebBrowserTestBase {
    * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
    * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    */
-  public function _testIndieAuth() {
+  public function testIndieAuth() {
 
     // ------------------------------------------------------------------------
     // Header link expose.

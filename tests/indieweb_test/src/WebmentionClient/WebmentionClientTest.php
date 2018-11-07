@@ -3,6 +3,8 @@
 namespace Drupal\indieweb_test\WebmentionClient;
 
 use Drupal\Core\Url;
+use Drupal\indieweb\Entity\WebmentionInterface;
+use Drupal\indieweb\WebmentionClient\WebmentionClient;
 use Drupal\indieweb\WebmentionClient\WebmentionClientInterface;
 
 class WebmentionClientTest implements WebmentionClientInterface {
@@ -11,7 +13,6 @@ class WebmentionClientTest implements WebmentionClientInterface {
    * {@inheritdoc}
    */
   public function sendWebmention($sourceURL, $targetURL) {
-    // Call the test webmention endpoint hook.
     $uri = Url::fromRoute('indieweb_test.webmention_endpoint', [], ['absolute' => TRUE])->toString();
     $httpClient = \Drupal::httpClient();
     try {
@@ -26,6 +27,24 @@ class WebmentionClientTest implements WebmentionClientInterface {
     catch (\Exception $ignored) {}
 
     return FALSE;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function processWebmentions() {
+    // Call the original implementation;
+    $client = new WebmentionClient();
+    $client->processWebmentions();
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function createComment(WebmentionInterface $webmention) {
+    // Call the original implementation;
+    $client = new WebmentionClient();
+    $client->createComment($webmention);
   }
 
 }

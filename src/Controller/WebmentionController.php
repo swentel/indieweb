@@ -7,6 +7,8 @@ use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Link;
 use Drupal\Core\Url;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 class WebmentionController extends ControllerBase {
 
@@ -87,20 +89,65 @@ class WebmentionController extends ControllerBase {
   }
 
   /**
-   * Routing callback: receive webmentions and pingbacks from an external
-   * service, most likely being webmention.io
+   * Routing callback: internal webmention endpoint.
+   *
+   * @param \Symfony\Component\HttpFoundation\Request $request
+   *
+   * @return \Symfony\Component\HttpFoundation\Response
+   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
+   * @throws \Drupal\Core\Entity\EntityStorageException
+   */
+  public function webmentionInternal(Request $request) {
+    $response_code = 400;
+
+    $config = \Drupal::config('indieweb.webmention');
+    $webmention_internal = $config->get('webmention_internal');
+
+    // Early return when the internal endpoint is not enabled.
+    if (!$webmention_internal) {
+      return new JsonResponse('', 404);
+    }
+
+    // We validate the request and store it as a webmention which we'll
+    // handle later in either cron or drush.
+    if ($request->getMethod() == 'POST' &&
+      ($source = $request->request->get('source')) &&
+      ($target = $request->request->get('target')) &&
+      $source != $target) {
+
+      // Save the entity, processing happens later.
+      $values = [
+        'source' => $source,
+        'target' => $target,
+        'type' => 'webmention',
+        'property' => 'received',
+        'status' => 0,
+        'user_id' => $config->get('webmention_uid'),
+      ];
+      $webmention = $this->entityTypeManager()->getStorage('webmention_entity')->create($values);
+      $webmention->save();
+
+      $response_code = 202;
+    }
+
+    return new Response("", $response_code);
+  }
+
+  /**
+   * Routing callback: receive webmentions from an external service, most likely
+   * being webmention.io.
    *
    * @return \Symfony\Component\HttpFoundation\JsonResponse
    */
-  public function webhook() {
+  public function webmentionNotify() {
     $valid = FALSE;
 
     $config = \Drupal::config('indieweb.webmention');
-    $webmentions_enabled = $config->get('webmention_enable');
-    $pingbacks_enabled = $config->get('pingback_enable');
+    $webmention_notify = $config->get('webmention_notify');
 
-    // Early return when nothing is enabled.
-    if (!$webmentions_enabled && !$pingbacks_enabled) {
+    // Early return when the endpoint is not enabled.
+    if (!$webmention_notify) {
       return new JsonResponse('', 404);
     }
 
@@ -113,23 +160,9 @@ class WebmentionController extends ControllerBase {
     $input = is_array($input) ? array_shift($input) : '';
     $mention = json_decode($input, TRUE);
 
-    // Check if this is a forward pingback, which is a POST request.
-    if (empty($mention) && $pingbacks_enabled && (!empty($_POST['source']) && !empty($_POST['target']))) {
-      if ($this->validateSource($_POST['source'], $_POST['target'])) {
-        $valid = TRUE;
-        $mention = [];
-        $mention['source'] = $_POST['source'];
-        $mention['post'] = [];
-        $mention['post']['type'] = 'pingback';
-        $mention['post']['wm-property'] = 'pingback';
-        $mention['target'] = $_POST['target'];
-      }
-    }
-    elseif ($webmentions_enabled) {
-      $secret = $config->get('webmention_secret');
-      if (!empty($mention['secret']) && $mention['secret'] == $secret) {
-        $valid = TRUE;
-      }
+    $secret = $config->get('webmention_secret');
+    if (!empty($mention['secret']) && $mention['secret'] == $secret) {
+      $valid = TRUE;
     }
 
     // We have a valid mention.
@@ -193,7 +226,7 @@ class WebmentionController extends ControllerBase {
         $values['url'] = ['value' => $mention['post']['url']];
       }
 
-      // Text content.
+      // Content.
       foreach (['html', 'text'] as $key) {
         if (!empty($mention['post']['content'][$key])) {
           $values['content_' . $key] = ['value' => $mention['post']['content'][$key]];
@@ -218,19 +251,108 @@ class WebmentionController extends ControllerBase {
       }
       catch (\Exception $ignored) {}
 
-      // Send microsub notification.
+      // Trigger comment creation and microsub notification.
       if (isset($webmention)) {
+
         /** @var \Drupal\indieweb\MicrosubClient\MicrosubClientInterface $client */
         $client = \Drupal::service('indieweb.microsub.client');
         $client->sendNotification($webmention);
+
+        /** @var \Drupal\indieweb\WebmentionClient\WebmentionClientInterface $client */
+        $client = \Drupal::service('indieweb.webmention.client');
+        $client->createComment($webmention);
+
+        // Clear cache.
+        $this->clearCache($values['target']['value']);
       }
 
-      // Clear cache.
-      $this->clearCache($values['target']['value']);
     }
 
     $response = ['result' => $response_message];
     return new JsonResponse($response, $response_code);
+  }
+
+  /**
+   * Routing callback: internal pingback endpoint.
+   *
+   * @param \Symfony\Component\HttpFoundation\Request $request
+   *
+   * @return \Symfony\Component\HttpFoundation\Response
+   */
+  public function pingbackInternal(Request $request) {
+    $config = \Drupal::config('indieweb.webmention');
+    $pingback_internal = $config->get('pingback_internal');
+
+    // Early return when the endpoint is not enabled.
+    if (!$pingback_internal) {
+      return new Response('', 404);
+    }
+
+    return $this->validatePingback($request, $config);
+  }
+
+  /**
+   * Routing callback: receive pingbacks from an external service, most likely
+   * being webmention.io.
+   *
+   * @param \Symfony\Component\HttpFoundation\Request $request
+   *
+   * @return \Symfony\Component\HttpFoundation\Response
+   */
+  public function pingbackNotify(Request $request) {
+
+    $config = \Drupal::config('indieweb.webmention');
+    $pingback_notify = $config->get('pingback_notify');
+
+    // Early return when the endpoint is not enabled.
+    if (!$pingback_notify) {
+      return new Response('', 404);
+    }
+
+    return $this->validatePingback($request, $config);
+  }
+
+  /**
+   * Validate pingback.
+   *
+   * @param \Symfony\Component\HttpFoundation\Request $request
+   *
+   * @return \Symfony\Component\HttpFoundation\Response
+   */
+  protected function validatePingback(Request $request, $config) {
+    // Default response code and message.
+    $response_code = 400;
+    $response_message = 'Bad request';
+
+    if ($request->getMethod() == 'POST' &&
+      ($source = $request->request->get('source')) &&
+      ($target = $request->request->get('target')) &&
+      $source != $target) {
+
+      if ($this->validateSource($source, $target)) {
+
+        $values = [
+          'user_id' => $config->get('webmention_uid'),
+          'target' => ['value' => $target],
+          'source' => ['value' => $source],
+          'type' => ['value' => 'pingback'],
+          'property' => ['value' => 'pingback']
+        ];
+
+        // Save the entity.
+        try {
+          /** @var \Drupal\indieweb\Entity\WebmentionInterface $webmention */
+          $webmention = $this->entityTypeManager()->getStorage('webmention_entity')->create($values);
+          $webmention->save();
+        }
+        catch (\Exception $ignored) {}
+
+        $response_message = "Accepted";
+        $response_code = 202;
+      }
+    }
+
+    return new Response($response_message, $response_code);
   }
 
   /**

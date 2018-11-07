@@ -37,7 +37,7 @@ class CommentsTest extends IndiewebBrowserTestBase {
   public function testComments() {
 
     $this->drupalLogin($this->adminUser);
-    $this->enableWebmention();
+    $this->configureWebmention();
     $edit = ['existing_storage_name' => 'indieweb_webmention', 'existing_storage_label' => 'Webmention reference'];
     $this->drupalPostForm('admin/structure/comment/manage/comment/fields/add-field', $edit, 'Save and continue');
     $this->drupalPostForm('admin/structure/comment/manage/comment/display', ['fields[indieweb_webmention][type]' => 'entity_reference_entity_view'], 'Save');
@@ -322,16 +322,6 @@ class CommentsTest extends IndiewebBrowserTestBase {
 
     $this->drupalGet('node/' . $article->id());
     $this->assertSession()->responseContains('Reply with webmention target');
-  }
-
-  /**
-   * Assert comment count.
-   *
-   * @param $count
-   */
-  protected function assertCommentCount($count) {
-    $comment_count = \Drupal::database()->query('SELECT count(cid) FROM {comment_field_data}')->fetchField();
-    self::assertEquals($count, $comment_count);
   }
 
 }
