@@ -117,7 +117,7 @@ class MicrosubClient implements MicrosubClientInterface {
     $tries = 0;
 
     // Cleanup data.
-    $item = $this->cleanupData($item);
+    $item = $this->cleanupAndCache($item);
 
     // Save the entry.
     $values = [
@@ -170,18 +170,31 @@ class MicrosubClient implements MicrosubClientInterface {
   }
 
   /**
-   * Cleans up data.
+   * Cleans and caches data.
    *
    * @param $item
    *
    * @return mixed
    */
-  protected function cleanupData($item) {
+  protected function cleanupAndCache($item) {
 
     // Author names sometimes have newlines in the name, remove them.
     if (!empty($item['author']['name'])) {
       $item['author']['name'] = preg_replace('/\s+/', ' ', trim($item['author']['name']));
     }
+
+    // Apply caching to author and photo.
+    if (!empty($item['author']['photo'])) {
+      indieweb_image_cache($item['author']['photo']);
+    }
+
+    if (!empty($item['photo']) && is_array($item['photo'])) {
+      foreach ($item['photo'] as $i => $p) {
+        $item['photo'][$i] = indieweb_image_cache($p);
+      }
+    }
+
+    // TODO apply to content
 
     return $item;
   }

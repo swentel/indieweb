@@ -18,6 +18,7 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Site\Settings;
 use Drupal\Core\Url;
+use Drupal\image\Entity\ImageStyle;
 use Drupal\indieweb\Entity\FeedInterface;
 use Drupal\indieweb\Entity\WebmentionInterface;
 use Drupal\node\Entity\NodeType;
@@ -73,6 +74,10 @@ function indieweb_help($route_name, RouteMatchInterface $route_match) {
     'indieweb.admin.context_settings' => [
       'title' => 'Post context',
       'text' => '<p>' . t('When you create a post with a link which is a reply, like, repost or bookmark of an external post, you can fetch content from that URL so you can render more context.<br />You can also enable fetching of contexts on microsub items when you use the built-in microsub server.<br /><br />To enable this feature for node types, go to the node type settings screen and select a link field. Then on the manage display pages, add the post context field to the display. For microsub items, you can configure this per source.<br />Note: post contexts only work right now if the site for which you want to get the context supports microformats.') . '</p>'
+    ],
+    'indieweb.admin.cache_settings' => [
+      'title' => 'Media cache',
+      'text' => '<p>' . t('When using the built-in webmention or microsub endpoint, a lot of file urls are stored to external images. If you enable the Imagecache external module, the files are downloaded so they are cached locally. Use even more caching power by installing the CDN module.') . '</p>'
     ],
     'indieweb.fediverse' => [
       'title' => 'Fediverse',
@@ -1693,4 +1698,44 @@ function indieweb_microformat_view_modes() {
  */
 function indieweb_micropub_post_types() {
   return ['article', 'note', 'like', 'reply', 'repost', 'bookmark', 'event', 'rsvp', 'issue'];
+}
+
+/**
+ * Rewrites an image filename to use external imagecache if configured.
+ *
+ * @param $filename
+ *
+ * @return string
+ */
+function indieweb_image_cache($filename) {
+
+  // Return early if the filename is empty.
+  if (empty($filename)) {
+    return $filename;
+  }
+
+  $cache = \Drupal::config('indieweb.cache');
+  if ($cache->get('enable')) {
+
+    // Ignore webmention io.
+    if ($cache->get('ignore_webmention_io') && strpos($filename, 'webmention.io/avatar') !== FALSE) {
+      return $filename;
+    }
+
+    // Imagecache external module.
+    if ($cache->get('use_imagecache_external') && \Drupal::moduleHandler()->moduleExists('imagecache_external')) {
+      $image_style = $cache->get('image_style');
+      $filename = imagecache_external_generate_path($filename);
+      $style = ImageStyle::load($image_style);
+      if ($style) {
+        if ($style->supportsUri($filename)) {
+          $filename = $style->buildUri($filename);
+        }
+      }
+      $filename = file_create_url($filename);
+    }
+
+  }
+
+  return $filename;
 }

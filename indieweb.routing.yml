@@ -54,6 +54,14 @@ indieweb.admin.context_settings:
   requirements:
     _permission: 'administer indieweb'
 
+indieweb.admin.cache_settings:
+  path: '/admin/config/services/indieweb/cache'
+  defaults:
+    _form: '\Drupal\indieweb\Form\CacheSettingsForm'
+    _title: 'Media cache'
+  requirements:
+    _permission: 'administer indieweb'
+
 indieweb.indieauth.login.redirect:
   path: '/indieauth/login/redirect'
   defaults:

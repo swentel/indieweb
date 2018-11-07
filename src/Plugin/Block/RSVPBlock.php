@@ -153,7 +153,7 @@ class RSVPBlock extends BlockBase {
 
       $image = '';
       if ($show_avatar && !empty($record->author_photo)) {
-        $image = '<img width="40" src="' . $record->author_photo . '" />&nbsp;';
+        $image = '<img width="40" src="' . indieweb_image_cache($record->author_photo) . '" />&nbsp;';
       }
 
       $rsvp = $record->rsvp;

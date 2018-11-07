@@ -1,0 +1,4 @@
+enable: false
+use_imagecache_external: false
+image_style: ''
+ignore_webmention_io: true

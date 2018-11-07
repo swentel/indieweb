@@ -25,6 +25,7 @@ Current functionality:
 - Fetch post context for content or microsub items
 - Blocks for rendering webmentions, RSVP, signing in
 - Fediverse integration
+- Caching of image files
 
 More information is in this README and on the help pages.
 
@@ -322,6 +323,13 @@ a post on the fediverse via Bridgy Fed. The entity itself still needs to exist o
 Install https://www.drupal.org/project/rabbit_hole and the option will be available globally or per entity.
 
 For more background, see https://github.com/snarfed/bridgy-fed/issues/30 and https://indieweb.org/deleted
+
+## Caching of image files
+
+When using the built-in webmention or microsub endpoint, a lot of file urls are stored to external images. If you
+enable the Imagecache external module, the files are downloaded so they are cached locally. Use even more caching power
+by installing the CDN module. The cache is generated when the webmention or microsub items are processed so the impact
+on request is minimal.
 
 ## Drush commands
 

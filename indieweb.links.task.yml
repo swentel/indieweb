@@ -78,6 +78,11 @@ indieweb.admin.context_settings:
   route_name: indieweb.admin.context_settings
   base_route: indieweb.admin.dashboard
 
+indieweb.admin.cache_settings:
+  title: 'Media cache'
+  route_name: indieweb.admin.cache_settings
+  base_route: indieweb.admin.dashboard
+
 webmention_entity.list_tab:
   title: 'Webmentions'
   route_name: entity.webmention_entity.collection

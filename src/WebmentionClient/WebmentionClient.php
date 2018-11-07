@@ -74,6 +74,11 @@ class WebmentionClient implements WebmentionClientInterface {
               $author_value = trim($data['author'][$key]);
               if (!empty($author_value)) {
                 $webmention->set('author_' . $key, $author_value);
+
+                // Trigger cache if configured.
+                if ($key == 'photo') {
+                  indieweb_image_cache($author_value);
+                }
               }
             }
           }

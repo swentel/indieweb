@@ -26,6 +26,7 @@ class MicrosubController extends MicroControllerBase {
    * @return \Symfony\Component\HttpFoundation\JsonResponse
    * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
    * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
+   * @throws \Drupal\Core\Entity\EntityStorageException
    */
   public function endpoint(Request $request) {
 
@@ -171,7 +172,10 @@ class MicrosubController extends MicroControllerBase {
       $microsub_items = $this->entityTypeManager()->getStorage('indieweb_microsub_item')->loadByChannel($channel);
       foreach ($microsub_items as $item) {
 
-        $entry = $item->getData();
+        $data = $item->getData();
+        $this->applyCache($data);
+
+        $entry = $data;
         $entry->_id = $item->id();
         $entry->_is_read = $item->isRead();
 
@@ -194,6 +198,28 @@ class MicrosubController extends MicroControllerBase {
     }
 
     return ['response' => $response, 'code' => 200];
+  }
+
+  /**
+   * Apply cache settings.
+   *
+   * @param $data
+   */
+  protected function applyCache($data) {
+
+    // Author images.
+    if (isset($data->author->photo)) {
+      $data->author->photo = indieweb_image_cache($data->author->photo);
+    }
+
+    // Photos.
+    if (isset($data->photo) && !empty($data->photo) && is_array($data->photo)) {
+      foreach ($data->photo as $i => $p) {
+        $data->photo[$i] = indieweb_image_cache($p);
+      }
+    }
+
+    // TODO inline images in text
   }
 
   /**

@@ -170,7 +170,7 @@ class WebmentionBlock extends BlockBase {
         '#show_created' => $show_created,
         '#property' => $record->property,
         '#author_name' => $record->author_name,
-        '#author_photo' => $record->author_photo,
+        '#author_photo' => indieweb_image_cache($record->author_photo),
         '#created' => $record->created,
         '#source' => $record->source,
         '#content_text' => $record->content_text,

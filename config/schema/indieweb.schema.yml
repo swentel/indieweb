@@ -1,3 +1,21 @@
+# schema for indieweb.cache
+indieweb.cache:
+  type: config_object
+  label: 'Indieweb cache'
+  mapping:
+    enable:
+      type: boolean
+      label: 'Enable caching of media'
+    use_imagecache_external:
+      type: boolean
+      label: 'Use external imagecache module'
+    image_style:
+      type: string
+      label: 'The image style to apply to the downloaded image'
+    ignore_webmention_io:
+      type: boolean
+      label: 'Ignore webmention.io'
+
 # schema for indieweb.comment
 indieweb.comment:
   type: config_object
