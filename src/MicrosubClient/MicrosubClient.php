@@ -231,7 +231,7 @@ class MicrosubClient implements MicrosubClientInterface {
         }
 
         if ($parsed && isset($parsed['data']['type']) && $parsed['data']['type'] == 'entry') {
-            $item = $parsed['data']['items'][0];
+            $item = $parsed['data'];
 
             foreach (['like-of', 'repost-of', 'bookmark-of', 'in-reply-to', 'mention-of'] as $item_url) {
               if (isset($item[$item_url]) && !empty($item[$item_url][0])) {
