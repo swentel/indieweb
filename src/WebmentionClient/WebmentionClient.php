@@ -184,10 +184,10 @@ class WebmentionClient implements WebmentionClientInterface {
       // ------------------------------------------------------------------
 
       else {
-        $error = isset($parsed['error']) ? $parsed['error'] : 'unknown';
+        $error_type = isset($parsed['error']) ? $parsed['error'] : 'unknown';
 
-        $webmention->set('type', $error);
-        $webmention->set('property', $error);
+        $webmention->set('type', $error_type);
+        $webmention->set('property', $error_type);
         $webmention->save();
 
         // Log the error message if configured.
