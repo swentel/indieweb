@@ -97,6 +97,7 @@ class CacheSettingsForm extends ConfigFormBase {
       '#states' => array(
         'visible' => array(
           ':input[name="enable"]' => array('checked' => TRUE),
+          ':input[name="use_imagecache_external"]' => array('checked' => TRUE),
         ),
       ),
     ];
