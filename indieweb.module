@@ -1704,10 +1704,11 @@ function indieweb_micropub_post_types() {
  * Rewrites an image filename to use external imagecache if configured.
  *
  * @param $filename
+ * @param $type
  *
  * @return string
  */
-function indieweb_image_cache($filename) {
+function indieweb_image_cache($filename, $type = 'avatar') {
 
   // Return early if the filename is empty.
   if (empty($filename)) {
@@ -1724,7 +1725,7 @@ function indieweb_image_cache($filename) {
 
     // Imagecache external module.
     if ($cache->get('use_imagecache_external') && \Drupal::moduleHandler()->moduleExists('imagecache_external')) {
-      $image_style = $cache->get('image_style');
+      $image_style = $cache->get('image_style_' . $type);
       $filename = imagecache_external_generate_path($filename);
       $style = ImageStyle::load($image_style);
       if ($style) {

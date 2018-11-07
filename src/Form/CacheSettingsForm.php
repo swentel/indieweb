@@ -55,13 +55,27 @@ class CacheSettingsForm extends ConfigFormBase {
       ),
     ];
 
-    $form['cache']['image_style'] = [
+    $form['cache']['image_style_avatar'] = [
       '#type' => 'select',
       '#options' => image_style_options(),
-      '#default_value' => $config->get('image_style'),
-      '#title' => $this->t('Image style'),
+      '#default_value' => $config->get('image_style_avatar'),
+      '#title' => $this->t('Image style for avatars'),
       '#disabled' => !$imagecache_external_module_enabled,
-      '#description' => $this->t('Select an image style to apply to the downloaded image.'),
+      '#description' => $this->t('Select an image style to apply to an avatar.'),
+      '#states' => array(
+        'visible' => array(
+          ':input[name="use_imagecache_external"]' => array('checked' => TRUE),
+        ),
+      ),
+    ];
+
+    $form['cache']['image_style_photo'] = [
+      '#type' => 'select',
+      '#options' => image_style_options(),
+      '#default_value' => $config->get('image_style_photo'),
+      '#title' => $this->t('Image style for photos'),
+      '#disabled' => !$imagecache_external_module_enabled,
+      '#description' => $this->t('Select an image style to apply to any photo.'),
       '#states' => array(
         'visible' => array(
           ':input[name="use_imagecache_external"]' => array('checked' => TRUE),
@@ -91,7 +105,8 @@ class CacheSettingsForm extends ConfigFormBase {
     $this->config('indieweb.cache')
       ->set('enable', $form_state->getValue('enable'))
       ->set('use_imagecache_external', $form_state->getValue('use_imagecache_external'))
-      ->set('image_style', $form_state->getValue('image_style'))
+      ->set('image_style_avatar', $form_state->getValue('image_style_avatar'))
+      ->set('image_style_photo', $form_state->getValue('image_style_photo'))
       ->set('ignore_webmention_io', $form_state->getValue('ignore_webmention_io'))
       ->save();
 

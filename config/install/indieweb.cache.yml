@@ -1,4 +1,5 @@
 enable: false
 use_imagecache_external: false
-image_style: ''
+image_style_avatar: ''
+image_style_photo: ''
 ignore_webmention_io: true

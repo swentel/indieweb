@@ -215,7 +215,7 @@ class MicrosubController extends MicroControllerBase {
     // Photos.
     if (isset($data->photo) && !empty($data->photo) && is_array($data->photo)) {
       foreach ($data->photo as $i => $p) {
-        $data->photo[$i] = indieweb_image_cache($p);
+        $data->photo[$i] = indieweb_image_cache($p, 'photo');
       }
     }
 
