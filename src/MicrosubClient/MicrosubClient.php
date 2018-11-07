@@ -190,7 +190,7 @@ class MicrosubClient implements MicrosubClientInterface {
 
     if (!empty($item['photo']) && is_array($item['photo'])) {
       foreach ($item['photo'] as $i => $p) {
-        $item['photo'][$i] = indieweb_image_cache($p, 'photo');
+        indieweb_image_cache($p, 'photo');
       }
     }
 
