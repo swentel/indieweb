@@ -65,6 +65,7 @@ class CacheSettingsForm extends ConfigFormBase {
       '#states' => array(
         'visible' => array(
           ':input[name="use_imagecache_external"]' => array('checked' => TRUE),
+          ':input[name="enable"]' => array('checked' => TRUE),
         ),
       ),
     ];
@@ -79,6 +80,7 @@ class CacheSettingsForm extends ConfigFormBase {
       '#states' => array(
         'visible' => array(
           ':input[name="use_imagecache_external"]' => array('checked' => TRUE),
+          ':input[name="enable"]' => array('checked' => TRUE),
         ),
       ),
     ];
@@ -91,7 +93,12 @@ class CacheSettingsForm extends ConfigFormBase {
       '#title' => $this->t('Ignore Webmention IO'),
       '#type' => 'checkbox',
       '#default_value' => $config->get('ignore_webmention_io'),
-      '#description' => $this->t('If you previously used Webmention IO, the images for author avatars already are cached in a proxy there. Toggle this to keep using that proxy.')
+      '#description' => $this->t('If you previously used Webmention IO, the images for author avatars already are cached in a proxy there. Toggle this to keep using that proxy.'),
+      '#states' => array(
+        'visible' => array(
+          ':input[name="enable"]' => array('checked' => TRUE),
+        ),
+      ),
     ];
 
     return parent::buildForm($form, $form_state);
