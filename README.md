@@ -1,6 +1,6 @@
 # IndieWeb integration for Drupal 8
 
-## About this module.
+## About this module
 
 Integrates the philosophy of IndieWeb in your Drupal website.
 For more information about IndieWeb, see https://indieweb.org/.

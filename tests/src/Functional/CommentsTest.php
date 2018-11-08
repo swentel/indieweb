@@ -153,6 +153,7 @@ class CommentsTest extends IndiewebBrowserTestBase {
     // on node 1. The target is comment/indieweb/cid.
     $webmention['target'] = '/comment/indieweb/1';
     $webmention['post']['content']['text'] = 'This is awesome!';
+    $webmention['post']['url'] = 'https://example.com/a-link-to-appear-when-replying';
     $code = $this->sendWebmentionNotificationRequest($webmention);
     self::assertEquals(202, $code);
     $this->assertCommentCount(2);
@@ -205,6 +206,14 @@ class CommentsTest extends IndiewebBrowserTestBase {
     $code = $this->sendWebmentionNotificationRequest($webmention);
     self::assertEquals(202, $code);
     $this->assertCommentCount(3);
+
+    // Reply to a comment, see that the target link is populated with the link
+    // from the parent comment.
+    $edit = [];
+    $edit['send_comment_webmention_field'] = 'indieweb_webmention';
+    $this->drupalPostForm('admin/config/services/indieweb/send', $edit, 'Save configuration');
+    $this->drupalGet('comment/reply/node/1/comment/2');
+    $this->assertRaw('value="https://example.com/a-link-to-appear-when-replying"');
 
     // ------------------------------------------------------------------------
     // Test micropub reply post to create a comment.
