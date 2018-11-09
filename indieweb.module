@@ -1732,8 +1732,17 @@ function indieweb_image_cache($filename, $type = 'avatar') {
       }
       $filename = file_create_url($filename);
     }
-
   }
 
   return $filename;
+}
+
+/**
+ * Returns whether the imagecache is enabled or not.
+ *
+ * @return bool
+ */
+function indieweb_imagecache_enabled() {
+  $cache = \Drupal::config('indieweb.cache');
+  return $cache->get('enable') && $cache->get('use_imagecache_external');
 }

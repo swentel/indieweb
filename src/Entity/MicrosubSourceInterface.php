@@ -88,4 +88,11 @@ interface MicrosubSourceInterface extends ContentEntityInterface {
    */
   public function getPostContext();
 
+  /**
+   * Whether to disable image cache or not.
+   *
+   * @return mixed
+   */
+  public function disableImageCache();
+
 }

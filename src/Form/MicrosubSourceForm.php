@@ -31,6 +31,13 @@ class MicrosubSourceForm extends ContentEntityForm {
       '#default_value' => $source->getStatus(),
     ];
 
+    $form['cache_image_disable'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Disable image cache'),
+      '#default_value' => $source->disableImageCache(),
+      '#description' => $this->t('Disable image cache for this source. Image cache is currently @status.', ['@status' => indieweb_imagecache_enabled() ? $this->t('enabled') : $this->t('disabled')]),
+    ];
+
     // Channels
     $options = [];
     $channels = \Drupal::entityTypeManager()->getStorage('indieweb_microsub_channel')->loadMultiple();

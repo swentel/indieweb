@@ -60,7 +60,8 @@ class MicrosubClient implements MicrosubClientInterface {
             foreach ($items as $i => $item) {
               $source_id = $source->id();
               $channel_id = $source->getChannel();
-              $this->saveItem($item, $tries, $source_id, $channel_id, $empty, $context);
+              $disable_image_cache = $source->disableImageCache();
+              $this->saveItem($item, $tries, $source_id, $channel_id, $empty, $context, $disable_image_cache);
             }
           }
 
@@ -89,12 +90,13 @@ class MicrosubClient implements MicrosubClientInterface {
    * @param int $channel_id
    * @param bool $empty
    * @param array $context
+   * @param $disable_image_cache
    *
    * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
    * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    * @throws \Drupal\Core\Entity\EntityStorageException
    */
-  protected function saveItem($item, &$tries = 0, $source_id = 0, $channel_id = 0, $empty = FALSE, $context = []) {
+  protected function saveItem($item, &$tries = 0, $source_id = 0, $channel_id = 0, $empty = FALSE, $context = [], $disable_image_cache = FALSE) {
 
     // Prefer uid, then url, then hash the content
     if (isset($item['uid'])) {
@@ -117,7 +119,7 @@ class MicrosubClient implements MicrosubClientInterface {
     $tries = 0;
 
     // Cleanup data.
-    $item = $this->cleanupAndCache($item);
+    $item = $this->cleanupAndCache($item, $disable_image_cache);
 
     // Save the entry.
     $values = [
@@ -173,10 +175,11 @@ class MicrosubClient implements MicrosubClientInterface {
    * Cleans and caches data.
    *
    * @param $item
+   * @param $disable_image_cache
    *
    * @return mixed
    */
-  protected function cleanupAndCache($item) {
+  protected function cleanupAndCache($item, $disable_image_cache) {
 
     // Author names sometimes have newlines in the name, remove them.
     if (!empty($item['author']['name'])) {
@@ -184,11 +187,11 @@ class MicrosubClient implements MicrosubClientInterface {
     }
 
     // Apply caching to author and photo.
-    if (!empty($item['author']['photo'])) {
+    if (!$disable_image_cache && !empty($item['author']['photo'])) {
       indieweb_image_cache($item['author']['photo']);
     }
 
-    if (!empty($item['photo']) && is_array($item['photo'])) {
+    if (!$disable_image_cache && !empty($item['photo']) && is_array($item['photo'])) {
       foreach ($item['photo'] as $i => $p) {
         indieweb_image_cache($p, 'photo');
       }

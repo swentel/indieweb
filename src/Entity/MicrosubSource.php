@@ -142,6 +142,13 @@ class MicrosubSource extends ContentEntityBase implements MicrosubSourceInterfac
   /**
    * {@inheritdoc}
    */
+  public function disableImageCache() {
+    return (bool) $this->get('cache_image_disable')->value;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function delete() {
 
     \Drupal::database()
@@ -208,6 +215,10 @@ class MicrosubSource extends ContentEntityBase implements MicrosubSourceInterfac
 
     $fields['fetch_tries'] = BaseFieldDefinition::create('integer')
       ->setLabel(t('How many times a fetch was performed without changes'))
+      ->setDefaultValue(0);
+
+    $fields['cache_image_disable'] = BaseFieldDefinition::create('integer')
+      ->setLabel(t('Whether to disable the image cache or not for this source'))
       ->setDefaultValue(0);
 
     return $fields;

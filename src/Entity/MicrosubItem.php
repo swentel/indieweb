@@ -43,6 +43,13 @@ class MicrosubItem extends ContentEntityBase implements MicrosubItemInterface {
   /**
    * {@inheritdoc}
    */
+  public function getSource() {
+    return $this->get('source_id')->entity;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function getData() {
     $return = NULL;
     $value = $this->get('data')->value;

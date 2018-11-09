@@ -18,6 +18,14 @@ interface MicrosubItemInterface extends ContentEntityInterface {
   public function getSourceId();
 
   /**
+   * Returns the source of microsub item.
+   *
+   * @return \Drupal\indieweb\Entity\MicrosubSourceInterface
+   *   The source id.
+   */
+  public function getSource();
+
+  /**
    * Get the content for this item.
    *
    * @return string

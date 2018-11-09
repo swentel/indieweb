@@ -173,7 +173,11 @@ class MicrosubController extends MicroControllerBase {
       foreach ($microsub_items as $item) {
 
         $data = $item->getData();
-        $this->applyCache($data);
+
+        // Apply media cache.
+        if (!$item->getSource()->disableImageCache()) {
+          $this->applyCache($data);
+        }
 
         $entry = $data;
         $entry->_id = $item->id();
