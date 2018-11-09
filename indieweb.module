@@ -144,17 +144,6 @@ function indieweb_theme() {
 }
 
 /**
- * Implements hook_theme_suggestions_HOOK().
- */
-function indieweb_theme_suggestions_webmention(array $variables) {
-  $suggestions = [];
-  if (!empty($variables['property'])) {
-    $suggestions[] = 'webmention__' . str_replace('-', '_', $variables['property']);
-  }
-  return $suggestions;
-}
-
-/**
  * Prepares variables for the webmention template.
  *
  * @param $variables

@@ -163,8 +163,9 @@ class WebmentionBlock extends BlockBase {
         }
       }
 
+      $suggestion = !empty($record->property) ? '__' . str_replace('-', '_', $record->property) : '';
       $items[] = [
-        '#theme' => 'webmention',
+        '#theme' => 'webmention' . $suggestion,
         '#show_summary' => TRUE,
         '#show_avatar' => $show_avatar,
         '#show_created' => $show_created,

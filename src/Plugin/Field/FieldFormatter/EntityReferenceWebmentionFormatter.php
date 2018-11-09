@@ -88,8 +88,10 @@ class EntityReferenceWebmentionFormatter extends EntityReferenceFormatterBase {
 
     foreach ($this->getEntitiesToView($items, $langcode) as $delta => $entity) {
       if ($entity->id()) {
+
+        $suggestion = !empty($entity->get('property')->value) ? '__' . str_replace('-', '_', $entity->get('property')->value) : '';
         $elements[$delta] = [
-          '#theme' => 'webmention',
+          '#theme' => 'webmention' . $suggestion,
           '#show_summary' => $this->getSetting('show_summary'),
           '#show_avatar' => $this->getSetting('show_avatar'),
           '#show_created' => $this->getSetting('show_created'),
