@@ -19,7 +19,7 @@ use Drupal\Core\Field\BaseFieldDefinition;
  *     "storage_schema" = "Drupal\indieweb\Entity\Storage\IndieAuthTokenStorageSchema",
  *     "list_builder" = "Drupal\indieweb\IndieAuthTokenListBuilder",
  *     "form" = {
- *       "delete" = "Drupal\indieweb\Form\IndieAuthTokenDeleteForm"
+ *       "delete" = "Drupal\Core\Entity\ContentEntityDeleteForm",
  *     },
  *     "route_provider" = {
  *       "html" = "Drupal\indieweb\IndieAuthTokenRouteProvider",

@@ -27,7 +27,7 @@ use Drupal\user\UserInterface;
  *       "default" = "Drupal\indieweb\Form\WebmentionForm",
  *       "add" = "Drupal\indieweb\Form\WebmentionForm",
  *       "edit" = "Drupal\indieweb\Form\WebmentionForm",
- *       "delete" = "Drupal\indieweb\Form\WebmentionDeleteForm",
+ *       "delete" = "Drupal\Core\Entity\ContentEntityDeleteForm",
  *     },
  *     "access" = "Drupal\indieweb\WebmentionAccessControlHandler",
  *     "route_provider" = {

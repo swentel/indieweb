@@ -19,7 +19,7 @@ use Drupal\Core\Field\BaseFieldDefinition;
  *     "storage_schema" = "Drupal\indieweb\Entity\Storage\IndieAuthAuthorizationCodeStorageSchema",
  *     "list_builder" = "Drupal\indieweb\IndieAuthAuthorizationCodeListBuilder",
  *     "form" = {
- *       "delete" = "Drupal\indieweb\Form\IndieAuthAuthorizationCodeDeleteForm"
+ *       "delete" = "Drupal\Core\Entity\ContentEntityDeleteForm",
  *     },
  *     "route_provider" = {
  *       "html" = "Drupal\Core\Entity\Routing\AdminHtmlRouteProvider",
