@@ -17,7 +17,6 @@ class IndieAuthTokenListBuilder extends EntityListBuilder {
   public function buildHeader() {
     $header['label'] = $this->t('Token');
     $header['status'] = $this->t('Status');
-    $header['expire'] = $this->t('Expires');
     $header['client'] = $this->t('Client');
     $header['access'] = $this->t('Last access');
     return $header + parent::buildHeader();
@@ -30,8 +29,6 @@ class IndieAuthTokenListBuilder extends EntityListBuilder {
     /** @var \Drupal\indieweb\Entity\IndieAuthTokenInterface */
     $row['label'] = $entity->label();
     $row['status'] = $entity->get('status')->value ? t('Active') : t('Revoked');
-    $expires = $entity->get('expire')->value ? \Drupal::service('date.formatter')->format($entity->get('expire')->value, 'short') : t('Never');
-    $row['expire'] = $expires;
     $row['client_id'] = $entity->get('client_id')->value;
     $last_access = $entity->get('changed')->value ? \Drupal::service('date.formatter')->format($entity->get('changed')->value, 'short') : t('Never');
     $row['access'] = $last_access;
