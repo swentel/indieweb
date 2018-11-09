@@ -20,6 +20,7 @@ class MicrosubChannelStorage extends SqlContentEntityStorage implements Microsub
   public function getUnreadCount($channel_id) {
 
     $exclude = [];
+    /** @var \Drupal\indieweb\Entity\MicrosubChannelInterface $channel */
     $channel = \Drupal::entityTypeManager()->getStorage('indieweb_microsub_channel')->load($channel_id);
     if ($channel) {
       $exclude = $channel->getPostTypesToExclude();
@@ -27,6 +28,7 @@ class MicrosubChannelStorage extends SqlContentEntityStorage implements Microsub
 
     $query = \Drupal::entityQuery('indieweb_microsub_item')
       ->condition('channel_id', $channel_id)
+      ->condition('status', 1)
       ->condition('is_read', 0);
 
     if ($exclude) {

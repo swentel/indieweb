@@ -29,7 +29,8 @@ class MicrosubItemStorage extends SqlContentEntityStorage implements MicrosubIte
    * {@inheritdoc}
    */
   public function removeItem($entry_id) {
-    $this->database->delete('microsub_item')
+    $this->database->update('microsub_item')
+      ->fields(['status' => 0])
       ->condition('id', $entry_id)
       ->execute();
   }
@@ -86,8 +87,6 @@ class MicrosubItemStorage extends SqlContentEntityStorage implements MicrosubIte
    *
    * @param \Drupal\Core\Entity\Query\QueryInterface $query
    *   The query to execute.
-   * @param int $start
-   *   Start and end.
    * @param int $limit
    *   (optional) The number of items to return.
    *

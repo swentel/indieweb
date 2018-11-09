@@ -10,7 +10,7 @@ use Drupal\indieweb\Entity\MicrosubSourceInterface;
  * Controller class for microsub sources.
  *
  * This extends the Drupal\Core\Entity\Sql\SqlContentEntityStorage class, adding
- * required special handling for microsub item entities.
+ * required special handling for microsub source entities.
  */
 class MicrosubSourceStorage extends SqlContentEntityStorage implements MicrosubSourceStorageInterface {
 
@@ -42,7 +42,7 @@ class MicrosubSourceStorage extends SqlContentEntityStorage implements MicrosubS
    * {@inheritdoc}
    */
   public function deleteItems($source_id) {
-    \Drupal::database()->delete('microsub_item')->condition('source_id', $source_id)->execute();
+    $this->database->delete('microsub_item')->condition('source_id', $source_id)->execute();
   }
 
 }

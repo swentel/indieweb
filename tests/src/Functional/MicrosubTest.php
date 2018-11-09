@@ -222,11 +222,15 @@ class MicrosubTest extends IndiewebBrowserTestBase {
     // Delete an item.
     $query = ['action' => 'timeline', 'method' => 'remove', 'entry' => 4];
     $this->sendMicrosubRequest($query, 'POST');
-    $this->assertItemCount('item', 3);
+    $this->assertItemCount('item', 3, 1);
+    $this->assertItemCount('item', 1, 0);
+    $this->assertItemCount('item', 4);
     $this->resetNextFetch(1);
     $this->resetNextFetch(2);
     $this->fetchItems();
-    $this->assertItemCount('item', 3);
+    $this->assertItemCount('item', 3, 1);
+    $this->assertItemCount('item', 1, 0);
+    $this->assertItemCount('item', 4);
 
     // Test post context.
     $page = $this->createNode(['type' => 'page', 'title' => 'microsub page', 'body' => ['value' => 'This should be a context for a microsub item']]);
@@ -373,11 +377,17 @@ class MicrosubTest extends IndiewebBrowserTestBase {
    *   Either channel, source or item.
    * @param $expected_total
    *   The total to expect
+   * @param $status
+   *   Whether to add the status condition or not.
    */
-  protected function assertItemCount($type, $expected_total) {
+  protected function assertItemCount($type, $expected_total, $status = NULL) {
     $table = 'microsub_' . $type;
-    $query = 'SELECT count(id) FROM {' . $table . '}';
-    $total = \Drupal::database()->query($query)->fetchField();
+    $query = \Drupal::database()
+      ->select($table, 't');
+    if (is_integer($status)) {
+      $query->condition('status', $status);
+    }
+    $total = $query->countQuery()->execute()->fetchField();
     self::assertEquals($expected_total, (int) $total);
   }
 
