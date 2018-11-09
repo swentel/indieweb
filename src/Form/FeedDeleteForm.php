@@ -39,12 +39,6 @@ class FeedDeleteForm extends EntityConfirmFormBase {
 
     $form_state->setRedirectUrl($this->getCancelUrl());
 
-    \Drupal::database()
-      ->delete('indieweb_feed_item')
-      ->condition('feed', $this->entity->id())
-      ->execute();
-
-
     \Drupal::service('router.builder')->rebuild();
   }
 

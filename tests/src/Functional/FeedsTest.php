@@ -10,18 +10,18 @@ namespace Drupal\Tests\indieweb\Functional;
 class FeedsTest extends IndiewebBrowserTestBase {
 
   /**
-   * The profile to use. Use Standard as we need a lot.
-   *
-   * @var string
-   */
-  protected $profile = 'standard';
-
-  /**
    * Timeline path.
    *
    * @var string
    */
   protected $timeline_path = '/timeline/all';
+
+  /**
+   * Timeline 2 path.
+   *
+   * @var string
+   */
+  protected $timeline_path_2 = '/timeline/all/2';
 
   /**
    * Timeline atom path.
@@ -59,7 +59,21 @@ class FeedsTest extends IndiewebBrowserTestBase {
   protected $header_link_jf2_link = '<link rel="alternate" type="application/jf2feed+json"';
 
   /**
+   * {@inheritdoc}
+   */
+  public function setUp() {
+    parent::setUp();
+
+    $this->createContentType(['type' => 'article']);
+    $this->createContentType(['type' => 'page']);
+    $this->placeBlock('page_title_block', ['region' => 'content']);
+  }
+
+  /**
    * Tests feeds functionality.
+   *
+   * @throws \Behat\Mink\Exception\ExpectationException
+   * @throws \Drupal\Core\Entity\EntityStorageException
    */
   public function testFeeds() {
 
@@ -79,7 +93,6 @@ class FeedsTest extends IndiewebBrowserTestBase {
       ],
     ];
     $this->drupalPostForm('admin/config/services/indieweb/feeds/add', $edit, 'Save');
-    $this->assertSession()->responseNotContains('Created Timeline');
 
     // Set all microformats too.
     $microformats = [
@@ -99,7 +112,7 @@ class FeedsTest extends IndiewebBrowserTestBase {
     $this->assertSession()->responseNotContains($this->header_link_jf2_link);
 
     $this->drupalGet($this->timeline_path);
-    $this->assertSession()->responseContains('<h1 class="title page-title">Timeline</h1>');
+    $this->assertSession()->responseContains('<h1 class="page-title">Timeline</h1>');
     $this->assertSession()->responseContains($edit['author']);
     $this->assertSession()->responseContains('noindex, nofollow');
 
@@ -179,10 +192,44 @@ class FeedsTest extends IndiewebBrowserTestBase {
 
     // Delete, should be gone from timeline.
     $article_2->delete();
+    $this->assertFeedItems(1, 0, $article_2->id());
     $this->drupalGet($this->timeline_path);
     $this->assertSession()->responseNotContains($settings['title']);
     $this->drupalGet($this->timeline_jf2_path);
     $this->assertSession()->responseNotContains($settings['title']);
+
+    // Add page node.
+    $page = $this->createNode(['type' => 'page', 'title' => 'A nice page', 'uid' => 1]);
+
+    // Create new feed, will be indexed immediately.
+    $this->drupalLogin($this->adminUser);
+    $edit = [
+      'label' => 'Timeline 2',
+      'id' => 'timeline_2',
+      'path' => $this->timeline_path_2,
+      'feedTitle' => 'Timeline 2',
+      'ownerId' => 1,
+      'excludeIndexing' => 1,
+      'limit' => 10,
+      'bundles[]' => [
+        'node|page' => 'node|page'
+      ],
+    ];
+    $this->drupalPostForm('admin/config/services/indieweb/feeds/add', $edit, 'Save');
+    $this->drupalLogout();
+
+    $this->drupalGet($this->timeline_path);
+    $this->assertSession()->responseNotContains($page->label());
+    $this->drupalGet($this->timeline_path_2);
+    $this->assertSession()->responseContains($page->label());
+    $this->assertFeedItems(1, 1, $article->id());
+    $this->assertFeedItems(1, 1, $page->id(), 'timeline_2');
+
+    // Delete feed 2.
+    $this->drupalLogin($this->adminUser);
+    $this->drupalPostForm('admin/config/services/indieweb/feeds/timeline_2/delete', [], 'Delete');
+    $this->assertFeedItems(1, 1, $article->id());
+    $this->assertFeedItems(0, 0, $page->id(), 'timeline_2');
   }
 
   /**

@@ -270,4 +270,17 @@ class Feed extends ConfigEntityBase implements FeedInterface {
     parent::preSave($storage);
   }
 
+  /**
+   * {@inheritdoc}
+   */
+  public function delete() {
+    parent::delete();
+
+    \Drupal::database()
+      ->delete('indieweb_feed_item')
+      ->condition('feed', $this->id())
+      ->execute();
+
+  }
+
 }
