@@ -1,0 +1,20 @@
+indieweb.admin.indieauth_settings:
+  title: 'IndieAuth'
+  route_name: indieweb.admin.indieauth_settings
+  base_route: indieweb.admin.dashboard
+  weight: 60
+
+indieweb.admin.indieauth_settings_tab:
+  title: 'Settings'
+  route_name: indieweb.admin.indieauth_settings
+  parent_id: indieweb.admin.indieauth_settings
+
+indieweb.admin.indieauth_token_list:
+  title: 'Tokens'
+  route_name: entity.indieweb_indieauth_token.collection
+  parent_id: indieweb.admin.indieauth_settings
+
+indieweb.admin.indieauth_authorization_codes_list:
+  title: 'Authorization codes'
+  route_name: entity.indieweb_indieauth_code.collection
+  parent_id: indieweb.admin.indieauth_settings

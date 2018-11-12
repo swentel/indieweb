@@ -1,0 +1,85 @@
+<?php
+
+/**
+ * @file
+ * IndieWeb IndieAuth module.
+ */
+
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Url;
+
+/**
+ * Implements hook_page_attachments_alter().
+ */
+function indieweb_indieauth_page_attachments_alter(array &$attachments) {
+
+  if (\Drupal::service('path.matcher')->isFrontPage()) {
+
+    if (($config = \Drupal::config('indieweb_indieauth.settings')) && ($config->get('expose_link_tag'))) {
+
+      if ($config->get('auth_internal')) {
+        $authorization_endpoint = Url::fromRoute('indieweb.indieauth.auth_endpoint', [], ['absolute' => TRUE])->toString();
+        $token_endpoint = Url::fromRoute('indieweb.indieauth.token_endpoint', [], ['absolute' => TRUE])->toString();
+      }
+      else {
+        $authorization_endpoint = $config->get('authorization_endpoint');
+        $token_endpoint = $config->get('token_endpoint');
+      }
+
+      $link = [
+        '#tag' => 'link',
+        '#attributes' => [
+          'rel' => 'authorization_endpoint',
+          'href' => $authorization_endpoint,
+        ],
+      ];
+      $attachments['#attached']['html_head'][] = [$link, 'authorization_endpoint'];
+
+      $link = [
+        '#tag' => 'link',
+        '#attributes' => [
+          'rel' => 'token_endpoint',
+          'href' => $token_endpoint,
+        ],
+      ];
+      $attachments['#attached']['html_head'][] = [$link, 'token_endpoint'];
+    }
+  }
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function indieweb_indieauth_form_user_form_alter(&$form, FormStateInterface $form_state, $form_id) {
+  if (indieweb_indieauth_user_authenticated_with_domain_on_edit_form()) {
+
+    // Hide password fields as it's not needed. We also hide the current pass
+    // so that the e-mail can be changed.
+    $form['account']['pass']['#access'] = FALSE;
+    $form['account']['current_pass']['#access'] = FALSE;
+
+    // Set user_pass_reset in form_state. Users can always change their email
+    // if wanted. The unique validation constraint will make sure they can not
+    // set it to an existing email.
+    $form_state->set('user_pass_reset', 1);
+  }
+}
+
+/**
+ * Checks if a user is authenticated with his domain on the user edit form.
+ *
+ * @return bool
+ */
+function indieweb_indieauth_user_authenticated_with_domain_on_edit_form() {
+  $authenticated = FALSE;
+
+  if (\Drupal::routeMatch()->getRouteName() == 'entity.user.edit_form' && ($account = \Drupal::routeMatch()->getParameter('user')) && \Drupal::currentUser()->id() == $account->id()) {
+    // Check if login is enabled and current user is authenticated with domain
+    // and has no administer users permission.
+    if (\Drupal::config('indieweb_indieauth.settings')->get('login_enable') && \Drupal::service('externalauth.authmap')->get($account->id(), 'indieweb') && !\Drupal::currentUser()->hasPermission('administer users')) {
+      $authenticated = TRUE;
+    }
+  }
+
+  return $authenticated;
+}

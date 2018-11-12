@@ -1,0 +1,304 @@
+<?php
+
+/**
+ * @file
+ * IndieWeb Microformats2.
+ */
+
+/**
+ * Returns the view modes on which Microformats2 should be applied to.
+ *
+ * @return array
+ */
+function indieweb_microformat_view_modes() {
+  return ['full', 'indieweb_microformat'];
+}
+
+/**
+ * Get content fields for microformats.
+ *
+ * @return array
+ */
+function indieweb_microformat_get_content_fields() {
+  static $fields = [];
+  static $loaded = FALSE;
+
+  if (!$loaded) {
+    $loaded = TRUE;
+    $fields = explode("\n", \Drupal::config('indieweb_microformat.settings')->get('e_content_fields'));
+  }
+
+  return $fields;
+}
+
+/**
+ * Get summary fields for microformats.
+ *
+ * @return array
+ */
+function indieweb_microformat_get_summary_fields() {
+  static $fields = [];
+  static $loaded = FALSE;
+
+  if (!$loaded) {
+    $loaded = TRUE;
+    $fields = explode("\n", \Drupal::config('indieweb_microformat.settings')->get('p_summary'));
+  }
+
+  return $fields;
+}
+
+/**
+ * Implements hook_preprocess_node().
+ */
+function indieweb_microformat_preprocess_node(&$variables) {
+  if (in_array($variables['view_mode'], indieweb_microformat_view_modes())) {
+
+    // Add h-entry or h-event.
+    $h_entry = FALSE;
+    if (\Drupal::config('indieweb_microformat.settings')->get('h_entry')) {
+      $h_entry = TRUE;
+    }
+    if (($h_event = \Drupal::config('indieweb_microformat.settings')->get('h_event')) && $variables['node']->bundle() == $h_event) {
+      $h_entry = FALSE;
+      $variables['attributes']['class'][] = 'h-event';
+    }
+    if ($h_entry) {
+      $variables['attributes']['class'][] = 'h-entry';
+    }
+
+    if (\Drupal::config('indieweb_microformat.settings')->get('post_metadata')) {
+      $date = \Drupal::service('date.formatter')->format($variables['node']->getCreatedTime(), 'custom', 'c');
+
+      $exclude_p_name_node_type = \Drupal::config('indieweb_microformat.settings')->get('p_name_exclude_node_type');
+      if ($exclude_p_name_node_type && $variables['node']->bundle() == $exclude_p_name_node_type) {
+        $metadata = '<span class="hidden">
+          <a href="' . $variables['node']->toUrl('canonical', ['absolute' => TRUE])->toString() . '" class="u-url">
+            <span class="dt-published">' . $date . '</span>
+          </a>
+          <a href="/" class="u-author"></a>
+        </span>
+        ';
+      }
+      else {
+        $metadata = '<span class="hidden">
+          <a href="' . $variables['node']->toUrl('canonical', ['absolute' => TRUE])->toString() . '" class="u-url">
+            <span class="p-name">' . $variables['node']->getTitle() . '</span>
+            <span class="dt-published">' . $date . '</span>
+          </a>
+          <a href="/" class="u-author"></a>
+        </span>';
+      }
+
+      /**
+       * Rdf module might have set the 'metadata' key.
+       *
+       * Depending whether a patch is applied, or is in core, we need to make
+       * sure we don't crash and/or overwrite this key.
+       *
+       * @see rdf_preprocess_node().
+       * @see https://www.drupal.org/project/drupal/issues/2819695
+       */
+      if (isset($variables['metadata'])) {
+        $other = $variables['metadata'];
+        $variables['metadata'] = [];
+        // Patch applied, or core has been updated already.
+        if (is_array($other)) {
+          $variables['metadata']['other'] = $other;
+          $variables['metadata']['indieweb'] = ['#markup' => $metadata];
+        }
+        // The metadata has been rendered.
+        else {
+          $variables['metadata']['#markup'] = $other;
+          $variables['metadata']['indieweb'] = ['#markup' => $metadata];
+        }
+      }
+      else {
+        $variables['metadata'] = ['#markup' => $metadata];
+      }
+    }
+  }
+
+}
+
+/**
+ * Implements hook_preprocess_comment().
+ */
+function indieweb_preprocess_comment(&$variables) {
+
+  // Replace comment user picture.
+  if (isset($variables['content']['indieweb_webmention'][0]['#replace_comment_user_picture']) && $variables['content']['indieweb_webmention'][0]['#replace_comment_user_picture'] && !empty($variables['content']['indieweb_webmention'][0]['#author_photo'])) {
+    $variables['user_picture'] = [
+      '#theme' => 'webmention_author_photo',
+      '#author_photo' => $variables['content']['indieweb_webmention'][0]['#author_photo'],
+      '#author_name' => $variables['content']['indieweb_webmention'][0]['#author_name'],
+    ];
+  }
+
+  // Microformats for comments.
+  if ($variables['elements']['#view_mode'] == 'indieweb_microformat') {
+
+    // h-entry
+    if (\Drupal::config('indieweb_microformat.settings')->get('h_entry_comment')) {
+      $variables['attributes']['class'][] = 'h-entry';
+    }
+
+    // Post metadata.
+    if (\Drupal::config('indieweb_microformat.settings')->get('post_metadata_comment')) {
+      $date = \Drupal::service('date.formatter')
+        ->format($variables['elements']['#comment']->getCreatedTime(), 'custom', 'c');
+
+      $metadata = '<span class="hidden">
+        <a href="' . $variables['elements']['#comment']->toUrl('canonical', ['absolute' => TRUE])->toString() . '" class="u-url">
+          <span class="dt-published">' . $date . '</span>
+        </a>
+        <a href="/" class="u-author"></a>
+      </span>';
+
+      // Attach it to content.
+      $variables['content']['indieweb_medata_data']['#markup'] = $metadata;
+    }
+  }
+}
+
+/**
+ * Implements hook_preprocess_field().
+ */
+function indieweb_microformat_preprocess_field(&$variables) {
+
+  $view_mode = isset($variables['element']['#view_mode']) ? $variables['element']['#view_mode'] : '';
+  if (!empty($view_mode) && !in_array($view_mode, indieweb_microformat_view_modes())) {
+    return;
+  }
+
+  // Put e-content on textarea fields.
+  if ($variables['field_name'] == 'body' && \Drupal::config('indieweb_microformat.settings')->get('e_content') || in_array($variables['field_name'], indieweb_microformat_get_content_fields())) {
+    $variables['attributes']['class'][] = 'e-content';
+
+    $exclude_p_name_node_type = \Drupal::config('indieweb_microformat.settings')->get('p_name_exclude_node_type');
+    if ($variables['element']['#object']->bundle() == $exclude_p_name_node_type) {
+      $variables['attributes']['class'][] = 'p-name';
+    }
+
+    // Check p-bridgy-twitter-content class. In case there is no summary field
+    // on this entity or the field is empty, then add it.
+    if (\Drupal::config('indieweb_microformat.settings')->get('p_bridgy_twitter_content')) {
+
+      $add = TRUE;
+      /** @var \Drupal\Core\Entity\EntityInterface $entity */
+      $entity = $variables['element']['#object'];
+      $summary_fields = indieweb_microformat_get_summary_fields();
+      foreach ($summary_fields as $field) {
+        if ($entity->hasField($field) && $entity->get($field)->getValue()) {
+          $add = FALSE;
+        }
+      }
+
+      if ($add) {
+        $variables['attributes']['class'][] = 'p-bridgy-twitter-content';
+      }
+    }
+  }
+
+  // Put e-content on comment_body.
+  if ($variables['field_name'] == 'comment_body' && \Drupal::config('indieweb_microformat.settings')->get('e_content_comment')) {
+    $variables['attributes']['class'][] = 'e-content';
+  }
+
+  // Date range fields.
+  if ($h_event = \Drupal::config('indieweb_microformat.settings')->get('h_event')) {
+    if ($variables['element']['#field_type'] == 'daterange' && $variables['element']['#object']->bundle() == $h_event && !empty($variables['items'][0]['content'])) {
+      foreach ($variables['items'] as $key => $item) {
+        if (isset($item['content']['start_date'])) {
+          $variables['items'][$key]['content']['start_date']['#attributes']['class'][] = 'dt-start';
+        }
+        if (isset($item['content']['end_date'])) {
+          $variables['items'][$key]['content']['end_date']['#attributes']['class'][] = 'dt-end';
+        }
+      }
+    }
+  }
+
+  // In case there's a p-summary.
+  if (in_array($variables['field_name'], indieweb_microformat_get_summary_fields())) {
+    $variables['attributes']['class'][] = 'p-summary';
+
+    if (\Drupal::config('indieweb_microformat.settings')->get('p_bridgy_twitter_content')) {
+      $variables['attributes']['class'][] = 'p-bridgy-twitter-content';
+    }
+  }
+
+}
+
+/**
+ * Implements hook_preprocess_image_style().
+ *
+ * @param $variables
+ */
+function indieweb_microformat_preprocess_image_style(&$variables) {
+  if (\Drupal::config('indieweb_microformat.settings')->get('u_photo')) {
+    $variables['image']['#attributes']['class'][] = 'u-photo';
+  }
+}
+
+/**
+ * Implements hook_preprocess_file_audio().
+ */
+function indieweb_microformat_preprocess_file_audio(&$variables) {
+  if (\Drupal::config('indieweb_microformat.settings')->get('u_audio')) {
+    if (!empty($variables['files'])) {
+      foreach ($variables['files'] as $file) {
+        $file['source_attributes']->addClass('u-audio');
+      }
+    }
+  }
+}
+
+/**
+ * Implements hook_preprocess_file_entity_audio().
+ */
+function indieweb_microformat_preprocess_file_entity_audio(&$variables) {
+  if (\Drupal::config('indieweb_microformat.settings')->get('u_audio')) {
+    if (!empty($variables['files'])) {
+      foreach ($variables['files'] as $file) {
+        $file['source_attributes']->addClass('u-audio');
+      }
+    }
+  }
+}
+
+/**
+ * Implements hook_preprocess_file_video().
+ */
+function indieweb_microformat_preprocess_file_video(&$variables) {
+  if (\Drupal::config('indieweb_microformat.settings')->get('u_video')) {
+    if (!empty($variables['files'])) {
+      foreach ($variables['files'] as $file) {
+        $file['source_attributes']->addClass('u-video');
+      }
+    }
+  }
+}
+
+/**
+ * Implements hook_preprocess_file_entity_video().
+ */
+function indieweb_microformat_preprocess_file_entity_video(&$variables) {
+  if (\Drupal::config('indieweb_microformat.settings')->get('u_video')) {
+    if (!empty($variables['files'])) {
+      foreach ($variables['files'] as $file) {
+        $file['source_attributes']->addClass('u-video');
+      }
+    }
+  }
+}
+
+/**
+ * Implements hook_ds_pre_render_alter().
+ */
+function indieweb_microformat_ds_pre_render_alter(array &$layout_render_array, array $context, array &$variables) {
+  if ($context['entity_type'] == 'node' && \Drupal::config('indieweb_microformat.settings')->get('ds_node_support')) {
+    $variables['view_mode'] = $context['view_mode'];
+    indieweb_microformat_preprocess_node($variables);
+  }
+}

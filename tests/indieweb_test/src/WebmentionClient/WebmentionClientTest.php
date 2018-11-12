@@ -3,9 +3,9 @@
 namespace Drupal\indieweb_test\WebmentionClient;
 
 use Drupal\Core\Url;
-use Drupal\indieweb\Entity\WebmentionInterface;
-use Drupal\indieweb\WebmentionClient\WebmentionClient;
-use Drupal\indieweb\WebmentionClient\WebmentionClientInterface;
+use Drupal\indieweb_webmention\Entity\WebmentionInterface;
+use Drupal\indieweb_webmention\WebmentionClient\WebmentionClient;
+use Drupal\indieweb_webmention\WebmentionClient\WebmentionClientInterface;
 
 class WebmentionClientTest implements WebmentionClientInterface {
 

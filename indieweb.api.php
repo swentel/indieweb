@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Hooks specific to the IndieWeb module.
+ * Hooks specific to the IndieWeb modules.
  */
 
 use Drupal\node\NodeInterface;

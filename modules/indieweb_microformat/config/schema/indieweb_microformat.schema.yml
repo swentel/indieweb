@@ -1,0 +1,59 @@
+# schema for indieweb_microformat.settings
+indieweb_microformat.settings:
+  type: config_object
+  label: 'IndieWeb Microformats2'
+  mapping:
+    h_entry:
+      type: boolean
+      label: 'Enable microformat h-entry class for nodes'
+    h_entry_comment:
+      type: boolean
+      label: 'Enable microformat h-entry class for comments'
+    h_event:
+      type: string
+      label: 'Enable microformat h-event class for a node type'
+    post_metadata:
+      type: boolean
+      label: 'Enable microformat metadata classes like dt-published and u-url for nodes'
+    post_metadata_comment:
+      type: boolean
+      label: 'Enable microformat metadata classes like dt-published and u-url for comments'
+    p_name_exclude_node_type:
+      type: string
+      label: 'Node type on which p-name will not be printed'
+    e_content:
+      type: boolean
+      label: 'Enable microformat e-content class'
+    e_content_fields:
+      type: text
+      label: 'Other fields than body'
+    e_content_comment:
+      type: boolean
+      label: 'Enable microformat e-content class on comment'
+    u_photo:
+      type: boolean
+      label: 'Enable microformat u-photo class'
+    u_video:
+      type: boolean
+      label: 'Enable microformat u-video class'
+    u_audio:
+      type: boolean
+      label: 'Enable microformat u-audio class'
+    p_summary:
+      type: text
+      label: 'Microformat summary fields'
+    p_bridgy_twitter_content:
+      type: boolean
+      label: 'p-bridgy-twitter-content'
+    ds_node_support:
+      type: boolean
+      label: 'Enable Display Suite node support'
+
+# schema for link_microformat setting
+field.formatter.settings.link_microformat:
+  type: field.formatter.settings.link
+  label: 'Link microformat format settings'
+  mapping:
+    microformat_class:
+      type: string
+      label: 'The microformat class for the link'

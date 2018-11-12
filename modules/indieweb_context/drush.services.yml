@@ -1,0 +1,5 @@
+services:
+  indieweb_context.commands:
+    class: \Drupal\indieweb_context\Commands\ContextCommands
+    tags:
+      - { name: drush.command }

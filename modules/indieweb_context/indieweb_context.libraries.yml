@@ -1,0 +1,7 @@
+node-form:
+  version: 1.0
+  js:
+    js/indieweb-context-node-form.js: {  }
+  dependencies:
+    - core/jquery
+

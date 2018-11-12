@@ -1,0 +1,7 @@
+indieweb.admin.context_settings:
+  path: '/admin/config/services/indieweb/post-context'
+  defaults:
+    _form: '\Drupal\indieweb_context\Form\ContextSettingsForm'
+    _title: 'Post context'
+  requirements:
+    _permission: 'administer indieweb'

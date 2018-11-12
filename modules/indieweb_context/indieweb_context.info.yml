@@ -1,0 +1,7 @@
+name: Post context
+type: module
+description: Adds context to content and microsub items.
+core: 8.x
+package: IndieWeb
+dependencies:
+  - indieweb

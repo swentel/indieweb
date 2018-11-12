@@ -1,0 +1,79 @@
+indieweb.admin.webmention_settings:
+  path: '/admin/config/services/indieweb/webmention'
+  defaults:
+    _form: '\Drupal\indieweb_webmention\Form\WebmentionSettingsForm'
+    _title: 'Webmention'
+  requirements:
+    _permission: 'administer indieweb'
+
+indieweb.admin.webmention_send_settings:
+  path: '/admin/config/services/indieweb/send'
+  defaults:
+    _form: '\Drupal\indieweb_webmention\Form\WebmentionSendSettingsForm'
+    _title: 'Send webmention'
+  requirements:
+    _permission: 'administer indieweb'
+
+indieweb.admin.comment_settings:
+  path: '/admin/config/services/indieweb/comments'
+  defaults:
+    _form: '\Drupal\indieweb_webmention\Form\CommentSettingsForm'
+    _title: 'Comments'
+  requirements:
+    _permission: 'administer indieweb'
+
+indieweb.webmention.internal:
+  path: '/webmention/receive'
+  defaults:
+    _controller: '\Drupal\indieweb_webmention\Controller\WebmentionController::webmentionInternal'
+    _title: 'Webmention internal endpoint'
+  requirements:
+    _access: 'TRUE'
+
+indieweb.webmention.notify:
+  path: '/webmention/notify'
+  defaults:
+    _controller: '\Drupal\indieweb_webmention\Controller\WebmentionController::webmentionNotify'
+    _title: 'Webmention notification endpoint'
+  requirements:
+    _access: 'TRUE'
+
+indieweb.pingback.internal:
+  path: '/pingback/receive'
+  defaults:
+    _controller: '\Drupal\indieweb_webmention\Controller\WebmentionController::pingbackInternal'
+    _title: 'Pingback internal endpoint'
+  requirements:
+    _access: 'TRUE'
+
+indieweb.pingback.notify:
+  path: '/pingback/notify'
+  defaults:
+    _controller: '\Drupal\indieweb_webmention\Controller\WebmentionController::pingbackNotify'
+    _title: 'Pingback notification endpoint'
+  requirements:
+    _access: 'TRUE'
+
+indieweb.webmention.multiple_delete_confirm:
+  path: '/admin/content/webmention/delete'
+  defaults:
+    _form: '\Drupal\indieweb_webmention\Form\WebmentionDeleteMultiple'
+  requirements:
+    _permission: 'administer webmention entities'
+
+indieweb.syndication.form:
+  path: '/admin/content/syndication/form'
+  defaults:
+    _form: '\Drupal\indieweb_webmention\Form\SyndicationForm'
+    _title: 'Add syndication'
+  requirements:
+    _permission: 'administer indieweb'
+
+indieweb.comment.canonical:
+  path: '/comment/indieweb/{comment}'
+  defaults:
+    _title_callback: '\Drupal\indieweb_webmention\Controller\CommentController::commentPermalinkTitle'
+    _controller: '\Drupal\indieweb_webmention\Controller\CommentController::commentPermalink'
+  requirements:
+    _entity_access: 'comment.view'
+    comment: \d+

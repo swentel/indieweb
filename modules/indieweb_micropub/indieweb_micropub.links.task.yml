@@ -1,0 +1,5 @@
+indieweb.admin.micropub_settings:
+  title: 'Micropub'
+  route_name: indieweb.admin.micropub_settings
+  base_route: indieweb.admin.dashboard
+  weight: 40

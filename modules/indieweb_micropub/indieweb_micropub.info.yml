@@ -1,0 +1,9 @@
+name: Micropub
+type: module
+description: Create posts via third party clients on the micropub endpoint.
+core: 8.x
+package: IndieWeb
+dependencies:
+  - indieweb
+  - indieweb_indieauth
+  - drupal:options

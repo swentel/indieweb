@@ -1,0 +1,5 @@
+services:
+  indieweb.aperture.client:
+    class: Drupal\indieweb_microsub\ApertureClient\ApertureClient
+  indieweb.microsub.client:
+    class: Drupal\indieweb_microsub\MicrosubClient\MicrosubClient

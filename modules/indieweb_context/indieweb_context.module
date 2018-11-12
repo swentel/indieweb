@@ -1,0 +1,364 @@
+<?php
+
+/**
+ * @file
+ * IndieWeb post context.
+ */
+
+use Drupal\Component\Utility\Unicode;
+use Drupal\Core\Entity\ContentEntityInterface;
+use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
+use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\node\Entity\NodeType;
+use Drupal\node\NodeInterface;
+use Drupal\node\NodeTypeInterface;
+use p3k\XRay;
+
+define('INDIEWEB_POST_CONTEXT_QUEUE', 'indieweb_context');
+
+/**
+ * Implements hook_theme().
+ */
+function indieweb_context_theme() {
+  return [
+    'indieweb_post_context' => [
+      'variables' => [
+        'name' => NULL,
+        'class' => NULL,
+        'content' => NULL,
+        'content_truncated' => NULL,
+      ],
+    ],
+  ];
+}
+
+/**
+ * Implements hook_cron().
+ */
+function indieweb_context_cron() {
+
+  if (\Drupal::config('indieweb_context.settings')->get('handler') == 'cron') {
+  // TODO move to service!
+    indieweb_handle_post_context_queue();
+  }
+
+}
+
+/**
+ * Get the post contexts for an entity.
+ *
+ * @param $entity_id
+ * @param $entity_type_id
+ *
+ * @return array
+ */
+function indieweb_get_post_contexts($entity_id, $entity_type_id) {
+  $contexts = [];
+
+  $records = \Drupal::database()->query('SELECT url, content FROM {indieweb_post_context} WHERE entity_id = :entity_id AND entity_type_id = :entity_type_id', [':entity_id' => $entity_id, ':entity_type_id' => $entity_type_id]);
+  foreach ($records as $record) {
+
+    $content = (array) json_decode($record->content);
+    if (isset($content['post-type'])) {
+      $contexts[] = [
+        'url' => $record->url,
+        'content' => $content,
+      ];
+    }
+
+  }
+
+  return $contexts;
+}
+
+/**
+ * Handles the post context queue.
+ */
+function indieweb_handle_post_context_queue() {
+  $end = time() + 15;
+  $xray = new XRay();
+  while (time() < $end && ($item = \Drupal::queue(INDIEWEB_POST_CONTEXT_QUEUE)->claimItem())) {
+    $data = $item->data;
+    if (!empty($data['url']) && !empty($data['entity_id']) && !empty($data['entity_type_id'])) {
+
+      // Get content.
+      // TODO we should make a helper service here, as microsub client does this
+      // TODO make a service if from it as well
+      // as well (in various ways :/)
+      try {
+        $response = \Drupal::httpClient()->get($data['url']);
+        $body = $response->getBody()->getContents();
+
+        $parsed = $xray->parse($data['url'], $body, ['expect'=>'feed']);
+        if ($parsed && isset($parsed['data']['type']) && $parsed['data']['type'] == 'feed') {
+            $reference = $parsed['data']['items'][0];
+
+            // Nodes.
+            if ($data['entity_type_id'] == 'node') {
+              \Drupal::database()
+                ->merge('indieweb_post_context')
+                ->key('entity_id', $data['entity_id'])
+                ->key('entity_type_id', $data['entity_type_id'])
+                ->key('url', $data['url'])
+                ->fields(['content' => json_encode($reference)])
+                ->execute();
+            }
+
+            // Microsub.
+            if ($data['entity_type_id'] == 'microsub_item') {
+              \Drupal::database()
+                ->merge('microsub_item')
+                ->key('id', $data['entity_id'])
+                ->fields(['post_context' => json_encode($reference)])
+                ->execute();
+
+          }
+        }
+      }
+      catch (\Exception $e) {
+        \Drupal::logger('indieweb_post_context')->notice('Error getting post context for @url: @message', ['@url' => $data['url'], '@message' => $e->getMessage()]);
+      }
+    }
+
+    // Remove the item - always.
+    \Drupal::queue(INDIEWEB_POST_CONTEXT_QUEUE)->deleteItem($item);
+  }
+}
+
+/**
+ * Creates a post context queue item.
+ *
+ * @param $url
+ * @param $entity_id
+ * @param $entity_type_id
+ */
+function indieweb_post_context_create_queue_item($url, $entity_id, $entity_type_id) {
+  $data = [
+    'url' => $url,
+    'entity_id' => $entity_id,
+    'entity_type_id' => $entity_type_id,
+  ];
+
+  try {
+    \Drupal::queue(INDIEWEB_POST_CONTEXT_QUEUE)->createItem($data);
+  }
+  catch (\Exception $e) {
+    \Drupal::logger('indieweb_queue')->notice('Error creating queue item: @message', ['@message' => $e->getMessage()]);
+  }
+}
+
+/**
+ * Implements hook_form_BASE_FORM_ID_alter() for \Drupal\node\NodeForm.
+ *
+ * Adds post context fields to the node form.
+ *
+ * @see menu_ui_form_node_form_submit()
+ */
+function indieweb_context_form_node_type_form_alter(&$form, FormStateInterface $form_state) {
+
+  $link_fields = [];
+  $fields = \Drupal::service('entity_field.manager')->getFieldStorageDefinitions('node');
+  $field_types = \Drupal::service('plugin.manager.field.field_type')->getDefinitions();
+
+  /** @var \Drupal\Core\Field\FieldStorageDefinitionInterface $field */
+  foreach ($fields as $key => $field) {
+    if (in_array($field->getType(), ['link'])) {
+      $link_fields[$key] = $field_types[$field->getType()]['label'] . ': ' . $field->getName();
+    }
+  }
+
+  /** @var \Drupal\node\NodeTypeInterface $type */
+  $type = $form_state->getFormObject()->getEntity();
+
+  $default_link_field = $type->getThirdPartySetting('indieweb_context', 'post_context_link_field');
+  $default_post_type = $type->getThirdPartySetting('indieweb_context', 'post_context_post_type');
+  $form['indieweb'] = [
+    '#type' => 'details',
+    '#title' => t('IndieWeb settings'),
+    '#group' => 'additional_settings',
+    '#attached' => [
+      'library' => ['indieweb_context/node-form'],
+    ],
+    '#attributes' => ['class' => ['indieweb-node-form']],
+    '#description' => t('Select a link field, if available, which will be used to fetch content from.<br />On the Manage Display screens, you can select "Post context" field which will render context about this url.<br />Content will be fetched on creation of the node, or when the URL field is updated.'),
+  ];
+
+  $form['indieweb']['post_context_link_field'] = [
+    '#type' => 'select',
+    '#attributes' => ['class' => ['indieweb-post-context-field']],
+    '#options' => ['' => t('Do not store external content')] + $link_fields,
+    '#title' => t('Link field'),
+    '#default_value' => $default_link_field,
+  ];
+
+  $form['indieweb']['post_context_post_type'] = [
+    '#type' => 'select',
+    '#options' => [
+      'u-in-reply-to' => t('Reply'),
+      'u-like-of' => t('Like'),
+      'u-bookmark-of' => t('Bookmark'),
+      'u-repost-of' => t('Repost'),
+    ],
+    '#title' => t('Post type'),
+    '#description' => t('Select a type post field, for the right markup.'),
+    '#default_value' => $default_post_type,
+  ];
+
+  $form['#entity_builders'][] = 'indieweb_context_node_type_builder';
+}
+
+/**
+ * Entity form builder to add the post context information to the node.
+ */
+function indieweb_context_node_type_builder($entity_type, NodeTypeInterface $type, &$form, FormStateInterface $form_state) {
+  $link_field = $form_state->getValue('post_context_link_field');
+  $post_type = $form_state->getValue('post_context_post_type');
+  if (!$link_field) {
+    $post_type = '';
+  }
+  $type->setThirdPartySetting('indieweb_context', 'post_context_link_field', $link_field);
+  $type->setThirdPartySetting('indieweb_context', 'post_context_post_type', $post_type);
+}
+
+/**
+ * Implements hook_entity_insert().
+ */
+function indieweb_context_entity_insert(EntityInterface $entity) {
+  indieweb_context_entity_update($entity, TRUE);
+}
+
+/**
+ * Implements hook_entity_update().
+ */
+function indieweb_context_entity_update(EntityInterface $entity, $is_new = NULL) {
+  if ($entity instanceof ContentEntityInterface) {
+    try {
+      _indieweb_entity_update_check_post_context($entity, $is_new);
+    }
+    catch (Exception $e) {
+      \Drupal::logger('indieweb_entity')->notice('Error on entity action: @message', ['@message' => $e->getMessage()]);
+    }
+  }
+}
+
+/**
+ * Implements hook_entity_delete().
+ */
+function indieweb_context_entity_delete(EntityInterface $entity) {
+
+  if ($entity instanceof ContentEntityInterface) {
+
+    // Delete from post_contexts table.
+    \Drupal::database()
+      ->delete('indieweb_post_context')
+      ->condition('entity_id', $entity->id())
+      ->condition('entity_type_id', $entity->getEntityTypeId())
+      ->execute();
+  }
+
+}
+
+/**
+ * Check if need to fetch a post context for an entity.
+ *
+ * @param \Drupal\Core\Entity\EntityInterface $entity
+ * @param $is_new
+ *
+ * @throws \Exception
+ */
+function _indieweb_entity_update_check_post_context(EntityInterface $entity, $is_new) {
+
+  // No need to check if it's not configured.
+  $handler = \Drupal::config('indieweb_context.settings')->get('handler');
+  if (empty($handler) || $handler == 'disabled') {
+    return;
+  }
+
+  // Check posts for node.
+  if ($entity->getEntityTypeId() =='node') {
+
+    $node_type = NodeType::load($entity->bundle());
+    $link_field = $node_type->getThirdPartySetting('indieweb_context', 'post_context_link_field');
+
+    if ($link_field && $entity->hasField($link_field)) {
+      if ($url = $entity->get($link_field)->uri) {
+        $create_queue_item = FALSE;
+        if ($is_new) {
+          $create_queue_item = TRUE;
+        }
+        elseif (isset($entity->original)) {
+          $previous_url = $entity->original->get($link_field)->uri;
+          if ($previous_url != $url) {
+            $create_queue_item = TRUE;
+          }
+        }
+
+        if ($create_queue_item) {
+          indieweb_post_context_create_queue_item($url, $entity->id(), $entity->getEntityTypeId());
+        }
+      }
+    }
+  }
+}
+
+/**
+ * Implements hook_entity_extra_field_info().
+ */
+function indieweb_context_entity_extra_field_info() {
+  $extra = [];
+
+  // Fields for node.
+  if (\Drupal::moduleHandler()->moduleExists('node')) {
+
+    /** @var \Drupal\node\NodeTypeInterface $bundle */
+    foreach (NodeType::loadMultiple() as $bundle) {
+
+      // Post context field.
+      $link_field = $bundle->getThirdPartySetting('indieweb_context', 'post_context_link_field');
+      if ($link_field) {
+        $extra['node'][$bundle->id()]['display']['indieweb_post_context'] = [
+          'label' => t('Post context'),
+          'weight' => 0,
+          'visible' => FALSE,
+        ];
+      }
+
+    }
+  }
+
+  return $extra;
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_view() for node entities.
+ */
+function indieweb_context_node_view(array &$build, NodeInterface $node, EntityViewDisplayInterface $display) {
+  _indieweb_extra_fields_display($build, $node, $display);
+}
+
+/**
+ * Renders post context extra field.
+ *
+ * @param array $build
+ * @param \Drupal\Core\Entity\EntityInterface $entity
+ * @param \Drupal\Core\Entity\Display\EntityViewDisplayInterface $display
+ */
+function _indieweb_extra_fields_display(array &$build, EntityInterface $entity, EntityViewDisplayInterface $display) {
+  if ($display->getComponent('indieweb_post_context')) {
+    $node_type = NodeType::load($entity->bundle());
+    $post_type_class = $node_type->getThirdPartySetting('indieweb_context', 'post_context_post_type');
+    $suggestion = str_replace(['in-', '-to', '-of', 'u-'], '', $post_type_class);
+    $contexts = indieweb_get_post_contexts($entity->id(), $entity->getEntityTypeId());
+    foreach ($contexts as $context) {
+      $text = isset($context['content']['content']->text) ? $context['content']['content']->text : '';
+      $build['post_context'][] = [
+        '#class' => $post_type_class,
+        '#theme' => 'indieweb_post_context__' . $suggestion,
+        '#content' => ['#markup' => nl2br($text)],
+        '#content_truncated' => ['#markup' => Unicode::truncate(nl2br($text), 300, TRUE, TRUE)],
+        '#name' => isset($context['content']['name']) ? $context['content']['name'] : '',
+      ];
+    }
+  }
+}

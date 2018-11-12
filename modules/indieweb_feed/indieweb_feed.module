@@ -1,0 +1,93 @@
+<?php
+
+/**
+ * @file
+ * IndieWeb feeds.
+ */
+
+use Drupal\Core\Entity\ContentEntityInterface;
+use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Url;
+
+/**
+ * Implements hook_page_attachments_alter().
+ */
+function indieweb_feed_page_attachments_alter(array &$attachments) {
+
+  // Add header link tags on front page.
+  if (\Drupal::service('path.matcher')->isFrontPage()) {
+
+    /** @var \Drupal\indieweb_feed\Entity\FeedInterface $feed */
+    foreach (\Drupal::entityTypeManager()->getStorage('indieweb_feed')->loadMultiple() as $feed) {
+
+      // Microformats2 feed.
+      if ($feed->exposeRelLinkTag()) {
+        $link = [
+          '#tag' => 'link',
+          '#attributes' => [
+            'rel' => 'feed',
+            'href' => Url::fromUri('internal:/' . $feed->getPath(), ['absolute' => TRUE])->toString(),
+          ],
+        ];
+
+        $attachments['#attached']['html_head'][] = [$link, 'feed_endpoint_' . $feed->id()];
+      }
+
+      // Atom feed.
+      if ($feed->exposeAtomFeed() && $feed->exposeAtomLinkTag()) {
+        $link = [
+          '#tag' => 'link',
+          '#attributes' => [
+            'rel' => 'alternate',
+            'type' => 'application/atom+xml',
+            'href' => Url::fromUri('internal:/' . str_replace('/', '-', $feed->getPath()) . '.xml', ['absolute' => TRUE])
+              ->toString(),
+          ],
+        ];
+
+        $attachments['#attached']['html_head'][] = [$link, 'feed_endpoint_atom_' . $feed->id()];
+      }
+
+      // JF2 feed.
+      if ($feed->exposeJf2Feed() && $feed->exposeJf2LinkTag()) {
+        $link = [
+          '#tag' => 'link',
+          '#attributes' => [
+            'rel' => 'alternate',
+            'type' => 'application/jf2feed+json',
+            'href' => Url::fromUri('internal:/' . str_replace('/', '-', $feed->getPath()) . '.jf2', ['absolute' => TRUE])->toString(),
+          ],
+        ];
+
+        $attachments['#attached']['html_head'][] = [$link, 'feed_endpoint_jf2_' . $feed->id()];
+      }
+    }
+  }
+}
+
+/**
+ * Implements hook_entity_insert().
+ */
+function indieweb_feed_entity_insert(EntityInterface $entity) {
+  if ($entity instanceof ContentEntityInterface) {
+    \Drupal::service('indieweb_feed.updater')->checkEntityOnInsertOrUpdate($entity);
+  }
+}
+
+/**
+ * Implements hook_entity_update().
+ */
+function indieweb_feed_entity_update(EntityInterface $entity) {
+  if ($entity instanceof ContentEntityInterface) {
+    \Drupal::service('indieweb_feed.updater')->checkEntityOnInsertOrUpdate($entity);
+  }
+}
+
+/**
+ * Implements hook_entity_delete().
+ */
+function indieweb_feed_entity_delete(EntityInterface $entity) {
+  if ($entity instanceof ContentEntityInterface) {
+    \Drupal::service('indieweb_feed.updater')->deleteEntityFromFeeds($entity);
+  }
+}

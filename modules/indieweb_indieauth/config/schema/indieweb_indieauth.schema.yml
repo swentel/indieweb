@@ -1,0 +1,20 @@
+# schema for indieweb_indieauth.settings
+indieweb_indieauth.settings:
+  type: config_object
+  label: 'Indieweb indieauth'
+  mapping:
+    auth_internal:
+      type: boolean
+      label: 'Enable IndieAuth support'
+    expose_link_tag:
+      type: boolean
+      label: 'Expose IndieAuth link tag'
+    authorization_endpoint:
+      type: string
+      label: 'IndieAuth authorization endpoint'
+    token_endpoint:
+      type: string
+      label: 'IndieAuth token endpoint'
+    login_enable:
+      type: boolean
+      label: 'Enable login support'

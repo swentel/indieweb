@@ -3,6 +3,7 @@
 namespace Drupal\Tests\indieweb\Functional;
 
 use Drupal\Core\Url;
+use Drupal\indieweb_webmention\Commands\WebmentionCommands;
 use Drupal\node\NodeInterface;
 use Drupal\Tests\BrowserTestBase;
 use GuzzleHttp\Exception\ClientException;
@@ -140,12 +141,12 @@ abstract class IndiewebBrowserTestBase extends BrowserTestBase {
     $edit += [
       'webmention_internal' => FALSE,
       'webmention_notify' => TRUE,
-      'webmention_expose_header_link' => TRUE,
+      'webmention_expose_link_tag' => TRUE,
       'webmention_uid' => $this->adminUser->id(),
       'webmention_secret' => 'valid_secret',
       'webmention_endpoint' => 'https://webmention.io/example.com/webmention',
       'pingback_notify' => TRUE,
-      'pingback_expose_header_link' => TRUE,
+      'pingback_expose_link_tag' => TRUE,
       'pingback_internal' => FALSE,
       'pingback_endpoint' => 'https://webmention.io/webmention?forward=http://example.com/webmention/notify',
     ];
@@ -476,7 +477,7 @@ abstract class IndiewebBrowserTestBase extends BrowserTestBase {
    */
   protected function assertWebmentionQueueItems($urls = [], $id = NULL) {
     if ($urls) {
-      $count = \Drupal::queue(WEBMENTION_QUEUE_NAME)->numberOfItems();
+      $count = \Drupal::queue(INDIEWEB_WEBMENTION_QUEUE)->numberOfItems();
       $this->assertTrue($count == count($urls));
 
       // We use a query here, don't want to use a while loop. When there's
@@ -484,7 +485,7 @@ abstract class IndiewebBrowserTestBase extends BrowserTestBase {
       // fail. When the first item is inserted, we'll be fine.
       try {
         $query = 'SELECT * FROM {queue} WHERE name = :name';
-        $records = \Drupal::database()->query($query, [':name' => WEBMENTION_QUEUE_NAME]);
+        $records = \Drupal::database()->query($query, [':name' => INDIEWEB_WEBMENTION_QUEUE]);
         foreach ($records as $record) {
           $data = unserialize($record->data);
           if (!empty($data['source']) && !empty($data['target']) && $id) {
@@ -503,7 +504,7 @@ abstract class IndiewebBrowserTestBase extends BrowserTestBase {
       }
     }
     else {
-      $count = \Drupal::queue(WEBMENTION_QUEUE_NAME)->numberOfItems();
+      $count = \Drupal::queue(INDIEWEB_WEBMENTION_QUEUE)->numberOfItems();
       $this->assertFalse($count);
     }
   }
@@ -516,7 +517,7 @@ abstract class IndiewebBrowserTestBase extends BrowserTestBase {
    */
   protected function assertPostContextQueueItems($urls = [], $id = NULL) {
     if ($urls) {
-      $count = \Drupal::queue(POST_CONTEXT_QUEUE_NAME)->numberOfItems();
+      $count = \Drupal::queue(INDIEWEB_POST_CONTEXT_QUEUE)->numberOfItems();
       $this->assertTrue($count == count($urls));
 
       // We use a query here, don't want to use a while loop. When there's
@@ -524,7 +525,7 @@ abstract class IndiewebBrowserTestBase extends BrowserTestBase {
       // fail. When the first item is inserted, we'll be fine.
       try {
         $query = 'SELECT * FROM {queue} WHERE name = :name';
-        $records = \Drupal::database()->query($query, [':name' => POST_CONTEXT_QUEUE_NAME]);
+        $records = \Drupal::database()->query($query, [':name' => INDIEWEB_POST_CONTEXT_QUEUE]);
         foreach ($records as $record) {
           $data = unserialize($record->data);
           $this->assertTrue(in_array($data['url'], $urls));
@@ -536,7 +537,7 @@ abstract class IndiewebBrowserTestBase extends BrowserTestBase {
       }
     }
     else {
-      $count = \Drupal::queue(POST_CONTEXT_QUEUE_NAME)->numberOfItems();
+      $count = \Drupal::queue(INDIEWEB_POST_CONTEXT_QUEUE)->numberOfItems();
       $this->assertFalse($count);
     }
   }
@@ -567,9 +568,10 @@ abstract class IndiewebBrowserTestBase extends BrowserTestBase {
    * Runs the post context queue. Both calls cron and drush.
    */
   protected function runPostContextQueue() {
-    module_load_include('inc', 'indieweb', 'indieweb.drush');
-    drush_indieweb_fetch_post_contexts();
-    indieweb_cron();
+    if (\Drupal::config('indieweb_context.settings')->get('handler') == 'drush') {
+      indieweb_handle_post_context_queue();
+    }
+    indieweb_context_cron();
   }
 
   /**
@@ -577,7 +579,7 @@ abstract class IndiewebBrowserTestBase extends BrowserTestBase {
    *
    * @param $queue_name
    */
-  protected function clearQueue($queue_name = WEBMENTION_QUEUE_NAME) {
+  protected function clearQueue($queue_name = INDIEWEB_WEBMENTION_QUEUE) {
     \Drupal::database()->delete('queue')->condition('name', $queue_name)->execute();
     $this->assertWebmentionQueueItems();
   }
@@ -586,9 +588,10 @@ abstract class IndiewebBrowserTestBase extends BrowserTestBase {
    * Runs the queue. Both calls cron and drush.
    */
   protected function runWebmentionQueue() {
-    module_load_include('inc', 'indieweb', 'indieweb.drush');
-    drush_indieweb_send_webmentions();
-    indieweb_cron();
+    if (\Drupal::config('indieweb_webmention.settings')->get('send_webmention_handler') == 'drush') {
+      indieweb_handle_webmention_queue();
+    }
+    indieweb_webmention_cron();
   }
 
   /**
@@ -653,7 +656,7 @@ abstract class IndiewebBrowserTestBase extends BrowserTestBase {
       $this->drupalLogin($this->adminUser);
     }
 
-    $edit = ['expose_endpoint_link' => 1, 'token_endpoint' => Url::fromRoute('indieweb_test.token_endpoint', [], ['absolute' => TRUE])->toString()];
+    $edit = ['expose_link_tag' => 1, 'token_endpoint' => Url::fromRoute('indieweb_test.token_endpoint', [], ['absolute' => TRUE])->toString()];
     $this->drupalPostForm('admin/config/services/indieweb/indieauth', $edit, 'Save configuration');
 
     if ($logout) {
@@ -677,7 +680,7 @@ abstract class IndiewebBrowserTestBase extends BrowserTestBase {
 
     $edit = [
       'auth_internal' => TRUE,
-      'expose_endpoint_link' => TRUE,
+      'expose_link_tag' => TRUE,
     ];
     $this->drupalPostForm('admin/config/services/indieweb/indieauth', $edit, 'Save configuration');
 

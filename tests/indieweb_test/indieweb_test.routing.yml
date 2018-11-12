@@ -33,7 +33,7 @@ indieweb_test.webmention_endpoint:
 indieweb_test.indieauth.login.page:
   path: '/indieauth-test/login'
   defaults:
-    _form: '\Drupal\indieweb\Form\IndieAuthLoginForm'
+    _form: '\Drupal\indieweb_indieauth\Form\IndieAuthLoginForm'
     _title: 'Login endpoint'
   requirements:
     _access: 'TRUE'

@@ -1,0 +1,12 @@
+indieweb.microsub_channel.add_form:
+  route_name: entity.indieweb_microsub_channel.add_form
+  title: 'Add Channel'
+  appears_on:
+    - indieweb.admin.microsub_channels
+
+indieweb.microsub_source.add_form:
+  route_name: entity.indieweb_microsub_source.add_form
+  title: 'Add Source'
+  appears_on:
+    - indieweb.admin.microsub_channels
+    - indieweb.admin.microsub_sources

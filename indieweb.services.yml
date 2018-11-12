@@ -1,7 +1,3 @@
 services:
-  indieweb.webmention.client:
-    class: Drupal\indieweb\WebmentionClient\WebmentionClient
-  indieweb.aperture.client:
-    class: Drupal\indieweb\ApertureClient\ApertureClient
-  indieweb.microsub.client:
-    class: Drupal\indieweb\MicrosubClient\MicrosubClient
+  indieweb.media_cache.client:
+    class: Drupal\indieweb\MediaCacheClient\MediaCacheClient

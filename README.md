@@ -27,6 +27,27 @@ Current functionality:
 - Fediverse integration
 - Caching of image files
 
+The functionality is split into several modules:
+
+- IndieWeb: main API module. Contains help, permissions, general blocks and more. All other modules depend on this
+- IndieAuth: expose endpoints and use external or internal endpoint
+- Webmention: send and receive webmentions and pingbacks; store syndications; create comments; internal or external
+- Microformats: apply Microformats2 to your markup
+- Micropub: expose a Micropub endpoint
+- Microsub: expose a Microsub endpoint, external or internal
+- Feeds: create Microformats2, Atom and JF2 feeds
+- Post context: store context for content and microsub items
+- Media cache: store images locally for internal webmention and micropub endpoint
+
+Additional useful modules
+
+- https://www.drupal.org/project/externalauth
+- https://www.drupal.org/project/auto_entitylabel
+- https://www.drupal.org/project/realname
+- https://www.drupal.org/project/rabbit_hole
+- https://www.drupal.org/project/imagecache_external
+- https://www.drupal.org/project/cdn
+
 More information is in this README and on the help pages.
 
 Development happens on github: https://github.com/swentel/indieweb
@@ -224,7 +245,7 @@ You have to create an entity reference field on your comment type which points t
 page of the comment you can set the formatter of that reference field to 'Webmention'. The webmention preprocess 
 formats the text content using the 'restricted_html' content format which comes default in Drupal 8. Also, don't
 forget to set permissions to view webmentions. When replying, and the comment has a link field, this field can also
-be pre-filled, see the 'Sending' section.
+be pre-filled, see the 'Sending' section. The module comes with a indieweb_webmention reference field, so use that!
 
 Every comment is available also at comment/indieweb/cid so this URL can also be a target for a webmention. If a
 webmention is send to this target, a comment will be created on the node, with the target cid as the parent.
@@ -241,7 +262,7 @@ Configuration still in settings.php
 
 ## Feeds
 
-Generate feeds in Microformat 2 , Atom or jf2feed+json. Atom feeds are generated using https://granary.io/. 
+Generate feeds in Microformats2 , JF2 and Atom. Atom feeds are generated using https://granary.io/. 
 
 You will need feeds when:
 
@@ -251,8 +272,8 @@ You will need feeds when:
   types which can either link to a page with microformat entries. It's advised to have an h-card on that page too as
   some parsers don't go to the homepage to fetch that content.
 
-Because content can be nodes, comments, etc. it isn't possible to use views. However, this module allows you to create a
-multiple feeds which aggregates all these content in a page and/or feed. The feeds are controlled by the
+Because content can be nodes, comments, etc. it isn't possible to use views. However, this module allows you to create
+multiple feeds which aggregates all these content in a page and/or feed. The feeds are controlled by the 
 'access content' permission.
 
 Configuration is at /admin/config/services/indieweb/feeds
@@ -332,6 +353,8 @@ by installing the CDN module. The cache is generated when the webmention or micr
 on request is minimal.
 
 ## Drush commands
+
+Note you need drush 8 or later to run these commands.
 
 - indieweb-send-webmentions: handles the queue for sending webmentions.
 - indieweb-process-webmentions: process the webmention received on the internal endpoint

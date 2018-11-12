@@ -1,0 +1,56 @@
+indieweb.admin.webmention_settings:
+  title: 'Webmention'
+  route_name: indieweb.admin.webmention_settings
+  base_route: indieweb.admin.dashboard
+  weight: 10
+
+indieweb.admin.webmention_settings_tab:
+  title: 'Receiving'
+  route_name: indieweb.admin.webmention_settings
+  parent_id: indieweb.admin.webmention_settings
+
+indieweb.admin.webmention_send_settings:
+  title: 'Sending'
+  route_name: indieweb.admin.webmention_send_settings
+  parent_id: indieweb.admin.webmention_settings
+
+indieweb.admin.comment_settings:
+  title: 'Comments'
+  route_name: indieweb.admin.comment_settings
+  parent_id: indieweb.admin.webmention_settings
+
+indieweb.webmention.list_tab:
+  title: 'Webmentions'
+  route_name: entity.indieweb_webmention.collection
+  base_route: system.admin_content
+
+indieweb.webmention.list_received:
+  title: 'Received'
+  route_name: entity.indieweb_webmention.collection
+  parent_id: indieweb.webmention.list_tab
+
+indieweb.webmention.list_send:
+  title: 'Send'
+  route_name: entity.indieweb_webmention_send.collection
+  parent_id: indieweb.webmention.list_tab
+
+indieweb.syndication.list_tab:
+  title: 'Syndications'
+  route_name: entity.indieweb_syndication.collection
+  base_route: system.admin_content
+
+entity.indieweb_webmention.canonical:
+  title: 'View'
+  route_name: entity.indieweb_webmention.canonical
+  base_route: entity.indieweb_webmention.canonical
+
+entity.indieweb_webmention.edit_form:
+  title: 'Edit'
+  route_name: entity.indieweb_webmention.edit_form
+  base_route: entity.indieweb_webmention.canonical
+
+entity.indieweb_webmention.delete_form:
+  title: 'Delete'
+  route_name:  entity.indieweb_webmention.delete_form
+  base_route:  entity.indieweb_webmention.canonical
+  weight: 10

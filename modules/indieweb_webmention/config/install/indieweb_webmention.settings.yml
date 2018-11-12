@@ -1,0 +1,22 @@
+webmention_endpoint: ''
+webmention_secret: ''
+webmention_internal: false
+webmention_internal_handler: 'disabled'
+webmention_log_processing: false
+webmention_notify: false
+webmention_expose_link_tag: false
+webmention_detect_identical: false
+pingback_internal: false
+pingback_notify: false
+pingback_endpoint: ''
+pingback_expose_link_tag: false
+webmention_uid: 1
+webmention_log_payload: true
+syndication_targets: "Twitter (bridgy)|https://brid.gy/publish/twitter"
+bridgy_back_link: always
+send_webmention_handler: disabled
+send_custom_url: true
+send_link_fields: ''
+send_log_response: false
+send_comment_webmention_field: ''
+send_comment_permission_fields: true

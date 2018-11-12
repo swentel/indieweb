@@ -1,0 +1,19 @@
+indieweb_cache.settings:
+  type: config_object
+  label: 'Indieweb cache'
+  mapping:
+    enable:
+      type: boolean
+      label: 'Enable caching of media'
+    use_imagecache_external:
+      type: boolean
+      label: 'Use external imagecache module'
+    image_style_avatar:
+      type: string
+      label: 'The image style to apply to the downloaded image for an avatar'
+    image_style_photo:
+      type: string
+      label: 'The image style to apply to the downloaded image for any other photo'
+    ignore_webmention_io:
+      type: boolean
+      label: 'Ignore webmention.io'

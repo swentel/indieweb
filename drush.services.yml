@@ -1,5 +1,0 @@
-services:
-  indieweb.commands:
-    class: \Drupal\indieweb\Commands\IndiewebCommands
-    tags:
-      - { name: drush.command }

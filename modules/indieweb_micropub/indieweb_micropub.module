@@ -1,0 +1,65 @@
+<?php
+
+/**
+ * @file
+ * IndieWeb Micropub module.
+ */
+
+use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Url;
+use Drupal\node\NodeTypeInterface;
+
+/**
+ * Implements hook_page_attachments_alter().
+ */
+function indieweb_micropub_page_attachments_alter(array &$attachments) {
+
+  if (\Drupal::service('path.matcher')->isFrontPage()) {
+
+    if (($config = \Drupal::config('indieweb_micropub.settings')) && ($config->get('micropub_enable')) && $config->get('micropub_expose_link_tag')) {
+
+      $link = [
+        '#tag' => 'link',
+        '#attributes' => [
+          'rel' => 'micropub',
+          'href' => Url::fromRoute('indieweb.micropub.endpoint', [], ['absolute' => TRUE])->toString(),
+        ],
+      ];
+
+      $attachments['#attached']['html_head'][] = [$link, 'micropub_endpoint'];
+    }
+  }
+
+}
+
+/**
+ * Implements hook_entity_delete().
+ */
+function indieweb_entity_delete(EntityInterface $entity) {
+
+  if ($entity instanceof NodeTypeInterface) {
+    $save = FALSE;
+    $config = \Drupal::configFactory()->getEditable('indieweb_micropub.settings');
+    foreach (indieweb_micropub_post_types() as $post_type) {
+      if ($config->get($post_type . '_node_type') == $entity->id()) {
+        $save = TRUE;
+        $config->set($post_type . '_create_node', FALSE);
+        $config->set($post_type . '_node_type', '');
+      }
+    }
+
+    if ($save) {
+      $config->save();
+    }
+  }
+
+}
+
+/**
+ * Returns the supported micropub post types.
+ *
+ * @return array
+ */
+function indieweb_micropub_post_types() {
+  return ['article', 'note', 'like', 'reply', 'repost', 'bookmark', 'event', 'rsvp', 'issue'];
+}

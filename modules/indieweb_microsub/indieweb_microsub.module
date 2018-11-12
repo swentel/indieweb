@@ -1,0 +1,50 @@
+<?php
+
+/**
+ * @file
+ * IndieWeb Microsub module.
+ */
+
+use Drupal\Core\Url;
+
+/**
+ * Implements hook_page_attachments_alter().
+ */
+function indieweb_microsub_page_attachments_alter(array &$attachments) {
+
+  if (\Drupal::service('path.matcher')->isFrontPage()) {
+
+    if (($config = \Drupal::config('indieweb_microsub.settings')) && $config->get('microsub_expose_link_tag')) {
+
+      if ($config->get('microsub_internal')) {
+        $endpoint = Url::fromRoute('indieweb.microsub.endpoint', [], ['absolute' => TRUE])->toString();
+      }
+      else {
+        $endpoint = $config->get('microsub_endpoint');
+      }
+
+      $link = [
+        '#tag' => 'link',
+        '#attributes' => [
+          'rel' => 'microsub',
+          'href' => $endpoint,
+        ],
+      ];
+
+      $attachments['#attached']['html_head'][] = [$link, 'microsub_endpoint'];
+    }
+  }
+
+}
+
+/**
+ * Implements hook_cron().
+ */
+function indieweb_microsub_cron() {
+
+  if (\Drupal::config('indieweb_microsub.settings')->get('microsub_internal') &&
+    \Drupal::config('indieweb_microsub.settings')->get('microsub_internal_handler') == 'cron') {
+    \Drupal::service('indieweb.microsub.client')->fetchItems();
+  }
+
+}

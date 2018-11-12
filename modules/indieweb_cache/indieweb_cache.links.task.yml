@@ -1,0 +1,5 @@
+indieweb.admin.cache_settings:
+  title: 'Media cache'
+  route_name: indieweb.admin.cache_settings
+  base_route: indieweb.admin.dashboard
+  weight: 80

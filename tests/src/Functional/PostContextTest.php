@@ -23,6 +23,20 @@ class PostContextTest extends IndiewebBrowserTestBase {
   protected $profile = 'standard';
 
   /**
+   * Modules to enable for this test.
+   *
+   * @var string[]
+   */
+  public static $modules = [
+    'block',
+    'node',
+    'indieweb',
+    'indieweb_context',
+    'indieweb_microformat',
+    'indieweb_test',
+  ];
+
+  /**
    * {@inheritdoc}
    */
   public function setUp() {
@@ -45,6 +59,10 @@ class PostContextTest extends IndiewebBrowserTestBase {
 
   /**
    * Tests post context.
+   *
+   * @throws \Behat\Mink\Exception\ExpectationException
+   * @throws \Drupal\Core\Entity\EntityStorageException
+   * @throws \Drupal\Core\Entity\EntityMalformedException
    */
   public function testPostContext() {
 
@@ -53,8 +71,8 @@ class PostContextTest extends IndiewebBrowserTestBase {
     $edit = ['post_context_link_field' => 'field_reply_link', 'post_context_post_type' => 'u-in-reply-to'];
     $this->drupalPostForm('admin/structure/types/manage/reply', $edit, 'Save content type');
     $node_type = NodeType::load('reply');
-    self::assertEquals($node_type->getThirdPartySetting('indieweb', 'post_context_link_field'), 'field_reply_link');
-    self::assertEquals($node_type->getThirdPartySetting('indieweb', 'post_context_post_type'), 'u-in-reply-to');
+    self::assertEquals($node_type->getThirdPartySetting('indieweb_context', 'post_context_link_field'), 'field_reply_link');
+    self::assertEquals($node_type->getThirdPartySetting('indieweb_context', 'post_context_post_type'), 'u-in-reply-to');
 
     // Create page for context.
     $page_settings = [

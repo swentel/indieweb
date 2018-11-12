@@ -1,0 +1,7 @@
+microsub_internal: false
+microsub_internal_handler: 'disabled'
+microsub_internal_cleanup_items: 0
+microsub_endpoint: ''
+microsub_expose_link_tag: false
+aperture_enable_micropub: false
+aperture_api_key: ''

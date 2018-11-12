@@ -1,0 +1,7 @@
+name: Webmention
+type: module
+description: Receive and send webmention and pingbacks, either via Webmention.io or via the built-in server.
+core: 8.x
+package: IndieWeb
+dependencies:
+  - indieweb

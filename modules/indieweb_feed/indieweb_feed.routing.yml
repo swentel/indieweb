@@ -1,0 +1,2 @@
+route_callbacks:
+  - '\Drupal\indieweb_feed\Routing\Feed::routes'

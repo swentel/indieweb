@@ -1,0 +1,26 @@
+# schema for indieweb_microsub.settings
+indieweb_microsub.settings:
+  type: config_object
+  label: 'Indieweb microsub'
+  mapping:
+    microsub_internal:
+      type: boolean
+      label: 'Use built-in microsub server'
+    microsub_internal_handler:
+      type: string
+      label: 'How to fetch new items'
+    microsub_internal_cleanup_items:
+      type: integer
+      label: 'Remove items older than a certain period'
+    microsub_endpoint:
+      type: string
+      label: 'Microsub endpoint'
+    microsub_expose_link_tag:
+      type: boolean
+      label: 'Expose microsub link tag'
+    aperture_enable_micropub:
+      type: boolean
+      label: 'Enable micropub post to Aperture'
+    aperture_api_key:
+      type: string
+      label: 'ApertureClient channel API key'

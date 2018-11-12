@@ -1,0 +1,23 @@
+indieweb.admin.micropub_settings:
+  path: '/admin/config/services/indieweb/micropub'
+  defaults:
+    _form: '\Drupal\indieweb_micropub\Form\MicropubSettingsForm'
+    _title: 'Micropub'
+  requirements:
+    _permission: 'administer indieweb'
+
+indieweb.micropub.endpoint:
+  path: '/indieweb/micropub'
+  defaults:
+   _controller: '\Drupal\indieweb_micropub\Controller\MicropubController::postEndpoint'
+   _title: 'Micropub endpoint'
+  requirements:
+   _access: 'TRUE'
+
+indieweb.micropub.media.endpoint:
+  path: '/indieweb/micropub/media'
+  defaults:
+   _controller: '\Drupal\indieweb_micropub\Controller\MicropubController::mediaEndpoint'
+   _title: 'Micropub media endpoint'
+  requirements:
+   _access: 'TRUE'

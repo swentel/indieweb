@@ -1,5 +1,0 @@
-auth_internal: false
-expose_endpoint_link: false
-authorization_endpoint: 'https://indieauth.com/auth'
-token_endpoint: 'https://tokens.indieauth.com/token'
-login_enable: false

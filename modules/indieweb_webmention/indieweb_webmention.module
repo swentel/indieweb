@@ -1,0 +1,678 @@
+<?php
+
+/**
+ * @file
+ * IndieWeb Webmention and Pingbacks.
+ */
+
+use Drupal\comment\CommentInterface;
+use Drupal\comment\Entity\CommentType;
+use Drupal\Core\Cache\Cache;
+use Drupal\Core\Entity\ContentEntityInterface;
+use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
+use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Url;
+use Drupal\node\Entity\NodeType;
+use Drupal\node\NodeInterface;
+
+define('INDIEWEB_WEBMENTION_QUEUE', 'indieweb_webmention');
+
+/**
+ * Implements hook_page_attachments_alter().
+ */
+function indieweb_webmention_page_attachments_alter(array &$attachments) {
+
+  // Add webmention and pingback rel links.
+  $route = \Drupal::routeMatch()->getRouteObject();
+  $is_admin = \Drupal::service('router.admin_context')->isAdminRoute($route);
+  if (!$is_admin) {
+
+    $config = \Drupal::config('indieweb_webmention.settings');
+    if ($config->get('webmention_expose_link_tag')) {
+
+      $endpoint = '';
+      if ($config->get('webmention_internal')) {
+        $endpoint = Url::fromRoute('indieweb.webmention.internal', [], ['absolute' => TRUE])->toString();
+      }
+      elseif ($config->get('webmention_notify')) {
+        $endpoint = $config->get('webmention_endpoint');
+      }
+
+      if (!empty($endpoint)) {
+        $link = [
+          '#tag' => 'link',
+          '#attributes' => [
+            'rel' => 'webmention',
+            'href' => $endpoint,
+          ],
+        ];
+        $attachments['#attached']['html_head'][] = [$link, 'webmention'];
+      }
+    }
+
+    if ($config->get('pingback_expose_link_tag')) {
+
+      $endpoint = '';
+      if ($config->get('pingback_internal')) {
+        $endpoint = Url::fromRoute('indieweb.pingback.internal', [], ['absolute' => TRUE])->toString();
+      }
+      elseif ($config->get('pingback_notify')) {
+        $endpoint = $config->get('pingback_endpoint');
+      }
+
+      if (!empty($endpoint)) {
+        $link = [
+          '#tag' => 'link',
+          '#attributes' => [
+            'rel' => 'pingback',
+            'href' => $endpoint,
+          ],
+        ];
+        $attachments['#attached']['html_head'][] = [$link, 'pingback'];
+      }
+    }
+  }
+}
+
+/**
+ * Implements hook_theme().
+ */
+function indieweb_webmention_theme() {
+  return [
+    'webmention' => [
+      'variables' => [
+        'show_summary' => NULL,
+        'show_created' => NULL,
+        'show_avatar' => FALSE,
+        'replace_comment_user_picture' => FALSE,
+        'property' => NULL,
+        'author_photo' => NULL,
+        'author_name' => NULL,
+        'created' => NULL,
+        'source' => NULL,
+        'content_text' => NULL,
+        'content_html' => NULL,
+      ],
+    ],
+    'webmention_author_photo' => [
+      'variables' => [
+        'author_photo' => NULL,
+        'author_name' => NULL,
+      ],
+    ],
+  ];
+}
+
+/**
+ * Prepares variables for the webmention template.
+ *
+ * @param $variables
+ */
+function template_preprocess_webmention(&$variables) {
+  $content = '';
+
+  switch ($variables['property']) {
+    case 'like-of':
+      $interaction = t('Liked by');
+      break;
+    case 'repost-of':
+      $interaction = t('Reposted by');
+      break;
+    case 'in-reply-to':
+      $interaction = t('Reply by');
+      $content = $variables['content_text'];
+      break;
+    case 'mention-of':
+      $interaction = t('Mention by');
+      $content = $variables['content_text'];
+      break;
+    default:
+      $interaction = t('Interaction from');
+      break;
+  }
+
+  $variables['interaction'] = $interaction;
+
+  if ($variables['show_created']) {
+    $variables['created'] = \Drupal::service('date.formatter')->format($variables['created']);
+  }
+
+  if (!empty($content)) {
+    $content = check_markup($content, 'restricted_html');
+  }
+  $variables['content'] = $content;
+}
+
+/**
+ * Handles the webmention queue.
+ */
+function indieweb_handle_webmention_queue() {
+  $end = time() + 15;
+  $syndication_targets = indieweb_get_syndication_targets();
+  while (time() < $end && ($item = \Drupal::queue(INDIEWEB_WEBMENTION_QUEUE)->claimItem())) {
+    $data = $item->data;
+    if (!empty($data['source']) && !empty($data['target'])) {
+
+      try {
+
+        $sourceURL = $data['source'];
+        $targetURL = $data['target'];
+
+        /** @var \Drupal\indieweb_webmention\WebmentionClient\WebmentionClientInterface $client */
+        $client = \Drupal::service('indieweb.webmention.client');
+        $response = $client->sendWebmention($sourceURL, $targetURL);
+
+        // Store the syndication when the targetUrl is in the syndication
+        // targets.
+        if (isset($syndication_targets[$targetURL])) {
+          if (!empty($response) && $response['code'] == 201 && !empty($response['headers']['Location'])) {
+
+            if (!empty($data['entity_id']) && !empty($data['entity_type_id'])) {
+              $values = [
+                'entity_id' => $data['entity_id'],
+                'entity_type_id' => $data['entity_type_id'],
+                'url' => $response['headers']['Location'],
+              ];
+
+              $syndication = \Drupal::entityTypeManager()->getStorage('indieweb_syndication')->create($values);
+              $syndication->save();
+
+              Cache::invalidateTags([$data['entity_type_id'] . ':' . $data['entity_id']]);
+            }
+
+            // Log the response if configured.
+            if (\Drupal::config('indieweb_webmention.settings')->get('send_log_response')) {
+              \Drupal::logger('indieweb_send_response')->notice('response for @source to @target: @response', ['@response' => print_r($response, 1), '@source' => $sourceURL, '@target' => $targetURL]);
+            }
+
+          }
+        }
+
+      }
+      catch (Exception $e) {
+        \Drupal::logger('indieweb_send')->notice('Error sending webmention for @source to @target: @message', ['@message' => $e->getMessage(), '@source' => $sourceURL, '@target' => $targetURL]);
+      }
+    }
+
+    // Store in send table.
+    $values = [
+      'source' => $data['source'],
+      'target' => $data['target'],
+      'entity_id' => !empty($data['entity_id']) ? $data['entity_id'] : 0,
+      'entity_type_id' => !empty($data['entity_type_id']) ? $data['entity_type_id'] : '',
+      'created' => \Drupal::time()->getCurrentTime(),
+    ];
+
+    try {
+      $send = \Drupal::entityTypeManager()->getStorage('indieweb_send')->create($values);
+      $send->save();
+    }
+    catch (\Exception $e) {
+      \Drupal::logger('indieweb_send')->notice('Error saving send webmention record: @message', ['@message' => $e->getMessage()]);
+    }
+
+    // Remove the item - always.
+    \Drupal::queue(INDIEWEB_WEBMENTION_QUEUE)->deleteItem($item);
+  }
+}
+
+/**
+ * Returns the syndication targets.
+ *
+ * @param boolean $return_options_and_defaults
+ *   Whether to return the syndication targets as an array with 'options' key
+ *   and 'default' key.
+ *
+ * @return array
+ */
+function indieweb_get_syndication_targets($return_options_and_defaults = FALSE) {
+  $syndication_targets = [];
+  $config = \Drupal::config('indieweb_webmention.settings')->get('syndication_targets');
+  if (!empty($config)) {
+    $lines = explode("\n", $config);
+    foreach ($lines as $line) {
+      $line = trim($line);
+      if (!empty($line)) {
+        $name_url = explode('|', $line);
+        if (!empty($name_url[0]) && !empty($name_url[1])) {
+          if ($return_options_and_defaults) {
+            $syndication_targets['options'][$name_url[1]] = $name_url[0];
+            if (isset($name_url[2]) && !empty($name_url[2]) && $name_url[2] == '1') {
+              $syndication_targets['default'][] = $name_url[1];
+            }
+          }
+          else {
+            $syndication_targets[$name_url[1]] = $name_url[0];
+          }
+        }
+      }
+    }
+  }
+
+  return $syndication_targets;
+}
+
+/**
+ * Get the syndications for an entity.
+ *
+ * @param $entity_id
+ * @param $entity_type_id
+ *
+ * @return array
+ */
+function indieweb_get_syndications($entity_id, $entity_type_id) {
+  $syndications = [];
+
+  $records = \Drupal::database()->query('SELECT url FROM {webmention_syndication} WHERE entity_id = :entity_id AND entity_type_id = :entity_type_id', [':entity_id' => $entity_id, ':entity_type_id' => $entity_type_id]);
+  foreach ($records as $record) {
+    $syndications[] = $record->url;
+  }
+
+  return $syndications;
+}
+
+/**
+ * Creates a webmention queue item.
+ *
+ * @param $source
+ * @param $target
+ * @param $entity_id
+ * @param $entity_type_id
+ */
+function indieweb_webmention_create_queue_item($source, $target, $entity_id = '', $entity_type_id = '') {
+
+  $data = [
+    'source' => $source,
+    'target' => $target,
+    'entity_id' => $entity_id,
+    'entity_type_id' => $entity_type_id,
+  ];
+
+  // Bail out when target is one of the silos, but not actually the webmention
+  // endpoint. This can happen with reply urls to twitter for example.
+  if (indieweb_is_silo_url($target)) {
+    return;
+  }
+
+  try {
+    \Drupal::queue(INDIEWEB_WEBMENTION_QUEUE)->createItem($data);
+  }
+  catch (\Exception $e) {
+    \Drupal::logger('indieweb_queue')->notice('Error creating queue item: @message', ['@message' => $e->getMessage()]);
+  }
+}
+
+/**
+ * Implements hook_cron().
+ */
+function indieweb_webmention_cron() {
+
+  if (\Drupal::config('indieweb_webmention.settings')->get('send_webmention_handler') == 'cron') {
+  // TODO move to service!
+    indieweb_handle_webmention_queue();
+  }
+
+  if (\Drupal::config('indieweb_webmention.settings')->get('webmention_internal') &&
+    \Drupal::config('indieweb_webmention.settings')->get('webmention_internal_handler') == 'cron') {
+    \Drupal::service('indieweb.webmention.client')->processWebmentions();
+  }
+}
+
+/**
+ * Implements hook_form_FORM_BASE_ID_alter() for the comments form.
+ */
+function indieweb_webmention_form_comment_form_alter(&$form, FormStateInterface $form_state) {
+  _indieweb_webmention_entity_form_alter($form, $form_state);
+
+  // Check the comment webmention reference field.
+  $config = \Drupal::config('indieweb_webmention.comment');
+  if ($config->get('comment_create_enable') && ($reference_field = $config->get('comment_create_webmention_reference_field'))) {
+    if (isset($form[$reference_field]) && isset($form['comment_body'])) {
+      /** @var \Drupal\comment\CommentInterface $comment */
+      $comment = $form_state->getFormObject()->getEntity();
+      // Deny access to comment form if webmention is referenced and body is
+      // empty. Otherwise, you can not save this comment anymore.
+      if (!$comment->isNew() && !empty($comment->get($reference_field)->target_id) && empty($comment->get('comment_body')->value)) {
+        $form['comment_body']['#access'] = FALSE;
+      }
+    }
+  }
+}
+
+/**
+ * Helper function to add IndieWeb publish to fieldsets.
+ *
+ * @param $form
+ * @param \Drupal\Core\Form\FormStateInterface $form_state
+ */
+function _indieweb_webmention_entity_form_alter(&$form, FormStateInterface $form_state) {
+  /** @var \Drupal\Core\Entity\EntityInterface $entity */
+  $entity = $form_state->getFormObject()->getEntity();
+  if ($entity) {
+    $form['indieweb'] = [
+      '#type' => 'details',
+      '#title' => t('Publish to'),
+      '#access' => \Drupal::currentUser()->hasPermission('send webmentions'),
+      '#group' => 'advanced',
+    ];
+
+    $syndication_targets = indieweb_get_syndication_targets(TRUE);
+    $form['indieweb']['indieweb_syndication_targets'] = [
+      '#type' => 'checkboxes',
+      '#options' => isset($syndication_targets['options']) ? $syndication_targets['options'] : [],
+      '#default_value' => isset($syndication_targets['default']) ? $syndication_targets['default'] : [],
+      '#access' => !empty($syndication_targets['options']),
+    ];
+
+    $options = [];
+    $link_fields_string = \Drupal::config('indieweb_webmention.settings')->get('send_link_fields');
+    if (!empty($link_fields_string)) {
+      $link_fields = explode('|', $link_fields_string);
+
+      foreach ($link_fields as $field) {
+        if ($entity->hasField($field)) {
+          $options[$field] = t('Use @field', ['@field' => $field]);
+        }
+      }
+
+      $form['indieweb']['indieweb_send_link_field'] = [
+        '#title' => t('Link field'),
+        '#type' => 'select',
+        '#access' => !empty($options),
+        '#options' => ['' => ''] + $options,
+        '#description' => t('Use the link from a field on this content.'),
+      ];
+    }
+
+    // Comment webmention.
+    if ($entity->getEntityTypeId() == 'comment' && ($reference_field = \Drupal::config('indieweb_webmention.settings')->get('send_comment_webmention_field')) && $entity->hasField($reference_field) && !empty($options)) {
+      /** @var \Drupal\comment\CommentInterface $comment */
+      $comment = $entity;
+
+      if (\Drupal::config('indieweb_webmention.settings')->get('send_comment_permission_fields')) {
+        $form[$reference_field]['#access'] = \Drupal::currentUser()->hasPermission('send webmentions');
+
+        foreach (array_keys($options) as $field_name) {
+          $form[$field_name]['#access'] = \Drupal::currentUser()->hasPermission('send webmentions');
+        }
+      }
+
+      // Default values for link fields on comment.
+      if (($parent = $comment->getParentComment()) && $parent->hasField($reference_field) && \Drupal::currentUser()->hasPermission('send webmentions')) {
+        /** @var \Drupal\indieweb_webmention\Entity\WebmentionInterface $webmention */
+        $webmention = $parent->get($reference_field)->entity;
+        if ($webmention && $webmention->get('url')->value) {
+          foreach ($options as $key => $field) {
+            $form[$key]['widget'][0]['uri']['#default_value'] = $webmention->get('url')->value;
+          }
+        }
+      }
+    }
+
+    if (\Drupal::config('indieweb_webmention.settings')->get('send_custom_url')) {
+      $form['indieweb']['indieweb_send_custom_url'] = [
+        '#type' => 'textfield',
+        '#description' => t('Enter a custom URL'),
+      ];
+    }
+
+    foreach (array_keys($form['actions']) as $action) {
+      if ($action != 'preview' && isset($form['actions'][$action]['#type']) && $form['actions'][$action]['#type'] === 'submit') {
+        $form['actions'][$action]['#submit'][] = '_indieweb_webmention_entity_content_form_submit';
+      }
+    }
+  }
+
+}
+
+/**
+ * Form submission handler for indieweb.
+ *
+ * @param $form
+ * @param \Drupal\Core\Form\FormStateInterface $form_state
+ *
+ * @see indieweb_form_node_form_alter()
+ *
+ * @throws \Drupal\Core\Entity\EntityMalformedException
+ */
+function _indieweb_webmention_entity_content_form_submit($form, FormStateInterface $form_state) {
+  /** @var \Drupal\Core\Entity\EntityInterface $entity */
+  $entity = $form_state->getFormObject()->getEntity();
+  if (method_exists($entity, 'isPublished') && $entity->isPublished()) {
+
+    // Use our route for comments. Drupal core redirects to the entity, but we
+    // need a page so webmentions can scan them for the content more easily.
+    if ($entity->getEntityTypeId() == 'comment') {
+      $source = Url::fromRoute('indieweb.comment.canonical', ['comment' => $entity->id()], ['absolute' => TRUE])->toString();
+    }
+    else {
+      $source = $entity->toUrl()->setAbsolute(TRUE)->toString();
+    }
+
+    // Syndicate to.
+    $syndicate_to = $form_state->getValue('indieweb_syndication_targets');
+    if (!empty($syndicate_to)) {
+      foreach ($syndicate_to as $key => $value) {
+        if ($key === $value) {
+          indieweb_webmention_create_queue_item($source, $key, $entity->id(), $entity->getEntityTypeId());
+        }
+      }
+    }
+
+    // Link fields.
+    $link_field = $form_state->getValue('indieweb_send_link_field');
+    if (!empty($link_field)) {
+      if ($entity->hasField($link_field)) {
+        $values = $entity->get($link_field)->getValue();
+        if (!empty($values[0]['uri'])) {
+          indieweb_webmention_create_queue_item($source, $values[0]['uri'], $entity->id(), $entity->getEntityTypeId());
+        }
+      }
+    }
+
+    // Custom URL.
+    $custom_url = $form_state->getValue('indieweb_send_custom_url');
+    if (!empty($custom_url)) {
+      indieweb_webmention_create_queue_item($source, $custom_url, $entity->id(), $entity->getEntityTypeId());
+    }
+
+  }
+}
+
+/**
+ * Implements hook_form_BASE_FORM_ID_alter() for \Drupal\node\NodeForm.
+ */
+function indieweb_webmention_form_node_form_alter(&$form, FormStateInterface $form_state) {
+  _indieweb_webmention_entity_form_alter($form, $form_state);
+}
+
+/**
+ * Implements hook_entity_delete().
+ */
+function indieweb_webmention_entity_delete(EntityInterface $entity) {
+
+  if ($entity instanceof ContentEntityInterface) {
+
+    // Delete from syndication table.
+    \Drupal::database()
+      ->delete('webmention_syndication')
+      ->condition('entity_id', $entity->id())
+      ->condition('entity_type_id', $entity->getEntityTypeId())
+      ->execute();
+
+  }
+
+}
+
+/**
+ * Checks whether the url is a silo URL or not. Currently detects Twitter urls.
+ *
+ * e.g. https://twitter.com/studioemma/status/999193968234713093 should be
+ * marked as a silo url.
+ *
+ * @param $url
+ *
+ * @return bool
+ */
+function indieweb_is_silo_url($url) {
+  $is_silo_url = FALSE;
+
+  if (strpos($url, 'twitter.com') !== FALSE) {
+    $is_silo_url = TRUE;
+  }
+
+  return $is_silo_url;
+}
+
+/**
+ * Implements hook_mail.
+ *
+ * @param $key
+ * @param $message
+ * @param $params
+ */
+function indieweb_webmention_mail($key, &$message, $params) {
+
+  $options = array(
+    'langcode' => $message['langcode'],
+  );
+
+  switch ($key) {
+    case 'webmention_comment_created':
+      /** @var \Drupal\comment\CommentInterface $comment */
+      $comment = $params['comment'];
+      $message['from'] = \Drupal::config('system.site')->get('mail');
+      $message['subject'] = t('Comment created on "@title" via webmention', array('@title' => $comment->getCommentedEntity()->label()), $options);
+      $message['body'][] = $params['comment_webmention_body'];
+      if (!$comment->isPublished()) {
+        $message['body'][] = "\n---------------------\n" . t('The comment is unpublished, so check the approval queue at @url', ['@url' => Url::fromRoute('comment.admin_approval', [], ['absolute' => TRUE])->toString()]);
+      }
+      break;
+  }
+}
+
+/**
+ * Implements hook_entity_extra_field_info().
+ */
+function indieweb_webmention_entity_extra_field_info() {
+  $extra = [];
+
+  $syndication_targets = indieweb_get_syndication_targets();
+
+  // Fields for node.
+  if (\Drupal::moduleHandler()->moduleExists('node')) {
+
+    /** @var \Drupal\node\NodeTypeInterface $bundle */
+    foreach (NodeType::loadMultiple() as $bundle) {
+      foreach ($syndication_targets as $url => $name) {
+        $machine_name = indieweb_generate_machine_name_from_url($url);
+        $extra['node'][$bundle->id()]['display'][$machine_name] = [
+          'label' => $name,
+          'weight' => 0,
+          'visible' => FALSE,
+        ];
+      }
+
+      // Syndication field.
+      $extra['node'][$bundle->id()]['display']['indieweb_syndication'] = [
+        'label' => t('Syndication'),
+        'weight' => 0,
+        'visible' => FALSE,
+      ];
+
+    }
+  }
+
+  // Fields for comment.
+  if (!empty($syndication_targets) && \Drupal::moduleHandler()->moduleExists('comment')) {
+    foreach (CommentType::loadMultiple() as $bundle) {
+      foreach ($syndication_targets as $url => $name) {
+        $machine_name = indieweb_generate_machine_name_from_url($url);
+        $extra['comment'][$bundle->id()]['display'][$machine_name] = [
+          'label' => $name,
+          'weight' => 0,
+          'visible' => FALSE,
+        ];
+      }
+
+      // Syndication field.
+      $extra['comment'][$bundle->id()]['display']['indieweb_syndication'] = [
+        'label' => t('Syndication'),
+        'weight' => 0,
+        'visible' => FALSE,
+      ];
+    }
+  }
+
+
+  return $extra;
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_view() for node entities.
+ */
+function indieweb_webmention_node_view(array &$build, NodeInterface $node, EntityViewDisplayInterface $display) {
+  _indieweb_webmention_extra_fields_display($build, $node, $display);
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_view() for comment entities.
+ */
+function indieweb_webmention_comment_view(array &$build, CommentInterface $comment, EntityViewDisplayInterface $display) {
+  _indieweb_webmention_extra_fields_display($build, $comment, $display);
+}
+
+/**
+ * Renders extra fields like targets and syndication.
+ *
+ * @param array $build
+ * @param \Drupal\Core\Entity\EntityInterface $entity
+ * @param \Drupal\Core\Entity\Display\EntityViewDisplayInterface $display
+ */
+function _indieweb_webmention_extra_fields_display(array &$build, EntityInterface $entity, EntityViewDisplayInterface $display) {
+  // Syndication targets fields.
+  $syndication_targets = indieweb_get_syndication_targets();
+  if (!empty($syndication_targets)) {
+    $back_link = '';
+    $add_back_link = \Drupal::config('indieweb_webmention.settings')->get('bridgy_back_link');
+    if ($add_back_link == 'never') {
+      $back_link = ' class="p-bridgy-omit-link" value="true"';
+    }
+    elseif ($add_back_link == 'maybe') {
+      $back_link = ' class="p-bridgy-omit-link" value="maybe"';
+    }
+    foreach ($syndication_targets as $url => $name) {
+      $machine_name = indieweb_generate_machine_name_from_url($url);
+      if ($display->getComponent($machine_name)) {
+        $build[$machine_name] = [
+          '#markup' => '<span class="hidden"><a href="' . $url . '"'. $back_link .'></a></span>',
+        ];
+      }
+    }
+  }
+
+  // Syndication field.
+  if ($display->getComponent('indieweb_syndication')) {
+    $syndications = indieweb_get_syndications($entity->id(), $entity->getEntityTypeId());
+    if ($syndications) {
+      $items = [];
+
+      foreach ($syndications as $url) {
+        $items[] = [
+          '#type' => 'link',
+          '#url' => Url::fromUri($url),
+          '#title' => $url,
+          '#attributes' => ['class' => ['u-syndication']],
+        ];
+      }
+
+      $build['indieweb_syndication'] = [
+        '#theme' => 'item_list__indieweb_syndication',
+        '#items' => $items,
+        '#wrapper_attributes' => ['class' => ['indieweb-syndication-list']],
+        '#title' => t('Syndications'),
+      ];
+    }
+  }
+}

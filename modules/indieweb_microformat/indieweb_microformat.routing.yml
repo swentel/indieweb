@@ -1,0 +1,7 @@
+indieweb.microformat.admin.settings:
+  path: '/admin/config/services/indieweb/microformats'
+  defaults:
+    _form: '\Drupal\indieweb_microformat\Form\MicroformatSettingsForm'
+    _title: 'Microformats'
+  requirements:
+    _permission: 'administer indieweb'

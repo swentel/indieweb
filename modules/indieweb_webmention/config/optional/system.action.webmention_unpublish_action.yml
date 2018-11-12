@@ -1,0 +1,10 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - node
+id: webmention_unpublish_action
+label: 'Unpublish webmention'
+type: indieweb_webmention
+plugin: entity:unpublish_action:indieweb_webmention
+configuration: {  }

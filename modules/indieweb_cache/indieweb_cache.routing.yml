@@ -1,0 +1,7 @@
+indieweb.admin.cache_settings:
+  path: '/admin/config/services/indieweb/cache'
+  defaults:
+    _form: '\Drupal\indieweb_cache\Form\CacheSettingsForm'
+    _title: 'Media cache'
+  requirements:
+    _permission: 'administer indieweb'

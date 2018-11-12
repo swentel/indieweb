@@ -1,0 +1,4 @@
+authorize with indieauth:
+  title: 'Authorize with IndieAuth'
+  description: 'Allow users to use the built-in authorization and token endpoints'
+  restrict access: true

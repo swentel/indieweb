@@ -1,0 +1,5 @@
+indieweb.feed.feed.add_form:
+  route_name: entity.indieweb_feed.add_form
+  title: 'Add Feed'
+  appears_on:
+    - entity.indieweb_feed.collection

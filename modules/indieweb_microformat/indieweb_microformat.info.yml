@@ -1,0 +1,7 @@
+name: Microformats2
+type: module
+description: Apply Microformats2 to your markup.
+core: 8.x
+package: IndieWeb
+dependencies:
+  - indieweb

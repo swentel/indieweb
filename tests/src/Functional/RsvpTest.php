@@ -13,6 +13,19 @@ use Drupal\user\RoleInterface;
 class RsvpTest extends IndiewebBrowserTestBase {
 
   /**
+   * Modules to enable for this test.
+   *
+   * @var string[]
+   */
+  public static $modules = [
+    'block',
+    'node',
+    'indieweb',
+    'indieweb_webmention',
+    'indieweb_test',
+  ];
+
+  /**
    * {@inheritdoc}
    */
   public function setUp() {

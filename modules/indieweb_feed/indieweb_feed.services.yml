@@ -1,0 +1,3 @@
+services:
+  indieweb_feed.updater:
+    class: Drupal\indieweb_feed\FeedUpdater\FeedUpdater

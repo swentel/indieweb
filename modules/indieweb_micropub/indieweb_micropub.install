@@ -1,0 +1,37 @@
+<?php
+
+/**
+ * @file
+ * IndieWeb Micropub install file.
+ */
+
+/**
+ * Implements hook_requirements().
+ */
+function indieweb_micropub_requirements($phase) {
+  $requirements = [];
+
+  if ($phase == 'runtime') {
+
+    $directory = 'public://micropub';
+    if (!is_dir($directory)) {
+      file_prepare_directory($directory, FILE_CREATE_DIRECTORY | FILE_MODIFY_PERMISSIONS);
+    }
+
+    if (!is_dir($directory)) {
+      if ($phase == 'runtime') {
+        $description = t('An automated attempt to create the directory %directory failed, possibly due to a permissions problem. To proceed with the installation, either create the directory and modify its permissions manually or ensure that the installer has the permissions to create it automatically. For more information, see INSTALL.txt or the <a href=":handbook_url">online handbook</a>.', ['%directory' => $directory, ':handbook_url' => 'https://www.drupal.org/server-permissions']);
+      }
+      else {
+        $description = t('The directory %directory does not exist.', ['%directory' => $directory]);
+      }
+      $requirements['micropub directory'] = [
+        'title' => t('Micropub directory'),
+        'description' => $description,
+        'severity' => REQUIREMENT_ERROR,
+      ];
+    }
+  }
+
+  return $requirements;
+}

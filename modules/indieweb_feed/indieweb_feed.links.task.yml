@@ -1,0 +1,5 @@
+indieweb.feed.admin.feeds_collection:
+  title: 'Feeds'
+  route_name: entity.indieweb_feed.collection
+  base_route: indieweb.admin.dashboard
+  weight: 30

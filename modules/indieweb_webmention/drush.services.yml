@@ -1,0 +1,5 @@
+services:
+  indieweb.webmention.commands:
+    class: \Drupal\indieweb_webmention\Commands\WebmentionCommands
+    tags:
+      - { name: drush.command }

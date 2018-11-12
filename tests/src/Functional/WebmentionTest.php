@@ -27,6 +27,8 @@ class WebmentionTest extends IndiewebBrowserTestBase {
     'node',
     'indieweb',
     'indieweb_test',
+    'indieweb_webmention',
+    'indieweb_microformat',
     'link',
     'field_ui',
     'comment',
@@ -95,8 +97,8 @@ class WebmentionTest extends IndiewebBrowserTestBase {
     // Do not expose.
     $this->drupalLogin($this->adminUser);
     $edit = [
-      'webmention_expose_header_link' => FALSE,
-      'pingback_expose_header_link' => FALSE,
+      'webmention_expose_link_tag' => FALSE,
+      'pingback_expose_link_tag' => FALSE,
     ];
     $this->drupalPostForm('admin/config/services/indieweb/webmention', $edit, 'Save configuration');
 
@@ -258,7 +260,7 @@ class WebmentionTest extends IndiewebBrowserTestBase {
     $this->drupalLogout();
     $this->processWebmentions();
     $this->assertNumberOfWebmentions(0, 'webmention');
-    \Drupal::database()->delete('webmention_entity')->execute();
+    \Drupal::database()->delete('webmention_received')->execute();
     $this->assertNumberOfWebmentions(0);
 
     // --------------------------------------------------------------------
@@ -353,7 +355,7 @@ class WebmentionTest extends IndiewebBrowserTestBase {
       'author_photo' => 'https://pbs.twimg.com/profile_images/589400481572790273/UDzrzoyO.jpg',
       'author_url' => 'https://twitter.com/pfrenssen',
       'url' => 'https://twitter.com/swentel/status/1057282744458317825#favorited-by-190024882',
-      'user_id' => $this->adminUser->id(),
+      'uid' => $this->adminUser->id(),
       'status' => 1,
       'content_html' => '',
       'content_text' => '',
@@ -375,7 +377,7 @@ class WebmentionTest extends IndiewebBrowserTestBase {
       'author_photo' => 'https://secure.gravatar.com/avatar/947b5f3f323da0ef785b6f02d9c265d6?s=96&d=blank&r=g',
       'author_url' => 'https://snarfed.org/',
       'url' => 'https://snarfed.org/2018-03-19_10-realize-be',
-      'user_id' => $this->adminUser->id(),
+      'uid' => $this->adminUser->id(),
       'status' => 1,
       'content_html' => 'likes <a class="u-like u-like-of" href="http://realize.local/node/1">#10 | realize.be</a>',
       'content_text' => 'likes #10 | realize.be',
@@ -402,7 +404,7 @@ class WebmentionTest extends IndiewebBrowserTestBase {
       'author_photo' => 'https://pbs.twimg.com/profile_images/1010975431305125889/sSiTFfJZ.jpg',
       'author_url' => 'http://hojtsy.hu',
       'url' => 'https://twitter.com/gaborhojtsy/status/1058794158540972032',
-      'user_id' => $this->adminUser->id(),
+      'uid' => $this->adminUser->id(),
       'status' => 1,
       'content_html' => '',
       'content_text' => 'The Drupal #indieweb module now contains a built-in IndieAuth server. Authorize applications by simply logging in with your Drupal account!',
@@ -429,7 +431,7 @@ class WebmentionTest extends IndiewebBrowserTestBase {
       'author_photo' => 'https://pbs.twimg.com/profile_images/941094497030586370/PJc-n99Q.jpg',
       'author_url' => 'http://bit.ly/meet-suchi-garg',
       'url' => 'https://twitter.com/gargsuchi/status/1057421577678073861',
-      'user_id' => $this->adminUser->id(),
+      'uid' => $this->adminUser->id(),
       'status' => 1,
       'content_html' => 'Totally agree. I always look it up. <a href="https://twitter.com/search?q=%23newbie">#newbie</a> <a href="https://twitter.com/search?q=%23php">#php</a> (I have been working with PHP since 2000)',
       'content_text' => 'Totally agree. I always look it up. #newbie #php (I have been working with PHP since 2000)',
@@ -455,7 +457,7 @@ class WebmentionTest extends IndiewebBrowserTestBase {
       'author_photo' => '',
       'author_url' => 'https://mastodon.social/users/swentel',
       'url' => 'https://mastodon.social/@swentel/100915150921296401',
-      'user_id' => $this->adminUser->id(),
+      'uid' => $this->adminUser->id(),
       'status' => 1,
       'content_html' => '<p><span class="h-card"><a href="https://fed.brid.gy/r/http://realize.be" class="u-url">@<span>realize.be</span></a></span> Don\'t exaggerate now, ok ? ;)</p>',
       'content_text' => "@realize.be Don't exaggerate now, ok ? ;)",
@@ -481,7 +483,7 @@ class WebmentionTest extends IndiewebBrowserTestBase {
       'author_photo' => 'https://eddiehinkle.com/images/profile.jpg',
       'author_url' => 'https://eddiehinkle.com/',
       'url' => 'https://eddiehinkle.com',
-      'user_id' => $this->adminUser->id(),
+      'uid' => $this->adminUser->id(),
       'status' => 1,
       'content_html' => '',
       'content_text' => 'That is a fair concern. That said, the good news is it doesn’t FEEL like last time. I’m sure they are gonna do something to mess with our heads but so far while they have had multiple timelines they have been honest about the different timelines rather then making it a secret like season 1',
@@ -511,7 +513,7 @@ class WebmentionTest extends IndiewebBrowserTestBase {
       'author_photo' => 'https://secure.gravatar.com/avatar/d5fb4e498fe609cc29b04e5b7ad688c4?s=49&d=https://boffosocko.com/wp-content/plugins/semantic-linkbacks/img/mm.jpg&r=pg',
       'author_url' => 'https://boffosocko.com/',
       'url' => 'https://boffosocko.com/2018/03/31/indieweb-module-for-drupal/',
-      'user_id' => $this->adminUser->id(),
+      'uid' => $this->adminUser->id(),
       'status' => 1,
       'private' => 0,
       'rsvp' => '',
@@ -536,7 +538,7 @@ class WebmentionTest extends IndiewebBrowserTestBase {
       'author_photo' => 'http://mysite.example.org/icon.jpg',
       'author_url' => 'http://mysite.example.org',
       'url' => '',
-      'user_id' => $this->adminUser->id(),
+      'uid' => $this->adminUser->id(),
       'status' => 1,
       'private' => 0,
       'rsvp' => 'yes',
@@ -560,7 +562,7 @@ class WebmentionTest extends IndiewebBrowserTestBase {
       'author_photo' => '',
       'author_url' => 'https://mastodon.social/@swentel',
       'url' => '',
-      'user_id' => $this->adminUser->id(),
+      'uid' => $this->adminUser->id(),
       'status' => 1,
       'private' => 0,
       'rsvp' => '',
@@ -584,7 +586,7 @@ class WebmentionTest extends IndiewebBrowserTestBase {
       'author_photo' => 'https://pbs.twimg.com/profile_images/659398307081379840/pyAVq5hk.jpg',
       'author_url' => 'https://www.zylstra.org/blog',
       'url' => 'https://twitter.com/ton_zylstra/status/1053619970201018370',
-      'user_id' => $this->adminUser->id(),
+      'uid' => $this->adminUser->id(),
       'status' => 1,
       'content_html' => '<a href="https://twitter.com/swentel">@swentel</a> Thank you for Indigenous! Allows me to easily post from my phone to my blog.',
       'content_text' => '@swentel Thank you for Indigenous! Allows me to easily post from my phone to my blog.',
@@ -815,27 +817,26 @@ class WebmentionTest extends IndiewebBrowserTestBase {
     $this->drupalPostForm('node/1', $edit, 'Send webmention');
     $this->assertSession()->responseContains('Thanks for letting me know!');
     $query = 'SELECT * FROM {queue} WHERE name = :name';
-    $records = \Drupal::database()->query($query, [':name' => WEBMENTION_QUEUE_NAME]);
+    $records = \Drupal::database()->query($query, [':name' => INDIEWEB_WEBMENTION_QUEUE]);
     foreach ($records as $record) {
       $data = unserialize($record->data);
       $this->assertTrue($data['source'] == $edit['source']);
       $this->assertTrue(strpos($data['target'], 'node/1') !== FALSE);
     }
-
   }
 
   /**
    * Get latest webmention.
    *
-   * @return \Drupal\indieweb\Entity\WebmentionInterface|null
+   * @return \Drupal\indieweb_webmention\Entity\WebmentionInterface|null
    *
    * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
    * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    */
   protected function getLatestWebmention() {
-    $webmention_id = \Drupal::database()->query("SELECT id FROM {webmention_entity} ORDER by id DESC limit 1")->fetchField();
-    /** @var \Drupal\indieweb\Entity\WebmentionInterface $webmention */
-    $webmention = \Drupal::entityTypeManager()->getStorage('webmention_entity')->load($webmention_id);
+    $webmention_id = \Drupal::database()->query("SELECT id FROM {webmention_received} ORDER by id DESC limit 1")->fetchField();
+    /** @var \Drupal\indieweb_webmention\Entity\WebmentionInterface $webmention */
+    $webmention = \Drupal::entityTypeManager()->getStorage('indieweb_webmention')->load($webmention_id);
     return $webmention;
   }
 
@@ -847,7 +848,7 @@ class WebmentionTest extends IndiewebBrowserTestBase {
    */
   protected function assertNumberOfWebmentions($total, $type = '') {
     $params = [];
-    $query = 'SELECT count(id) FROM {webmention_entity}';
+    $query = 'SELECT count(id) FROM {webmention_received}';
     if ($type) {
       $params[':type'] = $type;
       $query .= ' WHERE type = :type';
@@ -869,7 +870,7 @@ class WebmentionTest extends IndiewebBrowserTestBase {
     $webmention = $this->getLatestWebmention();
     foreach ($expected as $field => $expected_value) {
       $fuzzy = FALSE;
-      if ($field == 'user_id') {
+      if ($field == 'uid') {
         $actual = $webmention->get($field)->target_id;
       }
       // Testbot runs in a subdirectory and we don't support this (yet).
@@ -896,9 +897,10 @@ class WebmentionTest extends IndiewebBrowserTestBase {
    * Process webmentions, use both cron and drush.
    */
   protected function processWebmentions() {
-    module_load_include('inc', 'indieweb', 'indieweb.drush');
-    drush_indieweb_process_webmentions();
-    indieweb_cron();
+    if (\Drupal::config('indieweb_webmention.settings')->get('webmention_internal_handler') == 'drush') {
+      \Drupal::service('indieweb.webmention.client')->processWebmentions();
+    }
+    indieweb_webmention_cron();
   }
 
 }

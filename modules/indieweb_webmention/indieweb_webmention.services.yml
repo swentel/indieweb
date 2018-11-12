@@ -1,0 +1,3 @@
+services:
+  indieweb.webmention.client:
+    class: Drupal\indieweb_webmention\WebmentionClient\WebmentionClient

@@ -1,0 +1,5 @@
+services:
+  indieweb.microsub.commands:
+    class: \Drupal\indieweb_microsub\Commands\MicrosubCommands
+    tags:
+      - { name: drush.command }

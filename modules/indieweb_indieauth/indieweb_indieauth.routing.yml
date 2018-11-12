@@ -1,0 +1,39 @@
+indieweb.admin.indieauth_settings:
+  path: '/admin/config/services/indieweb/indieauth'
+  defaults:
+    _form: '\Drupal\indieweb_indieauth\Form\IndieAuthSettingsForm'
+    _title: 'IndieAuth'
+  requirements:
+    _permission: 'administer indieweb'
+
+indieweb.indieauth.login.redirect:
+  path: '/indieauth/login/redirect'
+  defaults:
+    _controller: '\Drupal\indieweb_indieauth\Controller\IndieAuthController::loginRedirect'
+    _title: 'Login redirect callback'
+  requirements:
+    _access: 'TRUE'
+
+indieweb.indieauth.auth:
+  path: '/indieauth/auth'
+  defaults:
+    _controller: '\Drupal\indieweb_indieauth\Controller\IndieAuthController::auth'
+    _title: 'Authorize'
+  requirements:
+    _access: 'TRUE'
+
+indieweb.indieauth.auth_form:
+  path: '/indieauth/auth/form'
+  defaults:
+    _controller: '\Drupal\indieweb_indieauth\Controller\IndieAuthController::authForm'
+    _title: 'Authorize form'
+  requirements:
+    _access: 'TRUE'
+
+indieweb.indieauth.token:
+  path: '/indieauth/token'
+  defaults:
+    _controller: '\Drupal\indieweb_indieauth\Controller\IndieAuthController::token'
+    _title: 'Token'
+  requirements:
+    _access: 'TRUE'

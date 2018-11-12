@@ -26,7 +26,7 @@ class AuthorBlock extends BlockBase {
     ];
   }
 
-    /**
+  /**
    * {@inheritdoc}
    */
   public function blockForm($form, FormStateInterface $form_state) {

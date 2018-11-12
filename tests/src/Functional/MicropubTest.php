@@ -25,6 +25,9 @@ class MicropubTest extends IndiewebBrowserTestBase {
     'node',
     'indieweb',
     'indieweb_test',
+    'indieweb_microformat',
+    'indieweb_micropub',
+    'indieweb_webmention',
     'datetime_range',
   ];
 
@@ -161,7 +164,7 @@ class MicropubTest extends IndiewebBrowserTestBase {
 
     // Enable the main micropub endpoint.
     $this->drupalLogin($this->adminUser);
-    $this->drupalPostForm('admin/config/services/indieweb/micropub', ['micropub_enable' => 1, 'micropub_add_header_link' => 1, 'micropub_media_enable' => 1], 'Save configuration');
+    $this->drupalPostForm('admin/config/services/indieweb/micropub', ['micropub_enable' => 1, 'micropub_expose_link_tag' => 1, 'micropub_media_enable' => 1], 'Save configuration');
     $this->drupalGet('<front>');
     $this->assertSession()->responseContains('/indieweb/micropub');
     $this->drupalGet('indieweb/micropub');
@@ -948,11 +951,11 @@ class MicropubTest extends IndiewebBrowserTestBase {
     $article = node_type_load('article');
     $article->delete();
 
-    $node_type_name = \Drupal::config('indieweb.micropub')->get('article_node_type');
+    $node_type_name = \Drupal::config('indieweb_micropub.settings')->get('article_node_type');
     self::assertTrue(empty($node_type_name));
-    $node_type_name = \Drupal::config('indieweb.micropub')->get('note_node_type');
+    $node_type_name = \Drupal::config('indieweb_micropub.settings')->get('note_node_type');
     self::assertTrue($node_type_name == 'page');
-    $node_type_name = \Drupal::config('indieweb.micropub')->get('like_node_type');
+    $node_type_name = \Drupal::config('indieweb_micropub.settings')->get('like_node_type');
     self::assertTrue($node_type_name == 'like');
   }
 

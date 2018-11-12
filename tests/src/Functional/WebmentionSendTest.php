@@ -23,6 +23,17 @@ class WebmentionSendTest extends IndiewebBrowserTestBase {
    */
   protected $syndication_targets = "Twitter (bridgy)|https://brid.gy/publish/twitter\nAnother channel|https://example.com/publish/test";
 
+    /**
+   * Modules to enable for this test.
+   *
+   * @var string[]
+   */
+  public static $modules = [
+    'indieweb',
+    'indieweb_webmention',
+    'indieweb_test',
+  ];
+
   /**
    * {@inheritdoc}
    */
@@ -33,6 +44,9 @@ class WebmentionSendTest extends IndiewebBrowserTestBase {
 
   /**
    * Tests send webmention functionality.
+   *
+   * @throws \Behat\Mink\Exception\ResponseTextException
+   * @throws \Behat\Mink\Exception\ExpectationException
    */
   public function testSendWebmention() {
 
@@ -74,7 +88,7 @@ class WebmentionSendTest extends IndiewebBrowserTestBase {
     // Configure manage display to display the fields.
     $edit = [];
     foreach ($syndication_targets as $url => $name) {
-      $machine_name = 'fields[' . indieweb_get_machine_name_from_url($url) . '][region]';
+      $machine_name = 'fields[' . indieweb_generate_machine_name_from_url($url) . '][region]';
       $edit[$machine_name] = 'content';
     }
     $this->drupalPostForm('admin/structure/types/manage/article/display', $edit, 'Save');

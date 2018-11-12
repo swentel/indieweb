@@ -13,8 +13,22 @@ use GuzzleHttp\Exception\ServerException;
  */
 class IndieAuthTest extends IndiewebBrowserTestBase {
 
-  protected $header_link_auth_endpoint = '<link rel="authorization_endpoint" href="https://indieauth.com/auth" />';
-  protected $header_link_token_endpoint = '<link rel="token_endpoint" href="https://tokens.indieauth.com/token" />';
+  protected $link_tag_auth_endpoint = '<link rel="authorization_endpoint" href="https://indieauth.com/auth" />';
+  protected $link_tag_token_endpoint = '<link rel="token_endpoint" href="https://tokens.indieauth.com/token" />';
+
+  /**
+   * Modules to enable for this test.
+   *
+   * @var string[]
+   */
+  public static $modules = [
+    'block',
+    'node',
+    'indieweb',
+    'indieweb_indieauth',
+    'indieweb_test',
+    'indieweb_micropub',
+  ];
 
   /**
    * An indieweb authorized user.
@@ -54,38 +68,38 @@ class IndieAuthTest extends IndiewebBrowserTestBase {
     // ------------------------------------------------------------------------
 
     $this->drupalGet('<front>');
-    $this->assertSession()->responseNotContains($this->header_link_auth_endpoint);
-    $this->assertSession()->responseNotContains($this->header_link_token_endpoint);
+    $this->assertSession()->responseNotContains($this->link_tag_auth_endpoint);
+    $this->assertSession()->responseNotContains($this->link_tag_token_endpoint);
 
     $this->drupalGet('admin/config/services/indieweb/indieauth');
     $this->assertSession()->statusCodeEquals(403);
 
     $this->drupalLogin($this->adminUser);
-    $edit = ['expose_endpoint_link' => 1];
+    $edit = ['expose_link_tag' => 1];
     $this->drupalPostForm('admin/config/services/indieweb/indieauth', $edit, 'Save configuration');
 
     $this->drupalGet('<front>');
-    $this->assertSession()->responseContains($this->header_link_auth_endpoint);
-    $this->assertSession()->responseContains($this->header_link_token_endpoint);
+    $this->assertSession()->responseContains($this->link_tag_auth_endpoint);
+    $this->assertSession()->responseContains($this->link_tag_token_endpoint);
 
     $this->drupalLogout();
     $this->drupalGet('<front>');
-    $this->assertSession()->responseContains($this->header_link_auth_endpoint);
-    $this->assertSession()->responseContains($this->header_link_token_endpoint);
+    $this->assertSession()->responseContains($this->link_tag_auth_endpoint);
+    $this->assertSession()->responseContains($this->link_tag_token_endpoint);
 
     // Do not expose.
     $this->drupalLogin($this->adminUser);
-    $edit = ['expose_endpoint_link' => 0];
+    $edit = ['expose_link_tag' => 0];
     $this->drupalPostForm('admin/config/services/indieweb/indieauth', $edit, 'Save configuration');
 
     $this->drupalGet('<front>');
-    $this->assertSession()->responseNotContains($this->header_link_auth_endpoint);
-    $this->assertSession()->responseNotContains($this->header_link_token_endpoint);
+    $this->assertSession()->responseNotContains($this->link_tag_auth_endpoint);
+    $this->assertSession()->responseNotContains($this->link_tag_token_endpoint);
 
     $this->drupalLogout();
     $this->drupalGet('<front>');
-    $this->assertSession()->responseNotContains($this->header_link_auth_endpoint);
-    $this->assertSession()->responseNotContains($this->header_link_token_endpoint);
+    $this->assertSession()->responseNotContains($this->link_tag_auth_endpoint);
+    $this->assertSession()->responseNotContains($this->link_tag_token_endpoint);
 
     // ------------------------------------------------------------------------
     // Test the user sign in. We use a custom login endpoint for authentication.

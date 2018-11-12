@@ -1,0 +1,3 @@
+services:
+  indieweb.indieauth.client:
+    class: Drupal\indieweb_indieauth\IndieAuthClient\IndieAuthClient

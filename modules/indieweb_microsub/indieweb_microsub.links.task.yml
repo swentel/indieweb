@@ -1,0 +1,15 @@
+indieweb.admin.microsub_settings:
+  title: 'Microsub'
+  route_name: indieweb.admin.microsub_settings
+  base_route: indieweb.admin.dashboard
+  weight: 50
+
+indieweb.admin.microsub_settings_tab:
+  title: 'Settings'
+  route_name: indieweb.admin.microsub_settings
+  parent_id: indieweb.admin.microsub_settings
+
+indieweb.admin.microsub_channels:
+  title: 'Channels and sources'
+  route_name: indieweb.admin.microsub_channels
+  parent_id: indieweb.admin.microsub_settings

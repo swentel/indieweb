@@ -1,0 +1,5 @@
+indieweb.microformat.admin.settings:
+  title: 'Microformats'
+  route_name: indieweb.microformat.admin.settings
+  base_route: indieweb.admin.dashboard
+  weight: 20

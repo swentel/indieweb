@@ -1,0 +1,5 @@
+services:
+  indieweb_indieauth.commands:
+    class: \Drupal\indieweb_indieauth\Commands\IndieAuthCommands
+    tags:
+      - { name: drush.command }

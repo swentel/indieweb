@@ -2,6 +2,8 @@
 
 namespace Drupal\Tests\indieweb\Functional;
 
+use Drupal\indieweb_microsub\Commands\MicrosubCommands;
+
 /**
  * Tests integration of microsub.
  *
@@ -43,6 +45,20 @@ class MicrosubTest extends IndiewebBrowserTestBase {
    * @var string
    */
   protected $timeline_path_2 = '/microsub-timeline/2';
+
+    /**
+   * Modules to enable for this test.
+   *
+   * @var string[]
+   */
+  public static $modules = [
+    'node',
+    'indieweb_test',
+    'indieweb_microformat',
+    'indieweb_microsub',
+    'indieweb_feed',
+    'indieweb_context',
+  ];
 
   /**
    * {@inheritdoc}
@@ -88,6 +104,10 @@ class MicrosubTest extends IndiewebBrowserTestBase {
    * Tests microsub functionality.
    *
    * @throws \Behat\Mink\Exception\ExpectationException
+   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
+   * @throws \Drupal\Core\Entity\EntityMalformedException
+   * @throws \Drupal\Core\Entity\EntityStorageException
    */
   public function testMicrosub() {
 
@@ -102,7 +122,7 @@ class MicrosubTest extends IndiewebBrowserTestBase {
     $this->assertSession()->statusCodeEquals(403);
 
     $this->drupalLogin($this->adminUser);
-    $edit = ['microsub_add_header_link' => TRUE, 'microsub_endpoint' => 'https://example.com/microsub', 'microsub_internal_handler' => 'drush'];
+    $edit = ['microsub_expose_link_tag' => TRUE, 'microsub_endpoint' => 'https://example.com/microsub', 'microsub_internal_handler' => 'drush'];
     $this->drupalPostForm('admin/config/services/indieweb/microsub', $edit, 'Save configuration');
 
     $this->drupalGet('<front>');
@@ -405,9 +425,11 @@ class MicrosubTest extends IndiewebBrowserTestBase {
    * Fetch items, use both cron and drush.
    */
   protected function fetchItems() {
-    module_load_include('inc', 'indieweb', 'indieweb.drush');
-    drush_indieweb_microsub_fetch_items();
-    indieweb_cron();
+    if (\Drupal::config('indieweb_microsub.settings')->get('microsub_internal') &&
+      \Drupal::config('indieweb_microsub.settings')->get('microsub_internal_handler') == 'drush') {
+      \Drupal::service('indieweb.microsub.client')->fetchItems();
+    }
+    indieweb_microsub_cron();
   }
 
   /**

@@ -1,0 +1,15 @@
+<?php
+
+/**
+ * @file
+ * IndieWeb Microformats2 install file.
+ */
+
+define('INDIEWEB_MICROFORMAT_MODULE_WEIGHT', 10);
+
+/**
+ * Implements hook_install().
+ */
+function indieweb_microformat_install() {
+  module_set_weight('indieweb_microformat', INDIEWEB_MICROFORMAT_MODULE_WEIGHT);
+}
