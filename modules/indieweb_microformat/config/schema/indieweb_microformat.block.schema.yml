@@ -1,0 +1,13 @@
+block.settings.indieweb_author:
+  type: block_settings
+  label: 'RSVP block'
+  mapping:
+    name:
+      type: string
+      label: 'The author name'
+    image:
+      type: string
+      label: 'The author image url'
+    note:
+      type: string
+      label: 'The author note'

@@ -141,6 +141,20 @@ class MicroformatTest extends IndiewebBrowserTestBase {
     ];
     $this->drupalPostForm('node/add/other', $edit, 'Save');
     $this->assertSession()->responseContains('e-content');
+
+    // Test author block.
+    $settings = [
+      'region' => 'content',
+      'name' => 'swentel',
+      'note' => 'this is my note',
+      'image' => 'https://example.com/image.png'
+    ];
+    $this->placeBlock('indieweb_author', $settings);
+    $this->drupalGet('<front>');
+    $this->assertSession()->responseContains('h-card');
+    $this->assertSession()->responseContains('https://example.com/image.png');
+    $this->assertSession()->pageTextContains('swentel');
+    $this->assertSession()->pageTextContains('this is my note');
   }
 
   /**

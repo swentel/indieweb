@@ -80,22 +80,6 @@ function indieweb_help($route_name, RouteMatchInterface $route_match) {
 }
 
 /**
- * Implements hook_theme().
- */
-function indieweb_theme() {
-  return [
-    'indieweb_author' => [
-      'variables' => [
-        'image' => NULL,
-        'note' => NULL,
-        'name' => NULL,
-        'domain' => NULL,
-      ],
-    ],
-  ];
-}
-
-/**
  * Generates a machine name from a url.
  *
  * @param $url
