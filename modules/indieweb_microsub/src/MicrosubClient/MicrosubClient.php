@@ -19,7 +19,7 @@ class MicrosubClient implements MicrosubClientInterface {
     $post_context_enabled = !empty($post_context_handler) && $post_context_handler != 'disabled';
 
     // Cleanup old items.
-    $cleanup_old_items = \Drupal::config('indieweb.microsub')->get('microsub_internal_cleanup_items');
+    $cleanup_old_items = \Drupal::config('indieweb_microsub.settings')->get('microsub_internal_cleanup_items');
     if ($cleanup_old_items) {
       \Drupal::database()
         ->delete('microsub_item')
@@ -206,7 +206,7 @@ class MicrosubClient implements MicrosubClientInterface {
    * {@inheritdoc}
    */
   public function sendNotification(WebmentionInterface $webmention, $parsed = NULL) {
-    $microsub = \Drupal::config('indieweb.microsub');
+    $microsub = \Drupal::config('indieweb_microsub.settings');
 
     // Send to aperture.
     if (!$microsub->get('microsub_internal') && $microsub->get('aperture_enable_micropub') && !empty($microsub->get('aperture_api_key'))) {
