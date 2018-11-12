@@ -354,7 +354,7 @@ on request is minimal.
 
 ## Drush commands
 
-Note you need drush 8 or later to run these commands.
+Note you need drush 8 or later to run these commands, although legacy commands in indieweb.drush.inc are available too.
 
 - indieweb-send-webmentions: handles the queue for sending webmentions.
 - indieweb-process-webmentions: process the webmention received on the internal endpoint

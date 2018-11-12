@@ -205,7 +205,7 @@ function indieweb_handle_webmention_queue() {
     ];
 
     try {
-      $send = \Drupal::entityTypeManager()->getStorage('indieweb_send')->create($values);
+      $send = \Drupal::entityTypeManager()->getStorage('indieweb_webmention_send')->create($values);
       $send->save();
     }
     catch (\Exception $e) {
