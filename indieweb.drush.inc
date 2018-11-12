@@ -71,7 +71,7 @@ function drush_indieweb_fetch_post_contexts() {
  * Microsub fetch items.
  */
 function drush_indieweb_microsub_fetch_items() {
-  if (\Drupal::config('indieweb_microsub.setings')->get('microsub_internal') &&
+  if (\Drupal::config('indieweb_microsub.settings')->get('microsub_internal') &&
     \Drupal::config('indieweb_microsub.settings')->get('microsub_internal_handler') == 'drush') {
     \Drupal::service('indieweb.microsub.client')->fetchItems();
   }
