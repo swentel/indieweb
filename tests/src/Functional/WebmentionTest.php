@@ -810,6 +810,8 @@ class WebmentionTest extends IndiewebBrowserTestBase {
    * Test webmention notify block form.
    *
    * @throws \Behat\Mink\Exception\ExpectationException
+   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    */
   public function testWebmentionNotifyBlock() {
 
@@ -833,6 +835,25 @@ class WebmentionTest extends IndiewebBrowserTestBase {
       $this->assertTrue($data['source'] == $edit['source']);
       $this->assertTrue(strpos($data['target'], 'node/1') !== FALSE);
     }
+
+    // Use internal endpoint, should create a webmention immediately.
+    $this->drupalLogin($this->adminUser);
+    $this->configureWebmention(['webmention_internal' => TRUE, 'pingback_internal' => TRUE, 'webmention_notify' => FALSE, 'pingback_notify' => FALSE]);
+    $this->drupalLogout();
+    $this->clearQueue();
+
+    $edit = ['source' => 'https://example.com/webmention-source-url'];
+    $this->drupalPostForm('node/1', $edit, 'Send webmention');
+    $this->assertSession()->responseContains('Thanks for letting me know!');
+    $this->assertWebmentionQueueItems();
+
+    $expected = [
+      'source' => 'https://example.com/webmention-source-url',
+      'property' => 'received',
+      'target' => Url::fromRoute('entity.node.canonical', ['node' => 1], ['absolute' => TRUE])->toString(),
+      'type' => 'webmention',
+    ];
+    $this->assertWebmention($expected, TRUE);
   }
 
   /**
@@ -872,11 +893,12 @@ class WebmentionTest extends IndiewebBrowserTestBase {
    *
    * @param $expected
    *   An array of expected values
+   * @param $ignore_fuzzy
    *
    * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
    * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    */
-  protected function assertWebmention($expected) {
+  protected function assertWebmention($expected, $ignore_fuzzy = FALSE) {
     $webmention = $this->getLatestWebmention();
     foreach ($expected as $field => $expected_value) {
       $fuzzy = FALSE;
@@ -892,7 +914,7 @@ class WebmentionTest extends IndiewebBrowserTestBase {
         $actual = $webmention->get($field)->value;
       }
 
-      if ($fuzzy) {
+      if (!$ignore_fuzzy && $fuzzy) {
         $host = \Drupal::request()->getSchemeAndHttpHost();
         self::assertTrue(strpos($actual, $host) === FALSE);
         self::assertTrue(strpos($actual, $expected_value) !== FALSE);

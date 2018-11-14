@@ -55,7 +55,26 @@ class webmentionNotifyForm extends FormBase {
   public function submitForm(array &$form, FormStateInterface $form_state) {
     $source = $form_state->getValue('source');
     $target = $form_state->getValue('target');
-    \Drupal::service('indieweb.webmention.client')->createQueueItem($source, $target);
+
+    $config = \Drupal::config('indieweb_webmention.settings');
+    if ($config->get('webmention_notify')) {
+      \Drupal::service('indieweb.webmention.client')->createQueueItem($source, $target);
+    }
+    elseif ($config->get('webmention_internal')) {
+      try {
+        $values = [
+          'source' => $source,
+          'target' => $target,
+          'type' => 'webmention',
+          'property' => 'received',
+          'status' => 0,
+          'uid' => $config->get('webmention_uid'),
+        ];
+        $webmention = \Drupal::entityTypeManager()->getStorage('indieweb_webmention')->create($values);
+        $webmention->save();
+      }
+      catch (\Exception $ignored) {}
+    }
     $this->messenger()->addMessage($this->t('Thanks for letting me know!'));
   }
 
