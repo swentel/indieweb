@@ -57,7 +57,7 @@ class MicrosubChannel extends ContentEntityBase implements MicrosubChannelInterf
    * {@inheritdoc}
    */
   public function getStatus() {
-    return $this->get('status')->value;
+    return (bool) $this->get('status')->value;
   }
 
   /**

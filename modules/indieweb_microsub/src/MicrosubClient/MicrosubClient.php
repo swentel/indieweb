@@ -31,9 +31,17 @@ class MicrosubClient implements MicrosubClientInterface {
     $sources = \Drupal::entityTypeManager()->getStorage('indieweb_microsub_source')->getSourcesToRefresh();
     foreach ($sources as $source) {
 
+      // Continue if the channel is disabled.
+      /*if (!$source->getChannel()->getStatus()) {
+        continue;
+      }*/
+
       $url = $source->label();
       $tries = $source->getTries();
       $empty = $source->getItemCount() == 0;
+      $source_id = $source->id();
+      $channel_id = $source->getChannelId();
+      $disable_image_cache = $source->disableImageCache();
       $tries++;
 
       // Allow internal URL's, at the moment only for testing.
@@ -58,9 +66,6 @@ class MicrosubClient implements MicrosubClientInterface {
           if ($parsed && isset($parsed['data']['type']) && $parsed['data']['type'] == 'feed') {
             $items = array_reverse($parsed['data']['items']);
             foreach ($items as $i => $item) {
-              $source_id = $source->id();
-              $channel_id = $source->getChannel();
-              $disable_image_cache = $source->disableImageCache();
               $this->saveItem($item, $tries, $source_id, $channel_id, $empty, $context, $disable_image_cache);
             }
           }

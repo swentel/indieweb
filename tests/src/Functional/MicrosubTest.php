@@ -2,6 +2,8 @@
 
 namespace Drupal\Tests\indieweb\Functional;
 
+use Drupal\indieweb_microsub\Entity\MicrosubSource;
+
 /**
  * Tests integration of microsub.
  *
@@ -250,6 +252,40 @@ class MicrosubTest extends IndiewebBrowserTestBase {
     $this->assertItemCount('item', 1, 0);
     $this->assertItemCount('item', 4);
 
+    // Test disabled source.
+    $this->drupalLogin($this->adminUser);
+    $this->drupalPostForm('admin/config/services/indieweb/microsub/sources/2/edit', ['status' => FALSE], 'Save');
+    $this->clear('item');
+    $this->drupalLogout();
+    $this->resetNextFetch(1);
+    $this->resetNextFetch(2);
+    $this->fetchItems();
+    $this->assertItemCount('item', 1, 1);
+    $this->assertItemCount('item', 0, 0);
+    $this->assertItemCount('item', 1);
+
+    $this->drupalLogin($this->adminUser);
+    $this->drupalPostForm('admin/config/services/indieweb/microsub/sources/2/edit', ['status' => TRUE], 'Save');
+    $this->drupalLogout();
+
+    // Test disabled channel.
+    /*
+    $this->drupalLogin($this->adminUser);
+    $this->drupalPostForm('admin/config/services/indieweb/microsub/channels/2/edit', ['status' => FALSE], 'Save');
+    $this->drupalPostForm('admin/config/services/indieweb/microsub/sources/2/edit', ['status' => TRUE], 'Save');
+    $this->drupalLogout();
+    $this->clear('item');
+    $this->assertItemCount('item', 0);
+    $this->resetNextFetch(1);
+    $this->resetNextFetch(2);
+    $this->fetchItems();
+    $this->assertItemCount('item', 1, 1);
+    $this->assertItemCount('item', 0, 0);
+    $this->assertItemCount('item', 1);
+    $this->drupalLogin($this->adminUser);
+    $this->drupalPostForm('admin/config/services/indieweb/microsub/channels/2/edit', ['status' => TRUE], 'Save');
+    $this->drupalLogout();*/
+
     // Test post context.
     $page = $this->createNode(['type' => 'page', 'title' => 'microsub page', 'body' => ['value' => 'This should be a context for a microsub item']]);
     $reply_settings = [
@@ -434,13 +470,17 @@ class MicrosubTest extends IndiewebBrowserTestBase {
    * Reset next fetch.
    *
    * @param $source_id
+   *
+   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
+   * @throws \Drupal\Core\Entity\EntityStorageException
    */
   protected function resetNextFetch($source_id) {
-    \Drupal::database()
-      ->update('microsub_source')
-      ->fields(['fetch_next' => 0])
-      ->condition('id', $source_id)
-      ->execute();
+    /** @var \Drupal\indieweb_microsub\Entity\MicrosubSourceInterface $source */
+    $source = \Drupal::entityTypeManager()->getStorage('indieweb_microsub_source')->loadUnchanged($source_id);
+    $source->setNextFetch(0);
+    $source->setHash("");
+    $source->save();
   }
 
 }

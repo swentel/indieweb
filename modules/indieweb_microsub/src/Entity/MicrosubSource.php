@@ -56,8 +56,15 @@ class MicrosubSource extends ContentEntityBase implements MicrosubSourceInterfac
   /**
    * {@inheritdoc}
    */
-  public function getChannel() {
+  public function getChannelId() {
     return $this->get('channel_id')->target_id;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getChannel() {
+    return $this->get('channel_id')->entity;
   }
 
   /**

@@ -19,7 +19,7 @@ class MicrosubSourceDeleteForm extends ContentEntityDeleteForm {
    * {@inheritdoc}
    */
   public function getCancelUrl() {
-    return new Url('indieweb.admin.microsub_sources', ['indieweb_microsub_channel' => $this->entity->getChannel()]);
+    return new Url('indieweb.admin.microsub_sources', ['indieweb_microsub_channel' => $this->entity->getChannelId()]);
   }
 
   /**

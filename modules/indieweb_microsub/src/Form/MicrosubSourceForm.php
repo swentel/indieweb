@@ -49,7 +49,7 @@ class MicrosubSourceForm extends ContentEntityForm {
       '#type' => 'select',
       '#title' => $this->t('Channel'),
       '#options' => $options,
-      '#default_value' => $source->getChannel(),
+      '#default_value' => $source->getChannelId(),
     ];
 
     // contexts
@@ -72,7 +72,7 @@ class MicrosubSourceForm extends ContentEntityForm {
    * {@inheritdoc}
    */
   public function save(array $form, FormStateInterface $form_state) {
-    /** @var \Drupal\indieweb_microsub\Entity\MicrosubItemInterface $source */
+    /** @var \Drupal\indieweb_microsub\Entity\MicrosubSourceInterface $source */
     $source = $this->entity;
 
     $source->set('post_context', serialize($form_state->getValue('post_context')));
@@ -89,7 +89,7 @@ class MicrosubSourceForm extends ContentEntityForm {
       default:
         $this->messenger()->addMessage($this->t('Saved %label', ['%label' => $source->label(),]));
     }
-    $form_state->setRedirectUrl(Url::fromRoute('indieweb.admin.microsub_sources', ['indieweb_microsub_channel' => $source->getChannel()]));
+    $form_state->setRedirectUrl(Url::fromRoute('indieweb.admin.microsub_sources', ['indieweb_microsub_channel' => $source->getChannelId()]));
 
   }
 

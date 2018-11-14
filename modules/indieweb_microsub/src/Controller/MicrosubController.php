@@ -302,7 +302,7 @@ class MicrosubController extends ControllerBase {
   public function resetNextFetch(MicrosubSourceInterface $indieweb_microsub_source) {
     $indieweb_microsub_source->setNextFetch(0)->save();
     $this->messenger()->addMessage($this->t('Next update reset for %source', ['%source' => $indieweb_microsub_source->label()]));
-    return new RedirectResponse(Url::fromRoute('indieweb.admin.microsub_sources', ['indieweb_microsub_channel' => $indieweb_microsub_source->getChannel()])->toString());
+    return new RedirectResponse(Url::fromRoute('indieweb.admin.microsub_sources', ['indieweb_microsub_channel' => $indieweb_microsub_source->getChannelId()])->toString());
   }
 
 }

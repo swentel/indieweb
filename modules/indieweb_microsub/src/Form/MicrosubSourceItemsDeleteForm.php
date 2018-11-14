@@ -34,7 +34,7 @@ class MicrosubSourceItemsDeleteForm extends ConfirmFormBase {
    * {@inheritdoc}
    */
   public function getCancelUrl() {
-    return new Url('indieweb.admin.microsub_sources', ['indieweb_microsub_channel' => $this->source->getChannel()]);
+    return new Url('indieweb.admin.microsub_sources', ['indieweb_microsub_channel' => $this->source->getChannelId()]);
   }
 
   /**

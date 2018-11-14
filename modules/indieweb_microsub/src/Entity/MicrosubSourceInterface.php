@@ -21,6 +21,13 @@ interface MicrosubSourceInterface extends ContentEntityInterface {
    *
    * @return string
    */
+  public function getChannelId();
+
+  /**
+   * Returns the channel.
+   *
+   * @return \Drupal\indieweb_microsub\Entity\MicrosubChannelInterface
+   */
   public function getChannel();
 
   /**
