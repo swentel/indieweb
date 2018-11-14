@@ -53,7 +53,7 @@ function hook_indieweb_micropub_node_saved(NodeInterface $node, $values, $payloa
       $category = trim($category);
       if ($category == 'to-twitter') {
         $source = $node->toUrl()->setAbsolute(TRUE)->toString();
-        indieweb_webmention_create_queue_item($source, 'https://brid.gy/publish/twitter', $node->id(), 'node');
+        \Drupal::service('indieweb.webmention.client')->createQueueItem($source, 'https://brid.gy/publish/twitter', $node->id(), 'node');
       }
     }
   }

@@ -55,7 +55,7 @@ class webmentionNotifyForm extends FormBase {
   public function submitForm(array &$form, FormStateInterface $form_state) {
     $source = $form_state->getValue('source');
     $target = $form_state->getValue('target');
-    indieweb_webmention_create_queue_item($source, $target);
+    \Drupal::service('indieweb.webmention.client')->createQueueItem($source, $target);
     $this->messenger()->addMessage($this->t('Thanks for letting me know!'));
   }
 

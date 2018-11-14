@@ -3,11 +3,10 @@
 namespace Drupal\indieweb_test\WebmentionClient;
 
 use Drupal\Core\Url;
-use Drupal\indieweb_webmention\Entity\WebmentionInterface;
 use Drupal\indieweb_webmention\WebmentionClient\WebmentionClient;
 use Drupal\indieweb_webmention\WebmentionClient\WebmentionClientInterface;
 
-class WebmentionClientTest implements WebmentionClientInterface {
+class WebmentionClientTest extends WebmentionClient implements WebmentionClientInterface {
 
   /**
    * {@inheritdoc}
@@ -27,24 +26,6 @@ class WebmentionClientTest implements WebmentionClientInterface {
     catch (\Exception $ignored) {}
 
     return FALSE;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function processWebmentions() {
-    // Call the original implementation;
-    $client = new WebmentionClient();
-    $client->processWebmentions();
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function createComment(WebmentionInterface $webmention) {
-    // Call the original implementation;
-    $client = new WebmentionClient();
-    $client->createComment($webmention);
   }
 
 }

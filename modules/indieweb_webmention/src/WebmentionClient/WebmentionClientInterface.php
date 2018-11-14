@@ -7,6 +7,25 @@ use Drupal\indieweb_webmention\Entity\WebmentionInterface;
 interface WebmentionClientInterface {
 
   /**
+   * Generates a queue item.
+   *
+   * @param $source
+   *   The source URL
+   * @param $target
+   *   The target URL
+   * @param string $entity_id
+   *   (optional) The entity id
+   * @param string $entity_type_id
+   *   (optional) The entity type id
+   */
+  public function createQueueItem($source, $target, $entity_id = '', $entity_type_id = '');
+
+  /**
+   * Handles the queue.
+   */
+  public function handleQueue();
+
+  /**
    * Send a webmention.
    *
    * @param $sourceURL

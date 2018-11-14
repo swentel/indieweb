@@ -705,16 +705,26 @@ class WebmentionTest extends IndiewebBrowserTestBase {
     $this->drupalPostForm('admin/config/services/indieweb/send', $edit, 'Save configuration');
 
     $this->createPage($node_1_url, TRUE);
+    $new_url = Url::fromRoute('entity.node.canonical', ['node' => 4], ['absolute' => TRUE])->toString();
     $this->assertWebmentionQueueItems([$node_1_url]);
     $this->runWebmentionQueue();
     $this->assertWebmentionQueueItems();
     $this->assertSyndication(4, $node_1_url);
+    $this->assertSendItem($new_url, 4);
 
-    // Remove syndication.
+    // Remove send item.
+    $this->drupalPostForm('admin/content/webmention/send-list/3/delete', [], 'Delete');
+    $this->assertNoSendItem(3);
+
+    // Remove nodes (test delete of syndication and send via API).
     $node = \Drupal::entityTypeManager()->getStorage('node')->load(4);
     $node->delete();
     $this->assertNoSyndication(4);
 
+    $node = \Drupal::entityTypeManager()->getStorage('node')->load(3);
+    $node->delete();
+    $this->assertNoSyndication(3);
+    $this->assertNoSendItem(2);
   }
 
   /**

@@ -3,6 +3,7 @@
 namespace Drupal\indieweb_webmention\WebmentionClient;
 
 use Drupal\comment\Entity\Comment;
+use Drupal\Core\Cache\Cache;
 use Drupal\Core\Site\Settings;
 use Drupal\Core\Url;
 use Drupal\indieweb_webmention\Entity\WebmentionInterface;
@@ -11,6 +12,104 @@ use IndieWeb\MentionClient;
 use p3k\XRay;
 
 class WebmentionClient implements WebmentionClientInterface {
+
+  /**
+   * {@inheritdoc}
+   */
+  public function createQueueItem($source, $target, $entity_id = '', $entity_type_id = '') {
+    $data = [
+      'source' => $source,
+      'target' => $target,
+      'entity_id' => $entity_id,
+      'entity_type_id' => $entity_type_id,
+    ];
+
+    // Bail out when target is one of the silos, but not actually the webmention
+    // endpoint. This can happen with reply urls to twitter for example.
+    if ($this->isSiloURL($target)) {
+      return;
+    }
+
+    try {
+      \Drupal::queue(INDIEWEB_WEBMENTION_QUEUE)->createItem($data);
+    }
+    catch (\Exception $e) {
+      \Drupal::logger('indieweb_queue')->notice('Error creating queue item: @message', ['@message' => $e->getMessage()]);
+    }
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function handleQueue() {
+    $end = time() + 15;
+    $syndication_targets = indieweb_get_syndication_targets();
+    while (time() < $end && ($item = \Drupal::queue(INDIEWEB_WEBMENTION_QUEUE)->claimItem())) {
+      $data = $item->data;
+      if (!empty($data['source']) && !empty($data['target'])) {
+
+        try {
+
+          $sourceURL = $data['source'];
+          $targetURL = $data['target'];
+
+          /** @var \Drupal\indieweb_webmention\WebmentionClient\WebmentionClientInterface $client */
+          $client = \Drupal::service('indieweb.webmention.client');
+          $response = $client->sendWebmention($sourceURL, $targetURL);
+
+          // Store the syndication when the targetUrl is in the syndication
+          // targets.
+          if (isset($syndication_targets[$targetURL])) {
+            if (!empty($response) && $response['code'] == 201 && !empty($response['headers']['Location'])) {
+
+              if (!empty($data['entity_id']) && !empty($data['entity_type_id'])) {
+                $values = [
+                  'entity_id' => $data['entity_id'],
+                  'entity_type_id' => $data['entity_type_id'],
+                  'url' => $response['headers']['Location'],
+                ];
+
+                $syndication = \Drupal::entityTypeManager()->getStorage('indieweb_syndication')->create($values);
+                $syndication->save();
+
+                Cache::invalidateTags([$data['entity_type_id'] . ':' . $data['entity_id']]);
+              }
+
+              // Log the response if configured.
+              if (\Drupal::config('indieweb_webmention.settings')->get('send_log_response')) {
+                \Drupal::logger('indieweb_send_response')->notice('response for @source to @target: @response', ['@response' => print_r($response, 1), '@source' => $sourceURL, '@target' => $targetURL]);
+              }
+
+            }
+          }
+
+        }
+        catch (Exception $e) {
+          \Drupal::logger('indieweb_send')->notice('Error sending webmention for @source to @target: @message', ['@message' => $e->getMessage(), '@source' => $sourceURL, '@target' => $targetURL]);
+        }
+      }
+
+      // Store in send table.
+      $values = [
+        'source' => $data['source'],
+        'target' => $data['target'],
+        'entity_id' => !empty($data['entity_id']) ? $data['entity_id'] : 0,
+        'entity_type_id' => !empty($data['entity_type_id']) ? $data['entity_type_id'] : '',
+        'created' => \Drupal::time()->getCurrentTime(),
+      ];
+
+      try {
+        $send = \Drupal::entityTypeManager()->getStorage('indieweb_webmention_send')->create($values);
+        $send->save();
+      }
+      catch (\Exception $e) {
+        \Drupal::logger('indieweb_send')->notice('Error saving send webmention record: @message', ['@message' => $e->getMessage()]);
+      }
+
+      // Remove the item - always.
+      \Drupal::queue(INDIEWEB_WEBMENTION_QUEUE)->deleteItem($item);
+    }
+  }
 
   /**
    * {@inheritdoc}
@@ -332,5 +431,25 @@ class WebmentionClient implements WebmentionClientInterface {
     return $exists;
   }
 
+
+  /**
+   * Checks if url is a silo URL or not. Only handles Twitter urls right now.
+   *
+   * e.g. https://twitter.com/studioemma/status/999193968234713093 should be
+   * marked as a silo url.
+   *
+   * @param $url
+   *
+   * @return bool
+   */
+  protected function isSiloURL($url) {
+    $is_silo_url = FALSE;
+
+    if (strpos($url, 'twitter.com') !== FALSE) {
+      $is_silo_url = TRUE;
+    }
+
+    return $is_silo_url;
+  }
 
 }

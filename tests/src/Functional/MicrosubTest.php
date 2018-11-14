@@ -2,8 +2,6 @@
 
 namespace Drupal\Tests\indieweb\Functional;
 
-use Drupal\indieweb_microsub\Commands\MicrosubCommands;
-
 /**
  * Tests integration of microsub.
  *

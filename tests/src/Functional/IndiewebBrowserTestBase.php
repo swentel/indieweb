@@ -3,7 +3,6 @@
 namespace Drupal\Tests\indieweb\Functional;
 
 use Drupal\Core\Url;
-use Drupal\indieweb_webmention\Commands\WebmentionCommands;
 use Drupal\node\NodeInterface;
 use Drupal\Tests\BrowserTestBase;
 use GuzzleHttp\Exception\ClientException;
@@ -589,19 +588,46 @@ abstract class IndiewebBrowserTestBase extends BrowserTestBase {
    */
   protected function runWebmentionQueue() {
     if (\Drupal::config('indieweb_webmention.settings')->get('send_webmention_handler') == 'drush') {
-      indieweb_handle_webmention_queue();
+      \Drupal::service('indieweb.webmention.client')->handleQueue();
     }
     indieweb_webmention_cron();
   }
 
   /**
+   * Asserts a send item.
+   *
+   * @param $source
+   * @param $entity_id
+   */
+  protected function assertSendItem($source, $entity_id) {
+    $object = \Drupal::database()->query('SELECT * FROM {webmention_send} WHERE source = :source AND entity_id = :id', [':source' => $source, ':id' => $entity_id])->fetchObject();
+    if (isset($object->url)) {
+      self::assertEquals($source, $object->url);
+    }
+    else {
+      // explicit fail
+      $this->assertTrue($object, 'no send item found');
+    }
+  }
+
+  /**
+   * Asserts no send item.
+   *
+   * @param $id
+   */
+  protected function assertNoSendItem($id) {
+    $false = \Drupal::database()->query('SELECT * FROM {webmention_send} WHERE id = :id', [':id' => $id])->fetchObject();
+    self::assertTrue($false === FALSE);
+  }
+
+  /**
    * Asserts a syndication.
    *
-   * @param $source_id
+   * @param $entity_id
    * @param $url
    */
-  protected function assertSyndication($source_id, $url) {
-    $object = \Drupal::database()->query('SELECT * FROM {webmention_syndication} WHERE entity_id = :id', [':id' => $source_id])->fetchObject();
+  protected function assertSyndication($entity_id, $url) {
+    $object = \Drupal::database()->query('SELECT * FROM {webmention_syndication} WHERE entity_id = :id', [':id' => $entity_id])->fetchObject();
     if (isset($object->url)) {
       self::assertEquals($url, $object->url);
     }
@@ -614,10 +640,10 @@ abstract class IndiewebBrowserTestBase extends BrowserTestBase {
   /**
    * Asserts no syndication.
    *
-   * @param $source_id
+   * @param $entity_id
    */
-  protected function assertNoSyndication($source_id) {
-    $false = \Drupal::database()->query('SELECT * FROM {webmention_syndication} WHERE entity_id = :id', [':id' => $source_id])->fetchField();
+  protected function assertNoSyndication($entity_id) {
+    $false = \Drupal::database()->query('SELECT * FROM {webmention_syndication} WHERE entity_id = :id', [':id' => $entity_id])->fetchField();
     self::assertTrue($false === FALSE);
   }
 

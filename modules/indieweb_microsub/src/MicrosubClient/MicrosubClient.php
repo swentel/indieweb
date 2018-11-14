@@ -213,7 +213,6 @@ class MicrosubClient implements MicrosubClientInterface {
       if ($post = $this->getPost($webmention)) {
         /** @var \Drupal\indieweb_microsub\ApertureClient\ApertureClientInterface $client */
         $client = \Drupal::service('indieweb.aperture.client');
-        // TODO kill this function and use the same as underneath
         $client->sendPost($microsub->get('aperture_api_key'), $webmention);
       }
     }

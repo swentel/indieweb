@@ -1030,7 +1030,7 @@ class MicropubController extends ControllerBase {
       if (!empty($this->input['mp-syndicate-to']) && $this->node->isPublished()) {
         $source = $this->node->toUrl()->setAbsolute(TRUE)->toString();
         foreach ($this->input['mp-syndicate-to'] as $target) {
-          indieweb_webmention_create_queue_item($source, $target, $this->node->id(), 'node');
+          \Drupal::service('indieweb.webmention.client')->createQueueItem($source, $target, $this->node->id(), 'node');
         }
       }
     }
@@ -1044,7 +1044,7 @@ class MicropubController extends ControllerBase {
       if (!empty($this->input['mp-syndicate-to']) && $this->comment->isPublished()) {
         $source = Url::fromRoute('indieweb.comment.canonical', ['comment' => $this->comment->id()], ['absolute' => TRUE])->toString();
         foreach ($this->input['mp-syndicate-to'] as $target) {
-          indieweb_webmention_create_queue_item($source, $target, $this->comment->id(), 'comment');
+          \Drupal::service('indieweb.webmention.client')->createQueueItem($source, $target, $this->comment->id(), 'comment');
         }
       }
     }
