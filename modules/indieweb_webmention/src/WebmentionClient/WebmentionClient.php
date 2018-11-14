@@ -53,9 +53,8 @@ class WebmentionClient implements WebmentionClientInterface {
           $sourceURL = $data['source'];
           $targetURL = $data['target'];
 
-          /** @var \Drupal\indieweb_webmention\WebmentionClient\WebmentionClientInterface $client */
-          $client = \Drupal::service('indieweb.webmention.client');
-          $response = $client->sendWebmention($sourceURL, $targetURL);
+          // Send with IndieWeb client.
+          $response = $this->sendWebmention($sourceURL, $targetURL);
 
           // Store the syndication when the targetUrl is in the syndication
           // targets.
