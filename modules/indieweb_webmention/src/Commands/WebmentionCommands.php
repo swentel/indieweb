@@ -17,7 +17,7 @@ class WebmentionCommands extends DrushCommands {
    */
   public function sendWebmentions() {
     if (\Drupal::config('indieweb_webmention.settings')->get('send_webmention_handler') == 'drush') {
-      indieweb_handle_webmention_queue();
+      \Drupal::service('indieweb.webmention.client')->handleQueue();
     }
   }
 
