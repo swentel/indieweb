@@ -32,9 +32,9 @@ class MicrosubClient implements MicrosubClientInterface {
     foreach ($sources as $source) {
 
       // Continue if the channel is disabled.
-      /*if (!$source->getChannel()->getStatus()) {
+      if (!$source->getChannel()->getStatus()) {
         continue;
-      }*/
+      }
 
       $url = $source->label();
       $tries = $source->getTries();
