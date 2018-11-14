@@ -329,7 +329,7 @@ class IndieAuthTest extends IndiewebBrowserTestBase {
     self::assertEquals(200, $response->getStatusCode());
 
     // Verify the authorization code is gone.
-    /** @var \Drupal\indieweb\Entity\IndieAuthAuthorizationCodeInterface $authorization_code */
+    /** @var \Drupal\indieweb_indieauth\Entity\IndieAuthAuthorizationCodeInterface $authorization_code */
     $authorization_code = \Drupal::entityTypeManager()->getStorage('indieweb_indieauth_code')->getIndieAuthAuthorizationCode($params['code']);
     self::assertFalse($authorization_code);
 
@@ -450,7 +450,7 @@ class IndieAuthTest extends IndiewebBrowserTestBase {
     self::assertEquals(200, $response->getStatusCode());
 
     // Verify the authorization code is gone.
-    /** @var \Drupal\indieweb\Entity\IndieAuthAuthorizationCodeInterface $authorization_code */
+    /** @var \Drupal\indieweb_indieauth\Entity\IndieAuthAuthorizationCodeInterface $authorization_code */
     $authorization_code = \Drupal::entityTypeManager()->getStorage('indieweb_indieauth_code')->getIndieAuthAuthorizationCode($params['code']);
     self::assertFalse($authorization_code);
   }

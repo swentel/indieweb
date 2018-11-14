@@ -63,10 +63,13 @@ Another good tool is http://xray.p3k.io, which displays the results in JSON.
 
 ## To install
 
+composer packages:
+
 - composer require indieweb/mention-client
 - composer require indieauth/client
 - composer require p3k/xray
 - composer require p3k/Micropub
+
 - go to admin/modules and toggle 'IndieWeb' to enable the module.
 
 ## Webmentions / Webmention.io
@@ -351,6 +354,11 @@ When using the built-in webmention or microsub endpoint, a lot of file urls are 
 enable the Imagecache external module, the files are downloaded so they are cached locally. Use even more caching power
 by installing the CDN module. The cache is generated when the webmention or microsub items are processed so the impact
 on request is minimal.
+
+By default, imagecache_external stores all files in public://externals. If you want to make it more dynamic,
+for instancy, by year and month, add following line to settings.php
+
+$config['imagecache_external.settings']['imagecache_directory'] = 'externals/' . date('Y') . '/' . date('m');
 
 ## Drush commands
 

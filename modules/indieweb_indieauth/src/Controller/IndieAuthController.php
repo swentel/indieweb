@@ -122,7 +122,7 @@ class IndieAuthController extends ControllerBase {
         return new JsonResponse('', 403);
       }
 
-      // Got to go.
+      // Good to go.
       $response = [
         'me' => $authorization_code->get('me')->value,
       ];
