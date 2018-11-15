@@ -39,6 +39,16 @@ class MicrosubSourceStorage extends SqlContentEntityStorage implements MicrosubS
   /**
    * {@inheritdoc}
    */
+  public function updateItemsToNewChannel($source_id, $channel_id) {
+    $this->database->update('microsub_item')
+      ->fields(['channel_id' => $channel_id])
+      ->condition('source_id', $source_id)
+      ->execute();
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function deleteItems($source_id) {
     $this->database->delete('microsub_item')->condition('source_id', $source_id)->execute();
   }

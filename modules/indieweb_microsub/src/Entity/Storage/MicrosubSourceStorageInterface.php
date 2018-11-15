@@ -27,6 +27,16 @@ interface MicrosubSourceStorageInterface extends ContentEntityStorageInterface {
   public function getItemCount($source_id);
 
   /**
+   * Updates the items of this source to the new channel.
+   *
+   * @param $source_id
+   * @param $channel_id
+   *
+   * @return mixed
+   */
+  public function updateItemsToNewChannel($source_id, $channel_id);
+
+  /**
    * Delete all items for a source.
    *
    * @param $source_id

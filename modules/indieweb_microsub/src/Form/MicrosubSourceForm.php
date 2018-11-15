@@ -79,8 +79,6 @@ class MicrosubSourceForm extends ContentEntityForm {
 
     $status = parent::save($form, $form_state);
 
-    // TODO move items to different channel if channel has changed
-
     switch ($status) {
       case SAVED_NEW:
         $this->messenger()->addMessage($this->t('Created %label.', ['%label' => $source->label(),]));

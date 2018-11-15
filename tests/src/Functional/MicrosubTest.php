@@ -351,6 +351,18 @@ class MicrosubTest extends IndiewebBrowserTestBase {
     $this->fetchItems();
     $this->assertItemCount('item', 6);
 
+    // Move source to another channel.
+    $this->drupalPostForm('admin/config/services/indieweb/microsub/sources/2/edit', ['channel_id' => '1'], 'Save');
+    $this->assertItemCount('item', 2, NULL, 1, 1);
+    $this->assertItemCount('item', 4, NULL, 2, 1);
+    $this->assertItemCount('item', 6, NULL, NULL, 1);
+    $this->assertItemCount('item', 0, NULL, NULL, 2);
+    $this->drupalPostForm('admin/config/services/indieweb/microsub/sources/2/edit', ['channel_id' => '2'], 'Save');
+    $this->assertItemCount('item', 2, NULL, 1, 1);
+    $this->assertItemCount('item', 4, NULL, 2, 2);
+    $this->assertItemCount('item', 2, NULL, NULL, 1);
+    $this->assertItemCount('item', 4, NULL, NULL, 2);
+
     // Delete source.
     $this->drupalPostForm('admin/config/services/indieweb/microsub/sources/1/delete', [], 'Delete');
     $this->assertItemCount('channel', 2);
@@ -434,13 +446,23 @@ class MicrosubTest extends IndiewebBrowserTestBase {
    *   The total to expect
    * @param $status
    *   Whether to add the status condition or not.
+   * @param $source_id
+   *   The channel id.
+   * @param $channel_id
+   *   The channel id.
    */
-  protected function assertItemCount($type, $expected_total, $status = NULL) {
+  protected function assertItemCount($type, $expected_total, $status = NULL, $source_id = NULL, $channel_id = NULL) {
     $table = 'microsub_' . $type;
     $query = \Drupal::database()
       ->select($table, 't');
     if (is_integer($status)) {
       $query->condition('status', $status);
+    }
+    if (is_integer($channel_id)) {
+      $query->condition('channel_id', $channel_id);
+    }
+    if (is_integer($source_id)) {
+      $query->condition('source_id', $source_id);
     }
     $total = $query->countQuery()->execute()->fetchField();
     self::assertEquals($expected_total, (int) $total);

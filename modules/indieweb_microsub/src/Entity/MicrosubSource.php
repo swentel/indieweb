@@ -3,6 +3,7 @@
 namespace Drupal\indieweb_microsub\Entity;
 
 use Drupal\Core\Entity\ContentEntityBase;
+use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
 
@@ -151,6 +152,14 @@ class MicrosubSource extends ContentEntityBase implements MicrosubSourceInterfac
    */
   public function disableImageCache() {
     return (bool) $this->get('cache_image_disable')->value;
+  }
+
+  public function postSave(EntityStorageInterface $storage, $update = TRUE) {
+    parent::postSave($storage, $update);
+
+    if (isset($this->original) && $this->original->getChannelId() != $this->getChannelId()) {
+      $storage->updateItemsToNewChannel($this->id(), $this->getChannelId());
+    }
   }
 
   /**
