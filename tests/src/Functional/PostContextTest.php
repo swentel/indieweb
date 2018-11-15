@@ -69,7 +69,9 @@ class PostContextTest extends IndiewebBrowserTestBase {
     $this->drupalLogin($this->adminUser);
 
     $edit = ['post_context_link_field' => 'field_reply_link', 'post_context_post_type' => 'u-in-reply-to'];
-    $this->drupalPostForm('admin/structure/types/manage/reply', $edit, 'Save content type');
+    $this->drupalGet('admin/structure/types/manage/reply');
+    $this->assertSession()->responseContains('indieweb-context-node-form.js');
+    $this->drupalPostForm(NULL, $edit, 'Save content type');
     $node_type = NodeType::load('reply');
     self::assertEquals($node_type->getThirdPartySetting('indieweb_context', 'post_context_link_field'), 'field_reply_link');
     self::assertEquals($node_type->getThirdPartySetting('indieweb_context', 'post_context_post_type'), 'u-in-reply-to');
