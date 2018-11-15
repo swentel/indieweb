@@ -652,7 +652,8 @@ class MicropubController extends ControllerBase {
       $extensions = 'jpg jpeg gif png';
       $validators['file_validate_extensions'] = [];
       $validators['file_validate_extensions'][0] = $extensions;
-      $file = $this->saveUpload('file', 'public://micropub', $validators);
+      $sub_directory = date('Y') . '/' . date('m');
+      $file = $this->saveUpload('file', 'public://micropub/' . $sub_directory, $validators);
       if ($file) {
 
         // Set permanent.
@@ -888,6 +889,7 @@ class MicropubController extends ControllerBase {
 
     // Try to save the file.
     try {
+      file_prepare_directory($destination, FILE_CREATE_DIRECTORY);
       $file = file_save_upload($file_key, $validators, $destination, 0);
       $messages = drupal_get_messages();
       if (!empty($messages)) {
