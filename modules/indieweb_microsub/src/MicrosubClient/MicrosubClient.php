@@ -170,7 +170,7 @@ class MicrosubClient implements MicrosubClientInterface {
         }
 
         if ($key && !empty($item[$key][0])) {
-          indieweb_post_context_create_queue_item($item[$key][0], $microsub_item->id(), 'microsub_item');
+          \Drupal::service('indieweb.post_context.client')->createQueueItem($item[$key][0], $microsub_item->id(), 'microsub_item');
         }
       }
     }

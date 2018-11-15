@@ -63,7 +63,7 @@ function drush_indieweb_process_webmentions() {
  */
 function drush_indieweb_fetch_post_contexts() {
   if (\Drupal::config('indieweb_context.settings')->get('handler') == 'drush') {
-    indieweb_handle_post_context_queue();
+    \Drupal::service('indieweb.post_context.client')->handleQueue();
   }
 }
 

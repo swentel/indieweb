@@ -17,7 +17,7 @@ class ContextCommands extends DrushCommands {
    */
   public function fetchPostContexts() {
     if (\Drupal::config('indieweb_context.settings')->get('handler') == 'drush') {
-      indieweb_handle_post_context_queue();
+      \Drupal::service('indieweb.post_context.client')->handleQueue();
     }
   }
 

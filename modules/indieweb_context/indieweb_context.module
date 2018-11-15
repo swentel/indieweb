@@ -13,7 +13,6 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\node\Entity\NodeType;
 use Drupal\node\NodeInterface;
 use Drupal\node\NodeTypeInterface;
-use p3k\XRay;
 
 define('INDIEWEB_POST_CONTEXT_QUEUE', 'indieweb_context');
 
@@ -37,114 +36,8 @@ function indieweb_context_theme() {
  * Implements hook_cron().
  */
 function indieweb_context_cron() {
-
   if (\Drupal::config('indieweb_context.settings')->get('handler') == 'cron') {
-  // TODO move to service!
-    indieweb_handle_post_context_queue();
-  }
-
-}
-
-/**
- * Get the post contexts for an entity.
- *
- * @param $entity_id
- * @param $entity_type_id
- *
- * @return array
- */
-function indieweb_get_post_contexts($entity_id, $entity_type_id) {
-  $contexts = [];
-
-  $records = \Drupal::database()->query('SELECT url, content FROM {indieweb_post_context} WHERE entity_id = :entity_id AND entity_type_id = :entity_type_id', [':entity_id' => $entity_id, ':entity_type_id' => $entity_type_id]);
-  foreach ($records as $record) {
-
-    $content = (array) json_decode($record->content);
-    if (isset($content['post-type'])) {
-      $contexts[] = [
-        'url' => $record->url,
-        'content' => $content,
-      ];
-    }
-
-  }
-
-  return $contexts;
-}
-
-/**
- * Handles the post context queue.
- */
-function indieweb_handle_post_context_queue() {
-  $end = time() + 15;
-  $xray = new XRay();
-  while (time() < $end && ($item = \Drupal::queue(INDIEWEB_POST_CONTEXT_QUEUE)->claimItem())) {
-    $data = $item->data;
-    if (!empty($data['url']) && !empty($data['entity_id']) && !empty($data['entity_type_id'])) {
-
-      // Get content.
-      // TODO we should make a helper service here, as microsub client does this
-      // TODO make a service if from it as well
-      // as well (in various ways :/)
-      try {
-        $response = \Drupal::httpClient()->get($data['url']);
-        $body = $response->getBody()->getContents();
-
-        $parsed = $xray->parse($data['url'], $body, ['expect'=>'feed']);
-        if ($parsed && isset($parsed['data']['type']) && $parsed['data']['type'] == 'feed') {
-            $reference = $parsed['data']['items'][0];
-
-            // Nodes.
-            if ($data['entity_type_id'] == 'node') {
-              \Drupal::database()
-                ->merge('indieweb_post_context')
-                ->key('entity_id', $data['entity_id'])
-                ->key('entity_type_id', $data['entity_type_id'])
-                ->key('url', $data['url'])
-                ->fields(['content' => json_encode($reference)])
-                ->execute();
-            }
-
-            // Microsub.
-            if ($data['entity_type_id'] == 'microsub_item') {
-              \Drupal::database()
-                ->merge('microsub_item')
-                ->key('id', $data['entity_id'])
-                ->fields(['post_context' => json_encode($reference)])
-                ->execute();
-
-          }
-        }
-      }
-      catch (\Exception $e) {
-        \Drupal::logger('indieweb_post_context')->notice('Error getting post context for @url: @message', ['@url' => $data['url'], '@message' => $e->getMessage()]);
-      }
-    }
-
-    // Remove the item - always.
-    \Drupal::queue(INDIEWEB_POST_CONTEXT_QUEUE)->deleteItem($item);
-  }
-}
-
-/**
- * Creates a post context queue item.
- *
- * @param $url
- * @param $entity_id
- * @param $entity_type_id
- */
-function indieweb_post_context_create_queue_item($url, $entity_id, $entity_type_id) {
-  $data = [
-    'url' => $url,
-    'entity_id' => $entity_id,
-    'entity_type_id' => $entity_type_id,
-  ];
-
-  try {
-    \Drupal::queue(INDIEWEB_POST_CONTEXT_QUEUE)->createItem($data);
-  }
-  catch (\Exception $e) {
-    \Drupal::logger('indieweb_queue')->notice('Error creating queue item: @message', ['@message' => $e->getMessage()]);
+    \Drupal::service('indieweb.post_context.client')->handleQueue();
   }
 }
 
@@ -295,7 +188,7 @@ function _indieweb_entity_update_check_post_context(EntityInterface $entity, $is
         }
 
         if ($create_queue_item) {
-          indieweb_post_context_create_queue_item($url, $entity->id(), $entity->getEntityTypeId());
+          \Drupal::service('indieweb.post_context.client')->createQueueItem($url, $entity->id(), $entity->getEntityTypeId());
         }
       }
     }
@@ -349,7 +242,7 @@ function _indieweb_extra_fields_display(array &$build, EntityInterface $entity, 
     $node_type = NodeType::load($entity->bundle());
     $post_type_class = $node_type->getThirdPartySetting('indieweb_context', 'post_context_post_type');
     $suggestion = str_replace(['in-', '-to', '-of', 'u-'], '', $post_type_class);
-    $contexts = indieweb_get_post_contexts($entity->id(), $entity->getEntityTypeId());
+    $contexts = \Drupal::service('indieweb.post_context.client')->getPostContexts($entity->id(), $entity->getEntityTypeId());
     foreach ($contexts as $context) {
       $text = isset($context['content']['content']->text) ? $context['content']['content']->text : '';
       $build['post_context'][] = [
