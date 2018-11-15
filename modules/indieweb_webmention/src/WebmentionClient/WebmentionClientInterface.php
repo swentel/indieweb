@@ -47,4 +47,16 @@ interface WebmentionClientInterface {
    */
   public function createComment(WebmentionInterface $webmention);
 
+  /**
+   * Checks if a source url already exists as syndication.
+   *
+   * This can happen when you reply from your site to twitter. Brid.gy will then
+   * send that reply on twitter back as a webmention.
+   *
+   * @param \Drupal\indieweb_webmention\Entity\WebmentionInterface $webmention
+   *
+   * @return bool
+   */
+  public function sourceExistsAsSyndication(WebmentionInterface $webmention);
+
 }

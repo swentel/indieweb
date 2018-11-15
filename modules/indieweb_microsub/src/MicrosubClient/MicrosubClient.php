@@ -238,22 +238,22 @@ class MicrosubClient implements MicrosubClientInterface {
         }
 
         if ($parsed && isset($parsed['data']['type']) && $parsed['data']['type'] == 'entry') {
-            $item = $parsed['data'];
+          $item = $parsed['data'];
 
-            foreach (['like-of', 'repost-of', 'bookmark-of', 'in-reply-to', 'mention-of'] as $item_url) {
-              if (isset($item[$item_url]) && !empty($item[$item_url][0])) {
-                $item[$item_url][0] = $target;
-              }
+          foreach (['like-of', 'repost-of', 'bookmark-of', 'in-reply-to', 'mention-of'] as $item_url) {
+            if (isset($item[$item_url]) && !empty($item[$item_url][0])) {
+              $item[$item_url][0] = $target;
             }
+          }
 
-            // Set url to canonical webmention for in-reply-to. This makes sure
-            // that you can  reply to it from a reader as the micropub endpoint
-            // will get the right node or comment.
-            if (isset($item['in-reply-to']) && !empty($item['in-reply-to'][0])) {
-              $item['url'] = $webmention->toUrl('canonical', ['absolute' => TRUE])->toString();
-            }
+          // Set url to canonical webmention for in-reply-to. This makes sure
+          // that you can  reply to it from a reader as the micropub endpoint
+          // will get the right node or comment.
+          if (isset($item['in-reply-to']) && !empty($item['in-reply-to'][0])) {
+            $item['url'] = $webmention->toUrl('canonical', ['absolute' => TRUE])->toString();
+          }
 
-            $this->saveItem($item);
+          $this->saveItem($item);
         }
 
       }

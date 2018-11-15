@@ -273,14 +273,18 @@ class WebmentionClient implements WebmentionClientInterface {
         $webmention->setPublished();
         $webmention->save();
 
-        // Send notification if configured.
-        if (\Drupal::hasService('indieweb.microsub.client')) {
-          $client = \Drupal::service('indieweb.microsub.client');
-          $client->sendNotification($webmention, $parsed);
-        }
+        // Check syndication. If it exists, no need for further actions.
+        if (!$this->sourceExistsAsSyndication($webmention)) {
 
-        // Create a comment if configured.
-        $this->createComment($webmention);
+          // Notification.
+          if (\Drupal::hasService('indieweb.microsub.client')) {
+            $client = \Drupal::service('indieweb.microsub.client');
+            $client->sendNotification($webmention, $parsed);
+          }
+
+          // Create a comment.
+          $this->createComment($webmention);
+        }
 
       }
 
@@ -309,7 +313,6 @@ class WebmentionClient implements WebmentionClientInterface {
    * {@inheritdoc}
    */
   public function createComment(WebmentionInterface $webmention) {
-    // Comment creation.
     if (($config = \Drupal::config('indieweb_webmention.comment')) && $config->get('comment_create_enable')) {
 
       // This can be simplified when config validation is ok
@@ -350,12 +353,6 @@ class WebmentionClient implements WebmentionClientInterface {
               /** @var \Drupal\node\NodeInterface $node */
               $node = $storage->load($params[$entity_type]);
               if ($node && $node->hasField($comment_node_comment_field_name) && $node->{$comment_node_comment_field_name}->status == 2) {
-
-                // Last check now is to make sure we do not create the same
-                // comment again.
-                if ($this->sourceExistsAsSyndication($webmention)) {
-                  return;
-                }
 
                 $subject = 'Auto created comment from webmention';
 
@@ -407,16 +404,9 @@ class WebmentionClient implements WebmentionClientInterface {
   }
 
   /**
-   * Checks if a source url already exists as syndication.
-   *
-   * This can happen when you reply from your site to twitter. Brid.gy will then
-   * send that reply on twitter back as a webmention.
-   *
-   * @param \Drupal\indieweb_webmention\Entity\WebmentionInterface $webmention
-   *
-   * @return bool
+   * {@inheritdoc}
    */
-  protected function sourceExistsAsSyndication(WebmentionInterface $webmention) {
+  public function sourceExistsAsSyndication(WebmentionInterface $webmention) {
     $exists = FALSE;
 
     if (strpos($webmention->get('source')->value, 'brid-gy.appspot') !== FALSE) {

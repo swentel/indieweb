@@ -509,6 +509,47 @@ abstract class IndiewebBrowserTestBase extends BrowserTestBase {
   }
 
   /**
+   * Assert count in a table.
+   *
+   * @param $type
+   *   Either channel, source or item.
+   * @param $expected_total
+   *   The total to expect
+   * @param $status
+   *   Whether to add the status condition or not.
+   * @param $source_id
+   *   The channel id.
+   * @param $channel_id
+   *   The channel id.
+   */
+  protected function assertMicrosubItemCount($type, $expected_total, $status = NULL, $source_id = NULL, $channel_id = NULL) {
+    $table = 'microsub_' . $type;
+    $query = \Drupal::database()
+      ->select($table, 't');
+    if (is_integer($status)) {
+      $query->condition('status', $status);
+    }
+    if (is_integer($channel_id)) {
+      $query->condition('channel_id', $channel_id);
+    }
+    if (is_integer($source_id)) {
+      $query->condition('source_id', $source_id);
+    }
+    $total = $query->countQuery()->execute()->fetchField();
+    self::assertEquals($expected_total, (int) $total);
+  }
+
+  /**
+   * Clears a microsub table.
+   *
+   * @param $type
+   */
+  protected function microsubClear($type) {
+    $table = 'microsub_' . $type;
+    \Drupal::database()->truncate($table)->execute();
+  }
+
+  /**
    * Assert post context queue items.
    *
    * @param array $urls

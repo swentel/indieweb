@@ -196,7 +196,7 @@ class MicrosubTest extends IndiewebBrowserTestBase {
     $this->drupalGet($this->timeline_path_2);
 
     $this->fetchItems();
-    $this->assertItemCount('item', 3);
+    $this->assertMicrosubItemCount('item', 3);
 
     // ----------------------------------------------------------------
     // channels, timeline and post contexts.
@@ -230,7 +230,7 @@ class MicrosubTest extends IndiewebBrowserTestBase {
     $settings_page['body']['value'] = 'This is another page on the second timeline feed which will be marked as unread';
     $this->createNode($settings_page);
     $this->fetchItems();
-    $this->assertItemCount('item', 4);
+    $this->assertMicrosubItemCount('item', 4);
 
     $response = $this->sendMicrosubRequest($query);
     $body = json_decode($response['body']);
@@ -240,15 +240,15 @@ class MicrosubTest extends IndiewebBrowserTestBase {
     // Delete an item.
     $query = ['action' => 'timeline', 'method' => 'remove', 'entry' => 4];
     $this->sendMicrosubRequest($query, 'POST');
-    $this->assertItemCount('item', 3, 1);
-    $this->assertItemCount('item', 1, 0);
-    $this->assertItemCount('item', 4);
+    $this->assertMicrosubItemCount('item', 3, 1);
+    $this->assertMicrosubItemCount('item', 1, 0);
+    $this->assertMicrosubItemCount('item', 4);
     $this->resetNextFetch(1);
     $this->resetNextFetch(2);
     $this->fetchItems();
-    $this->assertItemCount('item', 3, 1);
-    $this->assertItemCount('item', 1, 0);
-    $this->assertItemCount('item', 4);
+    $this->assertMicrosubItemCount('item', 3, 1);
+    $this->assertMicrosubItemCount('item', 1, 0);
+    $this->assertMicrosubItemCount('item', 4);
 
     // Test post context.
     $page = $this->createNode(['type' => 'page', 'title' => 'microsub page', 'body' => ['value' => 'This should be a context for a microsub item']]);
@@ -265,7 +265,7 @@ class MicrosubTest extends IndiewebBrowserTestBase {
     $this->resetNextFetch(2);
 
     $this->fetchItems();
-    $this->assertItemCount('item', 6);
+    $this->assertMicrosubItemCount('item', 6);
     $id = \Drupal::database()->query('SELECT id FROM {microsub_item} where post_type = :reply', [':reply' => 'reply'])->fetchField();
     $item = \Drupal::entityTypeManager()->getStorage('indieweb_microsub_item')->loadUnchanged($id);
     $this->assertPostContextQueueItems(['https://example.com/fetch-content'], $item->id());
@@ -317,12 +317,12 @@ class MicrosubTest extends IndiewebBrowserTestBase {
     // Test disabled source.
     $this->drupalLogin($this->adminUser);
     $this->drupalPostForm('admin/config/services/indieweb/microsub/sources/2/edit', ['status' => FALSE], 'Save');
-    $this->clear('item');
+    $this->microsubClear('item');
     $this->drupalLogout();
     $this->resetNextFetch(1);
     $this->resetNextFetch(2);
     $this->fetchItems();
-    $this->assertItemCount('item', 2);
+    $this->assertMicrosubItemCount('item', 2);
 
     // Test disabled channel.
     $this->drupalLogin($this->adminUser);
@@ -334,12 +334,12 @@ class MicrosubTest extends IndiewebBrowserTestBase {
     $channel = \Drupal::entityTypeManager()->getStorage('indieweb_microsub_channel')->loadUnchanged(2);
     self::assertTrue($channel->getStatus() === FALSE);
 
-    $this->clear('item');
-    $this->assertItemCount('item', 0);
+    $this->microsubClear('item');
+    $this->assertMicrosubItemCount('item', 0);
     $this->resetNextFetch(1);
     $this->resetNextFetch(2);
     $this->fetchItems();
-    $this->assertItemCount('item', 2);
+    $this->assertMicrosubItemCount('item', 2);
     $this->drupalLogin($this->adminUser);
     $this->drupalPostForm('admin/config/services/indieweb/microsub/channels/2/edit', ['status' => TRUE], 'Save');
     // Load so caches are cleared - weird testbot.
@@ -349,31 +349,31 @@ class MicrosubTest extends IndiewebBrowserTestBase {
     $this->resetNextFetch(1);
     $this->resetNextFetch(2);
     $this->fetchItems();
-    $this->assertItemCount('item', 6);
+    $this->assertMicrosubItemCount('item', 6);
 
     // Move source to another channel.
     $this->drupalPostForm('admin/config/services/indieweb/microsub/sources/2/edit', ['channel_id' => '1'], 'Save');
-    $this->assertItemCount('item', 2, NULL, 1, 1);
-    $this->assertItemCount('item', 4, NULL, 2, 1);
-    $this->assertItemCount('item', 6, NULL, NULL, 1);
-    $this->assertItemCount('item', 0, NULL, NULL, 2);
+    $this->assertMicrosubItemCount('item', 2, NULL, 1, 1);
+    $this->assertMicrosubItemCount('item', 4, NULL, 2, 1);
+    $this->assertMicrosubItemCount('item', 6, NULL, NULL, 1);
+    $this->assertMicrosubItemCount('item', 0, NULL, NULL, 2);
     $this->drupalPostForm('admin/config/services/indieweb/microsub/sources/2/edit', ['channel_id' => '2'], 'Save');
-    $this->assertItemCount('item', 2, NULL, 1, 1);
-    $this->assertItemCount('item', 4, NULL, 2, 2);
-    $this->assertItemCount('item', 2, NULL, NULL, 1);
-    $this->assertItemCount('item', 4, NULL, NULL, 2);
+    $this->assertMicrosubItemCount('item', 2, NULL, 1, 1);
+    $this->assertMicrosubItemCount('item', 4, NULL, 2, 2);
+    $this->assertMicrosubItemCount('item', 2, NULL, NULL, 1);
+    $this->assertMicrosubItemCount('item', 4, NULL, NULL, 2);
 
     // Delete source.
     $this->drupalPostForm('admin/config/services/indieweb/microsub/sources/1/delete', [], 'Delete');
-    $this->assertItemCount('channel', 2);
-    $this->assertItemCount('source', 1);
-    $this->assertItemCount('item', 4);
+    $this->assertMicrosubItemCount('channel', 2);
+    $this->assertMicrosubItemCount('source', 1);
+    $this->assertMicrosubItemCount('item', 4);
 
     // Delete channel.
     $this->drupalPostForm('admin/config/services/indieweb/microsub/channels/2/delete', [], 'Delete');
-    $this->assertItemCount('channel', 1);
-    $this->assertItemCount('source', 0);
-    $this->assertItemCount('item', 0);
+    $this->assertMicrosubItemCount('channel', 1);
+    $this->assertMicrosubItemCount('source', 0);
+    $this->assertMicrosubItemCount('item', 0);
   }
 
   /**
@@ -435,47 +435,6 @@ class MicrosubTest extends IndiewebBrowserTestBase {
     $this->drupalPostForm('admin/config/services/indieweb/microsub/sources/add-source', $edit, 'Save');
     $edit = ['url' => 'internal:/microsub-timeline/2', 'channel_id' => '2'];
     $this->drupalPostForm('admin/config/services/indieweb/microsub/sources/add-source', $edit, 'Save');
-  }
-
-  /**
-   * Assert count in a table.
-   *
-   * @param $type
-   *   Either channel, source or item.
-   * @param $expected_total
-   *   The total to expect
-   * @param $status
-   *   Whether to add the status condition or not.
-   * @param $source_id
-   *   The channel id.
-   * @param $channel_id
-   *   The channel id.
-   */
-  protected function assertItemCount($type, $expected_total, $status = NULL, $source_id = NULL, $channel_id = NULL) {
-    $table = 'microsub_' . $type;
-    $query = \Drupal::database()
-      ->select($table, 't');
-    if (is_integer($status)) {
-      $query->condition('status', $status);
-    }
-    if (is_integer($channel_id)) {
-      $query->condition('channel_id', $channel_id);
-    }
-    if (is_integer($source_id)) {
-      $query->condition('source_id', $source_id);
-    }
-    $total = $query->countQuery()->execute()->fetchField();
-    self::assertEquals($expected_total, (int) $total);
-  }
-
-  /**
-   * Clears a table.
-   *
-   * @param $type
-   */
-  protected function clear($type) {
-    $table = 'microsub_' . $type;
-    \Drupal::database()->truncate($table)->execute();
   }
 
   /**

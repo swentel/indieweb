@@ -177,15 +177,23 @@ class WebmentionController extends ControllerBase {
       // Trigger comment creation and microsub notification.
       if (isset($webmention)) {
 
-        /** @var \Drupal\indieweb_microsub\MicrosubClient\MicrosubClientInterface $client */
-        if (\Drupal::hasService('indieweb.microsub.client')) {
-          $client = \Drupal::service('indieweb.microsub.client');
-          $client->sendNotification($webmention);
-        }
-
         /** @var \Drupal\indieweb_webmention\WebmentionClient\WebmentionClientInterface $client */
         $client = \Drupal::service('indieweb.webmention.client');
-        $client->createComment($webmention);
+
+        // Check syndication. If it exists, no need for further actions.
+        if (!$client->sourceExistsAsSyndication($webmention)) {
+
+          // Create a comment.
+          $client->createComment($webmention);
+
+          // Notification.
+          /** @var \Drupal\indieweb_microsub\MicrosubClient\MicrosubClientInterface $microsub_client */
+          if (\Drupal::hasService('indieweb.microsub.client')) {
+            $microsub_client = \Drupal::service('indieweb.microsub.client');
+            $microsub_client->sendNotification($webmention);
+          }
+
+        }
 
         // Clear cache.
         $this->clearCache($values['target']['value']);

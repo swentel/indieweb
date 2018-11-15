@@ -29,6 +29,7 @@ class CommentTest extends IndiewebBrowserTestBase {
     'indieweb_webmention',
     'indieweb_microformat',
     'indieweb_micropub',
+    'indieweb_microsub',
     'indieweb_test',
   ];
 
@@ -59,6 +60,10 @@ class CommentTest extends IndiewebBrowserTestBase {
     $edit = ['existing_storage_name' => 'indieweb_webmention', 'existing_storage_label' => 'Webmention reference'];
     $this->drupalPostForm('admin/structure/comment/manage/comment/fields/add-field', $edit, 'Save and continue');
     $this->drupalPostForm('admin/structure/comment/manage/comment/display', ['fields[indieweb_webmention][type]' => 'entity_reference_entity_view'], 'Save');
+
+    // Internal microsub channel.
+    $edit = ['microsub_internal' => TRUE];
+    $this->drupalPostForm('admin/config/services/indieweb/microsub', $edit, 'Save configuration');
 
     // Create link field on comments.
     $edit = ['new_storage_type' => 'link', 'label' => 'Link', 'field_name' => 'comment_link'];
@@ -196,6 +201,9 @@ class CommentTest extends IndiewebBrowserTestBase {
     $comment->setPublished();
     $comment->save();
 
+    // Assert notification items.
+    $this->assertMicrosubItemCount('item', 3, NULL, 0, 0);
+
     $this->drupalGet('node/1');
     $this->assertSession()->responseContains('This is awesome!');
 
@@ -209,6 +217,7 @@ class CommentTest extends IndiewebBrowserTestBase {
     $this->drupalGet('node/1');
     $this->assertSession()->responseContains("I know, isn't it!");
     $this->assertWebmentionQueueItems(['https://brid-gy.appspot.com/comment/twitter/swentel/994117538731741185/994129251946418177' => 'https://brid-gy.appspot.com/comment/twitter/swentel/994117538731741185/994129251946418177'], 3);
+    $this->assertCommentCount(3);
 
     $this->drupalGet('/comment/indieweb/3');
     $this->assertSession()->responseContains("I know, isn't it!");
@@ -220,10 +229,14 @@ class CommentTest extends IndiewebBrowserTestBase {
     $this->createSyndication('https://twitter.com/swentel/status/994133390680092672', 'node', 1);
     $webmention['target'] = '/comment/indieweb/2';
     $webmention['source'] = 'https://brid-gy.appspot.com/comment/twitter/swentel/994117538731741185/994133390680092672';
+    $webmention['post']['url'] = 'https://brid-gy.appspot.com/comment/twitter/swentel/994117538731741185/994133390680092672';
     $webmention['post']['content']['text'] = "I know, isn't it!";
     $code = $this->sendWebmentionNotificationRequest($webmention);
     self::assertEquals(202, $code);
     $this->assertCommentCount(3);
+
+    // Assert notification items.
+    $this->assertMicrosubItemCount('item', 3, NULL, 0, 0);
 
     // Reply to a comment, see that the target link is populated with the link
     // from the parent comment.
