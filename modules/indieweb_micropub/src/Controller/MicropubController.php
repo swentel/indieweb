@@ -199,7 +199,7 @@ class MicropubController extends ControllerBase {
 
       if ($this->indieAuth->isValidToken($auth_header)) {
         $response_code = 200;
-        $response_message = $this->getCategoryResponse();
+        $response_message = ['categories' => $this->getCategories()];
       }
       else {
         $response_code = 403;
@@ -1101,12 +1101,12 @@ class MicropubController extends ControllerBase {
   }
 
   /**
-   * Gets category response: return a list of terms.
+   * Gets categories: return a list of terms.
    *
    * @return array $terms
    *   A list of terms.
    */
-  protected function getCategoryResponse() {
+  protected function getCategories() {
     $vocabulary = $this->config->get('micropub_category_vocabulary');
 
     $terms = \Drupal::database()
