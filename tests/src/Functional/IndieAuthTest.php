@@ -55,6 +55,18 @@ class IndieAuthTest extends IndiewebBrowserTestBase {
   }
 
   /**
+   * Tests the mapping function.
+   */
+  public function testMapping() {
+    $uid = $this->adminUser->id();
+    $domain = 'https://example.com';
+    \Drupal::service('indieweb.indieauth.client')->externalauthMapAccount($uid, $domain);
+    $record = \Drupal::database()->query("SELECT * FROM {authmap} WHERE uid = :uid", [':uid' => $this->adminUser->id()])->fetchObject();
+    self::assertEquals('example.com', $record->authname);
+    self::assertEquals('indieweb', $record->provider);
+  }
+
+  /**
    * Tests indieauth functionality.
    *
    * @throws \Behat\Mink\Exception\ExpectationException

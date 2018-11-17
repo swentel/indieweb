@@ -27,4 +27,18 @@ interface IndieAuthClientInterface {
    */
   public function isValidToken($auth_header, $scope_to_check = NULL);
 
+  /**
+   * Maps an account with a domain
+   *
+   * @param $uid
+   *   The Drupal user id
+   * @param $domain
+   *   The domain
+   * @param $is_drush
+   *   Whether this is a Drush call or not.
+   *
+   * @return
+   */
+  public function externalauthMapAccount($uid, $domain, $is_drush = FALSE);
+
 }

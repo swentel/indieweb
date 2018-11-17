@@ -33,6 +33,38 @@ class IndieAuthClient implements IndieAuthClientInterface {
   }
 
   /**
+   * {@inheritdoc}
+   */
+  public function externalauthMapAccount($uid, $domain, $is_drush = FALSE) {
+    if (\Drupal::moduleHandler()->moduleExists('externalauth')) {
+
+      /** @var \Drupal\user\UserInterface $account */
+      $account = \Drupal::entityTypeManager()->getStorage('user')->load($uid);
+      if ($account) {
+        /** @var \Drupal\externalauth\ExternalAuthInterface $external_auth */
+        $external_auth = \Drupal::service('externalauth.externalauth');
+        $authname = str_replace(['https://', 'http://'], '', $domain);
+        $external_auth->linkExistingAccount($authname, 'indieweb', $account);
+
+        if ($is_drush) {
+          drush_print(dt('Mapped uid @uid with @domain.', ['@uid' => $uid, '@domain' => $domain]));
+        }
+      }
+      else {
+        if ($is_drush) {
+          dt('Account with uid @uid not found.', ['@uid' => $uid]);
+        }
+      }
+
+    }
+    else {
+      if ($is_drush) {
+        drush_print('The External Authentication module is not enabled.');
+      }
+    }
+  }
+
+  /**
    * Internal IndieAuth token validation.
    *
    * @param $auth_header

@@ -82,30 +82,7 @@ function drush_indieweb_microsub_fetch_items() {
  *
  * @param int $uid
  * @param string $domain
- *
- * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
- * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
  */
 function drush_indieweb_externalauth_map_account($uid = 0, $domain = '') {
-
-  if (\Drupal::moduleHandler()->moduleExists('externalauth')) {
-
-    /** @var \Drupal\user\UserInterface $account */
-    $account = \Drupal::entityTypeManager()->getStorage('user')->load($uid);
-    if ($account) {
-      /** @var \Drupal\externalauth\ExternalAuthInterface $external_auth */
-      $external_auth = \Drupal::service('externalauth.externalauth');
-      $authname = str_replace(['https://', 'http://'], '', $domain);
-      $external_auth->linkExistingAccount($authname, 'indieweb', $account);
-      drush_print(dt('Mapped uid @uid with @domain.', ['@uid' => $uid, '@domain' => $domain]));
-    }
-    else {
-      drush_print(dt('Account with uid @uid not found.', ['@uid' => $uid]));
-    }
-
-  }
-  else {
-    drush_print('The External Authentication module is not enabled.');
-  }
-
+  \Drupal::service('indieweb.indieauth.client')->externalauthMapAccount($uid, $domain, TRUE);
 }
