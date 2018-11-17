@@ -63,6 +63,37 @@ class WebmentionTest extends IndiewebBrowserTestBase {
   }
 
   /**
+   * UI tests for syndication.
+   *
+   * @throws \Behat\Mink\Exception\ResponseTextException
+   */
+  public function testSyndicationForm() {
+    $this->drupalLogin($this->adminUser);
+
+    $page = $this->createNode(['type' => 'page', 'title' => 'syndicated to']);
+
+    $edit = [
+      'entity_id' => 1,
+      'entity_type_id' => 'node',
+      'url' => 'https://twitter.com/status/12',
+    ];
+    $this->drupalPostForm('admin/content/syndication/form', $edit, 'Add syndication');
+    $this->assertSession()->pageTextContains($page->label());
+
+    $this->drupalPostForm('admin/content/syndication/1/delete', [], 'Delete');
+    $this->assertUrl('admin/content/syndication');
+    $this->assertSession()->pageTextNotContains($page->label());
+
+    $edit = [
+      'entity_id' => 2,
+      'entity_type_id' => 'node',
+      'url' => 'https://twitter.com/status/12',
+    ];
+    $this->drupalPostForm('admin/content/syndication/form', $edit, 'Add syndication');
+    $this->assertSession()->pageTextContains('Unknown entity: 2');
+  }
+
+  /**
    * Tests receiving webmention and pingbacks via notification endpoints.
    *
    * @throws \Behat\Mink\Exception\ExpectationException

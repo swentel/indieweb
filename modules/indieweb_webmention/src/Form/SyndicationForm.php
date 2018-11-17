@@ -64,11 +64,11 @@ class SyndicationForm extends FormBase {
       $syndication = \Drupal::entityTypeManager()->getStorage('indieweb_syndication')->create($values);
       $syndication->save();
 
-      drupal_set_message($this->t('The syndication has been saved.'));
+      $this->messenger()->addMessage($this->t('The syndication has been saved.'));
     }
     catch (\Exception $e) {
       $this->getLogger('indieweb_syndication')->notice('Error saving syndication: @message', ['@message' => $e->getMessage()]);
-      drupal_set_message($this->t('An error occurred saving the syndication.'));
+      $this->messenger()->addMessage($this->t('An error occurred saving the syndication.'));
     }
 
     $form_state->setRedirect('entity.indieweb_syndication.collection');
