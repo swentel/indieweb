@@ -55,15 +55,19 @@ class MicrosubSourceListBuilder extends EntityListBuilder {
   public function buildRow(EntityInterface $entity) {
     /** @var \Drupal\indieweb_microsub\Entity\MicrosubSourceInterface $entity */
     $row['label'] = $entity->label();
-    $row['status'] = $entity->get('status')->value ? t('Enabled') : t('Disabled');
+    $row['status'] = $entity->getStatus() ? t('Enabled') : t('Disabled');
     $row['media_cache'] = $entity->disableImageCache() ? t('Disabled') : t('Enabled');
     $row['items'] = $entity->getItemCount();
     $next = $entity->getNextFetch();
-    if ($next < \Drupal::time()->getRequestTime()) {
-      $fetch_next = $this->t('imminently');
-    }
-    else {
-      $fetch_next = $this->t('%time left', ['%time' => \Drupal::service('date.formatter')->formatInterval($next - \Drupal::time()->getRequestTime())]);
+
+    $fetch_next = '/';
+    if ($entity->getStatus() && $entity->getChannel()->getStatus()) {
+      if ($next < \Drupal::time()->getRequestTime()) {
+        $fetch_next = $this->t('imminently');
+      }
+      else {
+        $fetch_next = $this->t('%time left', ['%time' => \Drupal::service('date.formatter')->formatInterval($next - \Drupal::time()->getRequestTime())]);
+      }
     }
     $row['fetch_next'] = $fetch_next;
     return $row + parent::buildRow($entity);

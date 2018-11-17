@@ -2,7 +2,7 @@ langcode: en
 status: true
 dependencies:
   module:
-    - node
+    - indieweb_webmention
 id: webmention_unpublish_action
 label: 'Unpublish webmention'
 type: indieweb_webmention

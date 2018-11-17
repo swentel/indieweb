@@ -306,6 +306,7 @@ class MicrosubTest extends IndiewebBrowserTestBase {
     $channel = \Drupal::entityTypeManager()->getStorage('indieweb_microsub_channel')->loadUnchanged(1);
     $unread = (int) $channel->getUnreadCount();
     self::assertEquals(1, $unread);
+    self::assertEquals(2, $channel->getItemCount());
 
     $query = ['action' => 'timeline', 'channel' => 1];
     $response = $this->sendMicrosubRequest($query);

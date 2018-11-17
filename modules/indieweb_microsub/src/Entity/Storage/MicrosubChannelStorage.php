@@ -38,4 +38,16 @@ class MicrosubChannelStorage extends SqlContentEntityStorage implements Microsub
     return $query->execute();
   }
 
+    /**
+   * {@inheritdoc}
+   */
+  public function getItemCount($channel_id) {
+
+    $query = \Drupal::entityQuery('indieweb_microsub_item')
+      ->condition('channel_id', $channel_id)
+      ->count();
+
+    return $query->execute();
+  }
+
 }

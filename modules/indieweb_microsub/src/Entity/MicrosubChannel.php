@@ -82,6 +82,13 @@ class MicrosubChannel extends ContentEntityBase implements MicrosubChannelInterf
   /**
    * {@inheritdoc}
    */
+  public function getItemCount() {
+    return \Drupal::entityTypeManager()->getStorage('indieweb_microsub_channel')->getItemCount($this->id());
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function getPostTypesToExclude() {
     $return = [];
     $post_types = $this->get('exclude_post_type')->value;
