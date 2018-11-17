@@ -253,6 +253,14 @@ class MicrosubClient implements MicrosubClientInterface {
             $item['url'] = $webmention->toUrl('canonical', ['absolute' => TRUE])->toString();
           }
 
+          // Remove media, it isn't really necessary to see those back in the
+          // notification channel.
+          foreach (['photo', 'video', 'audio'] as $key) {
+            if (isset($item[$key])) {
+              unset($item[$key]);
+            }
+          }
+
           $this->saveItem($item);
         }
 
