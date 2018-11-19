@@ -346,7 +346,10 @@ class IndieAuthController extends ControllerBase {
       return new JsonResponse(['error' => 'invalid_request', 'error_description' => 'Missing or invalid parameters'], 400);
     }
 
+    // -----------------------------------------------------------------
     // Get authorization code.
+    // -----------------------------------------------------------------
+
     /** @var \Drupal\indieweb_indieauth\Entity\IndieAuthAuthorizationCodeInterface $authorization_code */
     $authorization_code = $this->entityTypeManager()->getStorage('indieweb_indieauth_code')->getIndieAuthAuthorizationCode($params['code']);
 
@@ -360,7 +363,27 @@ class IndieAuthController extends ControllerBase {
       return new JsonResponse(['error' => 'access_denied', 'error_description' => 'Authorization code expired'], 403);
     }
 
+    // -----------------------------------------------------------------
+    // Validate redirect_uri, me and client_id, and scope is not empty.
+    // -----------------------------------------------------------------
+
+    if ($authorization_code->get('client_id')->value != $params['client_id']) {
+      return new JsonResponse(['error' => 'invalid_request', 'error_description' => 'Client ID does not match'], 400);
+    }
+    if ($authorization_code->get('redirect_uri')->value != $params['redirect_uri']) {
+      return new JsonResponse(['error' => 'invalid_request', 'error_description' => 'Redirect URI does not match'], 400);
+    }
+    if ($authorization_code->get('me')->value != $params['me']) {
+      return new JsonResponse(['error' => 'invalid_request', 'error_description' => 'Me does not match'], 400);
+    }
+    if (empty($authorization_code->getScopes())) {
+      return new JsonResponse(['error' => 'invalid_request', 'error_description' => 'Scope is empty, can not issue access token'], 400);
+    }
+
+    // -----------------------------------------------------------------
     // Good to go, create a token!
+    // -----------------------------------------------------------------
+
     $random = new Random();
     $values = [
       'expire' => 0,

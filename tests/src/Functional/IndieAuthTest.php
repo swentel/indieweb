@@ -336,6 +336,21 @@ class IndieAuthTest extends IndiewebBrowserTestBase {
     $response = $this->postToUrl($post, $token_path);
     self::assertEquals(404, $response->getStatusCode());
 
+    $post = $params;
+    $post['redirect_uri'] = 'other_redirect_uri';
+    $response = $this->postToUrl($post, $token_path);
+    self::assertEquals(400, $response->getStatusCode());
+
+    $post = $params;
+    $post['client_id'] = 'other_client_id';
+    $response = $this->postToUrl($post, $token_path);
+    self::assertEquals(400, $response->getStatusCode());
+
+    $post = $params;
+    $post['me'] = 'other_me';
+    $response = $this->postToUrl($post, $token_path);
+    self::assertEquals(400, $response->getStatusCode());
+
     // Now a good one.
     $response = $this->postToUrl($params, $token_path);
     $body_response = $response->getBody()->__toString();
