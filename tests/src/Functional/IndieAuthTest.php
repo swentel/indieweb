@@ -327,6 +327,9 @@ class IndieAuthTest extends IndiewebBrowserTestBase {
     unset($post['me']);
     $response = $this->postToUrl($post, $token_path);
     self::assertEquals(400, $response->getStatusCode());
+    $body_response = $response->getBody()->__toString();
+    $body = @json_decode($body_response);
+    self::assertEquals('invalid_request', $body->error);
 
     $post = $params;
     $post['code'] = 'random';
@@ -432,12 +435,12 @@ class IndieAuthTest extends IndiewebBrowserTestBase {
     $post = $params;
     $post['redirect_uri'] = 'not matching';
     $response = $this->postToUrl($post, $auth_path);
-    self::assertEquals(403, $response->getStatusCode());
+    self::assertEquals(400, $response->getStatusCode());
 
     $post = $params;
     $post['client_id'] = 'another client';
     $response = $this->postToUrl($post, $auth_path);
-    self::assertEquals(403, $response->getStatusCode());
+    self::assertEquals(400, $response->getStatusCode());
 
     $post = $params;
     unset($post['code']);

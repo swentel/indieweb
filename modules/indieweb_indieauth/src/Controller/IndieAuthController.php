@@ -89,7 +89,7 @@ class IndieAuthController extends ControllerBase {
       self::validateAuthenticationRequestParameters($request, $reason, $valid_request, $params);
       if (!$valid_request) {
         $this->getLogger('indieweb_indieauth')->notice('Missing or invalid parameters to authentication request: @reason', ['@reason' => $reason]);
-        return new JsonResponse('', 400);
+        return new JsonResponse(['error' => 'invalid_request', 'error_description' => 'Missing or invalid parameters'], 400);
       }
 
       // Get authorization code.
@@ -98,12 +98,12 @@ class IndieAuthController extends ControllerBase {
 
       if (!$authorization_code) {
         $this->getLogger('indieweb_indieauth')->notice('No Authorization code found for @code', ['@code' => $params['code']]);
-        return new JsonResponse('', 404);
+        return new JsonResponse(['error' => 'invalid_request', 'error_description' => 'Authorization code not found'], 404);
       }
 
       if (!$authorization_code->isValid()) {
         $this->getLogger('indieweb_indieauth')->notice('Authorization expired for @code', ['@code' => $params['code']]);
-        return new JsonResponse('', 403);
+        return new JsonResponse(['error' => 'access_denied', 'error_description' => 'Authorization code expired'], 403);
       }
 
       // Verify the data from the request matches with the stored data.
@@ -119,7 +119,7 @@ class IndieAuthController extends ControllerBase {
 
       if (!$valid_request) {
         $this->getLogger('indieweb_indieauth')->notice('Stored values do not match with request values: @stored_data -  @request', ['@stored_values' => $stored_data, '@request' => print_r($params, 1)]);
-        return new JsonResponse('', 403);
+        return new JsonResponse(['error' => 'invalid_request', 'error_description' => 'Session and request values do not match'], 400);
       }
 
       // Good to go.
@@ -343,7 +343,7 @@ class IndieAuthController extends ControllerBase {
     self::validateTokenRequestParameters($request, $reason, $valid_request, $params);
     if (!$valid_request) {
       $this->getLogger('indieweb_indieauth')->notice('Missing or invalid parameters to obtain code: @reason', ['@reason' => $reason]);
-      return new JsonResponse('', 400);
+      return new JsonResponse(['error' => 'invalid_request', 'error_description' => 'Missing or invalid parameters'], 400);
     }
 
     // Get authorization code.
@@ -352,12 +352,12 @@ class IndieAuthController extends ControllerBase {
 
     if (!$authorization_code) {
       $this->getLogger('indieweb_indieauth')->notice('No Authorization code found for @code', ['@code' => $params['code']]);
-      return new JsonResponse('', 404);
+      return new JsonResponse(['error' => 'invalid_request', 'error_description' => 'Authorization code not found'], 404);
     }
 
     if (!$authorization_code->isValid()) {
       $this->getLogger('indieweb_indieauth')->notice('Authorization expired for @code', ['@code' => $params['code']]);
-      return new JsonResponse('', 403);
+      return new JsonResponse(['error' => 'access_denied', 'error_description' => 'Authorization code expired'], 403);
     }
 
     // Good to go, create a token!
