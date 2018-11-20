@@ -243,6 +243,9 @@ class MicrosubClient implements MicrosubClientInterface {
           foreach (['like-of', 'repost-of', 'bookmark-of', 'in-reply-to', 'mention-of'] as $item_url) {
             if (isset($item[$item_url]) && !empty($item[$item_url][0])) {
               $item[$item_url][0] = $target;
+
+              // Make sure the array is unique.
+              $item[$item_url] = array_unique($item[$item_url]);
             }
           }
 
