@@ -186,6 +186,19 @@ class MicrosubController extends ControllerBase {
 
         $data = $item->getData();
 
+        // TODO fix me.
+        // See https://github.com/swentel/indieweb/issues/325
+        $fields_to_fix = ['in-reply-to', 'like-of', 'repost-of'];
+        foreach ($fields_to_fix as $field) {
+          if (isset($data->{$field})) {
+            $flat = [];
+            foreach ($data->{$field} as $field_value) {
+              $flat[] = $field_value;
+            }
+            $data->{$field} = $flat;
+          }
+        }
+
         // Apply media cache.
         if ($channel > 0 && !$item->getSource()->disableImageCache()) {
           $this->applyCache($data);
