@@ -54,7 +54,8 @@ class IndieAuthSettingsForm extends ConfigFormBase {
     $form['auth'] = [
       '#type' => 'fieldset',
       '#title' => $this->t('Authentication API'),
-      '#description' => $this->t('If you use apps like Quill (https://quill.p3k.io - web) or Indigenous (iOS, Android) or other clients which can post via micropub or read via microsub, the easiest way to let those clients log you in with your domain is by using indieauth.com and exchange access tokens for further requests. Only expose those links if you want to use micropub or microsub. <br /><strong>Important: </strong> if you add the token endpoint manually, and the endpoint is an external service, you still need to enter the URL here because it is used by the micropub and/or microsub endpoint.')];
+      '#description' => $this->t('If you use apps like Quill (https://quill.p3k.io - web) or Indigenous (iOS, Android) or other clients which can post via micropub or read via microsub, the easiest way to let those clients log you in with your domain is by using indieauth.com and exchange access tokens for further requests. Only expose those links if you want to use micropub or microsub. <br /><strong>Important: </strong> if you add the token endpoint manually, and the endpoint is an external service, you still need to enter the URL here because it is used by the micropub and/or microsub endpoint.')
+    ];
 
     $form['auth']['auth_internal'] = [
       '#title' => $this->t('Use built-in authentication endpoint'),
@@ -97,6 +98,36 @@ class IndieAuthSettingsForm extends ConfigFormBase {
       ),
     ];
 
+    $form['keys'] = [
+      '#type' => 'fieldset',
+      '#title' => $this->t('Keys'),
+      '#description' => $this->t('Configure the paths to the public and private keys which are used for encrypting the access tokens.<br />If you choose to generate keys, the default path where these keys are stored is set to public://indieauth. You can override this via settings.php. Check the README for more information.'),
+      '#states' => array(
+        'visible' => array(
+          ':input[name="auth_internal"]' => array('checked' => TRUE),
+        ),
+      ),
+    ];
+
+    $form['keys']['public_key'] = [
+      '#type' => 'textfield',
+      '#title' => $this->t('Public key'),
+      '#default_value' => $config->get('public_key'),
+      '#description' => $this->t('The path to the public key file.'),
+    ];
+
+    $form['keys']['private_key'] = [
+      '#type' => 'textfield',
+      '#title' => $this->t('Public key'),
+      '#default_value' => $config->get('private_key'),
+      '#description' => $this->t('The path to the private key file.'),
+    ];
+
+    $form['keys']['generate_keys'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Generate keys on save'),
+    ];
+
     return parent::buildForm($form, $form_state);
   }
 
@@ -105,12 +136,29 @@ class IndieAuthSettingsForm extends ConfigFormBase {
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
 
+    $public_key = $form_state->getValue('public_key');
+    $private_key = $form_state->getValue('public_key');
+
+    // Generate keys if the checkbox is toggled.
+    if ($form_state->getValue('generate_keys')) {
+      $paths = \Drupal::service('indieweb.indieauth.client')->generateKeys();
+      if (!$paths) {
+        $this->messenger()->addMessage($this->t('Something went wrong generating the keys, please check your logs.'));
+      }
+      else {
+        $public_key = $paths['public_key'];
+        $private_key = $paths['private_key'];
+      }
+    }
+
     $this->config('indieweb_indieauth.settings')
       ->set('auth_internal', $form_state->getValue('auth_internal'))
       ->set('expose_link_tag', $form_state->getValue('expose_link_tag'))
       ->set('authorization_endpoint', $form_state->getValue('authorization_endpoint'))
       ->set('token_endpoint', $form_state->getValue('token_endpoint'))
       ->set('login_enable', $form_state->getValue('login_enable'))
+      ->set('public_key', $public_key)
+      ->set('private_key', $private_key)
       ->save();
 
     Cache::invalidateTags(['rendered']);

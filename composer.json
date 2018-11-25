@@ -17,7 +17,8 @@
     "indieweb/mention-client": "^1.2",
     "p3k/xray": "^1.7",
     "p3k/Micropub": "^0.0.2",
-    "indieauth/client": "^0.4.1"
+    "indieauth/client": "^0.4.1",
+    "league/oauth2-server": "~6.0"
   },
   "extra": {
     "drush": {

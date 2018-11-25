@@ -2,11 +2,14 @@
 
 namespace Drupal\Tests\indieweb\Functional;
 
+use Drupal\Component\Utility\Random;
 use Drupal\Core\Url;
 use Drupal\node\NodeInterface;
 use Drupal\Tests\BrowserTestBase;
 use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Exception\ServerException;
+use Lcobucci\JWT\Builder;
+use Lcobucci\JWT\Signer\Rsa\Sha512;
 
 /**
  * Provides the base class for web tests for Indieweb.
@@ -734,28 +737,34 @@ abstract class IndiewebBrowserTestBase extends BrowserTestBase {
   /**
    * Use the internal IndieAuth token endpoint.
    *
-   * @param null $createToken
+   * @param bool $createToken
    *   Whether to create a token or not.
    * @param string $scopes
+   *
+   * @return null|string
    *
    * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
    * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    * @throws \Drupal\Core\Entity\EntityStorageException
    */
   protected function setIndieAuthInternal($createToken = FALSE, $scopes = '') {
+    $token = NULL;
     $this->drupalLogin($this->adminUser);
 
     $edit = [
       'auth_internal' => TRUE,
       'expose_link_tag' => TRUE,
+      'generate_keys' => TRUE,
     ];
     $this->drupalPostForm('admin/config/services/indieweb/indieauth', $edit, 'Save configuration');
 
     if ($createToken) {
-      $this->createIndieAuthToken($scopes);
+      $token = $this->createIndieAuthToken($scopes);
     }
 
     $this->drupalLogout();
+
+    return $token;
   }
 
   /**
@@ -763,20 +772,43 @@ abstract class IndiewebBrowserTestBase extends BrowserTestBase {
    *
    * @param $scopes
    *
+   * @return string
+   *
    * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
    * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    * @throws \Drupal\Core\Entity\EntityStorageException
    */
   protected function createIndieAuthToken($scopes) {
+
+    $created = time();
+    $random = new Random();
+    $access_token = $random->name(128);
+    $signer = new Sha512();
+
+    $JWT = (new Builder())
+      ->setIssuer(\Drupal::request()->getSchemeAndHttpHost())
+      ->setAudience('internal')
+      ->setId($access_token, true)
+      ->setIssuedAt($created)
+      ->set('uid', 1)
+      ->sign($signer,  file_get_contents(\Drupal::config('indieweb_indieauth.settings')->get('private_key')))
+      ->getToken();
+
     $values = [
-      'access_token' => 'internal_indieauth_server',
+      'expire' => 0,
+      'changed' => 0,
+      'created' => $created,
+      'access_token' => $access_token,
       'client_id' => 'test',
       'uid' => 1,
-      'expire' => 0,
       'scope' => $scopes,
     ];
-    $new_token = \Drupal::entityTypeManager()->getStorage('indieweb_indieauth_token')->create($values);
-    $new_token->save();
+
+    /** @var \Drupal\indieweb_indieauth\Entity\IndieAuthTokenInterface $token */
+    $token = \Drupal::entityTypeManager()->getStorage('indieweb_indieauth_token')->create($values);
+    $token->save();
+
+    return (string) $JWT;
   }
 
   /**

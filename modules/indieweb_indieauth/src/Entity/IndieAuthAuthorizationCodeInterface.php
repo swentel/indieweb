@@ -49,4 +49,18 @@ interface IndieAuthAuthorizationCodeInterface extends ContentEntityInterface {
    */
   public function getScopes();
 
+  /**
+   * Returns the owner id.
+   *
+   * @return integer
+   */
+  public function getOwnerId();
+
+  /**
+   * Returns the client id.
+   *
+   * @return string
+   */
+  public function getClientId();
+
 }

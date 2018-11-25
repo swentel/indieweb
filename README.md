@@ -69,6 +69,7 @@ composer packages:
 - composer require indieauth/client
 - composer require p3k/xray
 - composer require p3k/Micropub
+- composer require lcobucci/jwt
 
 - go to admin/modules and toggle 'IndieWeb' to enable the module.
 
@@ -206,6 +207,25 @@ the 'Authorize with IndieAuth' permission.
 
 You can also allow users to register and login into this website. An account will created with the username based on the
 domain. Authenticated users can use the same "Web sign-in" block to map a domain with their account.
+
+### public and private keys
+
+When using the built-in endpoint, access tokens are encrypted using a private key and decrypted with a public key.
+You can generate those via the UI, or manually create them by running following commands:
+
+```
+openssl genrsa -out private.key 2048
+openssl rsa -in private.key -pubout > public.key
+```
+
+Ideally, those keys live in a folder outside your webroot. If that is not possible, make sure the permissions are set
+to 600. Fill in the path afterwards at admin/config/services/indieweb/indieauth.
+
+The path where generated keys are stored is at public://indieauth, but can be overriden by a setting in settings.php:
+
+```
+$settings['indieauth_keys_path'] = '/your/path/';
+```
 
 ## Micropub
 

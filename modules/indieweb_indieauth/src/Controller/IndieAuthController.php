@@ -7,6 +7,8 @@ use Drupal\Component\Utility\UrlHelper;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Url;
 use Drupal\indieweb_indieauth\Entity\IndieAuthTokenInterface;
+use Lcobucci\JWT\Builder;
+use Lcobucci\JWT\Signer\Rsa\Sha512;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -384,13 +386,27 @@ class IndieAuthController extends ControllerBase {
     // Good to go, create a token!
     // -----------------------------------------------------------------
 
+    $created = time();
     $random = new Random();
+    $access_token = $random->name(128);
+    $signer = new Sha512();
+
+    $JWT = (new Builder())
+      ->setIssuer(\Drupal::request()->getSchemeAndHttpHost())
+      ->setAudience($authorization_code->getClientId())
+      ->setId($access_token, true)
+      ->setIssuedAt($created)
+      ->set('uid', $authorization_code->getOwnerId())
+      ->sign($signer,  file_get_contents($config->get('private_key')))
+      ->getToken();
+
     $values = [
       'expire' => 0,
       'changed' => 0,
-      'access_token' => $random->name(128),
-      'client_id' => $authorization_code->get('client_id')->value,
-      'uid' => $authorization_code->get('uid')->target_id,
+      'created' => $created,
+      'access_token' => $access_token,
+      'client_id' => $authorization_code->getClientId(),
+      'uid' => $authorization_code->getOwnerId(),
       'scope' => implode(' ', $authorization_code->getScopes()),
     ];
 
@@ -405,7 +421,7 @@ class IndieAuthController extends ControllerBase {
       'me' => $params['me'],
       'token_type' => 'Bearer',
       'scope' => $token->getScopesAsString(),
-      'access_token' => $token->getAccessToken(),
+      'access_token' => (string) $JWT,
     ];
 
     return new JsonResponse($data, 200);

@@ -368,11 +368,19 @@ class IndieAuthTest extends IndiewebBrowserTestBase {
       'h' => 'entry',
       'content' => 'A note content',
     ];
-    $code = $this->sendMicropubRequest($post, $body->access_token);
-    self::assertEquals(201, $code);
+    $access_token = $body->access_token;
 
-    $code = $this->sendMicropubRequest($post, 'unknown');
+    // Append something random which should result in 403 as it won't validate.
+    $code = $this->sendMicropubRequest($post, $access_token . 'A');
     self::assertEquals(403, $code);
+
+    // Totally invalid token.
+    $code = $this->sendMicropubRequest($post, 'totally_invalid');
+    self::assertEquals(403, $code);
+
+    // Now valid.
+    $code = $this->sendMicropubRequest($post, $access_token);
+    self::assertEquals(201, $code);
 
     $this->drupalGet($token_path);
     $this->assertSession()->statusCodeEquals(404);

@@ -889,10 +889,10 @@ class MicropubTest extends IndiewebBrowserTestBase {
     // Test with internal indieauth server.
     // ----------------------------------------------------------------
 
-    $this->setIndieAuthInternal(TRUE, 'create');
+    $token = $this->setIndieAuthInternal(TRUE, 'create');
     $post = $this->note;
     $post['content'] = 'Using the internal indieauth functionality';
-    $code = $this->sendMicropubRequest($post, 'internal_indieauth_server');
+    $code = $this->sendMicropubRequest($post, $token);
     self::assertEquals(201, $code);
     $this->setIndieAuthExternal();
 

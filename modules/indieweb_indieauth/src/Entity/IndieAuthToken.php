@@ -85,8 +85,6 @@ class IndieAuthToken extends ContentEntityBase implements IndieAuthTokenInterfac
    * {@inheritdoc}
    */
   public function isValid() {
-    // TODO should this also check the permission again of the user
-    // or is it ok enough on the the authorize forms ?
     return !$this->isRevoked() && !$this->isExpired();
   }
 

@@ -28,6 +28,13 @@ interface IndieAuthClientInterface {
   public function isValidToken($auth_header, $scope_to_check = NULL);
 
   /**
+   * Generates keys.
+   *
+   * @return bool|array
+   */
+  public function generateKeys();
+
+  /**
    * Maps an account with a domain
    *
    * @param $uid

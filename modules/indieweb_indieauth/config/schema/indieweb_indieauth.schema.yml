@@ -18,3 +18,9 @@ indieweb_indieauth.settings:
     login_enable:
       type: boolean
       label: 'Enable login support'
+    public_key:
+      type: string
+      label: 'The path to the public key'
+    private_key:
+      type: string
+      label: 'The path to the private key'

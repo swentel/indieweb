@@ -92,6 +92,20 @@ class IndieAuthAuthorizationCode extends ContentEntityBase implements IndieAuthA
   /**
    * {@inheritdoc}
    */
+  public function getOwnerId() {
+    return $this->get('uid')->target_id;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getClientId() {
+    return $this->get('client_id')->value;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public static function baseFieldDefinitions(EntityTypeInterface $entity_type) {
     $fields = parent::baseFieldDefinitions($entity_type);
 
