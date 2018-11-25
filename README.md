@@ -357,7 +357,7 @@ OStatus, and vice versa. Bridgy Fed is open source so you can also host the serv
 Currently supports Mastodon, with more coming. You don't need any account at all on any of the social networks.
 
 Just add 'Fediverse|https://fed.brid.gy/' as a syndication target and add the field on the manage display pages of
-content types or comments where needed. Currently replies, likes and boosts work fine.
+content types or comments where needed. Posts, replies, likes, boosts and follows work fine.
 
 - Check https://fed.brid.gy/#setup for additional setup for .htaccess.
 - If you use a microsub server, you can subscribe to fediverse users through the microformats feed.
