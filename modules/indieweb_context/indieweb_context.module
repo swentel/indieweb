@@ -115,6 +115,62 @@ function indieweb_context_node_type_builder($entity_type, NodeTypeInterface $typ
 }
 
 /**
+ * Implements hook_form_BASE_FORM_ID_alter() for \Drupal\node\NodeForm.
+ */
+function indieweb_context_form_node_form_alter(&$form, FormStateInterface $form_state) {
+
+  // No need to add if it's not configured.
+  if (!indieweb_post_context_enabled()) {
+    return;
+  }
+
+  /** @var \Drupal\Core\Entity\EntityInterface $entity */
+  $entity = $form_state->getFormObject()->getEntity();
+  if ($entity) {
+
+    $node_type = NodeType::load($entity->bundle());
+    $link_field = $node_type->getThirdPartySetting('indieweb_context', 'post_context_link_field');
+    if (!$link_field || !$entity->hasField($link_field)) {
+      return;
+    }
+
+    $form['indieweb_post_context'] = [
+      '#type' => 'details',
+      '#title' => t('Post context'),
+      '#access' => \Drupal::currentUser()->hasPermission('refresh post context'),
+      '#group' => 'advanced',
+    ];
+
+    $form['indieweb_post_context']['indieweb_refresh_post_context'] = [
+      '#type' => 'checkbox',
+      '#title' => t('Refresh post context'),
+      '#description' => t('Toggle this checkbox in case the URL of the link does not change during this update but you want to get or refresh the post context.'),
+    ];
+
+    foreach (array_keys($form['actions']) as $action) {
+      if ($action != 'preview' && isset($form['actions'][$action]['#type']) && $form['actions'][$action]['#type'] === 'submit') {
+        $form['actions'][$action]['#submit'][] = '_indieweb_context_node_form_submit';
+      }
+    }
+
+  }
+}
+
+/**
+ * Submit callback: add post context to queue.
+ *
+ * @see indieweb_context_form_node_form_alter().
+ */
+function _indieweb_context_node_form_submit($form, FormStateInterface $form_state) {
+  if ($form_state->getValue('indieweb_refresh_post_context')) {
+    $entity = $form_state->getFormObject()->getEntity();
+    if ($entity) {
+      _indieweb_entity_update_check_post_context($entity, TRUE);
+    }
+  }
+}
+
+/**
  * Implements hook_entity_insert().
  */
 function indieweb_context_entity_insert(EntityInterface $entity) {
@@ -126,12 +182,7 @@ function indieweb_context_entity_insert(EntityInterface $entity) {
  */
 function indieweb_context_entity_update(EntityInterface $entity, $is_new = NULL) {
   if ($entity instanceof ContentEntityInterface) {
-    try {
-      _indieweb_entity_update_check_post_context($entity, $is_new);
-    }
-    catch (Exception $e) {
-      \Drupal::logger('indieweb_entity')->notice('Error on entity action: @message', ['@message' => $e->getMessage()]);
-    }
+    _indieweb_entity_update_check_post_context($entity, $is_new);
   }
 }
 
@@ -157,41 +208,46 @@ function indieweb_context_entity_delete(EntityInterface $entity) {
  *
  * @param \Drupal\Core\Entity\EntityInterface $entity
  * @param $is_new
- *
- * @throws \Exception
  */
 function _indieweb_entity_update_check_post_context(EntityInterface $entity, $is_new) {
+  $urls = &drupal_static('indieweb_context_urls');
 
   // No need to check if it's not configured.
-  $handler = \Drupal::config('indieweb_context.settings')->get('handler');
-  if (empty($handler) || $handler == 'disabled') {
+  if (!indieweb_post_context_enabled()) {
     return;
   }
 
-  // Check posts for node.
-  if ($entity->getEntityTypeId() =='node') {
 
-    $node_type = NodeType::load($entity->bundle());
-    $link_field = $node_type->getThirdPartySetting('indieweb_context', 'post_context_link_field');
+  try {
+    if ($entity->getEntityTypeId() =='node') {
 
-    if ($link_field && $entity->hasField($link_field)) {
-      if ($url = $entity->get($link_field)->uri) {
-        $create_queue_item = FALSE;
-        if ($is_new) {
-          $create_queue_item = TRUE;
-        }
-        elseif (isset($entity->original)) {
-          $previous_url = $entity->original->get($link_field)->uri;
-          if ($previous_url != $url) {
+      $node_type = NodeType::load($entity->bundle());
+      $link_field = $node_type->getThirdPartySetting('indieweb_context', 'post_context_link_field');
+
+      if ($link_field && $entity->hasField($link_field)) {
+        $url = $entity->get($link_field)->uri;
+        if (!isset($urls[$url])) {
+          $create_queue_item = FALSE;
+          if ($is_new) {
             $create_queue_item = TRUE;
           }
-        }
+          elseif (isset($entity->original)) {
+            $previous_url = $entity->original->get($link_field)->uri;
+            if ($previous_url != $url) {
+              $create_queue_item = TRUE;
+            }
+          }
 
-        if ($create_queue_item) {
-          \Drupal::service('indieweb.post_context.client')->createQueueItem($url, $entity->id(), $entity->getEntityTypeId());
+          if ($create_queue_item) {
+            $urls[$url] = TRUE;
+            \Drupal::service('indieweb.post_context.client')->createQueueItem($url, $entity->id(), $entity->getEntityTypeId());
+          }
         }
       }
     }
+  }
+  catch (\Exception $e) {
+    \Drupal::logger('indieweb_entity')->notice('Error on entity action: @message', ['@message' => $e->getMessage()]);
   }
 }
 
@@ -254,4 +310,19 @@ function _indieweb_extra_fields_display(array &$build, EntityInterface $entity, 
       ];
     }
   }
+}
+
+/**
+ * Returns whether post context is enabled or not.
+ *
+ * @return bool
+ */
+function indieweb_post_context_enabled() {
+
+  $handler = \Drupal::config('indieweb_context.settings')->get('handler');
+  if (empty($handler) || $handler == 'disabled') {
+    return FALSE;
+  }
+
+  return TRUE;
 }

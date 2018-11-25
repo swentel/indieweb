@@ -114,6 +114,7 @@ class PostContextTest extends IndiewebBrowserTestBase {
     $this->assertSession()->responseContains('u-in-reply-to');
 
     // Test with cron handler.
+    drupal_static_reset('indieweb_context_urls');
     $edit = ['handler' => 'cron'];
     $this->drupalPostForm('admin/config/services/indieweb/post-context', $edit, 'Save configuration');
 
@@ -128,6 +129,14 @@ class PostContextTest extends IndiewebBrowserTestBase {
     $this->drupalGet('node/' . $reply->id());
     $this->assertSession()->responseContains($page->get('body')->value);
     $this->assertSession()->responseContains('u-in-reply-to');
+
+    $this->drupalLogin($this->adminUser);
+    $edit = ['title[0][value]' => 'update title'];
+    $this->drupalPostForm('node/' . $reply->id() . '/edit', $edit, 'Save');
+    $this->assertPostContextQueueItems();
+    $edit = ['indieweb_refresh_post_context' => TRUE];
+    $this->drupalPostForm('node/' . $reply->id() . '/edit', $edit, 'Save');
+    $this->assertPostContextQueueItems([$page->toUrl('canonical', ['absolute' => TRUE])->toString()], $reply->id());
   }
 
 }

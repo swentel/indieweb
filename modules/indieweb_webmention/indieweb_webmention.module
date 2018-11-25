@@ -244,7 +244,7 @@ function _indieweb_webmention_entity_form_alter(&$form, FormStateInterface $form
   /** @var \Drupal\Core\Entity\EntityInterface $entity */
   $entity = $form_state->getFormObject()->getEntity();
   if ($entity) {
-    $form['indieweb'] = [
+    $form['indieweb_webmention'] = [
       '#type' => 'details',
       '#title' => t('Publish to'),
       '#access' => \Drupal::currentUser()->hasPermission('send webmentions'),
@@ -252,7 +252,7 @@ function _indieweb_webmention_entity_form_alter(&$form, FormStateInterface $form
     ];
 
     $syndication_targets = indieweb_get_syndication_targets(TRUE);
-    $form['indieweb']['indieweb_syndication_targets'] = [
+    $form['indieweb_webmention']['indieweb_syndication_targets'] = [
       '#type' => 'checkboxes',
       '#options' => isset($syndication_targets['options']) ? $syndication_targets['options'] : [],
       '#default_value' => isset($syndication_targets['default']) ? $syndication_targets['default'] : [],
@@ -270,7 +270,7 @@ function _indieweb_webmention_entity_form_alter(&$form, FormStateInterface $form
         }
       }
 
-      $form['indieweb']['indieweb_send_link_field'] = [
+      $form['indieweb_webmention']['indieweb_send_link_field'] = [
         '#title' => t('Link field'),
         '#type' => 'select',
         '#access' => !empty($options),
@@ -305,7 +305,7 @@ function _indieweb_webmention_entity_form_alter(&$form, FormStateInterface $form
     }
 
     if (\Drupal::config('indieweb_webmention.settings')->get('send_custom_url')) {
-      $form['indieweb']['indieweb_send_custom_url'] = [
+      $form['indieweb_webmention']['indieweb_send_custom_url'] = [
         '#type' => 'textfield',
         '#description' => t('Enter a custom URL'),
       ];
@@ -321,7 +321,7 @@ function _indieweb_webmention_entity_form_alter(&$form, FormStateInterface $form
 }
 
 /**
- * Form submission handler for indieweb.
+ * Form submission handler for indieweb webmention.
  *
  * @param $form
  * @param \Drupal\Core\Form\FormStateInterface $form_state
