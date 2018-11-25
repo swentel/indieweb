@@ -116,12 +116,20 @@ class IndieAuthSettingsForm extends ConfigFormBase {
       '#description' => $this->t('The path to the public key file.'),
     ];
 
+    if ($this->config('auth_internal') && \Drupal::request()->getMethod() == 'GET' && ($file = $config->get('public_key')) && !file_exists($file)) {
+      $this->messenger()->addError($this->t('The public key file does not exist.'));
+    }
+
     $form['keys']['private_key'] = [
       '#type' => 'textfield',
-      '#title' => $this->t('Public key'),
+      '#title' => $this->t('Private key'),
       '#default_value' => $config->get('private_key'),
       '#description' => $this->t('The path to the private key file.'),
     ];
+
+    if ($this->config('auth_internal') && \Drupal::request()->getMethod() == 'GET' && ($file = $config->get('private_key')) && !file_exists($file)) {
+      $this->messenger()->addError($this->t('The private key file does not exist.'));
+    }
 
     $form['keys']['generate_keys'] = [
       '#type' => 'checkbox',
@@ -137,7 +145,7 @@ class IndieAuthSettingsForm extends ConfigFormBase {
   public function submitForm(array &$form, FormStateInterface $form_state) {
 
     $public_key = $form_state->getValue('public_key');
-    $private_key = $form_state->getValue('public_key');
+    $private_key = $form_state->getValue('private_key');
 
     // Generate keys if the checkbox is toggled.
     if ($form_state->getValue('generate_keys')) {
