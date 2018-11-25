@@ -5,7 +5,6 @@ namespace Drupal\indieweb_webmention\Entity;
 use Drupal\Core\Entity\ContentEntityBase;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
-use Drupal\Core\Entity\ContentEntityInterface;
 
 /**
  * Defines the indieweb syndication entity class.
@@ -41,7 +40,28 @@ use Drupal\Core\Entity\ContentEntityInterface;
  *   }
  * )
  */
-class Syndication extends ContentEntityBase implements ContentEntityInterface {
+class Syndication extends ContentEntityBase implements SyndicationInterface {
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getSourceEntityTypeId() {
+    return $this->get('entity_type_id')->value;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getSourceEntityId() {
+    return $this->get('entity_id')->value;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getUrl() {
+    return $this->get('url')->value;
+  }
 
   /**
    * {@inheritdoc}

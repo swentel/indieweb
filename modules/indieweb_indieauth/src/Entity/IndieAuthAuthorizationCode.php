@@ -77,8 +77,6 @@ class IndieAuthAuthorizationCode extends ContentEntityBase implements IndieAuthA
    * {@inheritdoc}
    */
   public function isValid() {
-    // TODO should this also check the permission again of the user
-    // or is it ok enough on the the authorize forms ?
     return !$this->isRevoked() && !$this->isExpired();
   }
 
@@ -101,6 +99,34 @@ class IndieAuthAuthorizationCode extends ContentEntityBase implements IndieAuthA
    */
   public function getClientId() {
     return $this->get('client_id')->value;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getExpiretime() {
+    return $this->get('expire')->value;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getMe() {
+    return $this->get('me')->value;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getRedirectURI() {
+    return $this->get('redirect_uri')->value;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getCode() {
+    return $this->get('code')->value;
   }
 
   /**

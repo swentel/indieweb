@@ -409,8 +409,8 @@ class WebmentionClient implements WebmentionClientInterface {
   public function sourceExistsAsSyndication(WebmentionInterface $webmention) {
     $exists = FALSE;
 
-    if (strpos($webmention->get('source')->value, 'brid-gy.appspot') !== FALSE) {
-      $parts = parse_url($webmention->get('source')->value);
+    if (strpos($webmention->getSource(), 'brid-gy.appspot') !== FALSE) {
+      $parts = parse_url($webmention->getSource());
       $path_parts = explode('/', $parts['path']);
       if (!empty($path_parts[5])) {
         $exists = \Drupal::database()->query("SELECT count(url) as count FROM {webmention_syndication} WHERE url LIKE :id", [':id' => '%/' . db_like($path_parts[5])])->fetchField();

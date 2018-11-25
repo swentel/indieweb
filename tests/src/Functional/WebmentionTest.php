@@ -266,11 +266,11 @@ class WebmentionTest extends IndiewebBrowserTestBase {
     self::assertEquals(202, $response->getStatusCode());
 
     $webmention = $this->getLatestWebmention();
-    self::assertEquals($node_1_path, $webmention->get('source')->value);
-    self::assertEquals($node_2_path, $webmention->get('target')->value);
-    self::assertEquals('webmention', $webmention->get('type')->value);
-    self::assertEquals('received', $webmention->get('property')->value);
-    self::assertEquals(0, $webmention->get('status')->value);
+    self::assertEquals($node_1_path, $webmention->getSource());
+    self::assertEquals($node_2_path, $webmention->getTarget());
+    self::assertEquals('webmention', $webmention->getType());
+    self::assertEquals('received', $webmention->getProperty());
+    self::assertEquals(FALSE, $webmention->isPublished());
 
     // Process the webmention via cron.
     $this->assertNumberOfWebmentions(1, 'webmention');

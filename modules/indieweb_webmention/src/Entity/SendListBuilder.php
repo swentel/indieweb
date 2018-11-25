@@ -40,17 +40,22 @@ class SendListBuilder extends EntityListBuilder {
    * {@inheritdoc}
    */
   public function buildRow(EntityInterface $entity) {
-    /* @var $entity \Drupal\Core\Entity\ContentEntityInterface */
-    $entity_id = $entity->get('entity_id')->value;
-    $entity_type_id = $entity->get('entity_type_id')->value;
-    $source = $entity->get('source')->value;
-    $target = $entity->get('target')->value;
+    /* @var $entity \Drupal\indieweb_webmention\Entity\SendInterface */
+    $entity_id = $entity->getSourceEntityId();
+    $entity_type_id = $entity->getSourceEntityTypeId();
+    $source = $entity->getSource();
+    $target = $entity->getTarget();
 
     // Source.
     if (!empty($entity_id) && !empty($entity_type_id)) {
-      $send = \Drupal::entityTypeManager()->getStorage($entity_type_id)->load($entity_id);
-      if ($send) {
-        $row['source'] = ['data' => ['#markup' => Link::fromTextAndUrl($send->label(), $send->toUrl())->toString() . ' (' . $send->id() . ')']];
+
+      $source_entity = NULL;
+      try {
+        $source_entity = \Drupal::entityTypeManager()->getStorage($entity_type_id)->load($entity_id);
+      }
+      catch (\Exception $ignored) {}
+      if ($source_entity) {
+        $row['source'] = ['data' => ['#markup' => Link::fromTextAndUrl($source_entity->label(), $source_entity->toUrl())->toString() . ' (' . $source_entity->id() . ')']];
       }
       else {
         $row['source'] = $this->t('Unknown entity: @id (@type)', ['@id' => $entity_id, '@type' => $entity_type_id]);
@@ -69,7 +74,7 @@ class SendListBuilder extends EntityListBuilder {
     }
 
     // Created.
-    $row['created'] = \Drupal::service('date.formatter')->format($entity->get('created')->value, 'medium');
+    $row['created'] = \Drupal::service('date.formatter')->format($entity->getCreatedTime(), 'medium');
 
     // Return row.
     return $row + parent::buildRow($entity);

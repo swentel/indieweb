@@ -26,12 +26,12 @@ class IndieAuthAuthorizationCodeListBuilder extends EntityListBuilder {
    * {@inheritdoc}
    */
   public function buildRow(EntityInterface $entity) {
-    /** @var \Drupal\indieweb_indieauth\Entity\IndieAuthAuthorizationCodeInterface */
+    /** @var $entity \Drupal\indieweb_indieauth\Entity\IndieAuthAuthorizationCodeInterface */
     $row['label'] = $entity->label();
-    $row['status'] = $entity->get('status')->value ? t('Active') : t('Revoked');
-    $expires = $entity->get('expire')->value ? \Drupal::service('date.formatter')->format($entity->get('expire')->value, 'short') : t('Never');
+    $row['status'] = $entity->isRevoked() ? $this->t('Revoked') : $this->t('Active');
+    $expires = $entity->getExpiretime() ? \Drupal::service('date.formatter')->format($entity->getExpiretime(), 'short') : t('Never');
     $row['expire'] = $expires;
-    $row['client'] = $entity->get('client_id')->value;
+    $row['client'] = $entity->getClientId();
     return $row + parent::buildRow($entity);
   }
 

@@ -57,4 +57,60 @@ interface WebmentionInterface extends ContentEntityInterface, EntityChangedInter
    */
   public function getTarget();
 
+  /**
+   * Returns the type.
+   *
+   * @return string
+   */
+  public function getType();
+
+  /**
+   * Returns the property.
+   *
+   * @return string
+   */
+  public function getProperty();
+
+  /**
+   * Returns the author name.
+   *
+   * @return string
+   */
+  public function getAuthorName();
+
+  /**
+   * Returns the author avatar.
+   *
+   * @return string
+   */
+  public function getAuthorAvatar();
+
+  /**
+   * Returns the author URL.
+   *
+   * @return string
+   */
+  public function getAuthorUrl();
+
+  /**
+   * Returns the plain content.
+   *
+   * @return string
+   */
+  public function getPlainContent();
+
+  /**
+   * Returns the html content.
+   *
+   * @return string
+   */
+  public function getHTMLContent();
+
+  /**
+   * Returns the url.
+   *
+   * @return string
+   */
+  public function getUrl();
+
 }

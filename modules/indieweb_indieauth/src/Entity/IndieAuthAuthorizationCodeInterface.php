@@ -63,4 +63,32 @@ interface IndieAuthAuthorizationCodeInterface extends ContentEntityInterface {
    */
   public function getClientId();
 
+  /**
+   * Returns the expired time.
+   *
+   * @return integer
+   */
+  public function getExpiretime();
+
+  /**
+   * Returns the me URL.
+   *
+   * @return string
+   */
+  public function getMe();
+
+  /**
+   * Returns the redirect URI.
+   *
+   * @return string
+   */
+  public function getRedirectURI();
+
+  /**
+   * Returns the code.
+   *
+   * @return string
+   */
+  public function getCode();
+
 }

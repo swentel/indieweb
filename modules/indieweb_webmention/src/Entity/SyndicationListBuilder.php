@@ -25,10 +25,10 @@ class SyndicationListBuilder extends EntityListBuilder {
    * {@inheritdoc}
    */
   public function buildRow(EntityInterface $entity) {
-    /* @var $entity \Drupal\Core\Entity\ContentEntityInterface */
-    $entity_id = $entity->get('entity_id')->value;
-    $entity_type_id = $entity->get('entity_type_id')->value;
-    $url = $entity->get('url')->value;
+    /* @var $entity \Drupal\indieweb_webmention\Entity\SyndicationInterface */
+    $entity_id = $entity->getSourceEntityId();
+    $entity_type_id = $entity->getSourceEntityTypeId();
+    $url = $entity->getUrl();
 
     // Source.
     $source_entity = NULL;

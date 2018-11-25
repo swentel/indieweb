@@ -90,20 +90,20 @@ class EntityReferenceWebmentionFormatter extends EntityReferenceFormatterBase {
     foreach ($this->getEntitiesToView($items, $langcode) as $delta => $entity) {
       if ($entity->id()) {
 
-        $suggestion = !empty($entity->get('property')->value) ? '__' . str_replace('-', '_', $entity->get('property')->value) : '';
+        $suggestion = !empty($entity->getProperty()) ? '__' . str_replace('-', '_', $entity->getProperty()) : '';
         $elements[$delta] = [
           '#theme' => 'webmention' . $suggestion,
           '#show_summary' => $this->getSetting('show_summary'),
           '#show_avatar' => $this->getSetting('show_avatar'),
           '#show_created' => $this->getSetting('show_created'),
           '#replace_comment_user_picture' => $this->getSetting('replace_comment_user_picture'),
-          '#property' => $entity->get('property')->value,
-          '#author_name' => $entity->get('author_name')->value,
-          '#author_photo' => $entity->get('author_photo')->value,
-          '#created' => $entity->get('created')->value,
-          '#source' => $entity->get('source')->value,
-          '#content_text' => $entity->get('content_text')->value,
-          '#content_html' => $entity->get('content_html')->value,
+          '#property' => $entity->getProperty(),
+          '#author_name' => $entity->getAuthorName(),
+          '#author_photo' => $entity->getAuthorAvatar(),
+          '#created' => $entity->getCreatedTime(),
+          '#source' => $entity->getSource(),
+          '#content_text' => $entity->getPlainContent(),
+          '#content_html' => $entity->getHTMLContent(),
           // Create a cache tag entry for the referenced entity. In the case
           // that the referenced entity is deleted, the cache for referring
           // entities must be cleared.

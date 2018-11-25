@@ -57,6 +57,11 @@ class PostContextClient implements PostContextClientInterface {
 
               // Microsub.
               if ($data['entity_type_id'] == 'microsub_item') {
+
+                if (!isset($reference['url'])) {
+                  $reference['url'] = $data['url'];
+                }
+
                 \Drupal::database()
                   ->merge('microsub_item')
                   ->key('id', $data['entity_id'])

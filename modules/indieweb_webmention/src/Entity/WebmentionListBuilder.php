@@ -29,11 +29,11 @@ class WebmentionListBuilder extends EntityListBuilder {
    */
   public function buildRow(EntityInterface $entity) {
     /* @var $entity \Drupal\indieweb_webmention\Entity\WebmentionInterface */
-    $row['source'] = $entity->get('source')->value;
-    $row['target'] = ['data' => ['#markup' => '<a href="' . \Drupal::request()->getSchemeAndHttpHost() . $entity->get('target')->value . '">' . $entity->get('target')->value . '</a>', '#allowed_tags' => ['a']]];
-    $row['type'] = $entity->get('type')->value;
-    $row['property'] = $entity->get('property')->value;
-    $row['author'] = $entity->get('author_name')->value ?: '/' ;
+    $row['source'] = $entity->getSource();
+    $row['target'] = ['data' => ['#markup' => '<a href="' . \Drupal::request()->getSchemeAndHttpHost() . $entity->getTarget() . '">' . $entity->getTarget() . '</a>', '#allowed_tags' => ['a']]];
+    $row['type'] = $entity->getType();
+    $row['property'] = $entity->getProperty();
+    $row['author'] = $entity->getAuthorName() ?: '/';
     $row['created'] = \Drupal::service('date.formatter')->format($entity->getCreatedTime());
     return $row + parent::buildRow($entity);
   }

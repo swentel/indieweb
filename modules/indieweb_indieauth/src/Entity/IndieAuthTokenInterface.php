@@ -50,6 +50,13 @@ interface IndieAuthTokenInterface extends ContentEntityInterface {
   public function isValid();
 
   /**
+   * Get the status.
+   *
+   * @return bool
+   */
+  public function getStatus();
+
+  /**
    * Returns the scopes for this token.
    *
    * @return array
@@ -62,5 +69,19 @@ interface IndieAuthTokenInterface extends ContentEntityInterface {
    * @return string
    */
   public function getScopesAsString();
+
+  /**
+   * Returns the client id.
+   *
+   * @return string
+   */
+  public function getClientId();
+
+  /**
+   * Returns the changed time.
+   *
+   * @return integer
+   */
+  public function getChanged();
 
 }

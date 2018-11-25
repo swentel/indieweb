@@ -25,11 +25,11 @@ class IndieAuthTokenListBuilder extends EntityListBuilder {
    * {@inheritdoc}
    */
   public function buildRow(EntityInterface $entity) {
-    /** @var \Drupal\indieweb_indieauth\Entity\IndieAuthTokenInterface */
+    /** @var $entity \Drupal\indieweb_indieauth\Entity\IndieAuthTokenInterface */
     $row['label'] = $entity->label();
-    $row['status'] = $entity->get('status')->value ? t('Active') : t('Revoked');
-    $row['client_id'] = $entity->get('client_id')->value;
-    $last_access = $entity->get('changed')->value ? \Drupal::service('date.formatter')->format($entity->get('changed')->value, 'short') : t('Never');
+    $row['status'] = $entity->isRevoked() ? t('Revoked') : t('Active');
+    $row['client_id'] = $entity->getClientId();
+    $last_access = $entity->getChanged() ? \Drupal::service('date.formatter')->format($entity->getChanged(), 'short') : t('Never');
     $row['access'] = $last_access;
     return $row + parent::buildRow($entity);
   }

@@ -91,6 +91,13 @@ class IndieAuthToken extends ContentEntityBase implements IndieAuthTokenInterfac
   /**
    * {@inheritdoc}
    */
+  public function getStatus() {
+    return (bool) $this->get('status')->value;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function getScopes() {
     return explode(' ', $this->get('scope')->value);
   }
@@ -100,6 +107,20 @@ class IndieAuthToken extends ContentEntityBase implements IndieAuthTokenInterfac
    */
   public function getScopesAsString() {
     return $this->get('scope')->value;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getClientId() {
+    return $this->get('client_id')->value;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getChanged() {
+    return $this->get('changed')->value;
   }
 
   /**

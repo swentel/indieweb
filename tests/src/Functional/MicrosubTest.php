@@ -282,14 +282,12 @@ class MicrosubTest extends IndiewebBrowserTestBase {
 
     $this->runPostContextQueue();
     $this->assertPostContextQueueItems();
+    /** @var \Drupal\indieweb_microsub\Entity\MicrosubItemInterface $item */
     $item = \Drupal::entityTypeManager()->getStorage('indieweb_microsub_item')->loadUnchanged($id);
-    self::assertTrue(!empty($item->get('post_context')->value));
-    $context_data = json_decode($item->get('post_context')->value);
-    self::assertEqual($page->get('body')->value, $context_data->content->text);
+    self::assertTrue(!empty($item->getContext()));
+    $context_data = $item->getContext();
     $url = $page->toUrl('canonical', ['absolute' => TRUE])->toString();
-    $context_data->url = $url;
-    $item->set('post_context', json_encode($context_data));
-    $item->save();
+    self::assertEqual($page->get('body')->value, $context_data->{$url}->content);
 
     $query = ['action' => 'timeline', 'channel' => 1];
     $response = $this->sendMicrosubRequest($query);

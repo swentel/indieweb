@@ -126,7 +126,7 @@ class IndieAuthController extends ControllerBase {
 
       // Good to go.
       $response = [
-        'me' => $authorization_code->get('me')->value,
+        'me' => $authorization_code->getMe(),
       ];
 
       // Remove old code.
@@ -369,13 +369,13 @@ class IndieAuthController extends ControllerBase {
     // Validate redirect_uri, me and client_id, and scope is not empty.
     // -----------------------------------------------------------------
 
-    if ($authorization_code->get('client_id')->value != $params['client_id']) {
+    if ($authorization_code->getClientId() != $params['client_id']) {
       return new JsonResponse(['error' => 'invalid_request', 'error_description' => 'Client ID does not match'], 400);
     }
-    if ($authorization_code->get('redirect_uri')->value != $params['redirect_uri']) {
+    if ($authorization_code->getRedirectURI() != $params['redirect_uri']) {
       return new JsonResponse(['error' => 'invalid_request', 'error_description' => 'Redirect URI does not match'], 400);
     }
-    if ($authorization_code->get('me')->value != $params['me']) {
+    if ($authorization_code->getMe() != $params['me']) {
       return new JsonResponse(['error' => 'invalid_request', 'error_description' => 'Me does not match'], 400);
     }
     if (empty($authorization_code->getScopes())) {

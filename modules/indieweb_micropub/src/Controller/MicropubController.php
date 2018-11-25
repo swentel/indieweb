@@ -474,7 +474,7 @@ class MicropubController extends ControllerBase {
               $comment_comment_webmention_field_name = $comment_config->get('comment_create_webmention_reference_field');
               $table_name = 'comment__' . $comment_comment_webmention_field_name;
               $webmention_target = \Drupal::entityTypeManager()->getStorage('indieweb_webmention')->load($params['indieweb_webmention']);
-              if ($webmention_target && $webmention_target->get('property')->value == 'in-reply-to') {
+              if ($webmention_target && $webmention_target->getProperty() == 'in-reply-to') {
                 if (\Drupal::database()->schema()->tableExists($table_name)) {
                   $cid = \Drupal::database()
                     ->select($table_name, 'a')
@@ -486,7 +486,7 @@ class MicropubController extends ControllerBase {
                   if ($cid) {
 
                     // Check url.
-                    $url = $webmention_target->get('url')->value;
+                    $url = $webmention_target->getUrl();
                     if (!empty($url)) {
                       $link_field_url = $url;
                     }
