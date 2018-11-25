@@ -9,6 +9,7 @@ use Drupal\Core\Language\LanguageInterface;
 use Drupal\Core\Url;
 use Drupal\datetime\Plugin\Field\FieldType\DateTimeItemInterface;
 use Drupal\node\Entity\Node;
+use Drupal\node\Entity\NodeType;
 use Drupal\node\NodeInterface;
 use Drupal\taxonomy\Entity\Term;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -742,7 +743,8 @@ class MicropubController extends ControllerBase {
    * @return array|mixed|null
    */
   protected function createNodeFromPostType($post_type) {
-    return $this->config->get($post_type . '_create_node');
+    $node_type = NodeType::load($this->config->get($post_type . '_node_type'));
+    return $this->config->get($post_type . '_create_node') && $node_type;
   }
 
   /**

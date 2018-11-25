@@ -957,6 +957,12 @@ class MicropubTest extends IndiewebBrowserTestBase {
     self::assertTrue($node_type_name == 'page');
     $node_type_name = \Drupal::config('indieweb_micropub.settings')->get('like_node_type');
     self::assertTrue($node_type_name == 'like');
+
+    // Test creating an article now, should not create a node.
+    $code = $this->sendMicropubRequest($this->article);
+    self::assertEquals(400, $code);
+    self::assertNodeCount(30);
+
   }
 
 }

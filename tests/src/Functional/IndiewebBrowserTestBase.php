@@ -450,9 +450,15 @@ abstract class IndiewebBrowserTestBase extends BrowserTestBase {
    * @param $count
    * @param $type
    */
-  protected function assertNodeCount($count, $type) {
-    $node_count = \Drupal::database()->query('SELECT count(nid) FROM {node} WHERE type = :type', [':type' => $type])->fetchField();
-    self::assertEquals($count, $node_count);
+  protected function assertNodeCount($count, $type = '') {
+    if ($type) {
+      $node_count = \Drupal::database()->query('SELECT count(nid) FROM {node} WHERE type = :type', [':type' => $type])->fetchField();
+      self::assertEquals($count, $node_count);
+    }
+    else {
+      $node_count = \Drupal::database()->query('SELECT count(nid) FROM {node}')->fetchField();
+      self::assertEquals($count, $node_count);
+    }
   }
 
   /**
