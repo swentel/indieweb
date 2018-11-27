@@ -24,7 +24,7 @@ Current functionality:
 - Send a micropub post to Aperture on incoming webmentions
 - Fetch post context for content or microsub items
 - Blocks for rendering webmentions, RSVP, signing in
-- Fediverse integration
+- Fediverse integration via https://fed.brid.gy/
 - Caching of image files
 
 The functionality is split into several modules:

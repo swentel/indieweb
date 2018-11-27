@@ -53,7 +53,7 @@ class Send extends ContentEntityBase implements SendInterface {
    * {@inheritdoc}
    */
   public function getTarget() {
-    return $this->get('source')->value;
+    return $this->get('target')->value;
   }
 
   /**

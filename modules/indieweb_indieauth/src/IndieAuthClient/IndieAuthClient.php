@@ -46,11 +46,11 @@ class IndieAuthClient implements IndieAuthClientInterface {
    * {@inheritdoc}
    */
   public function generateKeys() {
-    $success = FALSE;
+    $return = FALSE;
 
     if (!extension_loaded('openssl')) {
       \Drupal::logger('indieweb_indieauth')->notice('OpenSSL PHP extension is not loaded.');
-      return $success;
+      return $return;
     }
 
     try {
@@ -92,13 +92,13 @@ class IndieAuthClient implements IndieAuthClientInterface {
         $paths[$name . '_key'] = $key_uri;
       }
 
-      $success = $paths;
+      $return = $paths;
     }
     catch (\Exception $e) {
       \Drupal::logger('indieweb_indieauth')->notice('Error generating keys: @message', ['@message' => $e->getMessage()]);
     }
 
-    return $success;
+    return $return;
   }
 
   /**
