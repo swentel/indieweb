@@ -73,13 +73,12 @@ class WebmentionClient implements WebmentionClientInterface {
 
                 Cache::invalidateTags([$data['entity_type_id'] . ':' . $data['entity_id']]);
               }
-
-              // Log the response if configured.
-              if (\Drupal::config('indieweb_webmention.settings')->get('send_log_response')) {
-                \Drupal::logger('indieweb_send_response')->notice('response for @source to @target: @response', ['@response' => print_r($response, 1), '@source' => $sourceURL, '@target' => $targetURL]);
-              }
-
             }
+          }
+
+          // Log the response if configured.
+          if (\Drupal::config('indieweb_webmention.settings')->get('send_log_response')) {
+            \Drupal::logger('indieweb_send_response')->notice('response for @source to @target: @response', ['@response' => print_r($response, 1), '@source' => $sourceURL, '@target' => $targetURL]);
           }
 
         }
