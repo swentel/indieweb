@@ -103,6 +103,34 @@ class MicrosubSource extends ContentEntityBase implements MicrosubSourceInterfac
   /**
    * {@inheritdoc}
    */
+  public function setItemsInFeed($total) {
+    return $this->set('items_in_feed', $total);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getItemsInFeed() {
+    return (int) $this->get('items_in_feed')->value;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setKeepItemsInFeed($total) {
+    return $this->set('items_to_keep', $total);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getKeepItemsInFeed() {
+    return (int) $this->get('items_to_keep')->value;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function getNextFetch() {
     return $this->get('fetch_next')->value;
   }
@@ -225,6 +253,7 @@ class MicrosubSource extends ContentEntityBase implements MicrosubSourceInterfac
       ])
       ->setDisplayConfigurable('form', TRUE);
 
+
     $fields['fetch_next'] = BaseFieldDefinition::create('integer')
       ->setLabel(t('The next time the source will be fetched'))
       ->setDefaultValue(0);
@@ -240,6 +269,21 @@ class MicrosubSource extends ContentEntityBase implements MicrosubSourceInterfac
     $fields['items_in_feed'] = BaseFieldDefinition::create('integer')
       ->setLabel(t('How many items a feed contains'))
       ->setDefaultValue(0);
+
+    $keep_values = [0, 20, 30, 40, 50, 60, 70, 80, 90, 100, 200, 250, 500, 1000];
+    $keep = array_combine($keep_values, $keep_values);
+    $fields['items_to_keep'] = BaseFieldDefinition::create('list_integer')
+      ->setLabel(t('Items to keep'))
+      ->setDescription(t('The number of items to keep when cleaning up feeds. Set to 0 to keep all.'))
+      ->setDefaultValue(0)
+      ->setRequired(TRUE)
+      ->setSetting('unsigned', TRUE)
+      ->setSetting('allowed_values', $keep)
+      ->setDisplayOptions('form', [
+        'type' => 'options_select',
+        'weight' => 10,
+      ])
+      ->setDisplayConfigurable('form', TRUE);
 
     return $fields;
   }

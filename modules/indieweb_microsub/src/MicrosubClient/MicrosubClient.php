@@ -65,8 +65,13 @@ class MicrosubClient implements MicrosubClientInterface {
           $parsed = $xray->parse($url, $body, ['expect' => 'feed']);
           if ($parsed && isset($parsed['data']['type']) && $parsed['data']['type'] == 'feed') {
             $items = array_reverse($parsed['data']['items']);
+            $total_items = count($items);
             foreach ($items as $i => $item) {
               $this->saveItem($item, $tries, $source_id, $channel_id, $empty, $context, $disable_image_cache);
+            }
+
+            if ($total_items) {
+              $source->setItemsInFeed($total_items);
             }
           }
 

@@ -266,6 +266,8 @@ class MicrosubTest extends IndiewebBrowserTestBase {
 
     $this->fetchItems();
     $this->assertMicrosubItemCount('item', 6);
+    $this->assertMicrosubSourceItemsInFeed(1, 2);
+    $this->assertMicrosubSourceItemsInFeed(2, 4);
     $id = \Drupal::database()->query('SELECT id FROM {microsub_item} where post_type = :reply', [':reply' => 'reply'])->fetchField();
     $item = \Drupal::entityTypeManager()->getStorage('indieweb_microsub_item')->loadUnchanged($id);
     $this->assertPostContextQueueItems(['https://example.com/fetch-content'], $item->id());

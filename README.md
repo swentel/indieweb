@@ -362,12 +362,6 @@ content types or comments where needed. Posts, replies, likes, boosts and follow
 - Check https://fed.brid.gy/#setup for additional setup for .htaccess.
 - If you use a microsub server, you can subscribe to fediverse users through the microformats feed.
 
-This module exposes a Rabbit hole behavior plugin to return '410 Gone' response. This is useful when you want to delete
-a post on the fediverse via Bridgy Fed. The entity itself still needs to exist on the site.  
-Install https://www.drupal.org/project/rabbit_hole and the option will be available globally or per entity.
-
-For more background, see https://github.com/snarfed/bridgy-fed/issues/30 and https://indieweb.org/deleted
-
 ## Caching of image files
 
 When using the built-in webmention or microsub endpoint, a lot of file urls are stored to external images. If you
@@ -379,6 +373,16 @@ By default, imagecache_external stores all files in public://externals. If you w
 for instancy, by year and month, add following line to settings.php
 
 $config['imagecache_external.settings']['imagecache_directory'] = 'externals/' . date('Y') . '/' . date('m');
+
+## 410 gone.
+
+This module exposes a Rabbit hole behavior plugin to return '410 Gone' response. This is useful when you want to delete
+a post on social media, fediverse via Bridgy Fed or just let it notice to an external site by sending a webmention.The 
+entity exist on the site, but then returns a 410 response.
+
+Install https://www.drupal.org/project/rabbit_hole and the option will be available globally or per entity.
+
+For more background, see https://github.com/snarfed/bridgy-fed/issues/30 and https://indieweb.org/deleted
 
 ## Drush commands
 

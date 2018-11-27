@@ -549,6 +549,22 @@ abstract class IndiewebBrowserTestBase extends BrowserTestBase {
   }
 
   /**
+   * Asserts the 'items_in_feed' number.
+   *
+   * @param $source_id
+   * @param $expected
+   */
+  protected function assertMicrosubSourceItemsInFeed($source_id, $expected) {
+    $actual = \Drupal::database()->select('microsub_source', 'm')
+      ->fields('m', ['items_in_feed'])
+      ->condition('id', $source_id)
+      ->execute()
+      ->fetchField();
+
+    self::assertEquals($expected, $actual);
+  }
+
+  /**
    * Clears a microsub table.
    *
    * @param $type

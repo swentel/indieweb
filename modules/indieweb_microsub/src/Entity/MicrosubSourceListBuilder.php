@@ -44,8 +44,9 @@ class MicrosubSourceListBuilder extends EntityListBuilder {
     $header['label'] = $this->t('Source');
     $header['status'] = $this->t('Status');
     $header['media_cache'] = $this->t('Media cache');
-    $header['items'] = $this->t('Items');
+    $header['items'] = $this->t('Total Items');
     $header['fetch_next'] = $this->t('Next update');
+    $header['in_keep'] = $this->t('Feed/keep');
     return $header + parent::buildHeader();
   }
 
@@ -70,6 +71,7 @@ class MicrosubSourceListBuilder extends EntityListBuilder {
       }
     }
     $row['fetch_next'] = $fetch_next;
+    $row['in_keep'] = $entity->getItemsInFeed() . '/' . $entity->getKeepItemsInFeed();
     return $row + parent::buildRow($entity);
   }
 

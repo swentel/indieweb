@@ -45,6 +45,38 @@ interface MicrosubSourceInterface extends ContentEntityInterface {
   public function setHash($hash);
 
   /**
+   * Set number of items in feed.
+   *
+   * @param $total
+   *
+   * @return $this
+   */
+  public function setItemsInFeed($total);
+
+  /**
+   * Return items in feed.
+   *
+   * @return integer
+   */
+  public function getItemsInFeed();
+
+  /**
+   * Set number of items to keep in feed.
+   *
+   * @param $total
+   *
+   * @return $this
+   */
+  public function setKeepItemsInFeed($total);
+
+  /**
+   * Get the number of items in the feed to keep.
+   *
+   * @return integer
+   */
+  public function getKeepItemsInFeed();
+
+  /**
    * Gets the interval.
    *
    * @return integer
