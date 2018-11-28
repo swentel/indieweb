@@ -45,15 +45,10 @@ class MicrosubSettingsForm extends ConfigFormBase {
       '#description' => $this->t('The endpoint is available at <strong>https://@domain/indieweb/microsub</strong>', ['@domain' => \Drupal::request()->getHttpHost()]),
     ];
 
-    $intervals = [86400, 172800, 259200, 604800, 1209600, 2419200, 7776000, 15552000];
-    $period = [0 => t('Never')] + array_map([\Drupal::service('date.formatter'), 'formatInterval'], array_combine($intervals, $intervals));
-
     $form['microsub']['microsub_internal_cleanup_items'] = [
-      '#title' => $this->t('Cleanup items'),
-      '#type' => 'select',
-      '#access' => FALSE,
-      '#options' => $period,
-      '#description' => $this->t('Items older than this period will be cleaned up.'),
+      '#title' => $this->t('Cleanup feed items'),
+      '#type' => 'checkbox',
+      '#description' => $this->t('You can configure the number of items to keep per feed.'),
       '#default_value' => $config->get('microsub_internal_cleanup_items'),
       '#states' => array(
         'visible' => array(

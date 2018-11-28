@@ -20,12 +20,6 @@ class MicrosubClient implements MicrosubClientInterface {
 
     // Cleanup old items.
     $cleanup_old_items = \Drupal::config('indieweb_microsub.settings')->get('microsub_internal_cleanup_items');
-    if ($cleanup_old_items) {
-      \Drupal::database()
-        ->delete('microsub_item')
-        ->condition('created', \Drupal::time()->getRequestTime() - $cleanup_old_items, '<')
-        ->execute();
-    }
 
     /** @var \Drupal\indieweb_microsub\Entity\MicrosubSourceInterface[] $sources */
     $sources = \Drupal::entityTypeManager()->getStorage('indieweb_microsub_source')->getSourcesToRefresh();
@@ -35,6 +29,7 @@ class MicrosubClient implements MicrosubClientInterface {
       if (!$source->getChannel()->getStatus()) {
         continue;
       }
+
 
       $url = $source->label();
       $tries = $source->getTries();
@@ -58,7 +53,31 @@ class MicrosubClient implements MicrosubClientInterface {
         $hash = md5($body);
         if ($source->getHash() != $hash) {
 
-          // Context.
+          // Cleanup old items if we can. We do this here because it doesn't
+          // make much sense to check this if the hash hasn't changed.
+          $items_in_feed = $source->getItemsInFeed();
+          $items_to_keep = $source->getKeepItemsInFeed();
+          if ($cleanup_old_items && $items_in_feed && $items_to_keep) {
+            // We use two queries as not all mysql servers understand limits
+            // in sub queries when the main query is a delete.
+            $id = \Drupal::database()
+              ->select('microsub_item', 'm')
+              ->fields('m', ['id'])
+              ->range($items_to_keep, 1)
+              ->condition('source_id', $source_id)
+              ->orderBy('id', 'DESC')
+              ->execute()
+              ->fetchField();
+            if ($id) {
+              \Drupal::database()
+                ->delete('microsub_item')
+                ->condition('id', $id, '<')
+                ->condition('source_id', $source_id)
+                ->execute();
+            }
+          }
+
+          // Get context.
           $context = $post_context_enabled ? $source->getPostContext() : [];
 
           // Parse the body.
@@ -66,8 +85,17 @@ class MicrosubClient implements MicrosubClientInterface {
           if ($parsed && isset($parsed['data']['type']) && $parsed['data']['type'] == 'feed') {
             $items = array_reverse($parsed['data']['items']);
             $total_items = count($items);
+
+            $c = 0;
             foreach ($items as $i => $item) {
               $this->saveItem($item, $tries, $source_id, $channel_id, $empty, $context, $disable_image_cache);
+              $c++;
+
+              // If we have number of items to keep and we hit the amount, break
+              // the loop so we don't keep importing everything over and over.
+              if ($items_to_keep && $c > $items_to_keep) {
+                break;
+              }
             }
 
             if ($total_items) {
