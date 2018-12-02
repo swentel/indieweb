@@ -11,6 +11,7 @@ use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Template\Attribute;
 use Drupal\Core\Url;
 use Drupal\node\Entity\NodeType;
 use Drupal\node\NodeInterface;
@@ -146,13 +147,13 @@ function template_preprocess_webmention(&$variables) {
 /**
  * Returns the syndication targets.
  *
- * @param boolean $return_options_and_defaults
- *   Whether to return the syndication targets as an array with 'options' key
- *   and 'default' key.
+ * @param boolean $return_all_config
+ *   Whether to return the syndication targets as an array with 'options',
+ *   'default' and 'custom-class' key.
  *
  * @return array
  */
-function indieweb_get_syndication_targets($return_options_and_defaults = FALSE) {
+function indieweb_get_syndication_targets($return_all_config = FALSE) {
   $syndication_targets = [];
   $config = \Drupal::config('indieweb_webmention.settings')->get('syndication_targets');
   if (!empty($config)) {
@@ -160,16 +161,24 @@ function indieweb_get_syndication_targets($return_options_and_defaults = FALSE) 
     foreach ($lines as $line) {
       $line = trim($line);
       if (!empty($line)) {
-        $name_url = explode('|', $line);
-        if (!empty($name_url[0]) && !empty($name_url[1])) {
-          if ($return_options_and_defaults) {
-            $syndication_targets['options'][$name_url[1]] = $name_url[0];
-            if (isset($name_url[2]) && !empty($name_url[2]) && $name_url[2] == '1') {
-              $syndication_targets['default'][] = $name_url[1];
+        $explode = explode('|', $line);
+        if (!empty($explode[0]) && !empty($explode[1])) {
+          if ($return_all_config) {
+            $syndication_targets['options'][$explode[1]] = $explode[0];
+
+            // Selected by default on the node form.
+            if (isset($explode[2]) && !empty($explode[2]) && $explode[2] == '1') {
+              $syndication_targets['default'][] = $explode[1];
             }
+
+            // Custom class.
+            if (isset($explode[3]) && !empty($explode[3])) {
+              $syndication_targets['custom-class'][$explode[1]] = $explode[3];
+            }
+
           }
           else {
-            $syndication_targets[$name_url[1]] = $name_url[0];
+            $syndication_targets[$explode[1]] = $explode[0];
           }
         }
       }
@@ -513,21 +522,25 @@ function indieweb_webmention_comment_view(array &$build, CommentInterface $comme
  */
 function _indieweb_webmention_extra_fields_display(array &$build, EntityInterface $entity, EntityViewDisplayInterface $display) {
   // Syndication targets fields.
-  $syndication_targets = indieweb_get_syndication_targets();
-  if (!empty($syndication_targets)) {
-    $back_link = '';
+  $syndication_targets = indieweb_get_syndication_targets(TRUE);
+
+  if (!empty($syndication_targets['options'])) {
     $add_back_link = \Drupal::config('indieweb_webmention.settings')->get('bridgy_back_link');
-    if ($add_back_link == 'never') {
-      $back_link = ' class="p-bridgy-omit-link" value="true"';
-    }
-    elseif ($add_back_link == 'maybe') {
-      $back_link = ' class="p-bridgy-omit-link" value="maybe"';
-    }
-    foreach ($syndication_targets as $url => $name) {
+    foreach ($syndication_targets['options'] as $url => $name) {
       $machine_name = indieweb_generate_machine_name_from_url($url);
       if ($display->getComponent($machine_name)) {
+        $attributes = [];
+        if (in_array($add_back_link, ['never', 'maybe']) && strpos($url, 'brid.gy/publish/') !== FALSE) {
+          $attributes['class'] = ['p-bridgy-omit-link'];
+          $attributes['value'] = $add_back_link == 'never' ? 'true' : 'maybe';
+        }
+
+        if (isset($syndication_targets['custom-class'][$url])) {
+          $attributes['class'][] = $syndication_targets['custom-class'][$url];
+        }
+
         $build[$machine_name] = [
-          '#markup' => '<span class="hidden"><a href="' . $url . '"'. $back_link .'></a></span>',
+          '#markup' => '<span class="hidden"><a href="' . $url . '"' . new Attribute($attributes) . '></a></span>',
         ];
       }
     }

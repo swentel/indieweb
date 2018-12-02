@@ -21,7 +21,7 @@ class WebmentionSendTest extends IndiewebBrowserTestBase {
    *
    * @var string
    */
-  protected $syndication_targets = "Twitter (bridgy)|https://brid.gy/publish/twitter\nAnother channel|https://example.com/publish/test";
+  protected $syndication_targets = "Twitter (bridgy)|https://brid.gy/publish/twitter\nAnother channel|https://example.com/publish/test|0|a-custom-class";
 
     /**
    * Modules to enable for this test.
@@ -124,6 +124,7 @@ class WebmentionSendTest extends IndiewebBrowserTestBase {
       $edit['indieweb_syndication_targets[' . $url . ']'] = TRUE;
     }
     $this->drupalPostForm('node/1/edit', $edit, 'Save');
+    $this->assertSession()->responseContains('example.com/publish/test" class="a-custom-class"');
     $this->assertWebmentionQueueItems($targets_queued, 1);
   }
 
