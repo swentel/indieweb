@@ -340,6 +340,19 @@ class IndieAuthController extends ControllerBase {
       return new Response($this->t('Page not found'), 404);
     }
 
+    // -----------------------------------------------------------------
+    // Token revocation request.
+
+    if ($request->request->has('action') && $request->request->get('action') == 'revoke' && ($token = $request->request->get('token'))) {
+      /** @var \Drupal\indieweb_indieauth\IndieAuthClient\IndieAuthClientInterface $indieAuthClient */
+      $indieAuthClient = \Drupal::service('indieweb.indieauth.client');
+      $indieAuthClient->revokeToken($token);
+      return new JsonResponse([], 200);
+    }
+
+    // -----------------------------------------------------------------
+    // Access token request.
+
     $params = [];
     $valid_request = TRUE;
     self::validateTokenRequestParameters($request, $reason, $valid_request, $params);

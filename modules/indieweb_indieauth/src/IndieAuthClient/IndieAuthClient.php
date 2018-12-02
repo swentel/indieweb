@@ -45,6 +45,38 @@ class IndieAuthClient implements IndieAuthClientInterface {
   /**
    * {@inheritdoc}
    */
+  public function revokeToken($token) {
+    $signer = new Sha512();
+    $config = \Drupal::config('indieweb_indieauth.settings');
+
+    $access_token = '';
+    try {
+      $JWT = (new Parser())->parse((string) $token);
+      $valid = $JWT->verify($signer, file_get_contents($config->get('public_key')));
+      if ($valid) {
+        $access_token = $JWT->getHeader('jti');
+      }
+    }
+    catch (\Exception $e) {
+      \Drupal::Logger('indieweb_token_verify')->notice('Error revoking token: @message', ['@message' => $e->getMessage()]);
+    }
+
+    if ($access_token) {
+      /** @var \Drupal\indieweb_indieauth\Entity\IndieAuthTokenInterface $indieAuthToken */
+      $indieAuthToken = \Drupal::entityTypeManager()->getStorage('indieweb_indieauth_token')->getIndieAuthTokenByAccessToken($access_token);
+      if ($indieAuthToken) {
+        try {
+          $indieAuthToken->revoke()->save();
+        }
+        catch (\Exception $ignored) {}
+      }
+    }
+
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function generateKeys() {
     $return = FALSE;
 

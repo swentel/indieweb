@@ -385,6 +385,19 @@ class IndieAuthTest extends IndiewebBrowserTestBase {
     $this->drupalGet($token_path);
     $this->assertSession()->statusCodeEquals(404);
 
+    // Revoke token.
+    $params = [];
+    $params['action'] = 'revoke';
+    $params['token'] = $access_token;
+    $response = $this->postToUrl($params, $token_path);
+
+    // The response code is always 200.
+    self::assertEquals(200, $response->getStatusCode());
+
+    // Should be 403 as it's invalid now.
+    $code = $this->sendMicropubRequest($post, $access_token);
+    self::assertEquals(403, $code);
+
     // -------------------------------------------------------
     // No 'response_type' or scope in this request since they
     // are optional as authenticated user.

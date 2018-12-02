@@ -28,6 +28,13 @@ interface IndieAuthClientInterface {
   public function isValidToken($auth_header, $scope_to_check = NULL);
 
   /**
+   * Revokes a token.
+   *
+   * @param $token
+   */
+  public function revokeToken($token);
+
+  /**
    * Generates keys.
    *
    * @return bool|array
