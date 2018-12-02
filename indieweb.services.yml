@@ -1,5 +1,5 @@
 services:
   indieweb.media_cache.client:
-    class: Drupal\indieweb\MediaCacheClient\MediaCacheClient
+    class: Drupal\indieweb\MediaCacheClient\MediaCacheClientDefault
   indieweb.post_context.client:
     class: Drupal\indieweb\PostContextClient\PostContextClient

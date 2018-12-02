@@ -2,11 +2,10 @@
 
 namespace Drupal\indieweb_cache\MediaCacheClient;
 
-use DOMDocument;
 use Drupal\image\Entity\ImageStyle;
-use Drupal\indieweb\MediaCacheClient\MediaCacheClientInterface;
+use Drupal\indieweb\MediaCacheClient\MediaCacheClientDefault;
 
-class MediaCacheClient implements MediaCacheClientInterface {
+class MediaCacheClient extends MediaCacheClientDefault {
 
   /**
    * {@inheritdoc}
@@ -63,28 +62,6 @@ class MediaCacheClient implements MediaCacheClientInterface {
     }
 
     return $filename;
-  }
-
-  /**
-   * Extracts images from a string.
-   *
-   * @param $html
-   *
-   * @return array $images
-   */
-  protected function extractImages($html) {
-    $images = [];
-
-    $dom = new domDocument;
-    $dom->loadHTML($html);
-    $dom->preserveWhiteSpace = false;
-    $image_list = $dom->getElementsByTagName('img');
-
-    foreach ($image_list as $image) {
-     $images[] = $image->getAttribute('src');
-    }
-
-    return $images;
   }
 
 }

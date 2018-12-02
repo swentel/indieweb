@@ -2,9 +2,9 @@
 
 namespace Drupal\indieweb_test\MediaCacheClient;
 
-use Drupal\indieweb_cache\MediaCacheClient\MediaCacheClient;
+use Drupal\indieweb\MediaCacheClient\MediaCacheClientDefault;
 
-class MediaCacheClientTest extends MediaCacheClient {
+class MediaCacheClientTest extends MediaCacheClientDefault {
 
   /**
    * {@inheritdoc}
