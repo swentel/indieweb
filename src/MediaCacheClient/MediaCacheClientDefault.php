@@ -38,8 +38,9 @@ class MediaCacheClientDefault implements MediaCacheClientInterface {
     $images = [];
 
     $dom = new domDocument;
+    libxml_use_internal_errors(TRUE);
     $dom->loadHTML($html);
-    $dom->preserveWhiteSpace = false;
+    $dom->preserveWhiteSpace = FALSE;
     $image_list = $dom->getElementsByTagName('img');
 
     foreach ($image_list as $image) {
