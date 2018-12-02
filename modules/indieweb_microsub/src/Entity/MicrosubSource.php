@@ -182,6 +182,9 @@ class MicrosubSource extends ContentEntityBase implements MicrosubSourceInterfac
     return (bool) $this->get('cache_image_disable')->value;
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function postSave(EntityStorageInterface $storage, $update = TRUE) {
     parent::postSave($storage, $update);
 
@@ -194,12 +197,7 @@ class MicrosubSource extends ContentEntityBase implements MicrosubSourceInterfac
    * {@inheritdoc}
    */
   public function delete() {
-
-    \Drupal::database()
-      ->delete('microsub_item')
-      ->condition('source_id', $this->id())
-      ->execute();
-
+    \Drupal::entityTypeManager()->getStorage('indieweb_microsub_item')->removeAllItemsBySource($this->id());
     parent::delete();
   }
 

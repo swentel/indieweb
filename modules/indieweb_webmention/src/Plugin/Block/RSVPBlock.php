@@ -134,14 +134,9 @@ class RSVPBlock extends BlockBase {
 
     // Get mentions. We use a query and not entity api at all to make sure this
     // block is fast because if you have tons of webmentions, this can be rough.
-    $query = \Drupal::database()
-      ->select('webmention_received', 'w')
-      ->fields('w', ['author_name', 'author_photo', 'property', 'rsvp'])
-      ->condition('target', \Drupal::request()->getPathInfo())
-      ->condition('property', $types, 'IN');
-
-    $query->orderBy('id', 'DESC');
-    $records = $query->execute();
+    $records = \Drupal::entityTypeManager()
+      ->getStorage('indieweb_webmention')
+      ->getWebmentions($types, \Drupal::request()->getPathInfo());
 
     $values = [
       0 => 'yes', 1 => 'maybe', 2 => 'interested', 3 => 'no',

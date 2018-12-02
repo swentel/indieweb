@@ -136,20 +136,7 @@ class WebmentionBlock extends BlockBase {
 
     // Get mentions. We use a query and not entity api at all to make sure this
     // block is fast because if you have tons of webmentions, this can be rough.
-    $query = \Drupal::database()
-      ->select('webmention_received', 'w')
-      ->fields('w', ['author_name', 'author_photo', 'property', 'created', 'source', 'content_text', 'content_html'])
-      ->condition('status', 1)
-      ->condition('target', \Drupal::request()->getPathInfo())
-      ->condition('property', $types, 'IN');
-
-    $query->orderBy('id', 'DESC');
-
-    if ($this->configuration['number_of_posts']) {
-      $query->range(0, $this->configuration['number_of_posts']);
-    }
-
-    $records = $query->execute();
+    $records = \Drupal::entityTypeManager()->getStorage('indieweb_webmention')->getWebmentions($types, \Drupal::request()->getPathInfo(), $this->configuration['number_of_posts']);
 
     $identical = [];
     foreach ($records as $record) {

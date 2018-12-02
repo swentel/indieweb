@@ -59,6 +59,14 @@ interface MicrosubItemStorageInterface extends ContentEntityStorageInterface {
   public function removeItem($id);
 
   /**
+   * Removes all items by source.
+   *
+   * @param $source_id
+   *   The source id
+   */
+  public function removeAllItemsBySource($source_id);
+
+  /**
    * Check if an item exists.
    *
    * @param $source_id

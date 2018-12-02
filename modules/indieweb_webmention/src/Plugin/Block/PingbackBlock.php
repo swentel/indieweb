@@ -65,20 +65,8 @@ class PingbackBlock extends BlockBase {
 
     // Get pingbacks. We use a query and not entity api at all to make sure this
     // block is fast because if you have tons of webmentions, this can be rough.
-    $query = \Drupal::database()
-      ->select('webmention_received', 'w')
-      ->fields('w', ['source'])
-      ->condition('status', 1)
-      ->condition('target', \Drupal::request()->getPathInfo())
-      ->condition('property', 'pingback');
-
-    $query->orderBy('id', 'DESC');
-
-    if ($this->configuration['number_of_posts']) {
-      $query->range(0, $this->configuration['number_of_posts']);
-    }
-
-    $records = $query->execute();
+    $types = ['pingback'];
+    $records = \Drupal::entityTypeManager()->getStorage('indieweb_webmention')->getWebmentions($types, \Drupal::request()->getPathInfo(), $this->configuration['number_of_posts']);
 
     foreach ($records as $record) {
 

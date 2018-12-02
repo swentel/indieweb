@@ -16,13 +16,7 @@ class WebmentionFilterSelect extends ManyToOne {
 
   protected function valueForm(&$form, FormStateInterface $form_state) {
     parent::valueForm($form, $form_state);
-
-    $options = \Drupal::database()->select('webmention_received', 'w')
-      ->fields('w', [$this->field])
-      ->distinct()
-      ->execute()
-      ->fetchAllKeyed(0, 0);
-
+    $options = \Drupal::entityTypeManager()->getStorage('indieweb_webmention')->getFieldOptions($this->field);
     $form['value']['#options'] = $options;
   }
 

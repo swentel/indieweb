@@ -13,12 +13,11 @@ use Drupal\user\UserInterface;
 /**
  * Defines the Webmention entity.
  *
- * @ingroup webmention
- *
  * @ContentEntityType(
  *   id = "indieweb_webmention",
  *   label = @Translation("Webmention"),
  *   handlers = {
+ *     "storage" = "Drupal\indieweb_webmention\Entity\Storage\WebmentionStorage",
  *     "storage_schema" = "Drupal\indieweb_webmention\Entity\Storage\WebmentionStorageSchema",
  *     "view_builder" = "Drupal\Core\Entity\EntityViewBuilder",
  *     "list_builder" = "Drupal\indieweb_webmention\Entity\WebmentionListBuilder",

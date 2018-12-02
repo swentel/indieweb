@@ -62,6 +62,8 @@ class WebmentionController extends ControllerBase {
    * being webmention.io.
    *
    * @return \Symfony\Component\HttpFoundation\JsonResponse
+   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    */
   public function webmentionNotify() {
     $valid = FALSE;
@@ -107,7 +109,7 @@ class WebmentionController extends ControllerBase {
       if ($config->get('webmention_detect_identical')) {
         $source = $mention['source'];
         $property = $mention['post']['wm-property'];
-        $exists = \Drupal::database()->query("SELECT id FROM {webmention_received} WHERE source = :source AND target = :target AND property = :property ORDER by id DESC limit 1", [':source' => $source, ':target' => $target, ':property' => $property])->fetchField();
+        $exists = $this->entityTypeManager()->getStorage('indieweb_webmention')->checkIdenticalWebmention($source, $target, $property);
         if ($exists) {
           $this->getLogger('indieweb_webmention_identical')->notice('Source @source, target @target and @property already exists.', ['@source' => $source, '@target' => $target, '@property' => $property]);
           $response = ['result' => $response_message];

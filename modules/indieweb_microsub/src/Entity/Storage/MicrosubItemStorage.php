@@ -49,6 +49,16 @@ class MicrosubItemStorage extends SqlContentEntityStorage implements MicrosubIte
   /**
    * {@inheritdoc}
    */
+  public function removeAllItemsBySource($source_id) {
+    $this->database
+      ->delete('microsub_item')
+      ->condition('source_id', $source_id)
+      ->execute();
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function loadByChannel($channel_id, $limit = 20) {
     $exclude = [];
 

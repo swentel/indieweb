@@ -52,10 +52,7 @@ class RSVPForm extends FormBase {
     $rsvp_value = $form_state->getValue('rsvp');
     $rsvp = $this->getRSVP();
     if (!empty($rsvp->id)) {
-      \Drupal::database()->update('webmention_received')
-        ->fields(['rsvp' => $rsvp_value])
-        ->condition('id', $rsvp->id)
-        ->execute();
+      \Drupal::entityTypeManager()->getStorage('indieweb_webmention')->updateRSVP($rsvp_value, $rsvp->id);
     }
     else {
       $values = [
@@ -66,7 +63,7 @@ class RSVPForm extends FormBase {
         'target' => \Drupal::request()->getPathInfo(),
         'source' => \Drupal::request()->getSchemeAndHttpHost()
       ];
-      $mention = Webmention::create($values);
+      $mention = \Drupal::entityTypeManager()->getStorage('indieweb_webmention')->create($values);
       $mention->save();
     }
 
@@ -77,14 +74,12 @@ class RSVPForm extends FormBase {
    * Gets the current RSVP status on this node for the current user.
    *
    * @return mixed
+   *
+   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    */
   protected function getRSVP() {
-    $args = [
-      ':target' => \Drupal::request()->getPathInfo(),
-      ':property' => 'rsvp',
-      ':uid' => \Drupal::currentUser()->id(),
-    ];
-    return \Drupal::database()->query('SELECT id, rsvp FROM {webmention_received} WHERE target = :target AND property = :property AND uid = :uid', $args)->fetchObject();
+    return \Drupal::entityTypeManager()->getStorage('indieweb_webmention')->getWebmentionByTargetPropertyAndUid(\Drupal::request()->getPathInfo(), 'rsvp', \Drupal::currentUser()->id());
   }
 
 }

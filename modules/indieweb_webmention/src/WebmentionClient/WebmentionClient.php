@@ -228,7 +228,7 @@ class WebmentionClient implements WebmentionClientInterface {
           // Check identical webmentions. If the source, target and property are
           // the same, trigger an error.
           if (\Drupal::config('indieweb_webmention.settings')->get('webmention_detect_identical')) {
-            $exists = \Drupal::database()->query("SELECT id FROM {webmention_received} WHERE source = :source AND target = :target AND property = :property ORDER by id DESC limit 1", [':source' => $source, ':target' => $target, ':property' => $property])->fetchField();
+            $exists = $this->entityTypeManager()->getStorage('indieweb_webmention')->checkIdenticalWebmention($source, $target, $property);
             if ($exists) {
               $error = TRUE;
               $parsed['error'] = 'duplicate';
