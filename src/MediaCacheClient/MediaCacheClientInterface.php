@@ -11,6 +11,16 @@ interface MediaCacheClientInterface {
    */
   public function imageCacheExternalEnabled();
 
+  /**
+   * Replaces images in strings.
+   *
+   * @param $content
+   * @param $type
+   *
+   * @return string $content
+   */
+  public function replaceImagesInString($content, $type = 'photo');
+
    /**
    * Applies imagecache to a file.
    *

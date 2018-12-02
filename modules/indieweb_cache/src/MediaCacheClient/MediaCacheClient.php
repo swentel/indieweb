@@ -2,6 +2,7 @@
 
 namespace Drupal\indieweb_cache\MediaCacheClient;
 
+use DOMDocument;
 use Drupal\image\Entity\ImageStyle;
 use Drupal\indieweb\MediaCacheClient\MediaCacheClientInterface;
 
@@ -13,6 +14,21 @@ class MediaCacheClient implements MediaCacheClientInterface {
   public function imageCacheExternalEnabled() {
     $cache = \Drupal::config('indieweb_cache.settings');
     return $cache->get('enable') && $cache->get('use_imagecache_external');
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function replaceImagesInString($content, $type = 'photo') {
+    $images = [];
+    $extracted_images = $this->extractImages($content);
+    if (!empty($extracted_images)) {
+      foreach ($extracted_images as $image) {
+        $images[$image] = $this->applyImageCache($image, $type);
+      }
+      $content = str_replace(array_keys($images), array_values($images), $content);
+    }
+    return $content;
   }
 
   /**
@@ -47,6 +63,28 @@ class MediaCacheClient implements MediaCacheClientInterface {
     }
 
     return $filename;
+  }
+
+  /**
+   * Extracts images from a string.
+   *
+   * @param $html
+   *
+   * @return array $images
+   */
+  protected function extractImages($html) {
+    $images = [];
+
+    $dom = new domDocument;
+    $dom->loadHTML($html);
+    $dom->preserveWhiteSpace = false;
+    $image_list = $dom->getElementsByTagName('img');
+
+    foreach ($image_list as $image) {
+     $images[] = $image->getAttribute('src');
+    }
+
+    return $images;
   }
 
 }

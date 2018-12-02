@@ -14,6 +14,13 @@ class MediaCacheClient implements MediaCacheClientInterface {
   /**
    * {@inheritdoc}
    */
+  public function replaceImagesInString($content, $type = 'photo') {
+    return $content;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function applyImageCache($filename, $type = 'avatar') {
     return $filename;
   }

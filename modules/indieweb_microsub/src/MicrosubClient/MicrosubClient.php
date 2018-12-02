@@ -235,7 +235,10 @@ class MicrosubClient implements MicrosubClientInterface {
       }
     }
 
-    // TODO apply to content
+    // Images in html content.
+    if (!$disable_image_cache && !empty($item['content']['html'])) {
+      \Drupal::service('indieweb.media_cache.client')->replaceImagesInString($item['content']['html'], 'photo');
+    }
 
     return $item;
   }

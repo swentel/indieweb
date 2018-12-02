@@ -248,7 +248,10 @@ class MicrosubController extends ControllerBase {
       }
     }
 
-    // TODO inline images in text
+    // Images in html content.
+    if (!empty($data->content->html)) {
+      $data->content->html = \Drupal::service('indieweb.media_cache.client')->replaceImagesInString($data->content->html, 'photo');
+    }
   }
 
   /**

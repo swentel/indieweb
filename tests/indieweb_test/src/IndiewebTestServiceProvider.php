@@ -23,6 +23,12 @@ class IndiewebTestServiceProvider extends ServiceProviderBase {
       $definition = $container->getDefinition('indieweb.microsub.client');
       $definition->setClass('Drupal\indieweb_test\MicrosubClient\MicrosubClientTest');
     }
-  }
 
+    // Swap out the MediaCacheClientTest service.
+    if ($container->has('indieweb.media_cache.client')) {
+      $definition = $container->getDefinition('indieweb.media_cache.client');
+      $definition->setClass('Drupal\indieweb_test\MediaCacheClient\MediaCacheClientTest');
+    }
+
+  }
 }
