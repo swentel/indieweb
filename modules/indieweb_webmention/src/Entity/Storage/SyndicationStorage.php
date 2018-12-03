@@ -28,5 +28,16 @@ class SyndicationStorage extends SqlContentEntityStorage implements SyndicationS
     return $syndications;
   }
 
+  /**
+   * {@inheritdoc}
+   */
+  public function deleteByIdAndType($entity_id, $entity_type_id) {
+    $this->database
+      ->delete('webmention_syndication')
+      ->condition('entity_id', $entity_id)
+      ->condition('entity_type_id', $entity_type_id)
+      ->execute();
+  }
+
 
 }

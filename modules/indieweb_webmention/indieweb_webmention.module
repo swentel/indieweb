@@ -377,21 +377,11 @@ function indieweb_webmention_form_node_form_alter(&$form, FormStateInterface $fo
 function indieweb_webmention_entity_delete(EntityInterface $entity) {
 
   if ($entity instanceof ContentEntityInterface) {
-
     // Delete from syndication table.
-    \Drupal::database()
-      ->delete('webmention_syndication')
-      ->condition('entity_id', $entity->id())
-      ->condition('entity_type_id', $entity->getEntityTypeId())
-      ->execute();
+    \Drupal::entityTypeManager()->getStorage('indieweb_syndication')->deleteByIdAndType($entity->id(), $entity->getEntityTypeId());
 
     // Delete from send table.
-    \Drupal::database()
-      ->delete('webmention_send')
-      ->condition('entity_id', $entity->id())
-      ->condition('entity_type_id', $entity->getEntityTypeId())
-      ->execute();
-
+    \Drupal::entityTypeManager()->getStorage('indieweb_webmention_send')->deleteByIdAndType($entity->id(), $entity->getEntityTypeId());
   }
 
 }
