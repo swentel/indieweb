@@ -24,33 +24,4 @@ class MicrosubSourceStorage extends SqlContentEntityStorage implements MicrosubS
     return $this->loadMultiple($query->execute());
   }
 
-  /**
-   * {@inheritdoc}
-   */
-  public function getItemCount($source_id) {
-
-    $query = \Drupal::entityQuery('indieweb_microsub_item')
-      ->condition('source_id', $source_id)
-      ->count();
-
-    return $query->execute();
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function updateItemsToNewChannel($source_id, $channel_id) {
-    $this->database->update('microsub_item')
-      ->fields(['channel_id' => $channel_id])
-      ->condition('source_id', $source_id)
-      ->execute();
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function deleteItems($source_id) {
-    $this->database->delete('microsub_item')->condition('source_id', $source_id)->execute();
-  }
-
 }

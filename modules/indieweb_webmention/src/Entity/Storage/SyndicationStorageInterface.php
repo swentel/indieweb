@@ -21,9 +21,16 @@ interface SyndicationStorageInterface extends ContentEntityStorageInterface {
    *
    * @param $entity_id
    * @param $entity_type_id
-   *
-   * @return mixed
    */
   public function deleteByIdAndType($entity_id, $entity_type_id);
+
+  /**
+   * Check for an identical syndication.
+   *
+   * @param $like
+   *
+   * @return bool
+   */
+  public function checkIdenticalSyndication($like);
 
 }

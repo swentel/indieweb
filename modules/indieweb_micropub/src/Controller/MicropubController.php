@@ -473,17 +473,10 @@ class MicropubController extends ControllerBase {
             if (!empty($params) && key($params) == 'indieweb_webmention') {
               /** @var \Drupal\indieweb_webmention\Entity\WebmentionInterface $webmention_target */
               $comment_comment_webmention_field_name = $comment_config->get('comment_create_webmention_reference_field');
-              $table_name = 'comment__' . $comment_comment_webmention_field_name;
-              $webmention_target = \Drupal::entityTypeManager()->getStorage('indieweb_webmention')->load($params['indieweb_webmention']);
-              if ($webmention_target && $webmention_target->getProperty() == 'in-reply-to') {
-                if (\Drupal::database()->schema()->tableExists($table_name)) {
-                  $cid = \Drupal::database()
-                    ->select($table_name, 'a')
-                    ->fields('a', ['entity_id'])
-                    ->condition($comment_comment_webmention_field_name . '_target_id', $webmention_target->id())
-                    ->execute()
-                    ->fetchField();
-
+              try {
+                $webmention_target = \Drupal::entityTypeManager()->getStorage('indieweb_webmention')->load($params['indieweb_webmention']);
+                if ($webmention_target && $webmention_target->getProperty() == 'in-reply-to') {
+                  $cid = \Drupal::entityTypeManager()->getStorage('indieweb_webmention')->getCommentIdByWebmentionId($comment_comment_webmention_field_name, $webmention_target->id());
                   if ($cid) {
 
                     // Check url.
@@ -496,6 +489,7 @@ class MicropubController extends ControllerBase {
                   }
                 }
               }
+              catch (\Exception $ignored) {}
             }
 
             // This can be a reply on a comment, or set via a webmention in the
@@ -1107,18 +1101,17 @@ class MicropubController extends ControllerBase {
    *
    * @return array $terms
    *   A list of terms.
+   *
+   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    */
   protected function getCategories() {
+    $terms = [];
     $vocabulary = $this->config->get('micropub_category_vocabulary');
-
-    $terms = \Drupal::database()
-      ->select('taxonomy_term_field_data', 't')
-      ->fields('t', ['name'])
-      ->condition('vid', $vocabulary)
-      ->orderBy('name', 'ASC')
-      ->execute()
-      ->fetchCol('name');
-
+    $tree = $this->entityTypeManager()->getStorage('taxonomy_term')->loadTree($vocabulary);
+    foreach ($tree as $term) {
+      $terms[] = $term->name;
+    }
     return $terms;
   }
 

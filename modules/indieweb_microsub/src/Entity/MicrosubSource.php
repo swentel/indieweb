@@ -172,7 +172,7 @@ class MicrosubSource extends ContentEntityBase implements MicrosubSourceInterfac
    * {@inheritdoc}
    */
   public function getItemCount() {
-    return \Drupal::entityTypeManager()->getStorage('indieweb_microsub_source')->getItemCount($this->id());
+    return \Drupal::entityTypeManager()->getStorage('indieweb_microsub_item')->getItemCountBySource($this->id());
   }
 
   /**
@@ -189,7 +189,7 @@ class MicrosubSource extends ContentEntityBase implements MicrosubSourceInterfac
     parent::postSave($storage, $update);
 
     if (isset($this->original) && $this->original->getChannelId() != $this->getChannelId()) {
-      $storage->updateItemsToNewChannel($this->id(), $this->getChannelId());
+      \Drupal::entityTypeManager()->getStorage('indieweb_microsub_item')->updateItemsToNewChannel($this->id(), $this->getChannelId());
     }
   }
 
@@ -217,7 +217,7 @@ class MicrosubSource extends ContentEntityBase implements MicrosubSourceInterfac
       ->setDescription(t('The username of the source.'))
       ->setRevisionable(TRUE)
       ->setSetting('target_type', 'user')
-      ->setDefaultValueCallback('Drupal\indieweb_microsub\Entity\MicrosubChannel::getCurrentUserId');
+      ->setDefaultValueCallback('Drupal\indieweb_microsub\Entity\MicrosubSource::getCurrentUserId');
 
     $fields['status'] = BaseFieldDefinition::create('integer')
       ->setLabel(t('Status of the source'))
@@ -284,6 +284,18 @@ class MicrosubSource extends ContentEntityBase implements MicrosubSourceInterfac
       ->setDisplayConfigurable('form', TRUE);
 
     return $fields;
+  }
+
+  /**
+   * Default value callback for 'uid' base field definition.
+   *
+   * @see ::baseFieldDefinitions()
+   *
+   * @return array
+   *   An array of default values.
+   */
+  public static function getCurrentUserId() {
+    return [\Drupal::currentUser()->id()];
   }
 
 }

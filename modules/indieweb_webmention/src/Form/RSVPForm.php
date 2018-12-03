@@ -67,7 +67,7 @@ class RSVPForm extends FormBase {
       $mention->save();
     }
 
-    drupal_set_message($this->t('Your RSVP has been updated.'));
+    $this->messenger()->addMessage($this->t('Your RSVP has been updated.'));
   }
 
   /**

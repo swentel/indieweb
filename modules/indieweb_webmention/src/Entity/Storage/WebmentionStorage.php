@@ -72,4 +72,24 @@ class WebmentionStorage extends SqlContentEntityStorage implements WebmentionSto
       ->execute();
   }
 
+  /**
+   * {@inheritdoc}
+   */
+  public function getCommentIdByWebmentionId($field_name, $id) {
+    $cid = FALSE;
+
+    $table_name = 'comment__' . $field_name;
+    if ($this->database->schema()->tableExists($table_name)) {
+      $cid = $this->database
+        ->select($table_name, 'a')
+        ->fields('a', ['entity_id'])
+        ->condition($field_name . '_target_id', $id)
+        ->execute()
+        ->fetchField();
+    }
+
+    return $cid;
+  }
+
+
 }

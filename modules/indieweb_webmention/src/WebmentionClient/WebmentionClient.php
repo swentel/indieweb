@@ -412,7 +412,7 @@ class WebmentionClient implements WebmentionClientInterface {
       $parts = parse_url($webmention->getSource());
       $path_parts = explode('/', $parts['path']);
       if (!empty($path_parts[5])) {
-        $exists = \Drupal::database()->query("SELECT count(url) as count FROM {webmention_syndication} WHERE url LIKE :id", [':id' => '%/' . db_like($path_parts[5])])->fetchField();
+        $exists = \Drupal::entityTypeManager()->getStorage('indieweb_syndication')->checkIdenticalSyndication($path_parts[5]);
       }
     }
 

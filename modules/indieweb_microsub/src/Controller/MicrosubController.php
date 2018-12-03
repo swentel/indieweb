@@ -136,7 +136,7 @@ class MicrosubController extends ControllerBase {
     $channels_list = $this->entityTypeManager()->getStorage('indieweb_microsub_channel')->loadMultiple($ids);
 
     // Notifications channel.
-    $notifications = \Drupal::entityTypeManager()->getStorage('indieweb_microsub_channel')->getUnreadCount(0);
+    $notifications = \Drupal::entityTypeManager()->getStorage('indieweb_microsub_item')->getUnreadCountByChannel(0);
     $channels[] = (object) [
       'uid' => 0,
       'name' => 'Notifications',

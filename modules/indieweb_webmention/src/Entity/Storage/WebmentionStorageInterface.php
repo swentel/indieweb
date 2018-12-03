@@ -55,8 +55,22 @@ interface WebmentionStorageInterface extends ContentEntityStorageInterface {
    * Update RSVP value.
    *
    * @param $value
+   *   The RSVP value.
    * @param $id
+   *   The webmention id.
    */
   public function updateRSVP($value, $id);
+
+  /**
+   * Get comment id by webmention id.
+   *
+   * @param $field_name
+   *   The comment field name.
+   * @param $id
+   *   The webmention id.
+   *
+   * @return int $comment_id | FALSE
+   */
+  public function getCommentIdByWebmentionId($field_name, $id);
 
 }

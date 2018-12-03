@@ -192,13 +192,8 @@ function indieweb_context_entity_update(EntityInterface $entity, $is_new = NULL)
 function indieweb_context_entity_delete(EntityInterface $entity) {
 
   if ($entity instanceof ContentEntityInterface) {
-
     // Delete from post_contexts table.
-    \Drupal::database()
-      ->delete('indieweb_post_context')
-      ->condition('entity_id', $entity->id())
-      ->condition('entity_type_id', $entity->getEntityTypeId())
-      ->execute();
+    \Drupal::entityTypeManager()->getStorage('indieweb_post_context')->deleteByIdAndType($entity->id(), $entity->getEntityTypeId());
   }
 
 }

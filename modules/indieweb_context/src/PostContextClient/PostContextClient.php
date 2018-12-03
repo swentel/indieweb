@@ -46,13 +46,9 @@ class PostContextClient implements PostContextClientInterface {
 
               // Nodes.
               if ($data['entity_type_id'] == 'node') {
-                \Drupal::database()
-                  ->merge('indieweb_post_context')
-                  ->key('entity_id', $data['entity_id'])
-                  ->key('entity_type_id', $data['entity_type_id'])
-                  ->key('url', $data['url'])
-                  ->fields(['content' => json_encode($reference)])
-                  ->execute();
+                \Drupal::entityTypeManager()
+                  ->getStorage('indieweb_post_context')
+                  ->saveContentContext($data['entity_id'], $data['entity_type_id'], $data['url'], $reference);
               }
 
               // Microsub.
@@ -62,12 +58,9 @@ class PostContextClient implements PostContextClientInterface {
                   $reference['url'] = $data['url'];
                 }
 
-                \Drupal::database()
-                  ->merge('microsub_item')
-                  ->key('id', $data['entity_id'])
-                  ->fields(['post_context' => json_encode($reference)])
-                  ->execute();
-
+                \Drupal::entityTypeManager()
+                  ->getStorage('indieweb_post_context')
+                  ->saveMicrosubContext($data['entity_id'], $reference);
             }
           }
         }
@@ -85,22 +78,7 @@ class PostContextClient implements PostContextClientInterface {
    * {@inheritdoc}
    */
   public function getPostContexts($entity_id, $entity_type_id) {
-    $contexts = [];
-
-    $records = \Drupal::database()->query('SELECT url, content FROM {indieweb_post_context} WHERE entity_id = :entity_id AND entity_type_id = :entity_type_id', [':entity_id' => $entity_id, ':entity_type_id' => $entity_type_id]);
-    foreach ($records as $record) {
-
-      $content = (array) json_decode($record->content);
-      if (isset($content['post-type'])) {
-        $contexts[] = [
-          'url' => $record->url,
-          'content' => $content,
-        ];
-      }
-
-    }
-
-    return $contexts;
+    return \Drupal::entityTypeManager()->getStorage('indieweb_post_context')->getContentPostContexts($entity_id, $entity_type_id);
   }
 
 }

@@ -16,6 +16,9 @@ use Drupal\Core\Entity\ContentEntityInterface;
  *   persistent_cache = FALSE,
  *   admin_permission = "administer indieweb",
  *   base_table = "indieweb_post_context",
+ *   handlers = {
+ *     "storage" = "Drupal\indieweb_context\Entity\Storage\PostContextStorage"
+ *   },
  *   entity_keys = {
  *     "id" = "id",
  *   }

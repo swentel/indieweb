@@ -39,5 +39,11 @@ class SyndicationStorage extends SqlContentEntityStorage implements SyndicationS
       ->execute();
   }
 
+  /**
+   * {@inheritdoc}
+   */
+  public function checkIdenticalSyndication($like) {
+    return $this->database->query("SELECT count(url) as count FROM {webmention_syndication} WHERE url LIKE :match_url", [':match_url' => '%/' . db_like($like)])->fetchField();
+  }
 
 }

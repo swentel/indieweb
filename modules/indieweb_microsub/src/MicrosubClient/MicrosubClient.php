@@ -60,20 +60,9 @@ class MicrosubClient implements MicrosubClientInterface {
           if ($cleanup_old_items && $items_in_feed && $items_to_keep) {
             // We use two queries as not all mysql servers understand limits
             // in sub queries when the main query is a delete.
-            $id = \Drupal::database()
-              ->select('microsub_item', 'm')
-              ->fields('m', ['id'])
-              ->range($items_to_keep, 1)
-              ->condition('source_id', $source_id)
-              ->orderBy('id', 'DESC')
-              ->execute()
-              ->fetchField();
+            $id = \Drupal::entityTypeManager()->getStorage('indieweb_microsub_item')->getIdByRangeAndSource($items_to_keep, $source_id);
             if ($id) {
-              \Drupal::database()
-                ->delete('microsub_item')
-                ->condition('id', $id, '<')
-                ->condition('source_id', $source_id)
-                ->execute();
+              \Drupal::entityTypeManager()->getStorage('indieweb_microsub_item')->removeItemsBySourceOlderThanId($id, $source_id);
             }
           }
 
@@ -312,6 +301,8 @@ class MicrosubClient implements MicrosubClientInterface {
   }
 
   /**
+   * Get post ready for Aperture notification.
+   *
    * @param \Drupal\indieweb_webmention\Entity\WebmentionInterface $webmention
    *
    * @return \stdClass
@@ -338,25 +329,6 @@ class MicrosubClient implements MicrosubClientInterface {
       case 'in-reply-to':
         $properties['in-reply-to'] = [$base_url . $webmention->get('target')->value];
         $content = $webmention->get('content_text')->value;
-
-        // Add comment url if found.
-        if (($comment_config = \Drupal::config('indieweb_webmention.comment')) && $comment_config->get('comment_create_enable')) {
-          $comment_comment_webmention_field_name = $comment_config->get('comment_create_webmention_reference_field');
-          $table_name = 'comment__' . $comment_comment_webmention_field_name;
-          if (\Drupal::database()->schema()->tableExists($table_name)) {
-            $cid = \Drupal::database()
-              ->select($table_name, 'a')
-              ->fields('a', ['entity_id'])
-              ->condition($comment_comment_webmention_field_name . '_target_id', $webmention->id())
-              ->execute()
-              ->fetchField();
-
-            if ($cid) {
-              $content .= "\n\n" . t('Comment available at @comment_url', ['@comment_url' => Url::fromRoute('indieweb.comment.canonical', ['comment' => $cid], ['absolute' => TRUE])->toString()]);
-            }
-          }
-        }
-
         $properties['content'] = [$content];
         break;
       case 'mention-of':

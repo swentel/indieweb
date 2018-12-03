@@ -3,7 +3,6 @@
 namespace Drupal\indieweb_microsub\Entity\Storage;
 
 use Drupal\Core\Entity\ContentEntityStorageInterface;
-use Drupal\indieweb_microsub\Entity\MicrosubSourceInterface;
 
 /**
  * Defines an interface for microsub item entity storage classes.
@@ -11,15 +10,36 @@ use Drupal\indieweb_microsub\Entity\MicrosubSourceInterface;
 interface MicrosubItemStorageInterface extends ContentEntityStorageInterface {
 
   /**
+   * Get the unread items for a channel.
+   *
+   * @param int $channel_id
+   *   The channel id.
+   *
+   * @return integer
+   */
+  public function getUnreadCountByChannel($channel_id);
+
+  /**
    * Returns the count of the items in a source.
    *
-   * @param \Drupal\indieweb_microsub\Entity\MicrosubSourceInterface $source
-   *   The feed entity.
+   * @param $channel_id
+   *   The channel id.
+   *
+   * @return int
+   *   The count of items associated with a channel.
+   */
+  public function getItemCountByChannel($channel_id);
+
+  /**
+   * Returns the count of the items in a source.
+   *
+   * @param $source_id
+   *   The source id.
    *
    * @return int
    *   The count of items associated with a source.
    */
-  public function getItemCount(MicrosubSourceInterface $source);
+  public function getItemCountBySource($source_id);
 
   /**
    * Loads microsub items filtered by a channel.
@@ -67,6 +87,24 @@ interface MicrosubItemStorageInterface extends ContentEntityStorageInterface {
   public function removeAllItemsBySource($source_id);
 
   /**
+   * Removes items by source.
+   *
+   * @param $id
+   *   The microsub item id
+   * @param $source_id
+   *   The source id
+   */
+  public function removeItemsBySourceOlderThanId($id, $source_id);
+
+  /**
+   * Updates the items of this source to the new channel.
+   *
+   * @param $source_id
+   * @param $channel_id
+   */
+  public function updateItemsToNewChannel($source_id, $channel_id);
+
+  /**
    * Check if an item exists.
    *
    * @param $source_id
@@ -77,5 +115,15 @@ interface MicrosubItemStorageInterface extends ContentEntityStorageInterface {
    * @return integer
    */
   public function itemExists($source_id, $guid);
+
+  /**
+   * Get an id by range and source.
+   *
+   * @param $start
+   * @param $source_id
+   *
+   * @return int $id|FALSE
+   */
+  public function getIdByRangeAndSource($start, $source_id);
 
 }

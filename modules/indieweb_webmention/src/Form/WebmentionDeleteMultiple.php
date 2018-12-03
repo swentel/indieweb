@@ -131,7 +131,7 @@ class WebmentionDeleteMultiple extends ConfirmFormBase {
       }
 
       if ($total_count) {
-        drupal_set_message($this->formatPlural($total_count, 'Deleted 1 webmention.', 'Deleted @count webmentions.'));
+        $this->messenger()->addMessage($this->formatPlural($total_count, 'Deleted 1 webmention.', 'Deleted @count webmentions.'));
       }
 
       $this->tempStoreFactory->get('webmention_multiple_delete_confirm')->delete(\Drupal::currentUser()->id());

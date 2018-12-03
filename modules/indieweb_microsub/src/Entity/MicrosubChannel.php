@@ -3,7 +3,6 @@
 namespace Drupal\indieweb_microsub\Entity;
 
 use Drupal\Core\Entity\ContentEntityBase;
-use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
 
@@ -15,7 +14,6 @@ use Drupal\Core\Field\BaseFieldDefinition;
  *   label = @Translation("Microsub channel"),
  *   label_collection = @Translation("Channels"),
  *   handlers = {
- *     "storage" = "Drupal\indieweb_microsub\Entity\Storage\MicrosubChannelStorage",
  *     "list_builder" = "Drupal\indieweb_microsub\Entity\MicrosubChannelListBuilder",
  *     "form" = {
  *       "add" = "Drupal\indieweb_microsub\Form\MicrosubChannelForm",
@@ -76,14 +74,14 @@ class MicrosubChannel extends ContentEntityBase implements MicrosubChannelInterf
    * {@inheritdoc}
    */
   public function getUnreadCount() {
-    return \Drupal::entityTypeManager()->getStorage('indieweb_microsub_channel')->getUnreadCount($this->id());
+    return \Drupal::entityTypeManager()->getStorage('indieweb_microsub_item')->getUnreadCountByChannel($this->id());
   }
 
   /**
    * {@inheritdoc}
    */
   public function getItemCount() {
-    return \Drupal::entityTypeManager()->getStorage('indieweb_microsub_channel')->getItemCount($this->id());
+    return \Drupal::entityTypeManager()->getStorage('indieweb_microsub_item')->getItemCountByChannel($this->id());
   }
 
   /**
