@@ -37,7 +37,7 @@ The functionality is split into several modules:
 - Microsub: expose a Microsub endpoint, external or internal
 - Feeds: create Microformats2, Atom and JF2 feeds
 - Post context: store context for content and microsub items
-- Media cache: store images locally for internal webmention and micropub endpoint
+- Media cache: store images locally for internal webmention and microsub endpoint
 
 Additional useful modules
 
@@ -370,7 +370,7 @@ by installing the CDN module. The cache is generated when the webmention or micr
 on request is minimal.
 
 By default, imagecache_external stores all files in public://externals. If you want to make it more dynamic,
-for instancy, by year and month, add following line to settings.php
+for instance, by year and month, add following line to settings.php
 
 $config['imagecache_external.settings']['imagecache_directory'] = 'externals/' . date('Y') . '/' . date('m');
 

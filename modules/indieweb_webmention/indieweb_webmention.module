@@ -189,25 +189,6 @@ function indieweb_get_syndication_targets($return_all_config = FALSE) {
 }
 
 /**
- * Get the syndications for an entity.
- *
- * @param $entity_id
- * @param $entity_type_id
- *
- * @return array
- */
-function indieweb_get_syndications($entity_id, $entity_type_id) {
-  $syndications = [];
-
-  $records = \Drupal::database()->query('SELECT url FROM {webmention_syndication} WHERE entity_id = :entity_id AND entity_type_id = :entity_type_id', [':entity_id' => $entity_id, ':entity_type_id' => $entity_type_id]);
-  foreach ($records as $record) {
-    $syndications[] = $record->url;
-  }
-
-  return $syndications;
-}
-
-/**
  * Implements hook_cron().
  */
 function indieweb_webmention_cron() {
@@ -548,7 +529,7 @@ function _indieweb_webmention_extra_fields_display(array &$build, EntityInterfac
 
   // Syndication field.
   if ($display->getComponent('indieweb_syndication')) {
-    $syndications = indieweb_get_syndications($entity->id(), $entity->getEntityTypeId());
+    $syndications = \Drupal::entityTypeManager()->getStorage('indieweb_syndication')->getSyndicationUrls($entity->id(), $entity->getEntityTypeId());
     if ($syndications) {
       $items = [];
 
