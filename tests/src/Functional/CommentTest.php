@@ -195,7 +195,10 @@ class CommentTest extends IndiewebBrowserTestBase {
     // We should have a mail notification.
     $captured_emails = \Drupal::state()->get('system.test_mail_collector');
     $notification = end($captured_emails);
-    $this->assertTrue($notification && $notification['id'] == 'indieweb_webmention_comment_created', 'Notification mail found for comment.');
+    self::assertTrue($notification && $notification['id'] == 'indieweb_webmention_webmention_comment_created', 'Notification mail found for comment.');
+    self::assertEquals('Comment created on "' . $this->title_text . '" via webmention', $notification['subject']);
+    self::assertTrue(strpos($notification['body'], $notification['params']['comment_webmention_body']) !== FALSE);
+    self::assertTrue(strpos($notification['body'], "The comment is unpublished, so check the approval queue at") !== FALSE);
 
     // Publish the comment.
     $comment->setPublished();
