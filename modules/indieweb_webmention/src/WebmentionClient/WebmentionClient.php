@@ -383,11 +383,11 @@ class WebmentionClient implements WebmentionClientInterface {
                 // Send mail notification.
                 if ($config->get('comment_create_mail_notification')) {
                   $mailManager = \Drupal::service('plugin.manager.mail');
-                  $module = 'indieweb';
+                  $module = 'indieweb_webmention';
                   $key = 'webmention_comment_created';
                   $to = $config->get('comment_create_mail_notification');
                   $params['comment'] = $comment;
-                  $params['comment_webmention_body'] = $webmention->get('content_text')->value;
+                  $params['comment_webmention_body'] = $webmention->getPlainContent();
                   $langcode = \Drupal::currentUser()->getPreferredLangcode();
                   $mailManager->mail($module, $key, $to, $langcode, $params, NULL);
                 }
