@@ -149,6 +149,9 @@ target, that will be altered later.
 You can also configure to just enter a custom URL, or use a "link" field to send a webmention to. On comments, these 
 link fields can be pre-filled when replying when the parent comment has a webmention reference.
 
+In case you have troubles sending webmentions (e.g. no webmention is found), apply following patch:
+https://github.com/indieweb/mention-client-php/pull/35
+
 ## Microformats
 
 Microformats are extensions to HTML for marking up people, organizations, events, locations, blog posts, products,

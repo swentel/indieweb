@@ -17,10 +17,7 @@ class WebmentionClientTest extends WebmentionClient implements WebmentionClientI
     try {
       $response = $httpClient->get($uri);
       if ($response->getHeader('Location')) {
-        $return = [];
-        $return['code'] = 201;
-        $return['headers']['Location'] = $response->getHeader('Location')[0];
-        return $return;
+        return $response;
       }
     }
     catch (\Exception $ignored) {}

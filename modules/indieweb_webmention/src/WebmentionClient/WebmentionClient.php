@@ -46,7 +46,10 @@ class WebmentionClient implements WebmentionClientInterface {
     $syndication_targets = indieweb_get_syndication_targets();
     while (time() < $end && ($item = \Drupal::queue(INDIEWEB_WEBMENTION_QUEUE)->claimItem())) {
       $data = $item->data;
+
+      $store_send = FALSE;
       if (!empty($data['source']) && !empty($data['target'])) {
+
 
         try {
 
@@ -56,31 +59,39 @@ class WebmentionClient implements WebmentionClientInterface {
           // Send with IndieWeb client.
           $response = $this->sendWebmention($sourceURL, $targetURL);
 
-          // Store the syndication when the targetUrl is in the syndication
-          // targets.
-          if (isset($syndication_targets[$targetURL])) {
-            if (!empty($response) && $response['code'] == 201 && !empty($response['headers']['Location'])) {
+          if ($response) {
+            $store_send = TRUE;
 
-              if (!empty($data['entity_id']) && !empty($data['entity_type_id'])) {
-                $values = [
-                  'entity_id' => $data['entity_id'],
-                  'entity_type_id' => $data['entity_type_id'],
-                  'url' => $response['headers']['Location'],
-                ];
+            // Store the syndication when the targetUrl is in the syndication
+            // targets.
+            if (isset($syndication_targets[$targetURL])) {
+              if ($response->getStatusCode() == 201 && !empty($response->getHeader('Location'))) {
 
-                $syndication = \Drupal::entityTypeManager()->getStorage('indieweb_syndication')->create($values);
-                $syndication->save();
+                if (!empty($data['entity_id']) && !empty($data['entity_type_id'])) {
+                  $values = [
+                    'entity_id' => $data['entity_id'],
+                    'entity_type_id' => $data['entity_type_id'],
+                    'url' => $response->getHeader('Location')[0],
+                  ];
 
-                Cache::invalidateTags([$data['entity_type_id'] . ':' . $data['entity_id']]);
+                  $syndication = \Drupal::entityTypeManager()->getStorage('indieweb_syndication')->create($values);
+                  $syndication->save();
+
+                  Cache::invalidateTags([$data['entity_type_id'] . ':' . $data['entity_id']]);
+                }
               }
             }
           }
 
           // Log the response if configured.
           if (\Drupal::config('indieweb_webmention.settings')->get('send_log_response')) {
-            \Drupal::logger('indieweb_send_response')->notice('response for @source to @target: @response', ['@response' => print_r($response, 1), '@source' => $sourceURL, '@target' => $targetURL]);
+            if ($response) {
+              \Drupal::logger('indieweb_send')->notice('response code for @source to @target: @code', ['@code' => $response->getStatusCode(), '@source' => $sourceURL, '@target' => $targetURL]);
+            }
+            else {
+              \Drupal::logger('indieweb_send')->notice('No webmention endpoint found for @source to @target', ['@source' => $sourceURL, '@target' => $targetURL]);
+            }
           }
-
         }
         catch (Exception $e) {
           \Drupal::logger('indieweb_send')->notice('Error sending webmention for @source to @target: @message', ['@message' => $e->getMessage(), '@source' => $sourceURL, '@target' => $targetURL]);
@@ -88,20 +99,23 @@ class WebmentionClient implements WebmentionClientInterface {
       }
 
       // Store in send table.
-      $values = [
-        'source' => $data['source'],
-        'target' => $data['target'],
-        'entity_id' => !empty($data['entity_id']) ? $data['entity_id'] : 0,
-        'entity_type_id' => !empty($data['entity_type_id']) ? $data['entity_type_id'] : '',
-        'created' => \Drupal::time()->getCurrentTime(),
-      ];
+      if ($store_send) {
 
-      try {
-        $send = \Drupal::entityTypeManager()->getStorage('indieweb_webmention_send')->create($values);
-        $send->save();
-      }
-      catch (\Exception $e) {
-        \Drupal::logger('indieweb_send')->notice('Error saving send webmention record: @message', ['@message' => $e->getMessage()]);
+        $values = [
+          'source' => $data['source'],
+          'target' => $data['target'],
+          'entity_id' => !empty($data['entity_id']) ? $data['entity_id'] : 0,
+          'entity_type_id' => !empty($data['entity_type_id']) ? $data['entity_type_id'] : '',
+          'created' => \Drupal::time()->getCurrentTime(),
+        ];
+
+        try {
+          $send = \Drupal::entityTypeManager()->getStorage('indieweb_webmention_send')->create($values);
+          $send->save();
+        }
+        catch (\Exception $e) {
+          \Drupal::logger('indieweb_send')->notice('Error saving send webmention record: @message', ['@message' => $e->getMessage()]);
+        }
       }
 
       // Remove the item - always.
@@ -114,7 +128,26 @@ class WebmentionClient implements WebmentionClientInterface {
    */
   public function sendWebmention($sourceURL, $targetURL) {
     $client = new MentionClient();
-    return $client->sendWebmention($sourceURL, $targetURL);
+    $client->usemf2 = FALSE;
+    $webmentionEndpoint = $client->discoverWebmentionEndpoint($targetURL);
+
+    if ($webmentionEndpoint) {
+      $client = \Drupal::httpClient();
+
+      $options = [
+        'headers' => [
+          'Accept' => 'application/json, */*;q=0.8',
+        ],
+        'form_params' => [
+          'source' => $sourceURL,
+          'target' => $targetURL,
+        ],
+      ];
+
+      return $client->post($webmentionEndpoint, $options);
+    }
+
+    return FALSE;
   }
 
   /**

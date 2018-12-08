@@ -31,7 +31,7 @@ interface WebmentionClientInterface {
    * @param $sourceURL
    * @param $targetURL
    *
-   * @return mixed
+   * @return \Psr\Http\Message\ResponseInterface
    */
   public function sendWebmention($sourceURL, $targetURL);
 
