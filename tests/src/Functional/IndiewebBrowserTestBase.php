@@ -478,6 +478,29 @@ abstract class IndiewebBrowserTestBase extends BrowserTestBase {
   }
 
   /**
+   * Creates a number of nodes.
+   *
+   * @param $number
+   * @param $type
+   * @param int $title_number
+   * @param null $timestamp
+   */
+  protected function createNodes($number, $type, $title_number = 1, $timestamp = NULL) {
+    if ($number > 0) {
+      if (!isset($timestamp)) {
+        $timestamp = time() - 3600;
+      }
+      while ($number > 0) {
+        $settings = ['type' => $type, 'title' => 'Number ' . $title_number, 'created' => $timestamp];
+        $this->drupalCreateNode($settings);
+        $number--;
+        $title_number++;
+        $timestamp += 10;
+      }
+    }
+  }
+
+  /**
    * Assert webmention queue items.
    *
    * @param array $urls

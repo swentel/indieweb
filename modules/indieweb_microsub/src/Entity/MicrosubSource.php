@@ -268,7 +268,7 @@ class MicrosubSource extends ContentEntityBase implements MicrosubSourceInterfac
       ->setLabel(t('How many items a feed contains'))
       ->setDefaultValue(0);
 
-    $keep_values = [0, 20, 30, 40, 50, 60, 70, 80, 90, 100, 200, 250, 500, 1000];
+    $keep_values = [0, 5, 10, 15, 20, 30, 40, 50, 60, 70, 80, 90, 100, 200, 250, 500, 1000];
     $keep = array_combine($keep_values, $keep_values);
     $fields['items_to_keep'] = BaseFieldDefinition::create('list_integer')
       ->setLabel(t('Items to keep'))

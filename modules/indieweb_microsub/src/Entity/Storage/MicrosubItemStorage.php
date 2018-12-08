@@ -97,17 +97,6 @@ class MicrosubItemStorage extends SqlContentEntityStorage implements MicrosubIte
   /**
    * {@inheritdoc}
    */
-  public function removeItemsBySourceOlderThanId($id, $source_id) {
-    $this->database
-      ->delete('microsub_item')
-      ->condition('id', $id, '<')
-      ->condition('source_id', $source_id)
-      ->execute();
-  }
-
-  /**
-   * {@inheritdoc}
-   */
   public function updateItemsToNewChannel($source_id, $channel_id) {
     $this->database->update('microsub_item')
       ->fields(['channel_id' => $channel_id])
@@ -137,7 +126,15 @@ class MicrosubItemStorage extends SqlContentEntityStorage implements MicrosubIte
       $query->condition('post_type', $exclude, 'NOT IN');
     }
 
-    return $this->executeFeedItemQuery($query, $limit);
+    $query
+      ->sort('created', 'DESC')
+      ->sort('id', 'DESC');
+
+    if (!empty($limit)) {
+      $query->pager($limit);
+    }
+
+    return $this->loadMultiple($query->execute());
   }
 
   /**
@@ -156,37 +153,26 @@ class MicrosubItemStorage extends SqlContentEntityStorage implements MicrosubIte
   /**
    * {@inheritdoc}
    */
-  public function getIdByRangeAndSource($start, $source_id) {
+  public function getTimestampByRangeAndSource($start, $source_id) {
     return $this->database
       ->select('microsub_item', 'm')
-      ->fields('m', ['id'])
+      ->fields('m', ['timestamp'])
       ->range($start, 1)
       ->condition('source_id', $source_id)
-      ->orderBy('id', 'DESC')
+      ->orderBy('timestamp', 'DESC')
       ->execute()
       ->fetchField();
   }
 
   /**
-   * Helper method to execute an item query.
-   *
-   * @param \Drupal\Core\Entity\Query\QueryInterface $query
-   *   The query to execute.
-   * @param int $limit
-   *   (optional) The number of items to return.
-   *
-   * @return \Drupal\aggregator\ItemInterface[]
-   *   An array of the microsub items.
+   * {@inheritdoc}
    */
-  protected function executeFeedItemQuery(QueryInterface $query, $limit) {
-    $query
-      ->sort('created', 'DESC')
-      ->sort('id', 'DESC');
-    if (!empty($limit)) {
-      $query->pager($limit);
-    }
-
-    return $this->loadMultiple($query->execute());
+  public function removeItemsBySourceOlderThanTimestamp($timestamp, $source_id) {
+    $this->database
+      ->delete('microsub_item')
+      ->condition('timestamp', $timestamp, '<')
+      ->condition('source_id', $source_id)
+      ->execute();
   }
 
 }

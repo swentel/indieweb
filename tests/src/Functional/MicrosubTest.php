@@ -2,6 +2,8 @@
 
 namespace Drupal\Tests\indieweb\Functional;
 
+use Drupal\indieweb_microsub\Entity\MicrosubSource;
+
 /**
  * Tests integration of microsub.
  *
@@ -378,6 +380,68 @@ class MicrosubTest extends IndiewebBrowserTestBase {
   }
 
   /**
+   * Tests the cleanup functionality.
+   */
+  function testMicrosubCleanup() {
+    $source = MicrosubSource::load(2);
+    $source->delete();
+
+    $this->createNodes(10, 'article');
+
+    $this->drupalLogin($this->adminUser);
+    $edit = ['microsub_internal' => TRUE, 'microsub_internal_handler' => 'drush', 'microsub_internal_cleanup_items' => TRUE];
+    $this->drupalPostForm('admin/config/services/indieweb/microsub', $edit, 'Save configuration');
+
+    // Set all microformats too.
+    $microformats = [
+      'h_entry' => 1,
+      'u_photo' => 1,
+      'e_content' => 1,
+      'post_metadata' => 1,
+      'p_name_exclude_node_type' => 'page',
+    ];
+    $this->drupalPostForm('admin/config/services/indieweb/microformats', $microformats, 'Save configuration');
+
+    $this->fetchItems();
+    $this->assertMicrosubItemCount('item', 10);
+
+    $this->createNodes(1, 'article', 11, time() - 1800);
+    $this->drupalPostForm('admin/config/services/indieweb/microsub/sources/1/edit', ['items_to_keep' => 5], 'Save');
+
+    $this->resetNextFetch(1);
+    $this->fetchItems();
+    $this->assertItemTitles(range(6, 11));
+    $this->assertMicrosubItemCount('item', 6);
+
+    $this->createNodes(2, 'article', 12, time() - 900);
+    $this->resetNextFetch(1);
+    $this->fetchItems();
+    $this->assertItemTitles(range(8, 13));
+    $this->assertMicrosubItemCount('item', 6);
+  }
+
+  /**
+   * Assert titles.
+   *
+   * @param $titles
+   */
+  protected function assertItemTitles($titles) {
+    $total = 0;
+    $total_to_find = count($titles);
+    $records = \Drupal::database()->query('SELECT * FROM {microsub_item} order by timestamp DESC');
+    foreach ($records as $record) {
+      $data = json_decode($record->data);
+      foreach ($titles as $nr) {
+        if ($data->name == 'Number ' . $nr) {
+          $total++;
+        }
+      }
+    }
+
+    self::assertEquals($total_to_find, $total);
+  }
+
+  /**
    * Create feeds.
    */
   protected function createFeeds() {
@@ -388,7 +452,7 @@ class MicrosubTest extends IndiewebBrowserTestBase {
       'feedTitle' => 'Timeline',
       'ownerId' => 1,
       'excludeIndexing' => 1,
-      'limit' => 10,
+      'limit' => 20,
       'author' => '<a class="u-url p-name" href="/">Your name</a><img src="https://example.com/image/avatar.png" class="u-photo hidden" alt="Your name">',
       'bundles[]' => [
         'node|article' => 'node|article',

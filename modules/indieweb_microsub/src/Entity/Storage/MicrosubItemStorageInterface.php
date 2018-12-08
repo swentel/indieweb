@@ -87,16 +87,6 @@ interface MicrosubItemStorageInterface extends ContentEntityStorageInterface {
   public function removeAllItemsBySource($source_id);
 
   /**
-   * Removes items by source.
-   *
-   * @param $id
-   *   The microsub item id
-   * @param $source_id
-   *   The source id
-   */
-  public function removeItemsBySourceOlderThanId($id, $source_id);
-
-  /**
    * Updates the items of this source to the new channel.
    *
    * @param $source_id
@@ -117,6 +107,16 @@ interface MicrosubItemStorageInterface extends ContentEntityStorageInterface {
   public function itemExists($source_id, $guid);
 
   /**
+   * Removes items by source and older than created time.
+   *
+   * @param $created
+   *   The microsub item created time
+   * @param $source_id
+   *   The source id
+   */
+  public function removeItemsBySourceOlderThanTimestamp($timestamp, $source_id);
+
+  /**
    * Get an id by range and source.
    *
    * @param $start
@@ -124,6 +124,6 @@ interface MicrosubItemStorageInterface extends ContentEntityStorageInterface {
    *
    * @return int $id|FALSE
    */
-  public function getIdByRangeAndSource($start, $source_id);
+  public function getTimestampByRangeAndSource($start, $source_id);
 
 }

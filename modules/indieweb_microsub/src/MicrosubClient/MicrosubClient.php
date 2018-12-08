@@ -30,10 +30,10 @@ class MicrosubClient implements MicrosubClientInterface {
         continue;
       }
 
-
       $url = $source->label();
       $tries = $source->getTries();
-      $empty = $source->getItemCount() == 0;
+      $item_count = $source->getItemCount();
+      $empty = $item_count== 0;
       $source_id = $source->id();
       $channel_id = $source->getChannelId();
       $disable_image_cache = $source->disableImageCache();
@@ -53,42 +53,54 @@ class MicrosubClient implements MicrosubClientInterface {
         $hash = md5($body);
         if ($source->getHash() != $hash) {
 
-          // Cleanup old items if we can. We do this here because it doesn't
-          // make much sense to check this if the hash hasn't changed.
-          $items_in_feed = $source->getItemsInFeed();
-          $items_to_keep = $source->getKeepItemsInFeed();
-          if ($cleanup_old_items && $items_in_feed && $items_to_keep) {
-            // We use two queries as not all mysql servers understand limits
-            // in sub queries when the main query is a delete.
-            $id = \Drupal::entityTypeManager()->getStorage('indieweb_microsub_item')->getIdByRangeAndSource($items_to_keep, $source_id);
-            if ($id) {
-              \Drupal::entityTypeManager()->getStorage('indieweb_microsub_item')->removeItemsBySourceOlderThanId($id, $source_id);
-            }
-          }
-
-          // Get context.
-          $context = $post_context_enabled ? $source->getPostContext() : [];
-
           // Parse the body.
           $parsed = $xray->parse($url, $body, ['expect' => 'feed']);
           if ($parsed && isset($parsed['data']['type']) && $parsed['data']['type'] == 'feed') {
-            $items = array_reverse($parsed['data']['items']);
+
+            $context = $post_context_enabled ? $source->getPostContext() : [];
+            $items_to_keep = $source->getKeepItemsInFeed();
+            $items_in_feed = $source->getItemsInFeed();
+
+            // Sort by published time.
+            $items_sorted = [];
+            $items = $parsed['data']['items'];
             $total_items = count($items);
+            foreach ($items as $i => $item) {
+              if (isset($item['published'])) {
+                $time = strtotime($item['published']);
+                $items_sorted[$time . '.' . $i] = $item;
+              }
+              else {
+                $items_sorted[] = $item;
+              }
+            }
+            krsort($items_sorted);
 
             $c = 0;
-            foreach ($items as $i => $item) {
+            foreach ($items_sorted as $item) {
               $this->saveItem($item, $tries, $source_id, $channel_id, $empty, $context, $disable_image_cache);
               $c++;
 
               // If we have number of items to keep and we hit the amount, break
               // the loop so we don't keep importing everything over and over.
-              if ($items_to_keep && $c > $items_to_keep) {
+              if (!$empty && $items_to_keep && $c > $items_to_keep) {
                 break;
               }
             }
 
             if ($total_items) {
               $source->setItemsInFeed($total_items);
+            }
+
+            // Cleanup old items if we can. We do this here because it doesn't
+            // make much sense to check this if the hash hasn't changed.
+            if (!$empty && $cleanup_old_items && $items_in_feed && $items_to_keep && $items_in_feed >= $item_count) {
+              // We use two queries as not all mysql servers understand limits
+              // in sub queries when the main query is a delete.
+              $timestamp = \Drupal::entityTypeManager()->getStorage('indieweb_microsub_item')->getTimestampByRangeAndSource($items_to_keep, $source_id);
+              if ($timestamp) {
+                \Drupal::entityTypeManager()->getStorage('indieweb_microsub_item')->removeItemsBySourceOlderThanTimestamp($timestamp, $source_id);
+              }
             }
           }
 
@@ -119,6 +131,8 @@ class MicrosubClient implements MicrosubClientInterface {
    * @param array $context
    * @param $disable_image_cache
    *
+   * @return bool
+   *
    * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
    * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    * @throws \Drupal\Core\Entity\EntityStorageException
@@ -139,7 +153,7 @@ class MicrosubClient implements MicrosubClientInterface {
     // Check if this entry exists.
     $exists = \Drupal::entityTypeManager()->getStorage('indieweb_microsub_item')->itemExists($source_id, $guid);
     if ($exists) {
-      return;
+      return FALSE;
     }
 
     // Reset tries.
