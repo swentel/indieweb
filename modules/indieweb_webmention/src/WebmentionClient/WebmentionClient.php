@@ -128,7 +128,6 @@ class WebmentionClient implements WebmentionClientInterface {
    */
   public function sendWebmention($sourceURL, $targetURL) {
     $client = new MentionClient();
-    $client->usemf2 = FALSE;
     $webmentionEndpoint = $client->discoverWebmentionEndpoint($targetURL);
 
     if ($webmentionEndpoint) {
