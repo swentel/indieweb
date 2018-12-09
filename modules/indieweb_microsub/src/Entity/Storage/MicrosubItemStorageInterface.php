@@ -107,9 +107,9 @@ interface MicrosubItemStorageInterface extends ContentEntityStorageInterface {
   public function itemExists($source_id, $guid);
 
   /**
-   * Removes items by source and older than created time.
+   * Removes items by source and older than created time and is unread.
    *
-   * @param $created
+   * @param $timestamp
    *   The microsub item created time
    * @param $source_id
    *   The source id

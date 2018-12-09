@@ -172,6 +172,7 @@ class MicrosubItemStorage extends SqlContentEntityStorage implements MicrosubIte
       ->delete('microsub_item')
       ->condition('timestamp', $timestamp, '<')
       ->condition('source_id', $source_id)
+      ->condition('is_read', 1)
       ->execute();
   }
 

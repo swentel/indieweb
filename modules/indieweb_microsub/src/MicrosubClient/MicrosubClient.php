@@ -33,7 +33,7 @@ class MicrosubClient implements MicrosubClientInterface {
       $url = $source->label();
       $tries = $source->getTries();
       $item_count = $source->getItemCount();
-      $empty = $item_count== 0;
+      $empty = $item_count == 0;
       $source_id = $source->id();
       $channel_id = $source->getChannelId();
       $disable_image_cache = $source->disableImageCache();
@@ -94,7 +94,7 @@ class MicrosubClient implements MicrosubClientInterface {
 
             // Cleanup old items if we can. We do this here because it doesn't
             // make much sense to check this if the hash hasn't changed.
-            if (!$empty && $cleanup_old_items && $items_in_feed && $items_to_keep && $items_in_feed >= $item_count) {
+            if (!$empty && $cleanup_old_items && $items_in_feed && $items_to_keep && $item_count >= $items_to_keep) {
               // We use two queries as not all mysql servers understand limits
               // in sub queries when the main query is a delete.
               $timestamp = \Drupal::entityTypeManager()->getStorage('indieweb_microsub_item')->getTimestampByRangeAndSource($items_to_keep, $source_id);
