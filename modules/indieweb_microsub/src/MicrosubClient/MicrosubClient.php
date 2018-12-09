@@ -178,10 +178,10 @@ class MicrosubClient implements MicrosubClientInterface {
       $values['timestamp'] = strtotime($item['published']);
     }
     else {
-      $values['timestamp'] = \Drupal::time()->getRequestTime();
+      $values['timestamp'] = \Drupal::time()->getCurrentTime();
     }
 
-    $values['created'] = $empty ? $values['timestamp'] : \Drupal::time()->getRequestTime();
+    $values['created'] = $empty ? $values['timestamp'] : \Drupal::time()->getCurrentTime();
 
     $microsub_item = MicrosubItem::create($values);
     $microsub_item->save();

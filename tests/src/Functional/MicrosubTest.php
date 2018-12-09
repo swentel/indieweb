@@ -172,6 +172,7 @@ class MicrosubTest extends IndiewebBrowserTestBase {
     $settings_article = [
       'type' => 'article',
       'title' => 'An article',
+      'created' => \Drupal::time()->getRequestTime() - 3600,
       'body' => [
         'value' => 'This is an article on the first timeline feed',
         'format' => filter_default_format()

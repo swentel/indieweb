@@ -128,7 +128,7 @@ class MicrosubItemStorage extends SqlContentEntityStorage implements MicrosubIte
 
     $query
       ->sort('created', 'DESC')
-      ->sort('id', 'DESC');
+      ->sort('id', 'ASC');
 
     if (!empty($limit)) {
       $query->pager($limit);
