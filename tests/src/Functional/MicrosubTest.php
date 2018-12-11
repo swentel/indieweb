@@ -419,6 +419,12 @@ class MicrosubTest extends IndiewebBrowserTestBase {
     $this->fetchItems();
     $this->assertItemTitles(range(8, 13));
     $this->assertMicrosubItemCount('item', 6);
+
+    // delete-items test.
+    $this->drupalPostForm('admin/config/services/indieweb/microsub/sources/1/delete-items', [], 'Confirm');
+    $this->assertSession()->responseContains('Deleted all items from');
+    $this->assertMicrosubItemCount('item', 0);
+
   }
 
   /**

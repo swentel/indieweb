@@ -49,7 +49,7 @@ class MicrosubSourceItemsDeleteForm extends ConfirmFormBase {
    * {@inheritdoc}
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
-    \Drupal::entityTypeManager()->getStorage('indieweb_microsub_source')->deleteItems($this->source->id());
+    \Drupal::entityTypeManager()->getStorage('indieweb_microsub_item')->removeAllItemsBySource($this->source->id());
     $this->messenger()->addMessage($this->t('Deleted all items from @source.', ['@source' => $this->source->label(),]));
     $form_state->setRedirectUrl($this->getCancelUrl());
   }
