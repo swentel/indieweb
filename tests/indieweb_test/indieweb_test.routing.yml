@@ -162,6 +162,15 @@ indieweb_test.webmention_follow_fediverse:
   requirements:
     _access: 'TRUE'
 
+indieweb_test.feed_pinned:
+  path: '/feed-pinned'
+  defaults:
+    _controller: '\Drupal\indieweb_test\Controller\IndiewebTestController::feed'
+    _title: 'Feed pinned'
+    theme: 'feed_pinned'
+  requirements:
+    _access: 'TRUE'
+
 indieweb_test.webmention_exception:
   path: '/webmention-exception'
   defaults:

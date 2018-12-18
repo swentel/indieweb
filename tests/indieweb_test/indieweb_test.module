@@ -23,6 +23,7 @@ function indieweb_test_theme($existing, $type, $theme, $path) {
     'post_type_bookmark_site' => ['variables' => ['target_url' => NULL]],
     'post_type_follow_fediverse' => ['variables' => ['target_url' => NULL]],
     'post_type_rsvp_site' => ['variables' => ['target_url' => NULL]],
+    'feed_pinned' => ['variables' => []],
   ];
 }
 

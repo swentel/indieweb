@@ -79,13 +79,14 @@ class MicrosubClient implements MicrosubClientInterface {
             $c = 0;
             foreach ($items_sorted as $item) {
               $this->saveItem($item, $tries, $source_id, $channel_id, $empty, $context, $disable_image_cache);
-              $c++;
 
               // If we have number of items to keep and we hit the amount, break
               // the loop so we don't keep importing everything over and over.
               if (!$empty && $items_to_keep && $c > $items_to_keep) {
                 break;
               }
+
+              $c++;
             }
 
             if ($total_items) {

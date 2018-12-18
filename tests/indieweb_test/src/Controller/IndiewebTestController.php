@@ -132,6 +132,20 @@ class IndiewebTestController extends ControllerBase {
   }
 
   /**
+   * Feed callback.
+   *
+   * @param $theme
+   * @param $nid
+   *
+   * @return array
+   */
+  public function feed($theme) {
+    $build = [];
+    $build['feed'] = ['#theme' => $theme];
+    return $build;
+  }
+
+  /**
    * Webmention post type callback with exception
    */
   public function webmentionPostTypeException($theme, $nid) {

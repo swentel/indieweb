@@ -157,7 +157,7 @@ class MicrosubItemStorage extends SqlContentEntityStorage implements MicrosubIte
     return $this->database
       ->select('microsub_item', 'm')
       ->fields('m', ['timestamp'])
-      ->range($start, 1)
+      ->range(($start - 1), 1)
       ->condition('source_id', $source_id)
       ->orderBy('timestamp', 'DESC')
       ->execute()

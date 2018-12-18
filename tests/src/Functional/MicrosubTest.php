@@ -382,6 +382,8 @@ class MicrosubTest extends IndiewebBrowserTestBase {
 
   /**
    * Tests the cleanup functionality.
+   *
+   * @throws \Drupal\Core\Entity\EntityStorageException
    */
   function testMicrosubCleanup() {
     $source = MicrosubSource::load(2);
@@ -411,20 +413,34 @@ class MicrosubTest extends IndiewebBrowserTestBase {
 
     $this->resetNextFetch(1);
     $this->fetchItems();
-    $this->assertItemTitles(range(6, 11));
-    $this->assertMicrosubItemCount('item', 6);
+    $this->assertItemTitles(range(7, 11));
+    $this->assertMicrosubItemCount('item', 5);
 
     $this->createNodes(2, 'article', 12, time() - 900);
     $this->resetNextFetch(1);
     $this->fetchItems();
-    $this->assertItemTitles(range(8, 13));
-    $this->assertMicrosubItemCount('item', 6);
+    $this->assertItemTitles(range(9, 13));
+    $this->assertMicrosubItemCount('item', 5);
 
     // delete-items test.
     $this->drupalPostForm('admin/config/services/indieweb/microsub/sources/1/delete-items', [], 'Confirm');
     $this->assertSession()->responseContains('Deleted all items from');
     $this->assertMicrosubItemCount('item', 0);
+    $source = MicrosubSource::load(1);
+    $source->delete();
 
+    // New source.
+    $this->drupalLogin($this->adminUser);
+    $edit = ['url' => 'internal:/feed-pinned', 'channel_id' => '1', 'items_to_keep' => 20,];
+    $this->drupalPostForm('admin/config/services/indieweb/microsub/sources/add-source', $edit, 'Save');
+
+    // Feed with pinned items.
+    $this->drupalGet('feed-pinned');
+    $this->fetchItems();
+    $this->assertMicrosubItemCount('item', 22);
+    $this->resetNextFetch(3);
+    $this->fetchItems();
+    $this->assertMicrosubItemCount('item', 20);
   }
 
   /**
@@ -521,19 +537,23 @@ class MicrosubTest extends IndiewebBrowserTestBase {
   }
 
   /**
-   * Reset next fetch.
+   * Reset next fetch. This can also changes the hash because otherwise we won't
+   * be parsing at all.
    *
    * @param $source_id
+   * @param $reset_hash
    *
    * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
    * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    * @throws \Drupal\Core\Entity\EntityStorageException
    */
-  protected function resetNextFetch($source_id) {
+  protected function resetNextFetch($source_id, $reset_hash = TRUE) {
     /** @var \Drupal\indieweb_microsub\Entity\MicrosubSourceInterface $source */
     $source = \Drupal::entityTypeManager()->getStorage('indieweb_microsub_source')->loadUnchanged($source_id);
     $source->setNextFetch(0);
-    $source->setHash("");
+    if ($reset_hash) {
+      $source->setHash("");
+    }
     $source->save();
   }
 
