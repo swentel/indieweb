@@ -331,7 +331,11 @@ Microsub actions implemented:
 - GET action=timeline: retrieve the list of items in a channel
 - POST action=timeline: mark entries as read, or remove an entry from a channel
 
-Want to follow twitter in your reader, checkout granary.io!
+Want to follow Twitter, or Instagram in your reader? Checkout granary.io!
+
+Known problems: if you configure to clean up items, but old ones keep coming back, set the items to keep either to 0,
+which is the default, or higher than the number of items in a feed. This problem usually pops up with pinned items in a
+feed, or with markup in Microformats2 feeds not completely following the specification.
 
 **Aperture**
 
