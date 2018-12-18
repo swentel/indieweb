@@ -377,6 +377,8 @@ for instance, by year and month, add following line to settings.php
 
 $config['imagecache_external.settings']['imagecache_directory'] = 'externals/' . date('Y') . '/' . date('m');
 
+Note that media in the notifications channel in microsub is never cached.
+
 ## 410 gone.
 
 This module exposes a Rabbit hole behavior plugin to return '410 Gone' response. This is useful when you want to delete

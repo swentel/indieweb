@@ -160,7 +160,11 @@ class MicrosubClient implements MicrosubClientInterface {
     // Reset tries.
     $tries = 0;
 
-    // Cleanup data.
+    // Cleanup data and trigger caches.
+    // We don't store caches for the media channel.
+    if (empty($channel_id)) {
+      $disable_image_cache = TRUE;
+    }
     $item = $this->cleanupAndCache($item, $disable_image_cache);
 
     // Save the entry.
