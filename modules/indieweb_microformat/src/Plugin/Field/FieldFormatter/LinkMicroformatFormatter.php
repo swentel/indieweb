@@ -51,6 +51,7 @@ class LinkMicroformatFormatter extends LinkFormatter {
         'u-in-reply-to' => $this->t('In reply to'),
         'u-repost-of' => $this->t('Repost of'),
         'u-follow-of' => $this->t('Follow of'),
+        'p-author h-card' => $this->t('Author'),
       ],
       '#title' => t('Class'),
       '#default_value' => $this->getSetting('microformat_class'),

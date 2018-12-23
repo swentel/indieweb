@@ -6,14 +6,15 @@ use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\Exception\UndefinedLinkTemplateException;
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Field\Plugin\Field\FieldFormatter\EntityReferenceFormatterBase;
+use Drupal\Core\Form\FormStateInterface;
 
 /**
  * Plugin implementation of the 'entity reference label with class' formatter.
  *
  * @FieldFormatter(
- *   id = "entity_reference_label_p_category_class",
- *   label = @Translation("Label link with p-category class"),
- *   description = @Translation("Display the label of the referenced entities with a p-category class."),
+ *   id = "entity_reference_label_microformat",
+ *   label = @Translation("Label link with microformat class"),
+ *   description = @Translation("Display the label of the referenced entities with a p-category class or p-author h-card classes."),
  *   field_types = {
  *     "entity_reference"
  *   }
@@ -24,9 +25,43 @@ class EntityReferenceLabelWithClassFormatter extends EntityReferenceFormatterBas
   /**
    * {@inheritdoc}
    */
+  public static function defaultSettings() {
+    return [
+      'microformat_class' => 'p-category',
+    ] + parent::defaultSettings();
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function settingsForm(array $form, FormStateInterface $form_state) {
+    $elements = parent::settingsForm($form, $form_state);
+
+    $elements['microformat_class'] = [
+      '#type' => 'select',
+      '#options' => [
+        'p-category' => $this->t('Category'),
+        'p-author h-card' => $this->t('Author'),
+      ],
+      '#title' => t('Class'),
+      '#default_value' => $this->getSetting('microformat_class'),
+    ];
+
+    return $elements;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function settingsSummary() {
     $summary = [];
-    $summary[] = $this->t('Renders the label as link with p-category class.');
+
+    $settings = $this->getSettings();
+
+    if (!empty($settings['microformat_class'])) {
+      $summary[] = $this->t('Renders the label as link with @class class.', ['@class' => $settings['microformat_class']]);
+    }
+
     return $summary;
   }
 
@@ -54,12 +89,13 @@ class EntityReferenceLabelWithClassFormatter extends EntityReferenceFormatterBas
         }
       }
 
+      $settings = $this->getSettings();
       if ($output_as_link && isset($uri) && !$entity->isNew()) {
         $elements[$delta] = [
           '#type' => 'link',
           '#title' => $label,
           '#url' => $uri,
-          '#attributes' => ['class' => ['p-category']],
+          '#attributes' => ['class' => $settings['microformat_class']],
           '#options' => $uri->getOptions(),
         ];
 
