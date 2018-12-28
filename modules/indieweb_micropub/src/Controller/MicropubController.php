@@ -887,7 +887,7 @@ class MicropubController extends ControllerBase {
     try {
       file_prepare_directory($destination, FILE_CREATE_DIRECTORY);
       $file = file_save_upload($file_key, $validators, $destination, 0);
-      $messages = drupal_get_messages();
+      $messages = $this->messenger()->all();
       if (!empty($messages)) {
         foreach ($messages as $message) {
           $this->getLogger('indieweb_micropub')->notice('Error saving file: @message', ['@message' => print_r($message, 1)]);

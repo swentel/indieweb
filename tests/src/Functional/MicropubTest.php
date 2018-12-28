@@ -2,12 +2,16 @@
 
 namespace Drupal\Tests\indieweb\Functional;
 
+use Drupal\Tests\TestFileCreationTrait;
+
 /**
  * Tests integration of micropub.
  *
  * @group indieweb
  */
 class MicropubTest extends IndiewebBrowserTestBase {
+
+  use TestFileCreationTrait;
 
   /**
    * The profile to use. Use Standard as we need a lot.
@@ -143,6 +147,32 @@ class MicropubTest extends IndiewebBrowserTestBase {
       'h_event' => 'event',
     ];
     $this->drupalPostForm('admin/config/services/indieweb/microformats', $edit, 'Save configuration');
+  }
+
+  /**
+   * Tests micropub uploads.
+   *
+   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
+   */
+  public function testUpload() {
+    $this->drupalLogin($this->adminUser);
+    $this->drupalPostForm('admin/config/services/indieweb/micropub', ['micropub_enable' => 1, 'micropub_expose_link_tag' => 1, 'micropub_media_enable' => 1], 'Save configuration');
+    $this->setIndieAuthEndPoints();
+    $edit = ['article_create_node' => 1, 'article_node_type' => 'article', 'article_uid' => $this->adminUser->id(), 'article_upload_field' => 'field_image'];
+    $this->drupalPostForm('admin/config/services/indieweb/micropub', $edit, 'Save configuration');
+
+    $image = current($this->getTestFiles('image'));
+    $image_path = \Drupal::service('file_system')->realpath($image->uri);
+    $post = $this->article;
+    unset($post['category']);
+    $post['photo'] = fopen($image_path, 'r');
+    $code = $this->sendMicropubRequest($post);
+    self::assertEquals(201, $code);
+    $this->assertNodeCount(1, 'article');
+    $nid = $this->getLastNid('article');
+    $node = \Drupal::entityTypeManager()->getStorage('node')->load($nid);
+    self::assertTrue(!empty($node->field_image->target_id));
   }
 
   /**

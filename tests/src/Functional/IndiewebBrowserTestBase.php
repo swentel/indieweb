@@ -350,6 +350,19 @@ abstract class IndiewebBrowserTestBase extends BrowserTestBase {
     ];
 
     try {
+
+      if (isset($post['photo'])) {
+        $type = 'multipart';
+        $new_post = [];
+        foreach ($post as $key => $value) {
+          $new_post[] = [
+            'name' => $key,
+            'contents' => $value,
+          ];
+        }
+        $post = $new_post;
+      }
+
       $response = $client->post($micropub_endpoint, [$type => $post, 'headers' => $headers]);
       $status_code = $response->getStatusCode();
       $headersLocation = $response->getHeader('Location');
