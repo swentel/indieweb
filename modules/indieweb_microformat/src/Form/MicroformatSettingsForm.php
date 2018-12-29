@@ -99,6 +99,13 @@ class MicroformatSettingsForm extends ConfigFormBase {
       '#default_value' => $config->get('post_metadata_comment'),
     ];
 
+    $form['classes']['provide_iso_datetime_variable'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Provide <code>iso_datetime</code> template variable'),
+      '#description' => $this->t('As an alternativee to the post metadata options above (<em>dt-published</em>, <em>u-author</em> and <em>u-url</em> in a hidden span) you can provide equivalent markup in your node or comment templates yourself— with the help of this variable; include it in your teplate for example like this:<br /><div class="indieweb-highlight-code">&lt;time class="dt-published" datetime="{{ iso_datetime }}"&gt;{{ date }}&lt;/time&gt;</div>'),
+      '#default_value' => $config->get('provide_iso_datetime_variable'),
+    ];
+
     $form['classes']['u_video'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('<em>u-video</em> on all videos'),
@@ -162,6 +169,7 @@ class MicroformatSettingsForm extends ConfigFormBase {
       ->set('h_event', $form_state->getValue('h_event'))
       ->set('post_metadata', $form_state->getValue('post_metadata'))
       ->set('post_metadata_comment', $form_state->getValue('post_metadata_comment'))
+      ->set('provide_iso_datetime_variable', $form_state->getValue('provide_iso_datetime_variable'))
       ->set('p_name_exclude_node_type', $form_state->getValue('p_name_exclude_node_type'))
       ->set('e_content', $form_state->getValue('e_content'))
       ->set('e_content_fields', $form_state->getValue('e_content_fields'))

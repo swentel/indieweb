@@ -133,6 +133,10 @@ function indieweb_microformat_preprocess_node(&$variables) {
         $variables['metadata'] = ['#markup' => $metadata];
       }
     }
+    if (\Drupal::config('indieweb_microformat.settings')->get('provide_iso_datetime_variable')) {
+      $date = \Drupal::service('date.formatter')->format($variables['node']->getCreatedTime(), 'custom', 'c');
+      $variables['iso_datetime'] = $date;
+    }
   }
 
 }
@@ -173,6 +177,11 @@ function indieweb_preprocess_comment(&$variables) {
 
       // Attach it to content.
       $variables['content']['indieweb_medata_data']['#markup'] = $metadata;
+    }
+
+    if (\Drupal::config('indieweb_microformat.settings')->get('provide_iso_datetime_variable')) {
+      $date = \Drupal::service('date.formatter')->format($variables['elements']['#comment']->getCreatedTime(), 'custom', 'c');
+      $variables['iso_datetime'] = $date;
     }
   }
 }

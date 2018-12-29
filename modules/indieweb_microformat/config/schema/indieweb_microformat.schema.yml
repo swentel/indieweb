@@ -18,6 +18,9 @@ indieweb_microformat.settings:
     post_metadata_comment:
       type: boolean
       label: 'Enable microformat metadata classes like dt-published and u-url for comments'
+    provide_iso_datetime_variable:
+      type: boolean
+      label: 'Provide an ISO datetime node template variable: {{ iso_datetime }}'
     p_name_exclude_node_type:
       type: string
       label: 'Node type on which p-name will not be printed'
