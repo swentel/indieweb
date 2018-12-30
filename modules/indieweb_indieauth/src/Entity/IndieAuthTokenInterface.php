@@ -84,4 +84,11 @@ interface IndieAuthTokenInterface extends ContentEntityInterface {
    */
   public function getChanged();
 
+  /**
+   * Returns the owner id of the token.
+   *
+   * @return integer
+   */
+  public function getOwnerId();
+
 }

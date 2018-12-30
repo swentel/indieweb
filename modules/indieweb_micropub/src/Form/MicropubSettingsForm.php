@@ -303,7 +303,7 @@ class MicropubSettingsForm extends ConfigFormBase {
 
       $form[$post_type][$post_type . '_uid'] = [
         '#type' => 'number',
-        '#title' => $this->t('The user id which will own the created node'),
+        '#title' => $this->t('Author of the node'),
         '#default_value' => $config->get($post_type . '_uid'),
         '#states' => array(
           'visible' => array(
@@ -311,6 +311,7 @@ class MicropubSettingsForm extends ConfigFormBase {
             ':input[name="' . $post_type . '_create_node"]' => array('checked' => TRUE),
           ),
         ),
+        '#description' => $this->t('Default user id when a node is created. If you are using the internal IndieAuth endpoint, the author of the node will be the owner of the token used in the micropub request.')
       ];
 
       $form[$post_type][$post_type . '_node_type'] = [

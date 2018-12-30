@@ -126,6 +126,13 @@ class IndieAuthToken extends ContentEntityBase implements IndieAuthTokenInterfac
   /**
    * {@inheritdoc}
    */
+  public function getOwnerId() {
+    return $this->get('uid')->target_id;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public static function baseFieldDefinitions(EntityTypeInterface $entity_type) {
     $fields = parent::baseFieldDefinitions($entity_type);
 

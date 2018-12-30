@@ -15,6 +15,7 @@ class IndieAuthTokenListBuilder extends EntityListBuilder {
    */
   public function buildHeader() {
     $header['label'] = $this->t('Token');
+    $header['uid'] = $this->t('User id');
     $header['status'] = $this->t('Status');
     $header['client'] = $this->t('Client');
     $header['access'] = $this->t('Last access');
@@ -27,6 +28,7 @@ class IndieAuthTokenListBuilder extends EntityListBuilder {
   public function buildRow(EntityInterface $entity) {
     /** @var $entity \Drupal\indieweb_indieauth\Entity\IndieAuthTokenInterface */
     $row['label'] = $entity->label();
+    $row['uid'] = $entity->getOwnerId();
     $row['status'] = $entity->isRevoked() ? t('Revoked') : t('Active');
     $row['client_id'] = $entity->getClientId();
     $last_access = $entity->getChanged() ? \Drupal::service('date.formatter')->format($entity->getChanged(), 'short') : t('Never');

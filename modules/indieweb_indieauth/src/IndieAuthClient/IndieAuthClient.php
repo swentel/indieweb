@@ -15,6 +15,13 @@ class IndieAuthClient implements IndieAuthClientInterface {
   ];
 
   /**
+   * The user id of the token if the internal IndieAuth endpoint is used.
+   *
+   * @var integer
+   */
+  protected $tokenOwnerId;
+
+  /**
    * {@inheritdoc}
    */
   public function getAuthorizationHeader() {
@@ -40,6 +47,19 @@ class IndieAuthClient implements IndieAuthClientInterface {
     else {
       return $this->validateTokenOnExternalService($auth_header, $indieauth->get('token_endpoint'), $scope_to_check);
     }
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function checkAuthor() {
+    $indieauth = \Drupal::config('indieweb_indieauth.settings');
+    $internal = $indieauth->get('auth_internal');
+    if ($internal) {
+      return $this->tokenOwnerId;
+    }
+
+    return FALSE;
   }
 
   /**
@@ -223,8 +243,11 @@ class IndieAuthClient implements IndieAuthClientInterface {
         }
       }
 
-      // Update changed.
-      $indieAuthToken->set('changed', \Drupal::time()->getRequestTime())->save();
+      // Update changed if valid and set owner id.
+      if ($valid_token) {
+        $this->tokenOwnerId = $indieAuthToken->getOwnerId();
+        $indieAuthToken->set('changed', \Drupal::time()->getRequestTime())->save();
+      }
     }
 
     return $valid_token;

@@ -248,7 +248,9 @@ class IndieAuthTest extends IndiewebBrowserTestBase {
     $this->authUser = $this->drupalCreateUser();
 
     $this->drupalLogin($this->adminUser);
-    $edit = ['micropub_enable' => 1, 'note_create_node' => 1, 'note_node_type' => 'page', 'note_uid' => $this->adminUser->id(), 'issue_node_type' => 'page'];
+    // Set uid to user 1. The uid should become the uid of the user we are
+    // authorizing with.
+    $edit = ['micropub_enable' => 1, 'note_create_node' => 1, 'note_node_type' => 'page', 'note_uid' => 1];
     $this->drupalPostForm('admin/config/services/indieweb/micropub', $edit, 'Save configuration');
     $this->drupalLogout();
 
@@ -381,6 +383,10 @@ class IndieAuthTest extends IndiewebBrowserTestBase {
     // Now valid.
     $code = $this->sendMicropubRequest($post, $access_token);
     self::assertEquals(201, $code);
+    $nid = $this->getLastNid('page');
+    /** @var \Drupal\node\NodeInterface $node */
+    $node = \Drupal::entityTypeManager()->getStorage('node')->load($nid);
+    self::assertEquals($this->indiewebAuthorizedUser->id(), $node->getOwnerId());
 
     $this->drupalGet($token_path);
     $this->assertSession()->statusCodeEquals(404);

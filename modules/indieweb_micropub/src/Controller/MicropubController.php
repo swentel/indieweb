@@ -763,6 +763,11 @@ class MicropubController extends ControllerBase {
       'status' => $this->config->get($post_type . '_status'),
     ];
 
+    // Override uid.
+    if ($tokenOwnerId = $this->indieAuth->checkAuthor()) {
+      $this->values['uid'] = $tokenOwnerId;
+    }
+
     // Check post-status.
     if (!empty($this->input['post-status'][0])) {
       if ($this->input['post-status'][0] == 'published') {
