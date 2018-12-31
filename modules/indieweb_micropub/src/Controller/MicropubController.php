@@ -768,6 +768,11 @@ class MicropubController extends ControllerBase {
       $this->values['uid'] = $tokenOwnerId;
     }
 
+    // Published date.
+    if (!empty($this->input['published'][0])) {
+      $this->values['created'] = strtotime($this->input['published'][0]);
+    }
+
     // Check post-status.
     if (!empty($this->input['post-status'][0])) {
       if ($this->input['post-status'][0] == 'published') {
