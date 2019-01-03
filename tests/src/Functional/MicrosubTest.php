@@ -297,9 +297,10 @@ class MicrosubTest extends IndiewebBrowserTestBase {
     $query = ['action' => 'timeline', 'channel' => 1];
     $response = $this->sendMicrosubRequest($query);
     $body = json_decode($response['body']);
-    self::assertTrue(isset($body->items[0]->references));
-    self::assertTrue(isset($body->items[0]->references->{$url}));
-    self::assertTrue(!isset($body->items[1]->references));
+    self::assertTrue(isset($body->items[0]->refs));
+    self::assertTrue(isset($body->items[0]->refs->{$url}));
+    self::assertEquals($page->get('body')->value, $body->items[0]->refs->{$url}->content);
+    self::assertTrue(!isset($body->items[1]->refs));
 
     // Exclude replies from channel.
     $this->drupalLogin($this->adminUser);

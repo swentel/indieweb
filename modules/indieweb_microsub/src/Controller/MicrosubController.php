@@ -186,7 +186,6 @@ class MicrosubController extends ControllerBase {
 
         $data = $item->getData();
 
-        // TODO fix me.
         // See https://github.com/swentel/indieweb/issues/325
         $fields_to_fix = ['in-reply-to', 'like-of', 'repost-of'];
         foreach ($fields_to_fix as $field) {
@@ -208,9 +207,10 @@ class MicrosubController extends ControllerBase {
         $entry->_id = $item->id();
         $entry->_is_read = $item->isRead();
 
-        // Context or not.
-        if ($context = $item->getContext()) {
-          $entry->references = $context;
+        // Get context.
+        if (!isset($entry->refs) && ($context = $item->getContext())) {
+          // TODO fix when https://github.com/indieweb/jf2/issues/41 lands.
+          $entry->refs = $context;
         }
 
         $items[] = $entry;

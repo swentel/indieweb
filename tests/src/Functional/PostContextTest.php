@@ -137,6 +137,12 @@ class PostContextTest extends IndiewebBrowserTestBase {
     $edit = ['indieweb_refresh_post_context' => TRUE];
     $this->drupalPostForm('node/' . $reply->id() . '/edit', $edit, 'Save');
     $this->assertPostContextQueueItems([$page->toUrl('canonical', ['absolute' => TRUE])->toString()], $reply->id());
+
+    // Test twitter parsing.
+    $expected = 'Every Drupal issue, when left alone long enough, will turn into an unrevieweable mess fixing 5 things at once.';
+    $content = file_get_contents(drupal_get_path('module', 'indieweb_test') . '/pages/twitter-canonical.html');
+    $reference = \Drupal::service('indieweb.post_context.client')->parseTwitter($content);
+    self::assertEquals($expected, $reference['content']['text']);
   }
 
 }

@@ -66,7 +66,7 @@ class PostContextStorage extends SqlContentEntityStorage implements PostContextS
       if (isset($content['post-type'])) {
         $contexts[] = [
           'url' => $record->url,
-          'content' => $content,
+          'data' => $content,
         ];
       }
     }

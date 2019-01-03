@@ -295,14 +295,16 @@ function _indieweb_extra_fields_display(array &$build, EntityInterface $entity, 
     $suggestion = str_replace(['in-', '-to', '-of', 'u-'], '', $post_type_class);
     $contexts = \Drupal::service('indieweb.post_context.client')->getPostContexts($entity->id(), $entity->getEntityTypeId());
     foreach ($contexts as $context) {
-      $text = isset($context['content']['content']->text) ? $context['content']['content']->text : '';
-      $build['post_context'][] = [
-        '#class' => $post_type_class,
-        '#theme' => 'indieweb_post_context__' . $suggestion,
-        '#content' => ['#markup' => nl2br($text)],
-        '#content_truncated' => ['#markup' => Unicode::truncate(nl2br($text), 300, TRUE, TRUE)],
-        '#name' => isset($context['content']['name']) ? $context['content']['name'] : '',
-      ];
+      $text = isset($context['data']['content']->text) ? $context['data']['content']->text : '';
+      if (!empty($text)) {
+        $build['post_context'][] = [
+          '#class' => $post_type_class,
+          '#theme' => 'indieweb_post_context__' . $suggestion,
+          '#content' => ['#markup' => nl2br($text)],
+          '#content_truncated' => ['#markup' => Unicode::truncate(nl2br($text), 300, TRUE, TRUE)],
+          '#name' => isset($context['data']['name']) ? $context['data']['name'] : '',
+        ];
+      }
     }
   }
 }

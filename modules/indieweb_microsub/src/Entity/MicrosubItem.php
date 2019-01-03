@@ -70,7 +70,15 @@ class MicrosubItem extends ContentEntityBase implements MicrosubItemInterface {
       if (isset($temp->url)) {
         $return = new \stdClass();
         $object = new \stdClass();
-        $object->content = $temp->content->text;
+        $content = '';
+        if (!empty($temp->content->text)) {
+          $content = $temp->content->text;
+        }
+        elseif (!empty($temp->summary)) {
+          $content = $temp->summary;
+        }
+        $object->content = $content;
+        $object->name = isset($temp->name) ? $temp->name : '';
         $return->{$temp->url} = $object;
       }
     }
