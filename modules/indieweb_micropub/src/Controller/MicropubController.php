@@ -1233,7 +1233,7 @@ class MicropubController extends ControllerBase {
             $item = new \stdClass();
             $item->type = ['h-entry'];
             $item->properties = (object) $this->getNodeProperties($node);
-            $items[$node->getCreatedTime()] = $item;
+            $items[$node->getCreatedTime() . '.' . $node->id()] = $item;
           }
         }
       }
@@ -1256,7 +1256,7 @@ class MicropubController extends ControllerBase {
             $item = new \stdClass();
             $item->type = ['h-entry'];
             $item->properties = (object) $this->getCommentProperties($comment);
-            $items[$comment->getCreatedTime()] = $item;
+            $items[$comment->getCreatedTime() . '.' . $comment->id()] = $item;
           }
         }
       }
