@@ -12,6 +12,22 @@ use Drupal\indieweb\IndieWebDraggableListBuilder;
  */
 class MicrosubChannelListBuilder extends IndieWebDraggableListBuilder {
 
+  public function render() {
+    $build = parent::render();
+
+    $delete_link  = '';
+    $count = \Drupal::entityTypeManager()->getStorage('indieweb_microsub_item')->getItemCountByChannel(0);
+    if ($count > 0) {
+      $delete_link = ' - ' . Link::createFromRoute($this->t('Delete notifications'), 'entity.indieweb_microsub.delete_notifications')->toString();
+    }
+    $build['notifications'] = [
+      '#markup' => $this->t('Number of notifications: @count.', ['@count' => $count]) . $delete_link,
+      '#weight' => -10,
+    ];
+
+    return $build;
+  }
+
   /**
    * {@inheritdoc}
    */

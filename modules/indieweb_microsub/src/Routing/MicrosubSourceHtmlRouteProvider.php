@@ -7,7 +7,7 @@ use Drupal\Core\Entity\Routing\AdminHtmlRouteProvider;
 use Symfony\Component\Routing\Route;
 
 /**
- * Provides routes for Microsub source entities.
+ * Provides routes for Microsub entities.
  *
  * @see \Drupal\Core\Entity\Routing\AdminHtmlRouteProvider
  */
@@ -36,6 +36,14 @@ class MicrosubSourceHtmlRouteProvider extends AdminHtmlRouteProvider {
       ->setRequirement('_permission', 'administer indieweb')
       ->setRequirement('indieweb_microsub_source', '\S+');
     $collection->add('entity.indieweb_microsub_source.delete_items', $route);
+
+    $route = (new Route('/admin/config/services/indieweb/microsub/delete-notifications'))
+      ->addDefaults([
+        '_form' => '\Drupal\indieweb_microsub\Form\MicrosubNotificationsDeleteForm',
+        '_title' => 'Delete notifications',
+      ])
+      ->setRequirement('_permission', 'administer indieweb');
+    $collection->add('entity.indieweb_microsub.delete_notifications', $route);
 
     return $collection;
   }
