@@ -301,10 +301,15 @@ class MicropubSettingsForm extends ConfigFormBase {
         '#description' => $this->t('When the payload contains the "post-status" property, its value will take precedence over this one. See <a href="https://indieweb.org/Micropub-extensions#Post_Status" target="_blank">https://indieweb.org/Micropub-extensions#Post_Status</a>'),
       ];
 
+      $author = NULL;
+      if ($uid = $config->get($post_type . '_uid')) {
+        $author = \Drupal::entityTypeManager()->getStorage('user')->load($uid);
+      }
       $form[$post_type][$post_type . '_uid'] = [
-        '#type' => 'number',
+        '#type' => 'entity_autocomplete',
+        '#target_type' => 'user',
         '#title' => $this->t('Author of the node'),
-        '#default_value' => $config->get($post_type . '_uid'),
+        '#default_value' => $author,
         '#states' => array(
           'visible' => array(
             ':input[name="micropub_enable"]' => array('checked' => TRUE),

@@ -756,11 +756,17 @@ class MicropubController extends ControllerBase {
    */
   protected function createNode($title, $post_type, $link_input_name = NULL) {
 
+    // Get uid.
+    $uid = $this->config->get($post_type . '_uid');
+    if (empty($uid)) {
+      $uid = 1;
+    }
+
     $this->values = [
-      'uid' => $this->config->get($post_type . '_uid'),
+      'uid' => $uid,
       'title' => $title,
       'type' => $this->config->get($post_type . '_node_type'),
-      'status' => $this->config->get($post_type . '_status'),
+      'status' => (int) $this->config->get($post_type . '_status'),
     ];
 
     // Override uid.

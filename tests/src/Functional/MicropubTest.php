@@ -159,7 +159,7 @@ class MicropubTest extends IndiewebBrowserTestBase {
     $this->drupalLogin($this->adminUser);
     $this->drupalPostForm('admin/config/services/indieweb/micropub', ['micropub_enable' => 1, 'micropub_expose_link_tag' => 1, 'micropub_media_enable' => 1], 'Save configuration');
     $this->setIndieAuthEndPoints();
-    $edit = ['article_create_node' => 1, 'article_node_type' => 'article', 'article_uid' => $this->adminUser->id(), 'article_upload_field' => 'field_image'];
+    $edit = ['article_create_node' => 1, 'article_node_type' => 'article', 'article_uid' => $this->adminUser->getUsername() . ' (' . $this->adminUser->id() . ')', 'article_upload_field' => 'field_image'];
     $this->drupalPostForm('admin/config/services/indieweb/micropub', $edit, 'Save configuration');
 
     $image = current($this->getTestFiles('image'));
@@ -218,7 +218,7 @@ class MicropubTest extends IndiewebBrowserTestBase {
 
     // Configure note and also enable issue. It doesn't have an explicit test
     // for properties, but just being enabled makes sure the order is ok.
-    $edit = ['note_create_node' => 1, 'note_node_type' => 'page', 'note_uid' => $this->adminUser->id(), 'issue_node_type' => 'page'];
+    $edit = ['note_create_node' => 1, 'note_node_type' => 'page', 'note_uid' => $this->adminUser->getUsername() . ' (' . $this->adminUser->id() . ')', 'issue_node_type' => 'page'];
     $this->drupalPostForm('admin/config/services/indieweb/micropub', $edit, 'Save configuration');
     $this->drupalLogout();
 
@@ -342,7 +342,7 @@ class MicropubTest extends IndiewebBrowserTestBase {
 
     // Test articles.
     $this->drupalLogin($this->adminUser);
-    $edit = ['article_create_node' => 1, 'article_node_type' => 'article', 'article_tags_field' => 'field_tags', 'article_uid' => $this->adminUser->id()];
+    $edit = ['article_create_node' => 1, 'article_node_type' => 'article', 'article_tags_field' => 'field_tags', 'article_uid' => $this->adminUser->getUsername() . ' (' . $this->adminUser->id() . ')'];
     $this->drupalPostForm('admin/config/services/indieweb/micropub', $edit, 'Save configuration');
     $this->drupalLogout();
     $code = $this->sendMicropubRequest($this->article);
@@ -372,7 +372,7 @@ class MicropubTest extends IndiewebBrowserTestBase {
 
     // Test event.
     $this->drupalLogin($this->adminUser);
-    $edit = ['event_create_node' => 1, 'event_node_type' => 'event', 'event_content_field' => 'body', 'event_date_field' => 'field_date', 'event_uid' => $this->adminUser->id()];
+    $edit = ['event_create_node' => 1, 'event_node_type' => 'event', 'event_content_field' => 'body', 'event_date_field' => 'field_date', 'event_uid' => $this->adminUser->getUsername() . ' (' . $this->adminUser->id() . ')'];
     $this->drupalPostForm('admin/config/services/indieweb/micropub', $edit, 'Save configuration');
     $this->drupalLogout();
     $code = $this->sendMicropubRequest($this->event);
@@ -404,7 +404,7 @@ class MicropubTest extends IndiewebBrowserTestBase {
     $this->assertNodeCount(0, 'like');
 
     $this->drupalLogin($this->adminUser);
-    $edit = ['like_create_node' => 1, 'like_node_type' => 'like', 'like_link_field' => 'field_like_link', 'like_content_field' => 'body', 'like_auto_send_webmention' => 1, 'like_uid' => $this->adminUser->id()];
+    $edit = ['like_create_node' => 1, 'like_node_type' => 'like', 'like_link_field' => 'field_like_link', 'like_content_field' => 'body', 'like_auto_send_webmention' => 1, 'like_uid' => $this->adminUser->getUsername() . ' (' . $this->adminUser->id() . ')'];
     $this->drupalPostForm('admin/config/services/indieweb/micropub', $edit, 'Save configuration');
     $this->drupalLogout();
     $code = $this->sendMicropubRequest($this->like);
@@ -455,7 +455,7 @@ class MicropubTest extends IndiewebBrowserTestBase {
     $this->assertNodeCount(0, 'bookmark');
 
     $this->drupalLogin($this->adminUser);
-    $edit = ['bookmark_create_node' => 1, 'bookmark_node_type' => 'bookmark', 'bookmark_link_field' => 'field_bookmark_link', 'bookmark_content_field' => 'body', 'bookmark_auto_send_webmention' => 1, 'bookmark_uid' => $this->adminUser->id()];
+    $edit = ['bookmark_create_node' => 1, 'bookmark_node_type' => 'bookmark', 'bookmark_link_field' => 'field_bookmark_link', 'bookmark_content_field' => 'body', 'bookmark_auto_send_webmention' => 1, 'bookmark_uid' => $this->adminUser->getUsername() . ' (' . $this->adminUser->id() . ')'];
     $this->drupalPostForm('admin/config/services/indieweb/micropub', $edit, 'Save configuration');
     $this->drupalLogout();
     $code = $this->sendMicropubRequest($this->bookmark);
@@ -496,7 +496,7 @@ class MicropubTest extends IndiewebBrowserTestBase {
     $this->assertNodeCount(0, 'repost');
 
     $this->drupalLogin($this->adminUser);
-    $edit = ['repost_create_node' => 1, 'repost_node_type' => 'repost', 'repost_link_field' => 'field_repost_link', 'repost_content_field' => 'body', 'repost_auto_send_webmention' => 1, 'repost_uid' => $this->adminUser->id()];
+    $edit = ['repost_create_node' => 1, 'repost_node_type' => 'repost', 'repost_link_field' => 'field_repost_link', 'repost_content_field' => 'body', 'repost_auto_send_webmention' => 1, 'repost_uid' => $this->adminUser->getUsername() . ' (' . $this->adminUser->id() . ')'];
     $this->drupalPostForm('admin/config/services/indieweb/micropub', $edit, 'Save configuration');
     $this->drupalLogout();
     $code = $this->sendMicropubRequest($this->repost);
@@ -537,7 +537,7 @@ class MicropubTest extends IndiewebBrowserTestBase {
     $this->assertNodeCount(0, 'reply');
 
     $this->drupalLogin($this->adminUser);
-    $edit = ['reply_create_node' => 1, 'reply_node_type' => 'reply', 'reply_link_field' => 'field_reply_link', 'reply_content_field' => 'body', 'reply_auto_send_webmention' => 1, 'reply_uid' => $this->adminUser->id()];
+    $edit = ['reply_create_node' => 1, 'reply_node_type' => 'reply', 'reply_link_field' => 'field_reply_link', 'reply_content_field' => 'body', 'reply_auto_send_webmention' => 1, 'reply_uid' => $this->adminUser->getUsername() . ' (' . $this->adminUser->id() . ')'];
     $this->drupalPostForm('admin/config/services/indieweb/micropub', $edit, 'Save configuration');
     $this->drupalLogout();
     $code = $this->sendMicropubRequest($this->reply);
@@ -579,7 +579,7 @@ class MicropubTest extends IndiewebBrowserTestBase {
     $this->assertNodeCount(0, 'rsvp');
 
     $this->drupalLogin($this->adminUser);
-    $edit = ['rsvp_create_node' => 1, 'rsvp_node_type' => 'rsvp', 'rsvp_link_field' => 'field_rsvp_link', 'rsvp_rsvp_field' => 'indieweb_rsvp', 'rsvp_content_field' => 'body', 'rsvp_auto_send_webmention' => 1, 'rsvp_uid' => $this->adminUser->id()];
+    $edit = ['rsvp_create_node' => 1, 'rsvp_node_type' => 'rsvp', 'rsvp_link_field' => 'field_rsvp_link', 'rsvp_rsvp_field' => 'indieweb_rsvp', 'rsvp_content_field' => 'body', 'rsvp_auto_send_webmention' => 1, 'rsvp_uid' => $this->adminUser->getUsername() . ' (' . $this->adminUser->id() . ')'];
     $this->drupalPostForm('admin/config/services/indieweb/micropub', $edit, 'Save configuration');
     $this->drupalLogout();
     $code = $this->sendMicropubRequest($this->rsvp);
