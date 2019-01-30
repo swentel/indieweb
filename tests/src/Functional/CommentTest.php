@@ -253,7 +253,7 @@ class CommentTest extends IndiewebBrowserTestBase {
     // Test micropub reply post to create a comment.
 
     $this->drupalLogin($this->adminUser);
-    $edit = ['micropub_enable' => 1, 'reply_create_comment' => 1, 'reply_create_node' => 1, 'reply_node_type' => 'reply', 'reply_link_field' => 'field_reply_link', 'reply_content_field' => 'body', 'reply_auto_send_webmention' => 1, 'reply_uid' => $this->adminUser->id()];
+    $edit = ['micropub_enable' => 1, 'reply_create_comment' => 1, 'reply_create_node' => 1, 'reply_node_type' => 'reply', 'reply_link_field' => 'field_reply_link', 'reply_content_field' => 'body', 'reply_auto_send_webmention' => 1, 'reply_uid' => $this->adminUser->getUsername() . ' (' . $this->adminUser->id() . ')'];
     $this->drupalPostForm('admin/config/services/indieweb/micropub', $edit, 'Save configuration');
 
     // Set IndieAuth token endpoint.
