@@ -250,7 +250,8 @@ class IndieAuthTest extends IndiewebBrowserTestBase {
     $this->drupalLogin($this->adminUser);
     // Set uid to user 1. The uid should become the uid of the user we are
     // authorizing with.
-    $edit = ['micropub_enable' => 1, 'note_create_node' => 1, 'note_node_type' => 'page', 'note_uid' => 1];
+    $user_1 = \Drupal::entityTypeManager()->getStorage('user')->load(1);
+    $edit = ['micropub_enable' => 1, 'note_create_node' => 1, 'note_node_type' => 'page', 'note_uid' => $user_1->label() . ' (' . 1 . ')'];
     $this->drupalPostForm('admin/config/services/indieweb/micropub', $edit, 'Save configuration');
     $this->drupalLogout();
 
