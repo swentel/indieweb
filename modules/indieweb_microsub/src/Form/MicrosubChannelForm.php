@@ -5,6 +5,7 @@ namespace Drupal\indieweb_microsub\Form;
 use Drupal\Core\Entity\ContentEntityForm;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
+use Drupal\indieweb_microsub\Entity\MicrosubChannelInterface;
 
 class MicrosubChannelForm extends ContentEntityForm {
 
@@ -14,6 +15,7 @@ class MicrosubChannelForm extends ContentEntityForm {
   public function form(array $form, FormStateInterface $form_state) {
     $form = parent::form($form, $form_state);
 
+    /** @var \Drupal\indieweb_microsub\Entity\MicrosubChannelInterface $channel */
     $channel = $this->entity;
 
     $form['title'] = [
@@ -23,6 +25,18 @@ class MicrosubChannelForm extends ContentEntityForm {
       '#default_value' => $channel->label(),
       '#description' => $this->t("Label for the channel."),
       '#required' => TRUE,
+    ];
+
+    // read indicator
+    $form['read_indicator'] = [
+      '#type' => 'select',
+      '#title' => $this->t('Read tracking'),
+      '#options' => [
+        MicrosubChannelInterface::readIndicatorCount => $this->t('Show unread count'),
+        MicrosubChannelInterface::readIndicatorNew => $this->t('Show unread indicator'),
+        MicrosubChannelInterface::readIndicatorOmit => $this->t('Disabled'),
+      ],
+      '#default_value' => $channel->getReadIndicator()
     ];
 
     // contexts

@@ -136,6 +136,7 @@ class MicrosubController extends ControllerBase {
     $channels_list = $this->entityTypeManager()->getStorage('indieweb_microsub_channel')->loadMultiple($ids);
 
     // Notifications channel.
+    $i = 0;
     $notifications = \Drupal::entityTypeManager()->getStorage('indieweb_microsub_item')->getUnreadCountByChannel(0);
     $channels[] = (object) [
       'uid' => 0,
@@ -145,11 +146,23 @@ class MicrosubController extends ControllerBase {
 
     /** @var \Drupal\indieweb_microsub\Entity\MicrosubChannelInterface $channel */
     foreach ($channels_list as $channel) {
-      $channels[] = (object) [
+      $unread = [];
+
+      // Unread can either an int, boolean or omitted.
+      if ($indicator = $channel->getReadIndicator()) {
+        if ($indicator == MicrosubChannelInterface::readIndicatorCount) {
+          $unread['unread'] = (int) $channel->getUnreadCount();
+        }
+        elseif ($indicator == MicrosubChannelInterface::readIndicatorNew) {
+          $unread['unread'] = (bool) $channel->getUnreadCount();
+        }
+      }
+
+      $channels[] = (object) ([
         'uid' => $channel->id(),
         'name' => $channel->label(),
-        'unread' => (int) $channel->getUnreadCount(),
-      ];
+      ] + $unread);
+
     }
 
     return ['response' => ['channels' => $channels]];

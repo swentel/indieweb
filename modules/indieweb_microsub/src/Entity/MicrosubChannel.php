@@ -106,6 +106,20 @@ class MicrosubChannel extends ContentEntityBase implements MicrosubChannelInterf
   /**
    * {@inheritdoc}
    */
+  public function getReadIndicator() {
+    $value = $this->get('read_indicator')->value;
+
+    // Default to count.
+    if (empty($value)) {
+      $value = self::readIndicatorCount;
+    }
+
+    return $value;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function delete() {
     $ids = $this->getSources();
     if ($ids) {

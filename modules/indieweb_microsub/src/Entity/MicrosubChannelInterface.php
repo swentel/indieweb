@@ -10,6 +10,21 @@ use Drupal\Core\Entity\ContentEntityInterface;
 interface MicrosubChannelInterface extends ContentEntityInterface {
 
   /**
+   * Read indicator: show count.
+   */
+  const readIndicatorCount = 1;
+
+  /**
+   * Read indicator: show new or not.
+   */
+  const readIndicatorNew = 2;
+
+  /**
+   * Read indicator: omit indicator.
+   */
+  const readIndicatorOmit = 3;
+
+  /**
    * Returns the status.
    *
    * @return integer
@@ -50,5 +65,12 @@ interface MicrosubChannelInterface extends ContentEntityInterface {
    * @return int $count
    */
   public function getItemCount();
+
+  /**
+   * Get the read indicator.
+   *
+   * @return string
+   */
+  public function getReadIndicator();
 
 }
