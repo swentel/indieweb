@@ -61,11 +61,9 @@ class MicrosubTest extends IndiewebBrowserTestBase {
   ];
 
   /**
-   * {@inheritdoc}
+   * Setup defaults.
    */
-  public function setUp() {
-    parent::setUp();
-
+  protected function setUpDefaults() {
     $this->createNodeTypes(['reply']);
 
     // Set microformat class to in-reply-to
@@ -101,7 +99,7 @@ class MicrosubTest extends IndiewebBrowserTestBase {
   }
 
   /**
-   * Tests microsub functionality.
+   * Tests microsub timeline functionality.
    *
    * @throws \Behat\Mink\Exception\ExpectationException
    * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
@@ -109,7 +107,8 @@ class MicrosubTest extends IndiewebBrowserTestBase {
    * @throws \Drupal\Core\Entity\EntityMalformedException
    * @throws \Drupal\Core\Entity\EntityStorageException
    */
-  public function testMicrosub() {
+  public function testMicrosubBasic() {
+    $this->setUpDefaults();
 
     // ----------------------------------------------------------------
     // basic tests.
@@ -390,6 +389,8 @@ class MicrosubTest extends IndiewebBrowserTestBase {
    * @throws \Drupal\Core\Entity\EntityStorageException
    */
   function testMicrosubCleanup() {
+    $this->setUpDefaults();
+
     $source = MicrosubSource::load(2);
     $source->delete();
 
@@ -445,6 +446,84 @@ class MicrosubTest extends IndiewebBrowserTestBase {
     $this->resetNextFetch(3);
     $this->fetchItems();
     $this->assertMicrosubItemCount('item', 22);
+  }
+
+  /**
+   * Test managing channels.
+   */
+  public function testManageChannels() {
+    $this->drupalLogin($this->adminUser);
+    $edit = ['microsub_internal' => TRUE];
+    $this->drupalPostForm('admin/config/services/indieweb/microsub', $edit, 'Save configuration');
+
+    // Set IndieAuth token endpoints.
+    $this->setIndieAuthEndPoints();
+
+    // Create a channel
+    $new_channel = ['action' => 'channels', 'name' => 'A new channel'];
+    $this->sendMicrosubRequest($new_channel, 'POST');
+    $this->assertChannelExists($new_channel['name']);
+    $this->assertMicrosubItemCount('channel', 1);
+
+    // Update channel (id = 1)
+    $update_channel = ['action' => 'channels', 'name' => 'An updated channel', 'channel' => 1];
+    $this->sendMicrosubRequest($update_channel, 'POST');
+    $this->assertChannelExists($update_channel['name'], 1);
+    $this->assertMicrosubItemCount('channel', 1);
+
+    // Add another channel.
+    $another_channel = ['action' => 'channels', 'name' => 'Another channel'];
+    $this->sendMicrosubRequest($another_channel, 'POST');
+    $this->assertChannelExists($another_channel['name']);
+    $this->assertMicrosubItemCount('channel', 2);
+
+    // Order.
+    $order = ['action' => 'channels', 'method' => 'order', 'channels' => [2, 1]];
+    $this->sendMicrosubRequest($order, 'POST');
+    $this->assertMicrosubItemCount('channel', 2);
+    $response = $this->sendMicrosubRequest($order);
+    $body = json_decode($response['body']);
+    self::assertEquals($another_channel['name'], $body->channels[1]->name);
+    self::assertEquals($update_channel['name'], $body->channels[2]->name);
+
+    $order = ['action' => 'channels', 'method' => 'order', 'channels' => [1, 2]];
+    $this->sendMicrosubRequest($order, 'POST');
+    $response = $this->sendMicrosubRequest($order);
+    $body = json_decode($response['body']);
+    self::assertEquals($update_channel['name'], $body->channels[1]->name);
+    self::assertEquals($another_channel['name'], $body->channels[2]->name);
+
+    // Delete channel.
+    $update_channel = ['action' => 'channels', 'method' => 'delete', 'channel' => 1];
+    $this->sendMicrosubRequest($update_channel, 'POST');
+    $this->assertChannelExists('An updated channel', 1, FALSE);
+  }
+
+  /**
+   * Asserts a channel exists by name.
+   *
+   * @param $name
+   * @param $id
+   * @param bool $exists
+   */
+  protected function assertChannelExists($name, $id = NULL, $exists = TRUE) {
+    $query = \Drupal::database()
+      ->select('microsub_channel', 't')
+      ->fields('t', ['title'])
+      ->condition('title', $name);
+
+    if ($id) {
+      $query->condition('id', $id);
+    }
+
+    $channel = $query->execute()->fetchField();
+
+    if ($exists) {
+      self::assertTrue($channel);
+    }
+    else {
+      self::assertFalse($channel);
+    }
   }
 
   /**

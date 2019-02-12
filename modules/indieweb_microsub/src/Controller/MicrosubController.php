@@ -64,10 +64,15 @@ class MicrosubController extends ControllerBase {
       return new JsonResponse('', 401);
     }
 
+    // Determine scope.
     $scope = NULL;
     $request_method = $request->getMethod();
     $action = $request->get('action');
-    if ($action == 'channels' || $action == 'timeline') {
+
+    if ($action == 'channels' && $request_method == 'POST') {
+      $scope = 'channels';
+    }
+    elseif ($action == 'channels' || $action == 'timeline') {
       $scope = 'read';
     }
 
@@ -94,6 +99,34 @@ class MicrosubController extends ControllerBase {
     // POST actions.
     if ($request_method == 'POST') {
       switch ($action) {
+
+        case 'channels':
+          $method = $request->get('method');
+          if (!$method) {
+            $method = 'create';
+            if ($id = $request->get('channel')) {
+              $method = 'update';
+            }
+          }
+
+          if ($method == 'create') {
+            $response = $this->createChannel();
+          }
+
+          if ($method == 'update') {
+            $response = $this->updateChannel();
+          }
+
+          if ($method == 'order') {
+            $response = $this->orderChannels();
+          }
+
+          if ($method == 'delete') {
+            $response = $this->deleteChannel();
+          }
+
+          break;
+
         case 'timeline':
 
           $method = $request->get('method');
@@ -106,6 +139,7 @@ class MicrosubController extends ControllerBase {
           }
 
           break;
+
       }
     }
 
@@ -136,7 +170,6 @@ class MicrosubController extends ControllerBase {
     $channels_list = $this->entityTypeManager()->getStorage('indieweb_microsub_channel')->loadMultiple($ids);
 
     // Notifications channel.
-    $i = 0;
     $notifications = \Drupal::entityTypeManager()->getStorage('indieweb_microsub_item')->getUnreadCountByChannel(0);
     $channels[] = (object) [
       'uid' => 0,
@@ -268,7 +301,114 @@ class MicrosubController extends ControllerBase {
   }
 
   /**
+   * Create a channel.
+   *
+   * @return array
+   *
+   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
+   * @throws \Drupal\Core\Entity\EntityStorageException
+   */
+  protected function createChannel() {
+    $return = ['response' => [], 'code' => 400];
+
+    $name = $this->request->get('name');
+    if (!empty($name)) {
+      $values = ['title' => $name];
+      $channel = $this->entityTypeManager()->getStorage('indieweb_microsub_channel')->create($values);
+      $channel->save();
+      if ($channel->label()) {
+        $return = ['response' => ['uid' => $channel->id(), 'name' => $channel->label()], 'code' => 200];
+      }
+    }
+
+    return $return;
+  }
+
+  /**
+   * Updates a channel.
+   *
+   * @return array
+   *
+   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
+   * @throws \Drupal\Core\Entity\EntityStorageException
+   */
+  protected function updateChannel() {
+    $return = ['response' => [], 'code' => 400];
+
+    $id = $this->request->get('channel');
+    $name = $this->request->get('name');
+    if (!empty($name) && !empty($id)) {
+      /** @var \Drupal\indieweb_microsub\Entity\MicrosubChannelInterface $channel */
+      $channel = $this->entityTypeManager()->getStorage('indieweb_microsub_channel')->load($id);
+      if ($channel) {
+        $channel->set('title', $name)->save();
+        $return = ['response' => ['uid' => $channel->id(), 'name' => $channel->label()], 'code' => 200];
+      }
+    }
+
+    return $return;
+  }
+
+  /**
+   * Deletes a channel.
+   *
+   * @return array
+   *
+   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
+   * @throws \Drupal\Core\Entity\EntityStorageException
+   */
+  protected function deleteChannel() {
+    $return = ['response' => [], 'code' => 400];
+
+    $id = $this->request->get('channel');
+    if (!empty($id)) {
+      $channel = $this->entityTypeManager()->getStorage('indieweb_microsub_channel')->load($id);
+      if ($channel) {
+        $channel->delete();
+        $return = ['response' => [], 'code' => 200];
+      }
+    }
+
+    return $return;
+  }
+
+  /**
+   * Orders channels.
+   *
+   * @return array
+   *
+   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
+   * @throws \Drupal\Core\Entity\EntityStorageException
+   */
+  protected function orderChannels() {
+    $return = ['response' => [], 'code' => 400];
+
+    $ids = $this->request->get('channels');
+    if (!empty($ids)) {
+      $weight = -20;
+      foreach ($ids as $id) {
+        /** @var \Drupal\indieweb_microsub\Entity\MicrosubChannelInterface $channel */
+        $channel = $this->entityTypeManager()->getStorage('indieweb_microsub_channel')->load($id);
+        if ($channel) {
+          $channel->set('weight', $weight);
+          $channel->save();
+          $weight++;
+        }
+      }
+      $return = ['response' => [], 'code' => 200];
+    }
+
+    return $return;
+  }
+
+  /**
    * Mark items read for a channel.
+   *
+   * @return array
    *
    * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
    * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
@@ -285,6 +425,8 @@ class MicrosubController extends ControllerBase {
 
   /**
    * Removes a microsub item
+   *
+   * @return array
    *
    * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
    * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
