@@ -384,13 +384,16 @@ class MicrosubTest extends IndiewebBrowserTestBase {
   /**
    * Tests the cleanup functionality.
    *
+   * @throws \Behat\Mink\Exception\ExpectationException
+   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    * @throws \Drupal\Core\Entity\EntityStorageException
    */
   function testMicrosubCleanup() {
     $source = MicrosubSource::load(2);
     $source->delete();
 
-    $this->createNodes(10, 'article');
+    $this->createNodes(15, 'article');
 
     $this->drupalLogin($this->adminUser);
     $edit = ['microsub_internal' => TRUE, 'microsub_internal_handler' => 'drush', 'microsub_internal_cleanup_items' => TRUE];
@@ -407,21 +410,21 @@ class MicrosubTest extends IndiewebBrowserTestBase {
     $this->drupalPostForm('admin/config/services/indieweb/microformats', $microformats, 'Save configuration');
 
     $this->fetchItems();
-    $this->assertMicrosubItemCount('item', 10);
+    $this->assertMicrosubItemCount('item', 15);
 
-    $this->createNodes(1, 'article', 11, time() - 1800);
+    $this->createNodes(1, 'article', 16, time() - 1800);
     $this->drupalPostForm('admin/config/services/indieweb/microsub/sources/1/edit', ['items_to_keep' => 5], 'Save');
 
     $this->resetNextFetch(1);
     $this->fetchItems();
-    $this->assertItemTitles(range(7, 11));
-    $this->assertMicrosubItemCount('item', 5);
+    $this->assertItemTitles(range(7, 16));
+    $this->assertMicrosubItemCount('item', 10);
 
-    $this->createNodes(2, 'article', 12, time() - 900);
+    $this->createNodes(2, 'article', 17, time() - 900);
     $this->resetNextFetch(1);
     $this->fetchItems();
     $this->assertItemTitles(range(9, 13));
-    $this->assertMicrosubItemCount('item', 5);
+    $this->assertMicrosubItemCount('item', 10);
 
     // delete-items test.
     $this->drupalPostForm('admin/config/services/indieweb/microsub/sources/1/delete-items', [], 'Confirm');
@@ -441,7 +444,7 @@ class MicrosubTest extends IndiewebBrowserTestBase {
     $this->assertMicrosubItemCount('item', 22);
     $this->resetNextFetch(3);
     $this->fetchItems();
-    $this->assertMicrosubItemCount('item', 20);
+    $this->assertMicrosubItemCount('item', 22);
   }
 
   /**

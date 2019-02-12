@@ -96,6 +96,12 @@ class MicrosubClient implements MicrosubClientInterface {
             // Cleanup old items if we can. We do this here because it doesn't
             // make much sense to check this if the hash hasn't changed.
             if (!$empty && $cleanup_old_items && $items_in_feed && $items_to_keep && $item_count >= $items_to_keep) {
+
+              // Add five more items to keep so we don't hit exceptions like:
+              //   - feeds with pinned items (e.g. mastodon).
+              //   - posts that have been deleted.
+
+              $items_to_keep += 5;
               // We use two queries as not all mysql servers understand limits
               // in sub queries when the main query is a delete.
               $timestamp = \Drupal::entityTypeManager()->getStorage('indieweb_microsub_item')->getTimestampByRangeAndSource($items_to_keep, $source_id);

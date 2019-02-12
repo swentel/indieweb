@@ -1,5 +1,5 @@
 admin:
-  version: 1.0
+  version: VERSION
   css:
     theme:
       css/indieweb.admin.css: {  }

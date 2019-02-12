@@ -333,9 +333,10 @@ Microsub actions implemented:
 
 Want to follow Twitter, or Instagram in your reader? Checkout granary.io!
 
-Known problems: if you configure to clean up items, but old ones keep coming back, set the items to keep either to 0,
-which is the default, or higher than the number of items in a feed. This problem usually pops up with pinned items in a
-feed, or with markup in Microformats2 feeds not completely following the specification.
+Note: when you configure a feed to cleanup old items, internally we count 5 items more by default. The reason is that
+some feeds use pinned items (.e.g. Mastodon) which can come and go and mix up the total visual items on a page. Or 
+simply because a post was deleted later.r
+
 
 **Aperture**
 
