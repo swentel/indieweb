@@ -72,6 +72,9 @@ class MicrosubController extends ControllerBase {
     if ($action == 'channels' && $request_method == 'POST') {
       $scope = 'channels';
     }
+    elseif (in_array($action, ['follow', 'unfollow'])) {
+      $scope = 'follow';
+    }
     elseif ($action == 'channels' || $action == 'timeline') {
       $scope = 'read';
     }
@@ -91,6 +94,10 @@ class MicrosubController extends ControllerBase {
 
         case 'timeline':
           $response = $this->getTimeline();
+          break;
+
+        case 'follow':
+          $response = $this->getSources();
           break;
 
       }
@@ -138,6 +145,14 @@ class MicrosubController extends ControllerBase {
             $response = $this->removeItem();
           }
 
+          break;
+
+        case 'follow':
+          $response = $this->followSource();
+          break;
+
+        case 'unfollow':
+          $response = $this->deleteSource();
           break;
 
       }
@@ -314,7 +329,11 @@ class MicrosubController extends ControllerBase {
 
     $name = $this->request->get('name');
     if (!empty($name)) {
-      $values = ['title' => $name];
+      $uid = 1;
+      if ($token_uid = $this->indieAuth->checkAuthor()) {
+        $uid = $token_uid;
+      }
+      $values = ['title' => $name, 'uid' => $uid];
       $channel = $this->entityTypeManager()->getStorage('indieweb_microsub_channel')->create($values);
       $channel->save();
       if ($channel->label()) {
@@ -421,6 +440,98 @@ class MicrosubController extends ControllerBase {
     }
 
     return ['response' => [], 'code' => 200];
+  }
+
+  /**
+   * Follow a source.
+   *
+   * @return array
+   *
+   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
+   * @throws \Drupal\Core\Entity\EntityStorageException
+   */
+  protected function followSource() {
+    $return = ['response' => [], 'code' => 400];
+
+    $url = $this->request->get('url');
+    $channel_id = $this->request->get('channel');
+    if (!empty($channel_id) && !empty($url)) {
+      $channel = $this->entityTypeManager()->getStorage('indieweb_microsub_channel')->load($channel_id);
+      if ($channel) {
+
+        $uid = 1;
+        if ($token_uid = $this->indieAuth->checkAuthor()) {
+          $uid = $token_uid;
+        }
+
+        $values = [
+          'uid' => $uid,
+          'url' => $url,
+          'channel_id' => $channel_id,
+          'fetch_interval' => 86400,
+        ];
+        $source = $this->entityTypeManager()->getStorage('indieweb_microsub_source')->create($values);
+        $source->save();
+        $return = ['response' => ['type' => 'feed', 'url' => $url], 'code' => 200];
+      }
+    }
+
+    return $return;
+  }
+
+  /**
+   * Delete a source.
+   *
+   * @return array
+   *
+   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
+   */
+  protected function deleteSource() {
+    $return = ['response' => [], 'code' => 400];
+
+    $url = $this->request->get('url');
+    $channel_id = $this->request->get('channel');
+    if (!empty($channel_id) && !empty($url)) {
+      $sources = $this->entityTypeManager()->getStorage('indieweb_microsub_source')->loadByProperties(['url' => $url, 'channel_id' => $channel_id]);
+      if (count($sources) == 1) {
+        $source = array_shift($sources);
+        $source->delete();
+        $return = ['response' => [], 'code' => 200];
+      }
+    }
+
+    return $return;
+  }
+
+  /**
+   * Get sources.
+   *
+   * @return array
+   *
+   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
+   */
+  protected function getSources() {
+    $return = ['response' => [], 'code' => 400];
+
+    $channel_id = $this->request->get('channel');
+    if (!empty($channel_id)) {
+      $sources = $this->entityTypeManager()->getStorage('indieweb_microsub_source')->loadByProperties(['channel_id' => $channel_id]);
+      if (!empty($sources)) {
+        $source_list = [];
+        foreach ($sources as $source) {
+          $source_list[] = (object) [
+            'type' => 'feed',
+            'url' => $source->label(),
+          ];
+        }
+        $return = ['response' => (object) ['items' => $source_list], 'code' => 200];
+      }
+    }
+
+    return $return;
   }
 
   /**

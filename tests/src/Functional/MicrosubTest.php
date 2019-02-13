@@ -500,6 +500,69 @@ class MicrosubTest extends IndiewebBrowserTestBase {
   }
 
   /**
+   * Test managing feeds.
+   */
+  public function testManageFeeds() {
+    $this->drupalLogin($this->adminUser);
+    $edit = ['microsub_internal' => TRUE];
+    $this->drupalPostForm('admin/config/services/indieweb/microsub', $edit, 'Save configuration');
+
+    // Set IndieAuth token endpoints.
+    $this->setIndieAuthEndPoints();
+
+    // Create a channel
+    $new_channel = ['action' => 'channels', 'name' => 'A new channel'];
+    $this->sendMicrosubRequest($new_channel, 'POST');
+    $this->assertChannelExists($new_channel['name']);
+    $this->assertMicrosubItemCount('channel', 1);
+
+    // Follow new feed
+    $new_feed = ['action' => 'follow', 'channel' => 2, 'url' => 'https://example.com/rss'];
+    $response = $this->sendMicrosubRequest($new_feed, 'POST');
+    self::assertEquals(400, $response['code']);
+    $this->assertSourceExists($new_feed['url'], NULL, NULL, FALSE);
+    $this->assertMicrosubItemCount('source', 0);
+
+    $new_feed = ['action' => 'follow', 'channel' => 1, 'url' => 'https://example.com/rss'];
+    $response = $this->sendMicrosubRequest($new_feed, 'POST');
+    self::assertEquals(200, $response['code']);
+    $this->assertSourceExists($new_feed['url'], 1, 1);
+    $this->assertMicrosubItemCount('source', 1);
+
+    $new_feed = ['action' => 'follow', 'channel' => 1, 'url' => 'https://example.com/rss3'];
+    $response = $this->sendMicrosubRequest($new_feed, 'POST');
+    self::assertEquals(200, $response['code']);
+    $this->assertSourceExists($new_feed['url'], 1, 2);
+    $this->assertMicrosubItemCount('source', 2);
+
+    // Get feeds.
+    $response = $this->sendMicrosubRequest(['action' => 'follow', 'channel' => 1], 'get');
+    self::assertEquals(200, $response['code']);
+    $items = json_decode($response['body']);
+    self::assertEquals('https://example.com/rss', $items->items[0]->url);
+    self::assertEquals('https://example.com/rss3', $items->items[1]->url);
+
+    // Remove feed
+    $remove_source = ['action' => 'unfollow', 'channel' => 2, 'url' => 'https://example.com/rss'];
+    $response = $this->sendMicrosubRequest($remove_source, 'POST');
+    self::assertEquals(400, $response['code']);
+    $this->assertSourceExists($remove_source['url'], 1, 1);
+    $this->assertMicrosubItemCount('source', 2);
+
+    $remove_source = ['action' => 'unfollow', 'channel' => 1, 'url' => 'https://example.com/rss2'];
+    $response = $this->sendMicrosubRequest($remove_source, 'POST');
+    self::assertEquals(400, $response['code']);
+    $this->assertSourceExists('https://example.com/rss', 1, 1);
+    $this->assertMicrosubItemCount('source', 2);
+
+    $remove_source = ['action' => 'unfollow', 'channel' => 1, 'url' => 'https://example.com/rss'];
+    $response = $this->sendMicrosubRequest($remove_source, 'POST');
+    self::assertEquals(200, $response['code']);
+    $this->assertSourceExists($remove_source['url'], 1, 1, FALSE);
+    $this->assertMicrosubItemCount('source', 1);
+  }
+
+  /**
    * Asserts a channel exists by name.
    *
    * @param $name
@@ -523,6 +586,38 @@ class MicrosubTest extends IndiewebBrowserTestBase {
     }
     else {
       self::assertFalse($channel);
+    }
+  }
+
+  /**
+   * Asserts a source exists by name.
+   *
+   * @param $url
+   * @param $channel_id
+   * $param $source_id
+   * @param bool $exists
+   */
+  protected function assertSourceExists($url, $channel_id = NULL, $source_id = NULL, $exists = TRUE) {
+    $query = \Drupal::database()
+      ->select('microsub_source', 't')
+      ->fields('t', ['url'])
+      ->condition('url', $url);
+
+    if ($channel_id) {
+      $query->condition('channel_id', $channel_id);
+    }
+
+    if ($source_id) {
+      $query->condition('id', $source_id);
+    }
+
+    $source = $query->execute()->fetchField();
+
+    if ($exists) {
+      self::assertTrue($source);
+    }
+    else {
+      self::assertFalse($source);
     }
   }
 
