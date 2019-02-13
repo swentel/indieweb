@@ -332,6 +332,7 @@ Microsub actions implemented:
 - POST action=timeline: mark entries as read, or remove an entry from a channel
 - POST action=channels: create, update, order and delete channels
 - POST action=follow, unfollow: subscribe, unsubscribe to feed
+- POST/GET action=search, preview: search and preview url
 
 Want to follow Twitter, or Instagram in your reader? Checkout granary.io!
 
