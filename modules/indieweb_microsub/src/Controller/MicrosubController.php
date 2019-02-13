@@ -219,7 +219,7 @@ class MicrosubController extends ControllerBase {
     // Notifications channel.
     $notifications = \Drupal::entityTypeManager()->getStorage('indieweb_microsub_item')->getUnreadCountByChannel(0);
     $channels[] = (object) [
-      'uid' => 0,
+      'uid' => 'notifications',
       'name' => 'Notifications',
       'unread' => (int) $notifications,
     ];
@@ -261,8 +261,13 @@ class MicrosubController extends ControllerBase {
 
     $channel = $this->request->get('channel');
 
+    // Notifications is stored as channel 0.
+    if ($channel == 'notifications') {
+      $channel = 0;
+    }
+
     // Get items for a specific channel.
-    if ($channel || ((int) $channel === 0)) {
+    if ($channel || $channel === 0) {
 
       $items = [];
       $paging = [];
