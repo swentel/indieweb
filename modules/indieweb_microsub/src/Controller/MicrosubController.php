@@ -472,7 +472,13 @@ class MicrosubController extends ControllerBase {
   protected function timelineMarkAllRead() {
 
     $channel_id = $this->request->get('channel');
-    if ($channel_id || ((int) $channel_id === 0)) {
+
+    // Notifications is stored as channel 0.
+    if ($channel == 'notifications') {
+      $channel = 0;
+    }
+
+    if ($channel_id || $channel_id === 0) {
       $this->entityTypeManager()->getStorage('indieweb_microsub_item')->markItemsRead($channel_id);
     }
 
