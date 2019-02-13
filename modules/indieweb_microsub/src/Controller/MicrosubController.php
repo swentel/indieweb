@@ -474,8 +474,8 @@ class MicrosubController extends ControllerBase {
     $channel_id = $this->request->get('channel');
 
     // Notifications is stored as channel 0.
-    if ($channel == 'notifications') {
-      $channel = 0;
+    if ($channel_id == 'notifications') {
+      $channel_id = 0;
     }
 
     if ($channel_id || $channel_id === 0) {
