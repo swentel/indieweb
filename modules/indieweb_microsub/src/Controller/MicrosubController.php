@@ -6,6 +6,7 @@ use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Url;
 use Drupal\indieweb_microsub\Entity\MicrosubChannelInterface;
 use Drupal\indieweb_microsub\Entity\MicrosubSourceInterface;
+use p3k\XRay;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -72,7 +73,7 @@ class MicrosubController extends ControllerBase {
     if ($action == 'channels' && $request_method == 'POST') {
       $scope = 'channels';
     }
-    elseif (in_array($action, ['follow', 'unfollow'])) {
+    elseif (in_array($action, ['follow', 'unfollow', 'search', 'preview'])) {
       $scope = 'follow';
     }
     elseif ($action == 'channels' || $action == 'timeline') {
@@ -83,7 +84,10 @@ class MicrosubController extends ControllerBase {
       return new JsonResponse('', 403);
     }
 
+    // ---------------------------------------------------------
     // GET actions.
+    // ---------------------------------------------------------
+
     if ($request_method == 'GET') {
 
       switch ($action) {
@@ -100,12 +104,27 @@ class MicrosubController extends ControllerBase {
           $response = $this->getSources();
           break;
 
+        case 'search':
+          $response = $this->searchUrl();
+          break;
+
+        case 'preview':
+          $response = $this->previewUrl();
+          break;
+
       }
     }
 
+    // ---------------------------------------------------------
     // POST actions.
+    // ---------------------------------------------------------
+
     if ($request_method == 'POST') {
       switch ($action) {
+
+        // ---------------------------------------------------------
+        // Channels
+        // ---------------------------------------------------------
 
         case 'channels':
           $method = $request->get('method');
@@ -131,11 +150,13 @@ class MicrosubController extends ControllerBase {
           if ($method == 'delete') {
             $response = $this->deleteChannel();
           }
-
           break;
 
-        case 'timeline':
+        // ---------------------------------------------------------
+        // Timeline
+        // ---------------------------------------------------------
 
+        case 'timeline':
           $method = $request->get('method');
           if ($method == 'mark_read') {
             $response = $this->timelineMarkAllRead();
@@ -144,8 +165,11 @@ class MicrosubController extends ControllerBase {
           if ($method == 'remove') {
             $response = $this->removeItem();
           }
-
           break;
+
+        // ---------------------------------------------------------
+        // Follow, Unfollow, Search and Preview
+        // ---------------------------------------------------------
 
         case 'follow':
           $response = $this->followSource();
@@ -153,6 +177,14 @@ class MicrosubController extends ControllerBase {
 
         case 'unfollow':
           $response = $this->deleteSource();
+          break;
+
+        case 'search':
+          $response = $this->searchUrl();
+          break;
+
+        case 'preview':
+          $response = $this->previewUrl();
           break;
 
       }
@@ -529,6 +561,61 @@ class MicrosubController extends ControllerBase {
         }
         $return = ['response' => (object) ['items' => $source_list], 'code' => 200];
       }
+    }
+
+    return $return;
+  }
+
+  /**
+   * Search url.
+   *
+   * @return array
+   */
+  protected function searchUrl() {
+    $return = ['response' => [], 'code' => 400];
+
+    $url = $this->request->get('query');
+    if (!empty($url)) {
+      $xray = new XRay();
+      $feeds = $xray->feeds($url);
+      if (!empty($feeds['feeds'])) {
+        $result_list = [];
+        foreach ($feeds['feeds'] as $feed) {
+          $result_list[] = (object) [
+            'type' => $feed['type'],
+            'url' => $feed['url'],
+          ];
+        }
+        $return = ['response' => (object) ['results' => $result_list], 'code' => 200];
+      }
+    }
+
+    return $return;
+  }
+
+  /**
+   * Preview url.
+   *
+   * @return array
+   */
+  protected function previewUrl() {
+    $return = ['response' => [], 'code' => 400];
+
+    $url = $this->request->get('url');
+    if (!empty($url)) {
+      try {
+        $xray = new XRay();
+        $response = \Drupal::httpClient()->get($url);
+        $body = $response->getBody()->getContents();
+        $parsed = $xray->parse($url, $body, ['expect' => 'feed']);
+        if ($parsed && isset($parsed['data']['type']) && $parsed['data']['type'] == 'feed') {
+          $return = ['response' => (object) ['items' => $parsed['data']['items']], 'code' => 200];
+        }
+      }
+      catch (\Exception $e) {
+        \Drupal::logger('indieweb_microsub')->notice('Error fetching preview for @url : @message', ['@url' => $url, '@message' => $e->getMessage()]);
+      }
+
     }
 
     return $return;
