@@ -21,7 +21,7 @@ class MicrosubChannelListBuilder extends IndieWebDraggableListBuilder {
       $delete_link = ' - ' . Link::createFromRoute($this->t('Delete notifications'), 'entity.indieweb_microsub.delete_notifications')->toString();
     }
     $build['notifications'] = [
-      '#markup' => $this->t('Number of notifications: @count.', ['@count' => $count]) . $delete_link,
+      '#markup' => $this->t('Number of notifications: @count', ['@count' => $count]) . $delete_link,
       '#weight' => -10,
     ];
 

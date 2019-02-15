@@ -446,6 +446,7 @@ class MicrosubController extends ControllerBase {
     $ids = $this->request->get('channels');
     if (!empty($ids)) {
       $weight = -20;
+      ksort($ids);
       foreach ($ids as $id) {
         /** @var \Drupal\indieweb_microsub\Entity\MicrosubChannelInterface $channel */
         $channel = $this->entityTypeManager()->getStorage('indieweb_microsub_channel')->load($id);
