@@ -162,7 +162,7 @@ class MicropubSettingsForm extends ConfigFormBase {
       '#title' => $this->t('Enable media endpoint'),
       '#type' => 'checkbox',
       '#default_value' => $config->get('micropub_media_enable'),
-      '#description' => $this->t('This will enable the micropub media endpoint to receive files, currently limited to images (jpg, png, gif). <br />The endpoint will look like <strong>https://@domain/indieweb/micropub/media</strong><br />', ['@domain' => \Drupal::request()->getHttpHost()]),
+      '#description' => $this->t('This will enable the micropub media endpoint to receive files, limited to images (jpg, png, gif). <br />The endpoint will look like <strong>https://@domain/indieweb/micropub/media</strong><br />', ['@domain' => \Drupal::request()->getHttpHost()]),
       '#states' => array(
         'visible' => array(
           ':input[name="micropub_enable"]' => array('checked' => TRUE),
@@ -422,8 +422,8 @@ class MicropubSettingsForm extends ConfigFormBase {
       // Upload field.
       $form[$post_type][$post_type . '_upload_field'] = [
         '#type' => 'select',
-        '#title' => $this->t('Upload field'),
-        '#description' => $this->t('Select the field which will be used to store files. Make sure the field exists on the node type.<br />Currently only supports saving 1 file in the "image" section of a micropub request.'),
+        '#title' => $this->t('Image field'),
+        '#description' => $this->t('Select the field which will be used to store files. Make sure the field exists on the node type.<br />Only images are allowed, multiple if the field has a cardinality other than 1.'),
         '#options' => ['' => $this->t('Do not allow uploads')] + $upload_fields,
         '#default_value' => $config->get($post_type . '_upload_field'),
         '#states' => array(

@@ -8,6 +8,7 @@ use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Language\LanguageInterface;
 use Drupal\Core\Url;
 use Drupal\datetime\Plugin\Field\FieldType\DateTimeItemInterface;
+use Drupal\field\FieldStorageConfigInterface;
 use Drupal\node\Entity\Node;
 use Drupal\node\Entity\NodeType;
 use Drupal\node\NodeInterface;
@@ -648,8 +649,11 @@ class MicropubController extends ControllerBase {
       $validators['file_validate_extensions'] = [];
       $validators['file_validate_extensions'][0] = $extensions;
       $sub_directory = date('Y') . '/' . date('m');
-      $file = $this->saveUpload('file', 'public://micropub/' . $sub_directory, $validators);
-      if ($file) {
+      $files = $this->saveUpload('file', 'public://micropub/' . $sub_directory, $validators);
+      if ($files) {
+
+        // Get first file.
+        $file = $files[0];
 
         // Set permanent.
         $file->setPermanent();
@@ -876,37 +880,51 @@ class MicropubController extends ControllerBase {
   /**
    * Helper function to upload file(s).
    *
-   * Currently limited to 1 file.
-   *
    * @param $file_key
    *   The key in the $_FILES variable to look for in upload.
    * @param string $destination
    *   The destination of the file.
    * @param array $validators
    *   A list of validators. If empty, anything is allowed.
+   * @param $limit
+   *   Limit number of uploads.
    *
-   * @return bool|\Drupal\file\FileInterface
+   * @return array $uploaded_files
    */
-  protected function saveUpload($file_key, $destination = 'public://', $validators = []) {
-    $file = FALSE;
+  protected function saveUpload($file_key, $destination = 'public://', $validators = [], $limit = NULL) {
+    $uploaded_files = [];
 
     // Return early if there are no uploads.
     $files = \Drupal::request()->files->get($file_key);
     if (empty($files)) {
-      return $file;
+      return $uploaded_files;
     }
 
     // Set files.
     \Drupal::request()->files->set('files', [$file_key => $files]);
 
-    // Try to save the file.
+    // Cast to array if needed.
+    if (!is_array($files)) {
+      $files = [$files];
+    }
+
+    // Save the files.
     try {
-      file_prepare_directory($destination, FILE_CREATE_DIRECTORY);
-      $file = file_save_upload($file_key, $validators, $destination, 0);
-      $messages = $this->messenger()->all();
-      if (!empty($messages)) {
-        foreach ($messages as $message) {
-          $this->getLogger('indieweb_micropub')->notice('Error saving file: @message', ['@message' => print_r($message, 1)]);
+      foreach (array_keys($files) as $delta) {
+
+        if ($limit && $delta >= $limit) {
+          continue;
+        }
+
+        file_prepare_directory($destination, FILE_CREATE_DIRECTORY);
+        if ($file = file_save_upload($file_key, $validators, $destination, $delta)) {
+          $uploaded_files[] = $file;
+        }
+        $messages = $this->messenger()->all();
+        if (!empty($messages)) {
+          foreach ($messages as $message) {
+            $this->getLogger('indieweb_micropub')->notice('Error saving file: @message', ['@message' => print_r($message, 1)]);
+          }
         }
       }
     }
@@ -914,21 +932,47 @@ class MicropubController extends ControllerBase {
       $this->getLogger('indieweb_micropub')->notice('Exception saving file: @message', ['@message' => $e->getMessage()]);
     }
 
-    return $file;
+    return $uploaded_files;
   }
 
   /**
    * Handle uploads
    *
    * @param $upload_field
+   *
+   * @throws \Drupal\Core\TypedData\Exception\MissingDataException
    */
   protected function handleUpload($upload_field) {
-    // File (currently only image, limited to 1).
     $file_field_name = $this->config->get($upload_field);
     if ($file_field_name && $this->node->hasField($file_field_name)) {
-      $file = $this->saveUpload('photo');
-      if ($file) {
-        $this->node->set($file_field_name, $file->id());
+
+      // Validators, destination and cardinality.
+      $items = $this->node->get($file_field_name);
+      /** @var \Drupal\file\Plugin\Field\FieldType\FileItem $field */
+      $field = $items->first() ?: $items->appendItem();
+      $validators = $field->getUploadValidators();
+      $field_settings = $field->getFieldDefinition()->getSettings();
+      $destination = $field->getUploadLocation();
+
+      // Resolution.
+      if ($field_settings['max_resolution'] || $field_settings['min_resolution']) {
+        $validators['file_validate_image_resolution'] = [$field_settings['max_resolution'], $field_settings['min_resolution']];
+      }
+
+      // Cardinality.
+      $limit = NULL;
+      $cardinality = $field->getFieldDefinition()->getFieldStorageDefinition()->getCardinality();
+      if ($cardinality > FieldStorageConfigInterface::CARDINALITY_UNLIMITED) {
+        $limit = $cardinality;
+      }
+
+      $files = $this->saveUpload('photo', $destination, $validators, $limit);
+      if ($files) {
+        $file_values = [];
+        foreach ($files as $file) {
+          $file_values[] = $file->id();
+        }
+        $this->node->set($file_field_name, $file_values);
       }
     }
   }

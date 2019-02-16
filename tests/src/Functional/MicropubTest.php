@@ -162,6 +162,7 @@ class MicropubTest extends IndiewebBrowserTestBase {
     $edit = ['article_create_node' => 1, 'article_node_type' => 'article', 'article_uid' => $this->adminUser->getUsername() . ' (' . $this->adminUser->id() . ')', 'article_upload_field' => 'field_image'];
     $this->drupalPostForm('admin/config/services/indieweb/micropub', $edit, 'Save configuration');
 
+    // Single image.
     $image = current($this->getTestFiles('image'));
     $image_path = \Drupal::service('file_system')->realpath($image->uri);
     $post = $this->article;
@@ -173,6 +174,70 @@ class MicropubTest extends IndiewebBrowserTestBase {
     $nid = $this->getLastNid('article');
     $node = \Drupal::entityTypeManager()->getStorage('node')->load($nid);
     self::assertTrue(!empty($node->field_image->target_id));
+
+    // Set cardinality to 2.
+    $edit = ['cardinality' => 'number', 'cardinality_number' => 2];
+    $this->drupalPostForm('admin/structure/types/manage/article/fields/node.article.field_image/storage', $edit, 'Save field settings');
+    drupal_flush_all_caches();
+
+    $post = $this->article;
+    $post['photo'] = [];
+    unset($post['category']);
+
+    $image = $this->getTestFiles('image')[0];
+    $image_path = \Drupal::service('file_system')->realpath($image->uri);
+    $post['photo'][] = fopen($image_path, 'r');
+
+    $image = $this->getTestFiles('image')[1];
+    $image_path = \Drupal::service('file_system')->realpath($image->uri);
+    $post['photo'][] = fopen($image_path, 'r');
+
+    $code = $this->sendMicropubRequest($post);
+    self::assertEquals(201, $code);
+    $this->assertNodeCount(2, 'article');
+    $nid = $this->getLastNid('article');
+    $node = \Drupal::entityTypeManager()->getStorage('node')->load($nid);
+    self::assertEquals(2, count($node->field_image->getValue()));
+
+    // Test with 3 images.
+    $post = $this->article;
+    $post['photo'] = [];
+    unset($post['category']);
+
+    $image = $this->getTestFiles('image')[0];
+    $image_path = \Drupal::service('file_system')->realpath($image->uri);
+    $post['photo'][] = fopen($image_path, 'r');
+
+    $image = $this->getTestFiles('image')[1];
+    $image_path = \Drupal::service('file_system')->realpath($image->uri);
+    $post['photo'][] = fopen($image_path, 'r');
+
+    $image = $this->getTestFiles('image')[2];
+    $image_path = \Drupal::service('file_system')->realpath($image->uri);
+    $post['photo'][] = fopen($image_path, 'r');
+
+    $code = $this->sendMicropubRequest($post);
+    self::assertEquals(201, $code);
+    $this->assertNodeCount(3, 'article');
+    $nid = $this->getLastNid('article');
+    $node = \Drupal::entityTypeManager()->getStorage('node')->load($nid);
+    self::assertEquals(2, count($node->field_image->getValue()));
+
+    // Test with invalid file.
+    $post = $this->article;
+    $post['photo'] = [];
+    unset($post['category']);
+
+    $file = $this->getTestFiles('text')[0];
+    $file_path = \Drupal::service('file_system')->realpath($file->uri);
+    $post['photo'][] = fopen($file_path, 'r');
+
+    $code = $this->sendMicropubRequest($post, 'is_valid', TRUE);
+    self::assertEquals(201, $code);
+    $this->assertNodeCount(4, 'article');
+    $nid = $this->getLastNid('article');
+    $node = \Drupal::entityTypeManager()->getStorage('node')->load($nid);
+    self::assertEquals(0, count($node->field_image->getValue()));
   }
 
   /**

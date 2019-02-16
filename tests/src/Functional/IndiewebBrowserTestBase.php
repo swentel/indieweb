@@ -355,10 +355,21 @@ abstract class IndiewebBrowserTestBase extends BrowserTestBase {
         $type = 'multipart';
         $new_post = [];
         foreach ($post as $key => $value) {
-          $new_post[] = [
-            'name' => $key,
-            'contents' => $value,
-          ];
+
+          if ($key == 'photo' && is_array($value)) {
+            foreach ($value as $k => $v) {
+              $new_post[] = [
+                'name' => 'photo[]',
+                'contents' => $v,
+              ];
+            }
+          }
+          else {
+            $new_post[] = [
+              'name' => $key,
+              'contents' => $value,
+            ];
+          }
         }
         $post = $new_post;
       }
