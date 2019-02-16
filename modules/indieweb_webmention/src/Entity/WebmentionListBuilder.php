@@ -53,4 +53,21 @@ class WebmentionListBuilder extends EntityListBuilder {
     return $query->execute();
   }
 
+  /**
+   * {@inheritdoc}
+   */
+  public function getDefaultOperations(EntityInterface $entity) {
+    $operations = parent::getDefaultOperations($entity);
+
+    if (\Drupal::config('indieweb_webmention.settings')->get('webmention_internal')) {
+      $operations['reprocess'] = [
+        'title' => $this->t('Reprocess'),
+        'weight' => 20,
+        'url' => $this->ensureDestination($entity->toUrl('reprocess')),
+      ];
+    }
+
+    return $operations;
+  }
+
 }

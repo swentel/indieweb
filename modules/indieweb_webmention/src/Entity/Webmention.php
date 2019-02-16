@@ -3,6 +3,7 @@
 namespace Drupal\indieweb_webmention\Entity;
 
 use Drupal\Core\Entity\EntityPublishedTrait;
+use Drupal\Core\Entity\EntityStorageException;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Entity\ContentEntityBase;
@@ -30,7 +31,7 @@ use Drupal\user\UserInterface;
  *     },
  *     "access" = "Drupal\indieweb_webmention\Entity\WebmentionAccessControlHandler",
  *     "route_provider" = {
- *      "html" = "Drupal\Core\Entity\Routing\AdminHtmlRouteProvider",
+ *       "html" = "Drupal\indieweb_webmention\Routing\WebmentionHtmlRouteProvider"
  *     },
  *   },
  *   base_table = "webmention_received",
@@ -49,7 +50,8 @@ use Drupal\user\UserInterface;
  *     "add-form" = "/admin/content/webmention/add",
  *     "edit-form" = "/admin/content/webmention/{indieweb_webmention}/edit",
  *     "delete-form" = "/admin/content/webmention/{indieweb_webmention}/delete",
- *     "collection" = "/admin/content/webmention",
+ *     "reprocess" = "/admin/content/webmention/{indieweb_webmention}/reprocess",
+ *     "collection" = "/admin/content/webmention"
  *   }
  * )
  */
@@ -181,6 +183,25 @@ class Webmention extends ContentEntityBase implements WebmentionInterface {
    */
   public function getUrl() {
     return $this->get('url')->value;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function reprocess() {
+    try {
+
+      $target = $this->getTarget();
+      if (strpos($target, \Drupal::request()->getSchemeAndHttpHost()) === FALSE) {
+        $target = \Drupal::request()->getSchemeAndHttpHost() . $target;
+      }
+      $this->set('target', $target);
+      $this->set('type', 'webmention');
+      $this->set('property', 'received');
+      $this->setUnpublished();
+      $this->save();
+    }
+    catch (EntityStorageException $ignored) {}
   }
 
   /**

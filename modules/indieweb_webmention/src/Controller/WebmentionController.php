@@ -5,7 +5,9 @@ namespace Drupal\indieweb_webmention\Controller;
 use Drupal\Core\Cache\Cache;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Url;
+use Drupal\indieweb_webmention\Entity\WebmentionInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -55,6 +57,23 @@ class WebmentionController extends ControllerBase {
     }
 
     return new Response("", $response_code);
+  }
+
+  /**
+   * Routing callback: reprocess webmention.
+   *
+   * @param \Drupal\indieweb_webmention\Entity\WebmentionInterface $indieweb_webmention
+   *
+   * @return \Symfony\Component\HttpFoundation\RedirectResponse
+   */
+  public function reprocess(WebmentionInterface $indieweb_webmention) {
+
+    if (\Drupal::config('indieweb_webmention.settings')->get('webmention_internal')) {
+      $indieweb_webmention->reprocess();
+      $this->messenger()->addMessage($this->t('Webmention @id ready for processing.', ['@id' => $indieweb_webmention->id()]));
+    }
+
+    return new RedirectResponse(Url::fromRoute('entity.indieweb_webmention.collection')->toString());
   }
 
   /**

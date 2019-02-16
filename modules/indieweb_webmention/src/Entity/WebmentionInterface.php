@@ -113,4 +113,9 @@ interface WebmentionInterface extends ContentEntityInterface, EntityChangedInter
    */
   public function getUrl();
 
+  /**
+   * Reprocess a webmention.
+   */
+  public function reprocess();
+
 }

@@ -37,8 +37,7 @@ use Drupal\Core\Field\BaseFieldDefinition;
  *   links = {
  *     "add-form" = "/admin/config/services/indieweb/microsub/channels/add-channel",
  *     "edit-form" = "/admin/config/services/indieweb/microsub/channels/{indieweb_microsub_channel}/edit",
- *     "delete-form" = "/admin/config/services/indieweb/microsub/channels/{indieweb_microsub_channel}/delete",
- *     "list-sources" = "/admin/config/services/indieweb/microsub/channels/{indieweb_microsub_channel}/sources"
+ *     "delete-form" = "/admin/config/services/indieweb/microsub/channels/{indieweb_microsub_channel}/delete"
  *   }
  * )
  */

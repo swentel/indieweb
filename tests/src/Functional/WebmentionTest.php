@@ -395,6 +395,12 @@ class WebmentionTest extends IndiewebBrowserTestBase {
     ];
     $this->assertWebmention($expected);
 
+    // Reprocess.
+    $webmention = $this->getLatestWebmention();
+    $webmention->reprocess();
+    $this->processWebmentions();
+    $this->assertWebmention($expected);
+
     $source = Url::fromRoute('indieweb_test.webmention_like_site', [], ['absolute' => TRUE])->toString();
     $response = $this->sendWebmentionInternalRequest($source, $node_1_path);
     self::assertEquals(202, $response->getStatusCode());
