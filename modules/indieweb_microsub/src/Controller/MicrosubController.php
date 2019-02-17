@@ -588,8 +588,9 @@ class MicrosubController extends ControllerBase {
 
     $url = $this->request->get('query');
     if (!empty($url)) {
-      $xray = new XRay();
-      $feeds = $xray->feeds($url);
+      /** @var \Drupal\indieweb_microsub\MicrosubClient\MicrosubClientInterface $microsubClient */
+      $microsubClient = \Drupal::service('indieweb.microsub.client');
+      $feeds = $microsubClient->searchFeeds($url);
       if (!empty($feeds['feeds'])) {
         $result_list = [];
         foreach ($feeds['feeds'] as $feed) {
@@ -627,7 +628,6 @@ class MicrosubController extends ControllerBase {
       catch (\Exception $e) {
         \Drupal::logger('indieweb_microsub')->notice('Error fetching preview for @url : @message', ['@url' => $url, '@message' => $e->getMessage()]);
       }
-
     }
 
     return $return;

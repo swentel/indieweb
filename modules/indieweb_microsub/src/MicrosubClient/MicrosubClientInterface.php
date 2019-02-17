@@ -19,4 +19,16 @@ interface MicrosubClientInterface {
    */
   public function sendNotification(WebmentionInterface $webmention, $parsed = NULL);
 
+  /**
+   * Search feeds on a url.
+   *
+   * XRay ignores rel="feed", so we use our own version that adds them.
+   *
+   * @param $url
+   * @param $body
+   *
+   * @return array
+   */
+  public function searchFeeds($url, $body = NULL);
+
 }

@@ -2,6 +2,7 @@
 
 namespace Drupal\Tests\indieweb\Functional;
 
+use Drupal\Core\Url;
 use Drupal\indieweb_microsub\Entity\MicrosubSource;
 
 /**
@@ -515,6 +516,15 @@ class MicrosubTest extends IndiewebBrowserTestBase {
     $this->sendMicrosubRequest($new_channel, 'POST');
     $this->assertChannelExists($new_channel['name']);
     $this->assertMicrosubItemCount('channel', 1);
+
+    // Search feeds.
+    /** @var \Drupal\indieweb_microsub\MicrosubClient\MicrosubClientInterface $microsubClient */
+    $microsubClient = \Drupal::service('indieweb.microsub.client');
+    $url = Url::fromRoute('<front>', [], ['absolute' => TRUE])->toString();
+    $url .= drupal_get_path('module', 'indieweb_test') . '/pages/search-feeds.html';
+    $body = file_get_contents(drupal_get_path('module', 'indieweb_test') . '/pages/search-feeds.html');
+    $feeds = $microsubClient->searchFeeds($url, $body);
+    self::assertEquals(5, count($feeds['feeds']));
 
     // Follow new feed
     $new_feed = ['action' => 'follow', 'channel' => 2, 'url' => 'https://example.com/rss'];

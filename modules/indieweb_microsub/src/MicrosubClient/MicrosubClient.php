@@ -6,6 +6,7 @@ use Drupal\Core\Url;
 use Drupal\indieweb_microsub\Entity\MicrosubItem;
 use Drupal\indieweb_webmention\Entity\WebmentionInterface;
 use p3k\XRay;
+use p3k\XRay\Formats;
 
 class MicrosubClient implements MicrosubClientInterface {
 
@@ -404,6 +405,108 @@ class MicrosubClient implements MicrosubClientInterface {
     if (!empty($author)) {
       $post['author'] = [(object) $author];
     }
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function searchFeeds($url, $body = NULL) {
+    $return = [];
+    $feeds = [];
+
+    try {
+
+      $contentType = '';
+      if (!isset($body)) {
+        $response = \Drupal::httpClient()->get($url);
+        $body = $response->getBody()->getContents();
+        $contentType = $response->getHeader('Content-Type');
+      }
+
+      if (strpos($contentType, 'application/atom+xml') !== FALSE || strpos(substr($body, 0, 50), '<feed ') !== FALSE) {
+        $feeds[] = [
+          'url' => $url,
+          'type' => 'atom'
+        ];
+      }
+      elseif (strpos($contentType, 'application/rss+xml') !== FALSE || strpos($contentType, 'text/xml') !== false
+               || strpos($contentType, 'application/xml') !== FALSE || strpos(substr($body, 0, 50), '<rss ') !== FALSE) {
+        $feeds[] = [
+          'url' => $url,
+          'type' => 'rss'
+        ];
+      }
+      elseif (strpos($contentType, 'application/json') !== FALSE && substr($body, 0, 1) == '{') {
+        $feeddata = json_decode($body, true);
+        if($feeddata && isset($feeddata['version']) && $feeddata['version'] == 'https://jsonfeed.org/version/1') {
+          $feeds[] = [
+            'url' => $url,
+            'type' => 'jsonfeed'
+          ];
+        }
+      }
+      else {
+
+        $mf2 = \mf2\Parse($body, $url);
+        if (isset($mf2['rel-urls'])) {
+          foreach ($mf2['rel-urls'] as $rel => $info) {
+
+            // We assume when 'rels[0]' is 'feed', this is a microformats feed.
+            if (isset($info['rels']) && isset($info['rels'][0]) && count($info['rels']) == 1 && $info['rels'][0] == 'feed') {
+              $feeds[] = [
+                'url' => $rel,
+                'type' => 'microformats'
+              ];
+            }
+
+            if (isset($info['rels']) && in_array('alternate', $info['rels'])) {
+              if (isset($info['type'])) {
+                if (strpos($info['type'], 'application/json') !== FALSE) {
+                  $feeds[] = [
+                    'url' => $rel,
+                    'type' => 'jsonfeed'
+                  ];
+                }
+                if (strpos($info['type'], 'application/atom+xml') !== FALSE) {
+                  $feeds[] = [
+                    'url' => $rel,
+                    'type' => 'atom'
+                  ];
+                }
+                if (strpos($info['type'], 'application/rss+xml') !== FALSE) {
+                  $feeds[] = [
+                    'url' => $rel,
+                    'type' => 'rss'
+                  ];
+                }
+              }
+            }
+          }
+        }
+
+        $parsed = Formats\HTML::parse(NULL, $body, $url, ['expect' => 'feed']);
+        if ($parsed && isset($parsed['data']['type']) && $parsed['data']['type'] == 'feed') {
+          $feeds[] = [
+            'url' => $url,
+            'type' => 'microformats'
+          ];
+        }
+      }
+
+      // Sort feeds by priority
+      $rank = ['microformats' => 0, 'jsonfeed' => 1, 'atom' => 2, 'rss' => 3];
+      usort($feeds, function($a, $b) use ($rank) {
+        return $rank[$a['type']] > $rank[$b['type']];
+      });
+
+      $return['feeds'] = $feeds;
+
+    }
+    catch (\Exception $e) {
+      \Drupal::logger('indieweb_microsub')->notice('Error fetching feeds for @url : @message', ['@url' => $url, '@message' => $e->getMessage()]);
+    }
+
+    return $return;
   }
 
 }

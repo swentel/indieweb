@@ -19,7 +19,6 @@ class MicrosubClientTest extends MicrosubClient {
       $url = $r->name();
     }
 
-
     $item = [
       'url' => $url,
       'content' => ['data']
