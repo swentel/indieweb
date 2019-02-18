@@ -59,10 +59,10 @@ interface MicrosubItemStorageInterface extends ContentEntityStorageInterface {
    *
    * @param $channel_id
    *   The channel id
-   * @param $id
-   *   The item id
+   * @param $entries
+   *   Array of single items.
    */
-  public function markItemsRead($channel_id, $id = NULL);
+  public function markItemsRead($channel_id, $entries = NULL);
 
   /**
    * Remove an item.

@@ -159,7 +159,7 @@ class MicrosubController extends ControllerBase {
         case 'timeline':
           $method = $request->get('method');
           if ($method == 'mark_read') {
-            $response = $this->timelineMarkAllRead();
+            $response = $this->timelineMarkRead();
           }
 
           if ($method == 'remove') {
@@ -470,7 +470,7 @@ class MicrosubController extends ControllerBase {
    * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
    * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    */
-  protected function timelineMarkAllRead() {
+  protected function timelineMarkRead() {
 
     $channel_id = $this->request->get('channel');
 
@@ -479,8 +479,13 @@ class MicrosubController extends ControllerBase {
       $channel_id = 0;
     }
 
+    // Get individual entries. There's also an option to mark everything read
+    // by using 'last_read_entry'. Currently we simply mark everything as read
+    // then as that makes most sense.
+    $entries = $this->request->get('entry');
+
     if ($channel_id || $channel_id === 0) {
-      $this->entityTypeManager()->getStorage('indieweb_microsub_item')->markItemsRead($channel_id);
+      $this->entityTypeManager()->getStorage('indieweb_microsub_item')->markItemsRead($channel_id, $entries);
     }
 
     return ['response' => [], 'code' => 200];
