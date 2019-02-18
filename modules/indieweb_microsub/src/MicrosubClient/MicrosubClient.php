@@ -421,6 +421,9 @@ class MicrosubClient implements MicrosubClientInterface {
         $response = \Drupal::httpClient()->get($url);
         $body = $response->getBody()->getContents();
         $contentType = $response->getHeader('Content-Type');
+        if (!empty($contentType) && is_array($contentType)) {
+          $contentType = $contentType[0];
+        }
       }
 
       if (strpos($contentType, 'application/atom+xml') !== FALSE || strpos(substr($body, 0, 50), '<feed ') !== FALSE) {
