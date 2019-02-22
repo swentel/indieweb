@@ -5,6 +5,7 @@ namespace Drupal\indieweb_feed\FeedUpdater;
 use Drupal\Core\Cache\Cache;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\indieweb_feed\Entity\FeedInterface;
+use Drupal\user\EntityOwnerInterface;
 
 class FeedUpdater implements FeedUpdaterInterface {
 
@@ -12,9 +13,14 @@ class FeedUpdater implements FeedUpdaterInterface {
    * {@inheritdoc}
    */
   public function checkEntityOnInsertOrUpdate(EntityInterface $entity) {
+
+    if (!($entity instanceof EntityOwnerInterface)) {
+      return;
+    }
+
     /** @var \Drupal\indieweb_feed\Entity\FeedInterface $feed */
     foreach (\Drupal::entityTypeManager()->getStorage('indieweb_feed')->loadMultiple() as $feed) {
-      if (in_array($entity->getEntityTypeId() . '|' . $entity->bundle(), $feed->getBundles())) {
+      if ($entity->getOwnerId() == $feed->getOwnerId() && in_array($entity->getEntityTypeId() . '|' . $entity->bundle(), $feed->getBundles())) {
         $this->insertItemIntoFeed($entity, $feed);
         Cache::invalidateTags(['indieweb_feed:' . $feed->id()]);
       }

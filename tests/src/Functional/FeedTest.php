@@ -213,6 +213,15 @@ class FeedTest extends IndiewebBrowserTestBase {
     $this->drupalGet($this->timeline_jf2_path);
     $this->assertSession()->responseNotContains($settings['title']);
 
+    // Create an article with a different uid, should not show up in feed.
+    $settings['uid'] = $this->adminUser->id();
+    $settings['title'] = 'Should not show up';
+    $article_3 = $this->createNode($settings);
+    $this->drupalGet($this->timeline_path);
+    $this->assertSession()->responseNotContains($article_3->label());
+    $this->drupalGet($this->timeline_jf2_path);
+    $this->assertSession()->responseNotContains($article_3->label());
+
     // Add page node.
     $page = $this->createNode(['type' => 'page', 'title' => 'A nice page', 'uid' => 1]);
 
