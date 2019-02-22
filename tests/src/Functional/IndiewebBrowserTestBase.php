@@ -515,7 +515,7 @@ abstract class IndiewebBrowserTestBase extends BrowserTestBase {
         $timestamp = time() - 3600;
       }
       while ($number > 0) {
-        $settings = ['type' => $type, 'title' => 'Number ' . $title_number, 'created' => $timestamp];
+        $settings = ['type' => $type, 'title' => 'Number ' . $title_number, 'created' => $timestamp, 'uid' => 1];
         $this->drupalCreateNode($settings);
         $number--;
         $title_number++;
