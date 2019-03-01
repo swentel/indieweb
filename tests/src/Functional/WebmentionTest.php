@@ -850,7 +850,7 @@ class WebmentionTest extends IndiewebBrowserTestBase {
    * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
    * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    */
-  public function _testWebmentionNotifyBlock() {
+  public function testWebmentionNotifyBlock() {
 
     $this->drupalLogin($this->adminUser);
     $this->configureWebmention();
@@ -887,10 +887,10 @@ class WebmentionTest extends IndiewebBrowserTestBase {
     $expected = [
       'source' => 'https://example.com/webmention-source-url',
       'property' => 'received',
-      'target' => Url::fromRoute('entity.node.canonical', ['node' => 1], ['absolute' => TRUE])->toString(),
+      'target' => 'node/1',
       'type' => 'webmention',
     ];
-    $this->assertWebmention($expected, TRUE);
+    $this->assertWebmention($expected, FALSE);
   }
 
   /**
@@ -930,12 +930,12 @@ class WebmentionTest extends IndiewebBrowserTestBase {
    *
    * @param $expected
    *   An array of expected values
-   * @param $ignore_fuzzy
+   * @param $check_host
    *
    * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
    * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    */
-  protected function assertWebmention($expected, $ignore_fuzzy = FALSE) {
+  protected function assertWebmention($expected, $check_host = TRUE) {
     $webmention = $this->getLatestWebmention();
     foreach ($expected as $field => $expected_value) {
       $fuzzy = FALSE;
@@ -951,10 +951,12 @@ class WebmentionTest extends IndiewebBrowserTestBase {
         $actual = $webmention->get($field)->value;
       }
 
-      if (!$ignore_fuzzy && $fuzzy) {
-        $host = \Drupal::request()->getSchemeAndHttpHost();
-        self::assertTrue(strpos($actual, $host) === FALSE);
-        self::assertTrue(strpos($actual, $expected_value) !== FALSE);
+      if ($fuzzy) {
+        if ($check_host) {
+          $host = \Drupal::request()->getSchemeAndHttpHost();
+          self::assertTrue(strpos($actual, $host) === FALSE);
+        }
+        self::assertTrue(strpos($actual, $expected_value) !== FALSE, "searching $expected_value in $actual");
       }
       else {
         self::assertEquals($expected_value, $actual, "$field is equal");
