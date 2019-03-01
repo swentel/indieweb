@@ -332,7 +332,9 @@ class WebmentionTest extends IndiewebBrowserTestBase {
    * endpoint. The source URL will always be internal, the target are examples
    * typically from either twitter or a website.
    *
-   * This test behaves weird on the testbot, so let's keep it out for now.
+   * This test doesn't work on the testbot since the domain does not have a dot
+   * and XRay doesn't support that (even though RFC allows domains without a
+   * dot).
    *
    * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
    * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
@@ -416,7 +418,7 @@ class WebmentionTest extends IndiewebBrowserTestBase {
       'url' => 'https://snarfed.org/2018-03-19_10-realize-be',
       'uid' => $this->adminUser->id(),
       'status' => 1,
-      'content_html' => 'likes <a class="u-like u-like-of" href="http://realize.local/node/1">#10 | realize.be</a>',
+      'content_html' => 'likes <a class="u-like u-like-of" href="' . Url::fromRoute('entity.node.canonical', ['node' => 1], ['absolute' => TRUE])->toString() . '">#10 | realize.be</a>',
       'content_text' => 'likes #10 | realize.be',
       'private' => 0,
       'rsvp' => '',
@@ -954,7 +956,7 @@ class WebmentionTest extends IndiewebBrowserTestBase {
       if ($fuzzy) {
         if ($check_host) {
           $host = \Drupal::request()->getSchemeAndHttpHost();
-          self::assertTrue(strpos($actual, $host) === FALSE);
+          self::assertTrue(strpos($actual, $host) === FALSE, "checking $host in $actual to be false");
         }
         self::assertTrue(strpos($actual, $expected_value) !== FALSE, "searching $expected_value in $actual");
       }
