@@ -141,8 +141,14 @@ class MicropubController extends ControllerBase {
 
       if ($this->indieAuth->isValidToken($auth_header)) {
         $response_code = 200;
+
+        $supported_queries = ['config', 'syndicate-to', 'category', 'source'];
+        $supported_properties = [];
+
         $response_message = [
           'syndicate-to' => $this->getSyndicationTargets(),
+          'q' => $supported_queries,
+          'properties' => $supported_properties,
         ];
 
         // Get post-types.
