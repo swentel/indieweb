@@ -88,8 +88,6 @@ class CheckinMicroformatFormatter extends LinkFormatter {
         $suffix = '';
 
         if (!empty($settings['geofield']) && $geoPhpWrapper) {
-                  $suffix = '<div>aha</div>';
-
           $entity = $items->getEntity();
           if ($entity->hasField($settings['geofield'])) {
             $value = $entity->get($settings['geofield'])->value;
