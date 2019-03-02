@@ -258,7 +258,8 @@ A media endpoint is also available where you can upload files, currently limited
 - Issue: create an issue on a repo
 - Checkin: checkin at a location  
 
-Important: Checkin is experimental and uses the location property to gather location information.
+Important: Checkin is experimental and uses the location property to gather location information, e.g.  
+geo:51.5258325,-0.1359825,0.0;name=london;h=card;url=https://hwclondon.co.uk
 
 Updating existing content is currently limited to change the published status, title and body of nodes and comments.
 You can also query for a list of posts. More functionality will be added when this part of the spec matures.
