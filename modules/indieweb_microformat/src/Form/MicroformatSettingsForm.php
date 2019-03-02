@@ -151,7 +151,7 @@ class MicroformatSettingsForm extends ConfigFormBase {
     $form['classes']['other'] = [
       '#type' => 'item',
       '#title' => $this->t('Formatters'),
-      '#markup' => 'To add "p-category" classes on tags, you can use the "Label link with p-category class" formatter.<br />To add "u-like-of", "u-bookmark-of", "u-in-reply-to" (use in reply, rsvp)  or "u-repost-of" on links, use the "Microformat link" formatter.<br />To add the "p-rsvp" class, use the "Microformat RSVP" formatter. For more information about RSVP, go to the Micropub configuration screen for RSVP so you know what kind of field you need to create.',
+      '#markup' => 'To add "p-category" classes on tags, you can use the "Label link with p-category class" formatter.<br />To add "u-like-of", "u-bookmark-of", "u-in-reply-to" (use in reply, rsvp)  or "u-repost-of" on links, use the "Microformat link" formatter.<br />To add the "p-rsvp" class, use the "Microformat RSVP" formatter. For more information about RSVP, go to the Micropub configuration screen for RSVP so you know what kind of field you need to create.<br />To add (basic) checkin markup, use the Microformat checkin formatter on a link field. On that formatter, you can also select the geofield for latitude and longitude.',
       '#description' => 'Go to the "Manage display" pages and select the formatter you want to use. ',
     ];
 

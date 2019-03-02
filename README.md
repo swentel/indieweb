@@ -48,7 +48,7 @@ Additional useful modules
 - https://www.drupal.org/project/imagecache_external
 - https://www.drupal.org/project/cdn
 
-More information is in this README and on the help pages.
+More information is in this README
 
 Development happens on github: https://github.com/swentel/indieweb
 
@@ -178,7 +178,7 @@ Your homepage should contain a h-card entry. This module does not expose this fo
 - p-summary: see indieweb_preprocess_field().
 - u-video: see indieweb_preprocess_file_video() and indieweb_preprocess_file_entity_video().
 
-Several field formatters are also available.
+Several field formatters are also available, see the microformats configuration page.
 
 You can configure this at /admin/config/services/indieweb/microformats
 
@@ -255,6 +255,9 @@ A media endpoint is also available where you can upload files, currently limited
 - Event: create an event
 - RSVP: create an rsvp
 - Issue: create an issue on a repo
+- Checkin: checkin at a location  
+
+Important: Checkin is experimental and uses the location property to gather location information.
 
 Updating existing content is currently limited to change the published status, title and body of nodes and comments.
 You can also query for a list of posts. More functionality will be added when this part of the spec matures.

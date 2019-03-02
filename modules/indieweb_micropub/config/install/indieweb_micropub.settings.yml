@@ -67,6 +67,7 @@ event_content_field: ''
 event_date_field: ''
 event_tags_field: ''
 event_geo_field: ''
+event_link_field: ''
 event_upload_field: ''
 event_uid: 1
 rsvp_create_node: false
@@ -88,3 +89,12 @@ issue_upload_field: ''
 issue_auto_send_webmention: false
 issue_tags_field: ''
 issue_uid: 1
+checkin_create_node: false
+checkin_status: 1
+checkin_node_type: ''
+checkin_content_field: ''
+checkin_tags_field: ''
+checkin_geo_field: ''
+checkin_link_field: ''
+checkin_upload_field: ''
+checkin_uid: 1

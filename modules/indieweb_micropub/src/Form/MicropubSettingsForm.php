@@ -17,53 +17,60 @@ class MicropubSettingsForm extends ConfigFormBase {
   protected function getPostTypes() {
     $post_types = [
       'article' => [
-        'description' => $this->t("An article request contains 'content', 'name' and the 'h' value is 'entry'. Think of it as a blog post. The article can also contain a 'mp-syndicate-to' value which will contain the target you want to syndicate to."),
         'geo_field' => TRUE,
+        'description' => $this->t("An article request contains 'content', 'name' and the 'h' value is 'entry'. Think of it as a blog post."),
       ],
       'note' => [
-        'description' => $this->t("A note request contains 'content', but no 'name' and the 'h' value is 'entry'. Think of it as a Tweet. The note can also contain a 'mp-syndicate-to' value which will contain the target you want to syndicate to."),
         'geo_field' => TRUE,
+        'description' => $this->t("A note request contains 'content', but no 'name' and the 'h' value is 'entry'. Think of it as a Tweet."),
       ],
       'like' => [
-        'description' => $this->t("A like request contains a URL in 'like-of' and 'h' value is 'entry'. The like can also contain a 'mp-syndicate-to' value which will contain the channel you want to publish to."),
+        'description' => $this->t("A like request contains a URL in 'like-of' and 'h' value is 'entry'."),
         'optional_body' => TRUE,
         'link_field' => TRUE,
         'send_webmention' => TRUE,
       ],
       'reply' => [
-        'description' => $this->t("A reply request contains a URL in 'in-reply-to', has content and 'h' value is 'entry'. The reply can also contain a 'mp-syndicate-to' value which will contain the target you want to syndicate to."),
+        'description' => $this->t("A reply request contains a URL in 'in-reply-to', has content and 'h' value is 'entry'."),
         'link_field' => TRUE,
         'send_webmention' => TRUE,
       ],
       'repost' => [
-        'description' => $this->t("A repost request contains a URL in 'repost-of' and 'h' value is 'entry'. The repost can also contain a 'mp-syndicate-to' value which will contain the target you want to syndicate to."),
+        'description' => $this->t("A repost request contains a URL in 'repost-of' and 'h' value is 'entry'."),
         'optional_body' => TRUE,
         'link_field' => TRUE,
         'send_webmention' => TRUE,
       ],
       'bookmark' => [
-        'description' => $this->t("A bookmark request contains a URL in 'bookmark-of' and 'h' value is 'entry'. The bookmark can also contain a 'mp-syndicate-to' value which will contain the target you want to syndicate to."),
+        'description' => $this->t("A bookmark request contains a URL in 'bookmark-of' and 'h' value is 'entry'."),
         'optional_body' => TRUE,
         'link_field' => TRUE,
         'send_webmention' => TRUE,
       ],
       'event' => [
-        'description' => $this->t("An event request contains a start and end date and the 'h' value is 'event'. The event can also contain a 'mp-syndicate-to' value which will contain the target you want to syndicate to."),
+        'description' => $this->t("An event request contains a start and end date and the 'h' value is 'event'."),
         'date_field' => TRUE,
+        'link_field' => TRUE,
         'optional_body' => TRUE,
         'geo_field' => TRUE,
       ],
       'rsvp' => [
-        'description' => $this->t("An rsvp request contains an rsvp field. The rsvp can also contain a 'mp-syndicate-to' value which will contain the target you want to syndicate to."),
+        'description' => $this->t("A rsvp request contains an rsvp field."),
         'rsvp_field' => TRUE,
         'optional_body' => TRUE,
         'link_field' => TRUE,
         'send_webmention' => TRUE,
       ],
       'issue' => [
-        'description' => $this->t("An issue request contains 'content', 'name', a URL in 'in-reply-to' (which is the URL of a repository) and the 'h' value is 'entry'. The issue can also contain a 'mp-syndicate-to' value which will contain the target you want to syndicate to."),
+        'description' => $this->t("An issue request contains 'content', 'name', a URL in 'in-reply-to' (which is the URL of a repository) and the 'h' value is 'entry'."),
         'link_field' => TRUE,
         'send_webmention' => TRUE,
+      ],
+      'checkin' => [
+        'description' => $this->t("A checkin request contains 'checkin' which is an URL and optionally a name or an h-card which contains url, name, latitude and longitude. 'Content' and 'name' are optional and the 'h' value is 'entry'.") . '<br /><strong>Important: experimental and and uses the "location" property to gather location information.</strong>',
+        'link_field' => TRUE,
+        'optional_body' => TRUE,
+        'geo_field' => TRUE,
       ],
     ];
 

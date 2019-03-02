@@ -210,6 +210,9 @@ indieweb_micropub.settings:
     event_geo_field:
       type: string
       label: 'The node geo field for the event'
+    event_link_field:
+      type: string
+      label: 'The node link field for the event'
     event_upload_field:
       type: string
       label: 'The node upload field for the event'
@@ -273,4 +276,30 @@ indieweb_micropub.settings:
     issue_uid:
       type: integer
       label: 'The user id of the issue'
-
+    checkin_create_node:
+      type: boolean
+      label: 'Enable checkin'
+    checkin_status:
+      type: integer
+      label: 'Whether the checkin is published or not'
+    checkin_node_type:
+      type: string
+      label: 'The node type for the checkin'
+    checkin_content_field:
+      type: string
+      label: 'The node content field for the checkin'
+    checkin_tags_field:
+      type: string
+      label: 'The node tags field for the checkin'
+    checkin_geo_field:
+      type: string
+      label: 'The node geo field for the checkin'
+    checkin_link_field:
+      type: string
+      label: 'The node link field for the checkin'
+    checkin_upload_field:
+      type: string
+      label: 'The node upload field for the checkin'
+    checkin_uid:
+      type: integer
+      label: 'The user id of the checkin'

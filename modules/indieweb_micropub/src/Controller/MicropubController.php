@@ -74,6 +74,13 @@ class MicropubController extends ControllerBase {
   public $comment = NULL;
 
   /**
+   * Location properties.
+   *
+   * @var array
+   */
+  protected $location = [];
+
+  /**
    * @var \Drupal\Core\Config\Config
    */
   protected $config;
@@ -93,6 +100,7 @@ class MicropubController extends ControllerBase {
    * @throws \Drupal\Core\Entity\EntityStorageException
    * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
    * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
+   * @throws \Drupal\Core\TypedData\Exception\MissingDataException
    */
   public function postEndpoint(Request $request) {
     $this->indieAuth = \Drupal::service('indieweb.indieauth.client');
@@ -158,6 +166,8 @@ class MicropubController extends ControllerBase {
         if ($this->config->get('micropub_media_enable')) {
           $response_message['media-endpoint'] = Url::fromRoute('indieweb.micropub.media.endpoint', [], ['absolute' => TRUE])->toString();
         }
+
+
       }
       else {
         $response_code = 403;
@@ -390,9 +400,57 @@ class MicropubController extends ControllerBase {
         $this->getLogger('indieweb_micropub_payload')->notice('input: @input', ['@input' => print_r($this->input, 1)]);
       }
 
+      // Check if we have a location property in the payload with the following
+      // key/value pair: h=card. If so, then we are dealing with a checkin. This
+      // also handles all location properties already.
+      $checkin = FALSE;
+      if (!empty($this->input['location'][0])) {
+
+        // Latitude and longitude.
+        $geo = explode(':', $this->input['location'][0]);
+        if (!empty($geo[0]) && $geo[0] == 'geo' && !empty($geo[1])) {
+          $lat_lon = explode(',', $geo[1]);
+          if (!empty($lat_lon[0]) && !empty($lat_lon[1])) {
+            $lat = trim($lat_lon[0]);
+            $lon = trim($lat_lon[1]);
+            if (!empty($lat) && !empty($lon)) {
+              $this->location['lat'] = $lat;
+              $this->location['lon'] = $lon;
+            }
+          }
+        }
+
+        // Additional parameters. If we find h=card, then it's a checkin.
+        $additional_params = explode(';', $this->input['location'][0]);
+        foreach ($additional_params as $additional_param) {
+          $ex = explode('=', $additional_param);
+          if (!empty($ex[0]) && !empty($ex[1])) {
+            if ($ex[0] == 'h' && $ex[1] == 'card') {
+              $checkin = TRUE;
+            }
+            $this->location[$ex[0]] = $ex[1];
+          }
+        }
+      }
+
       // The order here is of importance. Don't change it, unless there's a good
       // reason for, see https://indieweb.org/post-type-discovery. This does not
       // follow the exact rules, because we can be more flexible in Drupal.
+
+      // Checkin support.
+      if ($checkin && $this->createNodeFromPostType('checkin') && $this->isHEntry()) {
+
+        $checkin_title = 'Checkin';
+        if (!empty($this->location['name'])) {
+          $checkin_title = 'Checked in at ' . $this->location['name'];
+        }
+
+        $this->createNode($checkin_title, 'checkin');
+        $response = $this->saveNode();
+        if ($response instanceof Response) {
+          return $response;
+        }
+      }
 
       // Event support.
       if ($this->createNodeFromPostType('event') && $this->isHEvent() && $this->hasRequiredInput(['start', 'end', 'name'])) {
@@ -593,7 +651,7 @@ class MicropubController extends ControllerBase {
 
       // Note post type.
       if ($this->createNodeFromPostType('note') && $this->isHEntry() && $this->hasRequiredInput(['content']) && $this->hasNoKeysSet(['name', 'in-reply-to', 'bookmark-of', 'repost-of', 'like-of'])) {
-        $this->createNode('Micropub post', 'note');
+        $this->createNode('Note', 'note');
         $response = $this->saveNode();
         if ($response instanceof Response) {
           return $response;
@@ -610,9 +668,9 @@ class MicropubController extends ControllerBase {
       }
 
       // If we get end up here, it means that no node has been created.
-      $location = \Drupal::moduleHandler()->invokeAll('indieweb_micropub_no_post_made', [$this->payload_original]);
-      if (!empty($location[0])) {
-        header('Location: ' . $location[0]);
+      $header_location = \Drupal::moduleHandler()->invokeAll('indieweb_micropub_no_post_made', [$this->payload_original]);
+      if (!empty($header_location[0])) {
+        header('Location: ' . $header_location[0]);
         return new JsonResponse('', 201);
       }
 
@@ -763,6 +821,7 @@ class MicropubController extends ControllerBase {
    *
    * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
    * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
+   * @throws \Drupal\Core\TypedData\Exception\MissingDataException
    */
   protected function createNode($title, $post_type, $link_input_name = NULL) {
 
@@ -823,7 +882,18 @@ class MicropubController extends ControllerBase {
     // Link.
     $link_field_name = $this->config->get($post_type . '_link_field');
     if ($link_field_name && $this->node->hasField($link_field_name)) {
-      $this->node->set($link_field_name, ['uri' => $this->input[$link_input_name][0], 'title' => '']);
+
+      // Location check.
+      if (!empty($this->location['h']) && $this->location['h'] == 'card' && !empty($this->location['url'])) {
+        $title = '';
+        if (!empty($this->location['name'])) {
+          $title = $this->location['name'];
+        }
+        $this->node->set($link_field_name, ['uri' => $this->location['url'], 'title' => $title]);
+      }
+      else {
+        $this->node->set($link_field_name, ['uri' => $this->input[$link_input_name][0], 'title' => '']);
+      }
     }
 
     // Uploads.
@@ -1062,24 +1132,18 @@ class MicropubController extends ControllerBase {
    */
   protected function handleGeoLocation($config_key) {
     $geo_field_name = $this->config->get($config_key);
-    if ($geo_field_name && $this->node->hasField($geo_field_name) && !empty($this->input['location'][0])) {
-      $properties = explode(':', $this->input['location'][0]);
-      if (!empty($properties[0]) && $properties[0] == 'geo' && !empty($properties[1])) {
-        $lat_lon = explode(',', $properties[1]);
-        if (!empty($lat_lon[0]) && !empty($lat_lon[1])) {
-          try {
-            $service = \Drupal::service('geofield.wkt_generator');
-            if ($service) {
-              $value = $service->wktBuildPoint([trim($lat_lon[1]), trim($lat_lon[0])]);
-              if (!empty($value)) {
-                $this->node->set($geo_field_name, $value);
-              }
-            }
-          }
-          catch (\Exception $e) {
-            $this->getLogger('indieweb_micropub')->notice('Error saving geo location: @message', ['@message' => $e->getMessage()]);
+    if ($geo_field_name && $this->node->hasField($geo_field_name) && !empty($this->location['lat']) && !empty($this->location['lon'])) {
+      try {
+        $service = \Drupal::service('geofield.wkt_generator');
+        if ($service) {
+          $value = $service->wktBuildPoint([$this->location['lon'], $this->location['lat']]);
+          if (!empty($value)) {
+            $this->node->set($geo_field_name, $value);
           }
         }
+      }
+      catch (\Exception $e) {
+        $this->getLogger('indieweb_micropub')->notice('Error saving geo location: @message', ['@message' => $e->getMessage()]);
       }
     }
   }
