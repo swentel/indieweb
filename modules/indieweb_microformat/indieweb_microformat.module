@@ -18,6 +18,12 @@ function indieweb_microformat_theme() {
         'domain' => NULL,
       ],
     ],
+    'indieweb_geofield_latlon' => [
+      'variables' => [
+        'lat' => 0,
+        'lon' => 0,
+      ],
+    ],
   ];
 }
 
