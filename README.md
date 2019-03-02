@@ -178,7 +178,8 @@ Your homepage should contain a h-card entry. This module does not expose this fo
 - p-summary: see indieweb_preprocess_field().
 - u-video: see indieweb_preprocess_file_video() and indieweb_preprocess_file_entity_video().
 
-Several field formatters are also available, see the microformats configuration page.
+Several field formatters for links, categories, RSVP, checkin and geo, lin are also available, see the microformats
+configuration page.
 
 You can configure this at /admin/config/services/indieweb/microformats
 
