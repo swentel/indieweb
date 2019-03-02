@@ -303,3 +303,33 @@ indieweb_micropub.settings:
     checkin_uid:
       type: integer
       label: 'The user id of the checkin'
+    geocache_create_node:
+      type: boolean
+      label: 'Enable geocache'
+    geocache_status:
+      type: integer
+      label: 'Whether the geocache is published or not'
+    geocache_node_type:
+      type: string
+      label: 'The node type for the geocache'
+    geocache_content_field:
+      type: string
+      label: 'The node content field for the geocache'
+    geocache_tags_field:
+      type: string
+      label: 'The node tags field for the geocache'
+    geocache_geo_field:
+      type: string
+      label: 'The node geo field for the geocache'
+    geocache_link_field:
+      type: string
+      label: 'The node link field for the geocache'
+    geocache_upload_field:
+      type: string
+      label: 'The node upload field for the geocache'
+    geocache_uid:
+      type: integer
+      label: 'The user id of the geocache'
+    geocache_geocache_field:
+      type: string
+      label: 'The node geocache field for the log type'

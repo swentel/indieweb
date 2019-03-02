@@ -55,7 +55,7 @@ class MicropubSettingsForm extends ConfigFormBase {
         'geo_field' => TRUE,
       ],
       'rsvp' => [
-        'description' => $this->t("A rsvp request contains an rsvp field."),
+        'description' => $this->t("A RSVP request contains an RSVP field."),
         'rsvp_field' => TRUE,
         'optional_body' => TRUE,
         'link_field' => TRUE,
@@ -69,6 +69,13 @@ class MicropubSettingsForm extends ConfigFormBase {
       'checkin' => [
         'description' => $this->t("A checkin request contains 'checkin' which is an URL and optionally a name or an h-card which contains url, name, latitude and longitude. 'Content' and 'name' are optional and the 'h' value is 'entry'.") . '<br /><strong>Important: experimental and and uses the "location" property to gather location information.</strong>',
         'link_field' => TRUE,
+        'optional_body' => TRUE,
+        'geo_field' => TRUE,
+      ],
+      'geocache' => [
+        'description' => $this->t("A geocache request contains 'p-geocache-log-type', 'checkin' which is an URL and optionally a name or an h-card which contains url, name, latitude and longitude. 'Content' and 'name' are optional and the 'h' value is 'entry'.") . '<br /><strong>Important: experimental and and uses the "location" property to gather location information.</strong>',
+        'link_field' => TRUE,
+        'geocache_field' => TRUE,
         'optional_body' => TRUE,
         'geo_field' => TRUE,
       ],
@@ -374,6 +381,23 @@ class MicropubSettingsForm extends ConfigFormBase {
         ];
       }
 
+      // Geocache field.
+      if (isset($configuration['geocache_field'])) {
+        $form[$post_type][$post_type . '_geocache_field'] = [
+          '#type' => 'select',
+          '#title' => $this->t('Geocache field'),
+          '#description' => $this->t('Select the field which will be used to store the log type value. Make sure the field exists on the node type.<br />This can only be a list option field with following values:<br />found|Found<br />not-found|Did not find<br />This module comes with a geocache storage field with those settings, so it is easy to add.'),
+          '#options' => $option_fields,
+          '#default_value' => $config->get($post_type . '_rsvp_field'),
+          '#states' => array(
+            'visible' => array(
+              ':input[name="micropub_enable"]' => array('checked' => TRUE),
+              ':input[name="' . $post_type . '_create_node"]' => array('checked' => TRUE),
+            ),
+          ),
+        ];
+      }
+
       // Link field.
       if (isset($configuration['link_field'])) {
         $form[$post_type][$post_type . '_link_field'] = [
@@ -526,6 +550,10 @@ class MicropubSettingsForm extends ConfigFormBase {
 
       if (isset($configuration['rsvp_field'])) {
         $config->set($post_type . '_rsvp_field', $form_state->getValue($post_type . '_rsvp_field'));
+      }
+
+      if (isset($configuration['geocache_field'])) {
+        $config->set($post_type . '_geocache_field', $form_state->getValue($post_type . '_geocache_field'));
       }
 
       if (isset($configuration['send_webmention'])) {

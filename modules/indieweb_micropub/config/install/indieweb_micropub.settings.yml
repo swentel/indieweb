@@ -98,3 +98,13 @@ checkin_geo_field: ''
 checkin_link_field: ''
 checkin_upload_field: ''
 checkin_uid: 1
+geocache_create_node: false
+geocache_status: 1
+geocache_node_type: ''
+geocache_content_field: ''
+geocache_tags_field: ''
+geocache_geocache_field: ''
+geocache_geo_field: ''
+geocache_link_field: ''
+geocache_upload_field: ''
+geocache_uid: 1

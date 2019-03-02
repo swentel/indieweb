@@ -3,6 +3,7 @@
 namespace Drupal\indieweb_context\PostContextClient;
 
 use DOMDocument;
+use DOMXPath;
 use Drupal\Core\Cache\Cache;
 use Drupal\indieweb\PostContextClient\PostContextClientInterface;
 use p3k\XRay;
@@ -50,6 +51,10 @@ class PostContextClient implements PostContextClientInterface {
 
           if (strpos($data['url'], 'twitter.com') !== FALSE) {
             $reference = $this->parseTwitter($body);
+          }
+
+          if (strpos($data['url'], 'coord.info') !== FALSE || strpos($data['url'], 'geocaching.com') !== FALSE) {
+            $reference = $this->parseGeocaching($body);
           }
 
           // -----------------------------------------------------------------
@@ -126,6 +131,39 @@ class PostContextClient implements PostContextClientInterface {
       if ($element->getAttribute('property') == 'og:description') {
         $text = str_replace(['“', '”'], '', $element->getAttribute('content'));
       }
+    }
+
+    if ($text) {
+      return [
+        'type' => 'entry',
+        'content' => [
+          'text' => $text,
+        ],
+        'post-type' => 'note',
+      ];
+    }
+
+    return FALSE;
+  }
+
+  /**
+   * Create context from geocaching.
+   *
+   * @param $body
+   *
+   * @return array|bool
+   */
+  public function parseGeocaching($body) {
+    $text = '';
+
+    libxml_use_internal_errors(TRUE);
+    $doc = new DOMDocument();
+    $doc->loadHTML($body);
+    $xpath = new DOMXPath($doc);
+    // There are two description on the page ...
+    $description = $xpath->evaluate('//meta[@name="description"]/@content')->item(1);
+    if (!empty($description->value)) {
+      $text .= $description->value;
     }
 
     if ($text) {

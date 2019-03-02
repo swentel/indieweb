@@ -92,6 +92,7 @@ function indieweb_context_form_node_type_form_alter(&$form, FormStateInterface $
       'u-like-of' => t('Like'),
       'u-bookmark-of' => t('Bookmark'),
       'u-repost-of' => t('Repost'),
+      'u-geocache-of' => t('Geocache'),
     ],
     '#title' => t('Post type'),
     '#description' => t('Select a type post field, for the right markup.'),

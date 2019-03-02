@@ -1,0 +1,26 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - node
+    - options
+id: node.indieweb_geocache
+field_name: indieweb_geocache
+entity_type: node
+type: list_string
+settings:
+  allowed_values:
+    -
+      value: 'found'
+      label: 'Found'
+    -
+      value: 'not-found'
+      label: 'Not found'
+  allowed_values_function: ''
+module: options
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: true
+custom_storage: false

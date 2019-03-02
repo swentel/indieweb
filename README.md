@@ -14,10 +14,11 @@ Current functionality:
 - Built-in IndieAuth Authorization and Authentication API, or use external service
 - Microsub built-in server or use external service
 - Micropub
-  - Create content note, article, event, rsvp, reply, like, repost, bookmark and issue
+  - Create content note, article, event, rsvp, reply, like, repost, bookmark, checkin, geocache and issue
   - Updating content is currently limited to changing the published status, title and body of nodes and comments
-  - Delete a node, comment or webmention
   - q=category can be configured and q=source is also experimentally available to get a list of posts
+  - Delete a node, comment or webmention
+  - store location coordinates
 - Auto-create comments from 'in-reply-to'
 - Reply on comments and send webmention
 - Feeds: microformats, atom and jf2
@@ -178,7 +179,7 @@ Your homepage should contain a h-card entry. This module does not expose this fo
 - p-summary: see indieweb_preprocess_field().
 - u-video: see indieweb_preprocess_file_video() and indieweb_preprocess_file_entity_video().
 
-Several field formatters for links, categories, RSVP, checkin and geo, lin are also available, see the microformats
+Several field formatters for links, categories, RSVP, geocache, checkin and geo are also available, see the microformats
 configuration page.
 
 You can configure this at /admin/config/services/indieweb/microformats
@@ -257,8 +258,9 @@ A media endpoint is also available where you can upload files, currently limited
 - RSVP: create an rsvp
 - Issue: create an issue on a repo
 - Checkin: checkin at a location  
+- Geocache: log a geocache
 
-Important: Checkin is experimental and uses the location property to gather location information, e.g.  
+Important: Checkin and Geocache are experimental and use the location property to gather location information, e.g.  
 geo:51.5258325,-0.1359825,0.0;name=london;h=card;url=https://hwclondon.co.uk
 
 Updating existing content is currently limited to change the published status, title and body of nodes and comments.

@@ -410,7 +410,7 @@ class MicropubController extends ControllerBase {
         $geo = explode(':', $this->input['location'][0]);
         if (!empty($geo[0]) && $geo[0] == 'geo' && !empty($geo[1])) {
           $lat_lon = explode(',', $geo[1]);
-          if (!empty($lat_lon[0]) && !empty($lat_lon[1])) {
+          if (!empty((float) $lat_lon[0]) && !empty((float) $lat_lon[1])) {
             $lat = trim($lat_lon[0]);
             $lon = trim($lat_lon[1]);
             if (!empty($lat) && !empty($lon)) {
@@ -436,6 +436,29 @@ class MicropubController extends ControllerBase {
       // The order here is of importance. Don't change it, unless there's a good
       // reason for, see https://indieweb.org/post-type-discovery. This does not
       // follow the exact rules, because we can be more flexible in Drupal.
+
+      // Geocache support.
+      if ($checkin && $this->createNodeFromPostType('geocache') && $this->hasRequiredInput(['geocache-log-type'] && $this->isHEntry())) {
+
+        $geocache_title = 'Geocache';
+        if (!empty($this->location['name'])) {
+          $log_type = $this->input['geocache-log-type'] == 'found' ? 'Found' : 'Did not find';
+          $geocache_title = $log_type . ' ' . $this->location['name'];
+        }
+
+        $this->createNode($geocache_title, 'geocache');
+
+        // Geocache field
+        $geocache_field_name = $this->config->get('geocache_geocache_field');
+        if ($geocache_field_name && $this->node->hasField($geocache_field_name)) {
+          $this->node->set($geocache_field_name, $this->input['geocache-log-type']);
+        }
+
+        $response = $this->saveNode();
+        if ($response instanceof Response) {
+          return $response;
+        }
+      }
 
       // Checkin support.
       if ($checkin && $this->createNodeFromPostType('checkin') && $this->isHEntry()) {

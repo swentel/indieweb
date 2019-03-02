@@ -61,5 +61,5 @@ function indieweb_entity_delete(EntityInterface $entity) {
  * @return array
  */
 function indieweb_micropub_post_types() {
-  return ['article', 'note', 'like', 'reply', 'repost', 'bookmark', 'event', 'rsvp', 'issue', 'checkin'];
+  return ['article', 'note', 'like', 'reply', 'repost', 'bookmark', 'event', 'rsvp', 'issue', 'checkin', 'geocache'];
 }
