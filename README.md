@@ -260,8 +260,8 @@ A media endpoint is also available where you can upload files, currently limited
 - Checkin: checkin at a location  
 - Geocache: log a geocache
 
-Important: Checkin and Geocache are experimental and use the location property to gather location information, e.g.  
-geo:51.5258325,-0.1359825,0.0;name=london;h=card;url=https://hwclondon.co.uk
+Important: Checkin and Geocache are experimental and use the checkin property with a Geo URI to get the info, e.g.  
+geo:51.5258325,-0.1359825,0.0;name=london;url=https://hwclondon.co.uk
 
 Updating existing content is currently limited to change the published status, title and body of nodes and comments.
 You can also query for a list of posts. More functionality will be added when this part of the spec matures.

@@ -400,14 +400,22 @@ class MicropubController extends ControllerBase {
         $this->getLogger('indieweb_micropub_payload')->notice('input: @input', ['@input' => print_r($this->input, 1)]);
       }
 
-      // Check if we have a location property in the payload with the following
-      // key/value pair: h=card. If so, then we are dealing with a checkin. This
-      // also handles all location properties already.
+      // Check if we have a location or checkin property in the payload.
       $checkin = FALSE;
-      if (!empty($this->input['location'][0])) {
+      if (!empty($this->input['location'][0]) || !empty($this->input['checkin'][0])) {
+
+        $geouri = '';
+        if (!empty($this->input['location'][0])) {
+          $geouri = $this->input['location'][0];
+        }
+
+        if (!empty($this->input['checkin'][0])) {
+          $checkin = TRUE;
+          $geouri = $this->input['checkin'][0];
+        }
 
         // Latitude and longitude.
-        $geo = explode(':', $this->input['location'][0]);
+        $geo = explode(':', $geouri);
         if (!empty($geo[0]) && $geo[0] == 'geo' && !empty($geo[1])) {
           $lat_lon = explode(',', $geo[1]);
           if (!empty((float) $lat_lon[0]) && !empty((float) $lat_lon[1])) {
@@ -420,14 +428,11 @@ class MicropubController extends ControllerBase {
           }
         }
 
-        // Additional parameters. If we find h=card, then it's a checkin.
-        $additional_params = explode(';', $this->input['location'][0]);
+        // Additional parameters.
+        $additional_params = explode(';', $geouri);
         foreach ($additional_params as $additional_param) {
           $ex = explode('=', $additional_param);
           if (!empty($ex[0]) && !empty($ex[1])) {
-            if ($ex[0] == 'h' && $ex[1] == 'card') {
-              $checkin = TRUE;
-            }
             $this->location[$ex[0]] = $ex[1];
           }
         }
@@ -438,7 +443,7 @@ class MicropubController extends ControllerBase {
       // follow the exact rules, because we can be more flexible in Drupal.
 
       // Geocache support.
-      if ($checkin && $this->createNodeFromPostType('geocache') && $this->hasRequiredInput(['geocache-log-type'] && $this->isHEntry())) {
+      if ($checkin && $this->createNodeFromPostType('geocache') && $this->hasRequiredInput(['geocache-log-type', 'checkin']) && $this->isHEntry()) {
 
         $geocache_title = 'Geocache';
         if (!empty($this->location['name'])) {
@@ -461,7 +466,7 @@ class MicropubController extends ControllerBase {
       }
 
       // Checkin support.
-      if ($checkin && $this->createNodeFromPostType('checkin') && $this->isHEntry()) {
+      if ($checkin && $this->createNodeFromPostType('checkin') && $this->hasRequiredInput(['checkin']) && $this->isHEntry()) {
 
         $checkin_title = 'Checkin';
         if (!empty($this->location['name'])) {
@@ -906,8 +911,8 @@ class MicropubController extends ControllerBase {
     $link_field_name = $this->config->get($post_type . '_link_field');
     if ($link_field_name && $this->node->hasField($link_field_name)) {
 
-      // Location check.
-      if (!empty($this->location['h']) && $this->location['h'] == 'card' && !empty($this->location['url'])) {
+      // Checkin can have name.
+      if (!empty($this->input['checkin']) && !empty($this->location['url'])) {
         $title = '';
         if (!empty($this->location['name'])) {
           $title = $this->location['name'];

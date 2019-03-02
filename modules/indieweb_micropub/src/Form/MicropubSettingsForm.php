@@ -67,13 +67,13 @@ class MicropubSettingsForm extends ConfigFormBase {
         'send_webmention' => TRUE,
       ],
       'checkin' => [
-        'description' => $this->t("A checkin request contains 'checkin' which is an URL and optionally a name or an h-card which contains url, name, latitude and longitude. 'Content' and 'name' are optional and the 'h' value is 'entry'.") . '<br /><strong>Important: experimental and and uses the "location" property to gather location information.</strong>',
+        'description' => $this->t("A checkin request contains 'checkin' which is an URL and optionally a name or an h-card which contains url, name, latitude and longitude. 'Content' and 'name' are optional and the 'h' value is 'entry'.") . '<br /><strong>Note: experimental, will not work with some clients.</strong>',
         'link_field' => TRUE,
         'optional_body' => TRUE,
         'geo_field' => TRUE,
       ],
       'geocache' => [
-        'description' => $this->t("A geocache request contains 'p-geocache-log-type', 'checkin' which is an URL and optionally a name or an h-card which contains url, name, latitude and longitude. 'Content' and 'name' are optional and the 'h' value is 'entry'.") . '<br /><strong>Important: experimental and and uses the "location" property to gather location information.</strong>',
+        'description' => $this->t("A geocache request contains 'p-geocache-log-type', 'checkin' which is an URL and optionally a name or an h-card which contains url, name, latitude and longitude. 'Content' and 'name' are optional and the 'h' value is 'entry'.") . '<br /><strong>Note: experimental, will not work with some clients.</strong>',
         'link_field' => TRUE,
         'geocache_field' => TRUE,
         'optional_body' => TRUE,
