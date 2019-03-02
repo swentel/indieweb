@@ -255,7 +255,7 @@ A media endpoint is also available where you can upload files, currently limited
 - Event: create an event
 - RSVP: create an rsvp
 - Issue: create an issue on a repo
-- Checkin: checkin at a location  
+- Checkin: checkin at a location
 
 Important: Checkin is experimental and uses the location property to gather location information.
 
