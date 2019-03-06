@@ -1504,10 +1504,10 @@ class MicropubController extends ControllerBase {
    *
    * @param \Symfony\Component\HttpFoundation\Request $request
    *
-   * @return array
+   * @return \stdClass
    */
   private function getGeoResponse(Request $request) {
-    $return = ['geo' => [], 'venues' => []];
+    $return = new \stdClass();
 
     /** @var \Drupal\geocoder\GeocoderInterface $geocoder */
     if (!empty($request->get('latitude')) && !empty($request->get('longitude')) && ($geocoder = \Drupal::service('geocoder'))) {
@@ -1517,7 +1517,7 @@ class MicropubController extends ControllerBase {
         if ($collections->count()) {
           $first = $collections->first();
           if ($label = $first->getLocality()) {
-            $return['geo'] = ['label' => $label, 'latitude' => $first->getLatitude(), 'longitude' => $first->getLongitude()];
+            $return->geo = (object) ['label' => $label, 'latitude' => $first->getLatitude(), 'longitude' => $first->getLongitude()];
           }
         }
       }
