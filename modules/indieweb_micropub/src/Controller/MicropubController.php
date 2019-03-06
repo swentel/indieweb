@@ -736,6 +736,13 @@ class MicropubController extends ControllerBase {
     }
 
     if ($this->indieAuth->isValidToken($auth_header, 'media')) {
+
+      $uid = 1;
+      // Override uid if using internal indieauth.
+      if ($tokenOwnerId = $this->indieAuth->checkAuthor()) {
+        $uid = $tokenOwnerId;
+      }
+
       $response_code = 200;
       $extensions = 'jpg jpeg gif png';
       $validators['file_validate_extensions'] = [];
@@ -745,7 +752,11 @@ class MicropubController extends ControllerBase {
       if ($files) {
 
         // Get first file.
+        /** @var \Drupal\file\FileInterface $file */
         $file = $files[0];
+
+        // Set owner.
+        $file->setOwnerId($uid);
 
         // Set permanent.
         $file->setPermanent();
@@ -850,6 +861,7 @@ class MicropubController extends ControllerBase {
    * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
    * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    * @throws \Drupal\Core\TypedData\Exception\MissingDataException
+   * @throws \Drupal\Core\Entity\EntityStorageException
    */
   protected function createNode($title, $post_type, $link_input_name = NULL) {
 
