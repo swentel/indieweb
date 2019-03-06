@@ -1510,10 +1510,10 @@ class MicropubController extends ControllerBase {
     $return = new \stdClass();
 
     /** @var \Drupal\geocoder\GeocoderInterface $geocoder */
-    if (!empty($request->get('latitude')) && !empty($request->get('longitude')) && ($geocoder = \Drupal::service('geocoder'))) {
+    if (!empty($request->get('lat')) && !empty($request->get('lon')) && ($geocoder = \Drupal::service('geocoder'))) {
       $plugin = Settings::get('indieweb_micropub_geo_plugins', []);
       if (!empty($plugin)) {
-        $collections = $geocoder->reverse($request->get('latitude'), $request->get('longitude'), $plugin);
+        $collections = $geocoder->reverse($request->get('lat'), $request->get('lon'), $plugin);
         if ($collections->count()) {
           $first = $collections->first();
           if ($label = $first->getLocality()) {
