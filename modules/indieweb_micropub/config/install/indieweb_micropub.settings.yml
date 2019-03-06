@@ -3,6 +3,7 @@ micropub_expose_link_tag: true
 micropub_enable_update: false
 micropub_enable_delete: false
 micropub_enable_source: false
+micropub_enable_geo: false
 micropub_media_enable: false
 micropub_enable_category: false
 micropub_category_vocabulary: ''

@@ -17,6 +17,7 @@ Current functionality:
   - Create content note, article, event, rsvp, reply, like, repost, bookmark, checkin, geocache and issue
   - Updating content is currently limited to changing the published status, title and body of nodes and comments
   - q=category can be configured and q=source is also experimentally available to get a list of posts
+  - q=geo to query for location
   - Delete a node, comment or webmention
   - store location coordinates
 - Auto-create comments from 'in-reply-to'
@@ -42,6 +43,8 @@ The functionality is split into several modules:
 
 Additional useful modules
 
+- https://www.drupal.org/project/geofield
+- https://www.drupal.org/project/geocoder
 - https://www.drupal.org/project/externalauth
 - https://www.drupal.org/project/auto_entitylabel
 - https://www.drupal.org/project/realname

@@ -18,6 +18,9 @@ indieweb_micropub.settings:
     micropub_enable_source:
       type: boolean
       label: 'Enable post queries'
+    micropub_enable_geo:
+      type: boolean
+      label: 'Enable geo query'
     micropub_enable_category:
       type: boolean
       label: 'Enable category request'

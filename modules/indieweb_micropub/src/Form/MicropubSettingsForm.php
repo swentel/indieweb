@@ -219,6 +219,19 @@ class MicropubSettingsForm extends ConfigFormBase {
       ),
     ];
 
+    $form['general']['micropub_enable_geo'] = [
+      '#title' => $this->t('Enable geo lookup'),
+      '#type' => 'checkbox',
+      '#access' => \Drupal::moduleHandler()->moduleExists('geocoder'),
+      '#default_value' => $config->get('micropub_enable_geo'),
+      '#description' => $this->t('This will allow requests on q=geo for location information using the <a href="https://www.drupal.org/project/geocoder" target="_blank">Geocoder module</a>.<br />Configuration of the providers to use is currently done via settings.php: e.g.<br /> <div class="indieweb-highlight-code">$settings[\'indieweb_micropub_geo_plugins\'] = [\'arcgisonline\'];</div>'),
+      '#states' => array(
+        'visible' => array(
+          ':input[name="micropub_enable"]' => array('checked' => TRUE),
+        ),
+      ),
+    ];
+
     $form['general']['micropub_log_payload'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('Log the payload in watchdog on the micropub endpoint.'),
@@ -388,7 +401,7 @@ class MicropubSettingsForm extends ConfigFormBase {
           '#title' => $this->t('Geocache field'),
           '#description' => $this->t('Select the field which will be used to store the log type value. Make sure the field exists on the node type.<br />This can only be a list option field with following values:<br />found|Found<br />not-found|Did not find<br />This module comes with a geocache storage field with those settings, so it is easy to add.'),
           '#options' => $option_fields,
-          '#default_value' => $config->get($post_type . '_rsvp_field'),
+          '#default_value' => $config->get($post_type . '_geocache_field'),
           '#states' => array(
             'visible' => array(
               ':input[name="micropub_enable"]' => array('checked' => TRUE),
@@ -515,6 +528,7 @@ class MicropubSettingsForm extends ConfigFormBase {
       ->set('micropub_enable_update', $form_state->getValue('micropub_enable_update'))
       ->set('micropub_enable_delete', $form_state->getValue('micropub_enable_delete'))
       ->set('micropub_enable_source', $form_state->getValue('micropub_enable_source'))
+      ->set('micropub_enable_geo', $form_state->getValue('micropub_enable_geo'))
       ->set('micropub_expose_link_tag', $form_state->getValue('micropub_expose_link_tag'))
       ->set('micropub_media_enable', $form_state->getValue('micropub_media_enable'))
       ->set('micropub_enable_category', $form_state->getValue('micropub_enable_category'))

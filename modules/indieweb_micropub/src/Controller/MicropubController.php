@@ -6,6 +6,7 @@ use Drupal\comment\CommentInterface;
 use Drupal\comment\Entity\Comment;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Language\LanguageInterface;
+use Drupal\Core\Site\Settings;
 use Drupal\Core\Url;
 use Drupal\datetime\Plugin\Field\FieldType\DateTimeItemInterface;
 use Drupal\field\FieldStorageConfigInterface;
@@ -116,8 +117,11 @@ class MicropubController extends ControllerBase {
     $response_code = 400;
     $response_message = 'Bad request';
 
+    // Micropub query.
+    $micropub_query = $request->get('q');
+
     // q=syndicate-to request.
-    if (isset($_GET['q']) && $_GET['q'] == 'syndicate-to') {
+    if ($micropub_query == 'syndicate-to') {
 
       // Get authorization header, response early if none found.
       $auth_header = $this->indieAuth->getAuthorizationHeader();
@@ -139,7 +143,7 @@ class MicropubController extends ControllerBase {
     }
 
     // q=config request.
-    if (isset($_GET['q']) && $_GET['q'] == 'config') {
+    if ($micropub_query == 'config') {
 
       // Get authorization header, response early if none found.
       $auth_header = $this->indieAuth->getAuthorizationHeader();
@@ -150,7 +154,7 @@ class MicropubController extends ControllerBase {
       if ($this->indieAuth->isValidToken($auth_header)) {
         $response_code = 200;
 
-        $supported_queries = ['config', 'syndicate-to', 'category', 'source'];
+        $supported_queries = ['config', 'syndicate-to', 'category', 'source', 'geo'];
         $supported_properties = [];
 
         $response_message = [
@@ -177,7 +181,7 @@ class MicropubController extends ControllerBase {
     }
 
     // q=source request.
-    if (isset($_GET['q']) && $_GET['q'] == 'source') {
+    if ($micropub_query == 'source') {
 
       // Early response when this is not enabled.
       if (!$this->config->get('micropub_enable_source')) {
@@ -192,7 +196,32 @@ class MicropubController extends ControllerBase {
 
       if ($this->indieAuth->isValidToken($auth_header)) {
         $response_code = 200;
-        $response_message = $this->getSourceResponse();
+        $response_message = $this->getSourceResponse($request);
+      }
+      else {
+        $response_code = 403;
+      }
+
+      return new JsonResponse($response_message, $response_code);
+    }
+
+    // q=geo request.
+    if ($micropub_query == 'geo') {
+
+      // Early response when this is not enabled.
+      if (!$this->config->get('micropub_enable_geo')) {
+        return new JsonResponse('', 404);
+      }
+
+      // Get authorization header, response early if none found.
+      $auth_header = $this->indieAuth->getAuthorizationHeader();
+      if (!$auth_header) {
+        return new JsonResponse('', 401);
+      }
+
+      if ($this->indieAuth->isValidToken($auth_header)) {
+        $response_code = 200;
+        $response_message = $this->getGeoResponse($request);
       }
       else {
         $response_code = 403;
@@ -202,7 +231,7 @@ class MicropubController extends ControllerBase {
     }
 
     // q=category request.
-    if (isset($_GET['q']) && $_GET['q'] == 'category') {
+    if ($micropub_query == 'category') {
 
       // Early response when this is not enabled.
       if (!$this->config->get('micropub_enable_category')) {
@@ -1296,6 +1325,8 @@ class MicropubController extends ControllerBase {
    *
    * @see https://github.com/indieweb/micropub-extensions/issues/4
    *
+   * @param \Symfony\Component\HttpFoundation\Request $request
+   *
    * @return array $return.
    *   Either list of posts or a single item with properties.
    *
@@ -1303,13 +1334,13 @@ class MicropubController extends ControllerBase {
    * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    * @throws \Drupal\Core\Entity\EntityMalformedException
    */
-  protected function getSourceResponse() {
+  protected function getSourceResponse(Request $request) {
     $return = [];
 
     // Single URL.
-    if (isset($_GET['url'])) {
+    if (!empty($request->get('url'))) {
 
-      $path = str_replace(\Drupal::request()->getSchemeAndHttpHost(), '', $_GET['url']);
+      $path = str_replace(\Drupal::request()->getSchemeAndHttpHost(), '', $request->get('url'));
       try {
         $params = Url::fromUri("internal:" . $path)->getRouteParameters();
         if (!empty($params) && in_array(key($params), ['comment', 'node'])) {
@@ -1347,8 +1378,8 @@ class MicropubController extends ControllerBase {
       $get_comments = TRUE;
 
       // Filter on post-type.
-      if (isset($_GET['post-type']) && !empty($_GET['post-type'])) {
-        $type = $_GET['post-type'];
+      if (!empty($request->get('post-type'))) {
+        $type = $request->get('post-type');
         if ($type == 'comment') {
           $get_nodes = FALSE;
           $filter = 'comment';
@@ -1366,14 +1397,16 @@ class MicropubController extends ControllerBase {
       }
 
       // Override limit.
-      if (isset($_GET['limit']) && is_numeric($_GET['limit']) && $_GET['limit'] > 0 && $_GET['limit'] <= 100) {
-        $range = $_GET['limit'];
+      $limit = $request->get('limit');
+      if (isset($limit) && is_numeric($limit) && $limit > 0 && $limit <= 100) {
+        $range = $limit;
       }
 
       // Override offset.
-      if (isset($_GET['after']) && is_numeric($_GET['after'])) {
-        $offset = $range * $_GET['after'];
-        $after = $_GET['after'] + 1;
+      $after_query = $request->get('after');
+      if (isset($after_query) && is_numeric($after_query)) {
+        $offset = $range * $after_query;
+        $after = $after_query + 1;
       }
 
       // Get nodes.
@@ -1464,6 +1497,33 @@ class MicropubController extends ControllerBase {
     $properties['published'] = [\Drupal::service('date.formatter')->format($node->getCreatedTime(), 'html_datetime')];
 
     return $properties;
+  }
+
+  /**
+   * Returns geo information.
+   *
+   * @param \Symfony\Component\HttpFoundation\Request $request
+   *
+   * @return array
+   */
+  private function getGeoResponse(Request $request) {
+    $return = ['geo' => [], 'venues' => []];
+
+    /** @var \Drupal\geocoder\GeocoderInterface $geocoder */
+    if (!empty($request->get('latitude')) && !empty($request->get('longitude')) && ($geocoder = \Drupal::service('geocoder'))) {
+      $plugin = Settings::get('indieweb_micropub_geo_plugins', []);
+      if (!empty($plugin)) {
+        $collections = $geocoder->reverse($request->get('latitude'), $request->get('longitude'), $plugin);
+        if ($collections->count()) {
+          $first = $collections->first();
+          if ($label = $first->getLocality()) {
+            $return['geo'] = ['label' => $label, 'latitude' => $first->getLatitude(), 'longitude' => $first->getLongitude()];
+          }
+        }
+      }
+    }
+
+    return $return;
   }
 
   /**

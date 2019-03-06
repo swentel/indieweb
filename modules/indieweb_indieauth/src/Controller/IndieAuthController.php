@@ -442,8 +442,12 @@ class IndieAuthController extends ControllerBase {
 
   /**
    * Routing callback: login redirect callback.
+   *
+   * @param \Symfony\Component\HttpFoundation\Request $request
+   *
+   * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
    */
-  public function loginRedirect() {
+  public function loginRedirect(Request $request) {
 
     $config = \Drupal::config('indieweb_indieauth.settings');
     $login_enabled = $config->get('login_enable');
@@ -457,7 +461,7 @@ class IndieAuthController extends ControllerBase {
     $message = $this->t('Access denied');
 
     // Verify code.
-    if (!empty($_GET['code']) && !empty($_GET['state']) && $_GET['state'] == session_id()) {
+    if (!empty($request->get('code')) && $request->get('state') == session_id()) {
 
       // Validate the code.
       $valid_code = FALSE;
@@ -466,7 +470,7 @@ class IndieAuthController extends ControllerBase {
       try {
         $client = \Drupal::httpClient();
         $body = [
-          'code' => $_GET['code'],
+          'code' => $request->get('code'),
           'client_id' => \Drupal::request()->getSchemeAndHttpHost(),
           'redirect_uri' => Url::fromroute('indieweb.indieauth.login.redirect', [], ['absolute' => TRUE])->toString(),
         ];
