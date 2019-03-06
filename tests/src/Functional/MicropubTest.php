@@ -198,6 +198,9 @@ class MicropubTest extends IndiewebBrowserTestBase {
     $nid = $this->getLastNid('article');
     $node = \Drupal::entityTypeManager()->getStorage('node')->load($nid);
     self::assertEquals(2, count($node->field_image->getValue()));
+    /** @var \Drupal\file\FileInterface $file */
+    $file = \Drupal::entityTypeManager()->getStorage('file')->load($node->field_image->target_id);
+    self::assertEquals(2, $file->getOwnerId());
 
     // Test with 3 images.
     $post = $this->article;

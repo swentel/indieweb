@@ -1045,6 +1045,7 @@ class MicropubController extends ControllerBase {
    * @param $upload_field
    *
    * @throws \Drupal\Core\TypedData\Exception\MissingDataException
+   * @throws \Drupal\Core\Entity\EntityStorageException
    */
   protected function handleUpload($upload_field) {
     $file_field_name = $this->config->get($upload_field);
@@ -1073,8 +1074,12 @@ class MicropubController extends ControllerBase {
       $files = $this->saveUpload('photo', $destination, $validators, $limit);
       if ($files) {
         $file_values = [];
+        /** @var \Drupal\file\FileInterface $file */
         foreach ($files as $file) {
           $file_values[] = $file->id();
+
+          // Set owner of file.
+          $file->setOwnerId($this->values['uid'])->save();
         }
         $this->node->set($file_field_name, $file_values);
       }
