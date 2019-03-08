@@ -71,3 +71,27 @@ function hook_indieweb_micropub_node_saved(NodeInterface $node, $values, $payloa
  */
 function hook_indieweb_micropub_no_post_made($payload) {
 }
+
+/**
+ * Act on a geo response.
+ *
+ * Use this to change or add extra data to the response. The response might
+ * already contain the 'geo' property. Another property which can be added is
+ * 'places' which contains a list of suggested places.
+ *
+ * No context is given. You need to check for yourself if 'lat' and 'lon'
+ * paramaters are available in the request.
+ *
+ * @param \stdClass $response
+ *   The current response.
+ */
+function hook_micropub_geo_response_alter($response) {
+  $response->places = [
+    (object) [
+      'label' => 'Place 1',
+      'latitude' => '51.123',
+      'longitude' => '-0.2323',
+      'url' => 'https://example.com/place'
+    ],
+  ];
+}

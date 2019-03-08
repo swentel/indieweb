@@ -952,16 +952,20 @@ class MicropubController extends ControllerBase {
     $link_field_name = $this->config->get($post_type . '_link_field');
     if ($link_field_name && $this->node->hasField($link_field_name)) {
 
-      // Checkin can have name.
-      if (!empty($this->input['checkin']) && !empty($this->location['url'])) {
-        $title = '';
-        if (!empty($this->location['name'])) {
-          $title = $this->location['name'];
-        }
-        $this->node->set($link_field_name, ['uri' => $this->location['url'], 'title' => $title]);
+      $title = $uri = '';
+      if (!empty($this->location['name'])) {
+        $title = $this->location['name'];
       }
-      else {
-        $this->node->set($link_field_name, ['uri' => $this->input[$link_input_name][0], 'title' => '']);
+
+      if (!empty($this->location['url'])) {
+        $uri = $this->location['url'];
+      }
+      elseif (!empty($this->input[$link_input_name][0])) {
+        $uri = $this->input[$link_input_name][0];
+      }
+
+      if ($uri) {
+        $this->node->set($link_field_name, ['uri' => $uri, 'title' => $title]);
       }
     }
 
@@ -1522,6 +1526,8 @@ class MicropubController extends ControllerBase {
         }
       }
     }
+
+    \Drupal::moduleHandler()->alter('micropub_geo_response', $return);
 
     return $return;
   }
