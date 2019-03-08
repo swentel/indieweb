@@ -16,6 +16,7 @@ function indieweb_test_theme($existing, $type, $theme, $path) {
     'post_type_like_twitter' => ['variables' => ['target_url' => NULL]],
     'post_type_like_site' => ['variables' => ['target_url' => NULL]],
     'post_type_reply_twitter' => ['variables' => ['target_url' => NULL]],
+    'post_type_reply_photo_twitter' => ['variables' => ['target_url' => NULL]],
     'post_type_reply_site' => ['variables' => ['target_url' => NULL]],
     'post_type_reply_fediverse' => ['variables' => ['target_url' => NULL]],
     'post_type_repost_twitter' => ['variables' => ['target_url' => NULL]],

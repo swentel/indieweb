@@ -92,6 +92,16 @@ indieweb_test.webmention_reply_twitter:
   requirements:
     _access: 'TRUE'
 
+indieweb_test.webmention_reply_photo_twitter:
+  path: '/webmention-reply-photo-twitter/{theme}/{nid}'
+  defaults:
+    _controller: '\Drupal\indieweb_test\Controller\IndiewebTestController::webmentionPostType'
+    _title: 'Webmention reply photo twitter'
+    theme: 'post_type_reply_photo_twitter'
+    nid: 1
+  requirements:
+    _access: 'TRUE'
+
 indieweb_test.webmention_reply_site:
   path: '/webmention-reply-site/{theme}/{nid}'
   defaults:

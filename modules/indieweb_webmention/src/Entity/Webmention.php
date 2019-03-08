@@ -245,6 +245,9 @@ class Webmention extends ContentEntityBase implements WebmentionInterface {
       'author_url' => 'Author URL',
       'url' => 'url',
       'rsvp' => 'RSVP',
+      'photo' => 'Photo',
+      'video' => 'Video',
+      'audio' => 'Audio',
     ];
 
     $weight = 0;

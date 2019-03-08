@@ -223,6 +223,13 @@ class WebmentionClient implements WebmentionClientInterface {
             }
           }
 
+          // Media.
+          foreach (['photo', 'video', 'audio'] as $key) {
+            if (!empty($data[$key])) {
+              $webmention->set($key, $data[$key]);
+            }
+          }
+
           // Published.
           if (isset($data['published']) && !empty($data['published'])) {
             $webmention->set('created', strtotime($data['published']));

@@ -535,6 +535,22 @@ class WebmentionTest extends IndiewebBrowserTestBase {
     $this->drupalGet('node/1');
     $this->assertSession()->pageTextContains($expected['content_text']);
 
+    $source = Url::fromRoute('indieweb_test.webmention_reply_photo_twitter', [], ['absolute' => TRUE])->toString();
+    $response = $this->sendWebmentionInternalRequest($source, $node_1_path);
+    self::assertEquals(202, $response->getStatusCode());
+    $this->processWebmentions();
+    $expected = [
+      'source' => $source,
+      'target' => '/node/1',
+      'type' => 'entry',
+      'property' => 'in-reply-to',
+      'photo' => 'https://pbs.twimg.com/media/DssR-DVW0AA5NFq.jpg',
+      'private' => 0,
+    ];
+    $this->assertWebmention($expected);
+    $this->assertCommentCount(4);
+    $this->drupalGet('node/1');
+
     // ------------------------------------------------------------------
     // Bookmark.
     // ------------------------------------------------------------------

@@ -165,6 +165,13 @@ class WebmentionController extends ControllerBase {
         }
       }
 
+      // Media.
+      foreach (['photo', 'video', 'audio'] as $key) {
+        if (!empty($mention['post'][$key])) {
+          $values[$key] = ['value' => $mention['post'][$key]];
+        }
+      }
+
       // Url.
       if (!empty($mention['post']['url'])) {
         $values['url'] = ['value' => $mention['post']['url']];
