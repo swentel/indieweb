@@ -89,3 +89,19 @@ function indieweb_help($route_name, RouteMatchInterface $route_match) {
 function indieweb_generate_machine_name_from_url($url) {
   return 'indieweb_' . str_replace(['https://', 'http://', '/', '-', '.'], '', $url);
 }
+
+/**
+ * Returns the path without the hostname from a URL.
+ *
+ * @param $url
+ *
+ * @return string $path
+ *   The path.
+ */
+function indieweb_get_path($url) {
+  $path = trim(parse_url($url, PHP_URL_PATH));
+  if (empty($path)) {
+    $path = "/";
+  }
+  return $path;
+}

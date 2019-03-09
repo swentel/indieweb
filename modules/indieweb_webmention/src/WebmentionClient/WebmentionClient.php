@@ -257,8 +257,8 @@ class WebmentionClient implements WebmentionClientInterface {
             $webmention->set('url', $data['url']);
           }
 
-          // Remove the base url and protect against empty target.
-          $target = trim(str_replace(\Drupal::request()->getSchemeAndHttpHost(), '', $target));
+          // Get the path without hostname.
+          $target = indieweb_get_path($target);
           if (empty($target)) {
             $target = '/';
           }

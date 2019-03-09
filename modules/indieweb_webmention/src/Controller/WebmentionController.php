@@ -117,8 +117,8 @@ class WebmentionController extends ControllerBase {
         $this->getLogger('indieweb_webmention_payload')->notice('object: @object', ['@object' => print_r($mention, 1)]);
       }
 
-      // Remove the base url and protect against empty target.
-      $target = trim(str_replace(\Drupal::request()->getSchemeAndHttpHost(), '', $mention['target']));
+      // Get the path without hostname.
+      $target = indieweb_get_path($mention['target']);
       if (empty($target)) {
         $target = '/';
       }

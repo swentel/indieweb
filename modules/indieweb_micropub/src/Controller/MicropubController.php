@@ -306,7 +306,7 @@ class MicropubController extends ControllerBase {
       $response_message = '';
       $response_code = 404;
 
-      $path = str_replace(\Drupal::request()->getSchemeAndHttpHost(), '', $this->object_url);
+      $path = indieweb_get_path($this->object_url);
       try {
         $params = Url::fromUri("internal:" . $path)->getRouteParameters();
 
@@ -343,7 +343,7 @@ class MicropubController extends ControllerBase {
         return new JsonResponse('', 403);
       }
 
-      $path = str_replace(\Drupal::request()->getSchemeAndHttpHost(), '', $this->object_url);
+      $path = indieweb_get_path($this->object_url);
       try {
         $params = Url::fromUri("internal:" . $path)->getRouteParameters();
 
@@ -585,7 +585,7 @@ class MicropubController extends ControllerBase {
           $pid = 0;
           $link_field_url = '';
           $reply = $this->input['in-reply-to'][0];
-          $reply = str_replace(\Drupal::request()->getSchemeAndHttpHost(), '', $reply);
+          $reply = indieweb_get_path($reply);
           $path = \Drupal::service('path.alias_manager')->getPathByAlias($reply);
           try {
             $params = Url::fromUri("internal:" . $path)->getRouteParameters();
@@ -1344,7 +1344,7 @@ class MicropubController extends ControllerBase {
     // Single URL.
     if (!empty($request->get('url'))) {
 
-      $path = str_replace(\Drupal::request()->getSchemeAndHttpHost(), '', $request->get('url'));
+      $path = indeweb_get_path($request->get('url'));
       try {
         $params = Url::fromUri("internal:" . $path)->getRouteParameters();
         if (!empty($params) && in_array(key($params), ['comment', 'node'])) {
