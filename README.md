@@ -409,6 +409,12 @@ For more background, see https://github.com/snarfed/bridgy-fed/issues/30 and htt
 ## Drush commands
 
 Note you need drush 8 or later to run these commands, although legacy commands in indieweb.drush.inc are available too.
+Don't forget to pass on your domain in the drush commands as it's important for some functionality to work.
+
+```
+drush -l https://example.com indieweb-send-webmentions
+
+```
 
 - indieweb-send-webmentions: handles the queue for sending webmentions.
 - indieweb-process-webmentions: process the webmention received on the internal endpoint
