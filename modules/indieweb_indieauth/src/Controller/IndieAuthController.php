@@ -127,6 +127,7 @@ class IndieAuthController extends ControllerBase {
       // Good to go.
       $response = [
         'me' => $authorization_code->getMe(),
+        'profile' => $this->getProfile($authorization_code->getOwnerId()),
       ];
 
       // Remove old code.
@@ -435,6 +436,7 @@ class IndieAuthController extends ControllerBase {
       'token_type' => 'Bearer',
       'scope' => $token->getScopesAsString(),
       'access_token' => (string) $JWT,
+      'profile' => $this->getProfile($token->getOwnerId()),
     ];
 
     return new JsonResponse($data, 200);
@@ -564,6 +566,39 @@ class IndieAuthController extends ControllerBase {
     $indieweb_indieauth_token->save();
     $this->messenger()->addMessage($this->t('Changed status for %token', ['%token' => $indieweb_indieauth_token->label()]));
     return new RedirectResponse($indieweb_indieauth_token->toUrl('collection')->toString());
+  }
+
+  /**
+   * Returns profile information.
+   *
+   * @param $uid
+   *
+   * @return \stdClass
+   *
+   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
+   */
+  protected function getProfile($uid) {
+    $profile = ['type' => 'card'];
+
+    /** @var \Drupal\user\UserInterface $account */
+    $account = $this->entityTypeManager()->getStorage('user')->load($uid);
+
+    if ($account) {
+      $profile['name'] = $account->getAccountName();
+      $profile['url'] = \Drupal::request()->getSchemeAndHttpHost();
+
+      // Avatar.
+      if (!empty($account->user_picture)) {
+        /** @var \Drupal\file\FileInterface $file */
+        $file = $account->get('user_picture')->entity;
+        if ($file) {
+          $profile['photo'] = file_create_url($file->getFileUri());
+        }
+      }
+    }
+
+    return (object) $profile;
   }
 
 }

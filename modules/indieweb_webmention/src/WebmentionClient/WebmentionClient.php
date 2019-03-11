@@ -160,6 +160,10 @@ class WebmentionClient implements WebmentionClientInterface {
       'type' => 'webmention',
     ];
 
+
+    // Allow local domain URL matching, used for testbot.
+    $allow_local_domain = ['allow_local_domain' => (bool) drupal_valid_test_ua()];
+
     /** @var \Drupal\indieweb_webmention\Entity\WebmentionInterface[] $webmentions */
     $webmentions = \Drupal::entityTypeManager()->getStorage('indieweb_webmention')->loadByProperties($values);
     foreach ($webmentions as $webmention) {
@@ -178,7 +182,7 @@ class WebmentionClient implements WebmentionClientInterface {
         // Parse the body. Make sure the target is found.
         // ------------------------------------------------------------------
 
-        $parsed = $xray->parse($source, $body, ['target' => $target]);
+        $parsed = $xray->parse($source, $body, ['target' => $target] + $allow_local_domain);
 
         // ------------------------------------------------------------------
         // Target url was found on source and doc is valid, start parsing.

@@ -359,6 +359,7 @@ class IndieAuthTest extends IndiewebBrowserTestBase {
     $body_response = $response->getBody()->__toString();
     $body = @json_decode($body_response);
     self::assertTrue(isset($body->access_token));
+    self::assertEquals($this->indiewebAuthorizedUser->getAccountName(), $body->profile->name);
     self::assertEquals(200, $response->getStatusCode());
 
     // Verify the authorization code is gone.
@@ -505,6 +506,7 @@ class IndieAuthTest extends IndiewebBrowserTestBase {
     $body_response = $response->getBody()->__toString();
     $body = @json_decode($body_response);
     self::assertTrue(isset($body->me) && $body->me == $me);
+    self::assertEquals($this->indiewebAuthorizedUser->getAccountName(), $body->profile->name);
     self::assertEquals(200, $response->getStatusCode());
 
     // Verify the authorization code is gone.
