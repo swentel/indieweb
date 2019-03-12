@@ -119,6 +119,13 @@ class IndieAuthToken extends ContentEntityBase implements IndieAuthTokenInterfac
   /**
    * {@inheritdoc}
    */
+  public function getMe() {
+    return $this->get('me')->value;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function getChanged() {
     return $this->get('changed')->value;
   }
@@ -158,6 +165,11 @@ class IndieAuthToken extends ContentEntityBase implements IndieAuthTokenInterfac
 
     $fields['scope'] = BaseFieldDefinition::create('string')
       ->setLabel(t('Scopes'))
+      ->setRequired(FALSE)
+      ->setSetting('max_length', 255);
+
+    $fields['me'] = BaseFieldDefinition::create('string')
+      ->setLabel(t('The url owner'))
       ->setRequired(FALSE)
       ->setSetting('max_length', 255);
 

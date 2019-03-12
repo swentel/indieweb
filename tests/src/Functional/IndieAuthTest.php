@@ -367,6 +367,18 @@ class IndieAuthTest extends IndiewebBrowserTestBase {
     $authorization_code = \Drupal::entityTypeManager()->getStorage('indieweb_indieauth_code')->getIndieAuthAuthorizationCode($params['code']);
     self::assertFalse($authorization_code);
 
+    // Verify the token.
+    $response = $this->verifyTokenRequest('invalid', $token_path);
+    self::assertEquals(404, $response->getStatusCode());
+    $response = $this->verifyTokenRequest($body->access_token, $token_path);
+    self::assertEquals(200, $response->getStatusCode());
+    $body_response = $response->getBody()->__toString();
+    $body_get = @json_decode($body_response);
+    self::assertEquals($this->indiewebAuthorizedUser->getAccountName(), $body_get->profile->name);
+    self::assertEquals($params['me'], $body_get->me);
+    self::assertEquals($params['client_id'], $body_get->client_id);
+    self::assertEquals($options['query']['scope'], $body_get->scope);
+
     // Now do a micropub request with the access token.
     $post = [
       'h' => 'entry',
@@ -389,9 +401,6 @@ class IndieAuthTest extends IndiewebBrowserTestBase {
     /** @var \Drupal\node\NodeInterface $node */
     $node = \Drupal::entityTypeManager()->getStorage('node')->load($nid);
     self::assertEquals($this->indiewebAuthorizedUser->id(), $node->getOwnerId());
-
-    $this->drupalGet($token_path);
-    $this->assertSession()->statusCodeEquals(404);
 
     // Revoke token.
     $params = [];
@@ -543,6 +552,38 @@ class IndieAuthTest extends IndiewebBrowserTestBase {
     }
 
     return $response;
+  }
+
+  /**
+   * Token get request.
+   *
+   * @param $access_token
+   * @param $url
+   *
+   * @return \Psr\Http\Message\ResponseInterface
+   *   The request response.
+   *
+   * @throws \GuzzleHttp\Exception\GuzzleException
+   */
+  protected function verifyTokenRequest($access_token, $url) {
+
+    $headers = [
+      'Accept' => 'application/json',
+      'Authorization' => 'Bearer ' . $access_token,
+    ];
+
+    try {
+      $response = $this->httpClient->request('get', $url, ['headers' => $headers]);
+    }
+    catch (ClientException $e) {
+      $response = $e->getResponse();
+    }
+    catch (ServerException $e) {
+      $response = $e->getResponse();
+    }
+
+    return $response;
+
   }
 
 }

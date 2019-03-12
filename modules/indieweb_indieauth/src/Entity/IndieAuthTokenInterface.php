@@ -71,6 +71,13 @@ interface IndieAuthTokenInterface extends ContentEntityInterface {
   public function getScopesAsString();
 
   /**
+   * Returns me.
+   *
+   * @return string
+   */
+  public function getMe();
+
+  /**
    * Returns the client id.
    *
    * @return string

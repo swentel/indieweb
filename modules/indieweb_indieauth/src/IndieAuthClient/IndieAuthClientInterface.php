@@ -35,6 +35,13 @@ interface IndieAuthClientInterface {
   public function checkAuthor();
 
   /**
+   * Gets the internal token, if available.
+   *
+   * @return \Drupal\indieweb_indieauth\Entity\IndieAuthTokenInterface $indieAuthToken|boolean
+   */
+  public function getToken();
+
+  /**
    * Revokes a token.
    *
    * @param $token

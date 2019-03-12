@@ -336,7 +336,35 @@ class IndieAuthController extends ControllerBase {
       return new Response($this->t('Page not found'), 404);
     }
 
-    // Return early if this is not a POST request.
+    // GET request, verify token.
+    if ($request->getMethod() == 'GET') {
+
+      /** @var \Drupal\indieweb_indieauth\IndieAuthClient\IndieAuthClientInterface $indieAuthClient */
+      $indieAuthClient = \Drupal::service('indieweb.indieauth.client');
+      $auth_header = $indieAuthClient->getAuthorizationHeader();
+      if (!$auth_header) {
+        return new JsonResponse('', 401);
+      }
+
+      $response = '';
+      $response_code = 404;
+      if ($indieAuthClient->isValidToken($auth_header)) {
+        if ($uid = $indieAuthClient->checkAuthor()) {
+          $response_code = 200;
+          $token = $indieAuthClient->getToken();
+          $response = (object) [
+            'me' => $token->getMe(),
+            'client_id' => $token->getClientId(),
+            'scope' => $token->getScopesAsString(),
+            'profile' => $this->getProfile($uid)
+          ];
+        }
+      }
+
+      return new JsonResponse($response, $response_code);
+    }
+
+    // If not a get request, and not POST either, bail out.
     if ($request->getMethod() != 'POST') {
       return new Response($this->t('Page not found'), 404);
     }
@@ -420,6 +448,7 @@ class IndieAuthController extends ControllerBase {
       'created' => $created,
       'access_token' => $access_token,
       'client_id' => $authorization_code->getClientId(),
+      'me' => $authorization_code->getMe(),
       'uid' => $authorization_code->getOwnerId(),
       'scope' => implode(' ', $authorization_code->getScopes()),
     ];
