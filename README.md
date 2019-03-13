@@ -345,6 +345,7 @@ Microsub actions implemented:
 - POST/GET action=search, preview: search and preview url
 
 Want to follow Twitter, or Instagram in your reader? Checkout granary.io!
+Tip: use html formatting to to get the best context on posts.
 
 Note: when you configure a feed to cleanup old items, internally we count 5 items more by default. The reason is that
 some feeds use pinned items (e.g. Mastodon) which can come and go and mix up the total visual items on a page. Or 
