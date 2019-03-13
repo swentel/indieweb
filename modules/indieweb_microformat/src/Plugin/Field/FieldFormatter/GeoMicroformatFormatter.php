@@ -19,7 +19,7 @@ use Drupal\geofield\Plugin\Field\FieldFormatter\LatLonFormatter;
  */
 class GeoMicroformatFormatter extends LatLonFormatter {
 
-    /**
+  /**
    * {@inheritdoc}
    */
   public static function defaultSettings() {
@@ -28,7 +28,7 @@ class GeoMicroformatFormatter extends LatLonFormatter {
     ];
   }
 
-    /**
+  /**
    * {@inheritdoc}
    */
   public function settingsForm(array $form, FormStateInterface $form_state) {
