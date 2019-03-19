@@ -242,12 +242,18 @@ function _indieweb_webmention_entity_form_alter(&$form, FormStateInterface $form
     ];
 
     $syndication_targets = indieweb_get_syndication_targets(TRUE);
+    $default_targets = isset($syndication_targets['default']) ? $syndication_targets['default'] : [];
     $form['indieweb_webmention_wrapper']['indieweb_syndication_targets'] = [
       '#type' => 'checkboxes',
       '#options' => isset($syndication_targets['options']) ? $syndication_targets['options'] : [],
-      '#default_value' => isset($syndication_targets['default']) ? $syndication_targets['default'] : [],
+      '#default_value' => $default_targets,
       '#access' => !empty($syndication_targets['options']),
     ];
+
+    // Open details element if there are default targets.
+    if (!empty($default_targets)) {
+      $form['indieweb_webmention_wrapper']['#open'] = TRUE;
+    }
 
     $options = [];
     $link_fields_string = \Drupal::config('indieweb_webmention.settings')->get('send_link_fields');
