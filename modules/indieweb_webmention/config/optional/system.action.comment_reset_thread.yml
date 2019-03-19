@@ -1,0 +1,11 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - comment
+    - node
+id: comment_reset_thread
+label: 'Reset comment thread'
+type: node
+plugin: comment_reset_thread
+configuration: {  }

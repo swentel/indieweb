@@ -97,7 +97,12 @@ indieweb_webmention.settings:
 # schema for webmention_delete_action
 action.configuration.webmention_delete_action:
   type: action_configuration_default
-  label: 'Delete webmention configuration'
+  label: 'Delete webmention'
+
+# schema for comment_reset_thread
+action.configuration.comment_reset_thread:
+  type: action_configuration_default
+  label: 'Reset comment thread'
 
 # schema for entity_reference_webmention setting
 field.formatter.settings.entity_reference_webmention:

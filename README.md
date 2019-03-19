@@ -286,6 +286,9 @@ be pre-filled, see the 'Sending' section. The module comes with a indieweb_webme
 Every comment is available also at comment/indieweb/cid so this URL can also be a target for a webmention. If a
 webmention is send to this target, a comment will be created on the node, with the target cid as the parent.
 
+When comments are created which come from Brid.gy, the order is not guaranteed. The comment creation time will be fine,
+but the threading might be wrong. A 'Reset comment thread' action is available to reset the thread for a node.
+
 Configuration is at /admin/config/services/indieweb/comments
 
 Configuration still in settings.php
