@@ -483,6 +483,10 @@ class WebmentionTest extends IndiewebBrowserTestBase {
     $this->drupalGet('node/1');
     $this->assertSession()->responseContains($expected['content_text']);
 
+    /** @var \Drupal\comment\CommentInterface $comment */
+    $comment = \Drupal::entityTypeManager()->getStorage('comment')->load(1);
+    self::assertEqual($comment->getCreatedTime(), $expected['created']);
+
     $source = Url::fromRoute('indieweb_test.webmention_reply_fediverse', [], ['absolute' => TRUE])->toString();
     $response = $this->sendWebmentionInternalRequest($source, $node_1_path);
     self::assertEquals(202, $response->getStatusCode());

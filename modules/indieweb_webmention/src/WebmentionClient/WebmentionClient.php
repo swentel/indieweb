@@ -236,7 +236,7 @@ class WebmentionClient implements WebmentionClientInterface {
 
           // Published.
           if (isset($data['published']) && !empty($data['published'])) {
-            $webmention->set('created', strtotime($data['published']));
+            $webmention->setCreatedTime(strtotime($data['published']));
           }
 
           // Property. 'mention-of' is the default if we can't detect anything
@@ -404,7 +404,6 @@ class WebmentionClient implements WebmentionClientInterface {
                   'entity_id' => $node->id(),
                   'entity_type' => 'node',
                   'pid' => $pid,
-                  'created' > $webmention->getCreatedTime(),
                   'comment_type' => $comment_type,
                   'field_name' => $comment_node_comment_field_name,
                   $comment_comment_webmention_field_name => [
@@ -421,6 +420,7 @@ class WebmentionClient implements WebmentionClientInterface {
                 }
 
                 $comment = Comment::create($values);
+                $comment->setCreatedTime($webmention->getCreatedTime());
                 $comment->save();
 
                 // Send mail notification.
