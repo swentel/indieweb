@@ -78,8 +78,9 @@ class MicrosubClient implements MicrosubClientInterface {
             krsort($items_sorted);
 
             $c = 0;
+            $guids = [];
             foreach ($items_sorted as $item) {
-              $this->saveItem($item, $tries, $source_id, $channel_id, $empty, $context, $disable_image_cache);
+              $guids[] = $this->saveItem($item, $tries, $source_id, $channel_id, $empty, $context, $disable_image_cache);
 
               // If we have number of items to keep and we hit the amount, break
               // the loop so we don't keep importing everything over and over.
@@ -101,13 +102,15 @@ class MicrosubClient implements MicrosubClientInterface {
               // Add five more items to keep so we don't hit exceptions like:
               //   - feeds with pinned items (e.g. mastodon).
               //   - posts that have been deleted.
+              // We also pass on the guids that were found during the fetch so
+              // they are not deleted.
 
               $items_to_keep += 5;
               // We use two queries as not all mysql servers understand limits
               // in sub queries when the main query is a delete.
               $timestamp = \Drupal::entityTypeManager()->getStorage('indieweb_microsub_item')->getTimestampByRangeAndSource($items_to_keep, $source_id);
               if ($timestamp) {
-                \Drupal::entityTypeManager()->getStorage('indieweb_microsub_item')->removeItemsBySourceOlderThanTimestamp($timestamp, $source_id);
+                \Drupal::entityTypeManager()->getStorage('indieweb_microsub_item')->removeItemsBySourceOlderThanTimestamp($timestamp, $source_id, $guids);
               }
             }
           }
@@ -139,7 +142,7 @@ class MicrosubClient implements MicrosubClientInterface {
    * @param array $context
    * @param $disable_image_cache
    *
-   * @return bool
+   * @return string
    *
    * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
    * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
@@ -161,7 +164,7 @@ class MicrosubClient implements MicrosubClientInterface {
     // Check if this entry exists.
     $exists = \Drupal::entityTypeManager()->getStorage('indieweb_microsub_item')->itemExists($source_id, $guid);
     if ($exists) {
-      return FALSE;
+      return $guid;
     }
 
     // Reset tries.
@@ -222,6 +225,8 @@ class MicrosubClient implements MicrosubClientInterface {
         }
       }
     }
+
+    return $guid;
   }
 
   /**

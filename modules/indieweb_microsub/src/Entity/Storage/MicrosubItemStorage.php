@@ -172,12 +172,13 @@ class MicrosubItemStorage extends SqlContentEntityStorage implements MicrosubIte
   /**
    * {@inheritdoc}
    */
-  public function removeItemsBySourceOlderThanTimestamp($timestamp, $source_id) {
+  public function removeItemsBySourceOlderThanTimestamp($timestamp, $source_id, $guids) {
     $this->database
       ->delete('microsub_item')
       ->condition('timestamp', $timestamp, '<')
       ->condition('source_id', $source_id)
       ->condition('is_read', 1)
+      ->condition('guid', $guids, 'NOT IN')
       ->execute();
   }
 

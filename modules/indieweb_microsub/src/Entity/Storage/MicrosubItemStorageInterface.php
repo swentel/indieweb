@@ -113,8 +113,10 @@ interface MicrosubItemStorageInterface extends ContentEntityStorageInterface {
    *   The microsub item created time
    * @param $source_id
    *   The source id
+   * @param $guids
+   *   The ids to not remove.
    */
-  public function removeItemsBySourceOlderThanTimestamp($timestamp, $source_id);
+  public function removeItemsBySourceOlderThanTimestamp($timestamp, $source_id, $guids);
 
   /**
    * Get an id by range and source.
