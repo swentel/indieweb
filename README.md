@@ -51,6 +51,7 @@ Additional useful modules
 - https://www.drupal.org/project/rabbit_hole
 - https://www.drupal.org/project/imagecache_external
 - https://www.drupal.org/project/cdn
+- https://www.drupal.org/project/prepopulate
 
 More information is in this README
 
@@ -370,7 +371,11 @@ For microsub items, you can configure this per source.
 
 The content for post contexts is fetched either by cron or drush. It's stored in the queue so it can be handled later.
 This can be configured at /admin/config/services/indieweb/post-context.  
-Note: post contexts only work right now if the site for which you want to get the context supports microformats.
+
+Post contexts will be fetched from:
+
+- any site which supports microformats
+- twitter.com and geocaching.com
 
 ## Fediverse via Bridgy Fed
 
