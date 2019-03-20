@@ -533,7 +533,7 @@ abstract class IndiewebBrowserTestBase extends BrowserTestBase {
   protected function assertWebmentionQueueItems($urls = [], $id = NULL) {
     if ($urls) {
       $count = \Drupal::queue(INDIEWEB_WEBMENTION_QUEUE)->numberOfItems();
-      $this->assertTrue($count == count($urls));
+      $this->assertTrue($count == count($urls), 'Items in queue: ' . $count . ' - total passed: ' . count($urls));
 
       // We use a query here, don't want to use a while loop. When there's
       // nothing in the queue yet, the table won't exist, so the query will
@@ -544,7 +544,7 @@ abstract class IndiewebBrowserTestBase extends BrowserTestBase {
         foreach ($records as $record) {
           $data = unserialize($record->data);
           if (!empty($data['source']) && !empty($data['target']) && $id) {
-            $this->assertTrue(in_array($data['target'], $urls));
+            $this->assertTrue(in_array($data['target'], $urls), 'Found ' . $data['target'] . ' in ' . print_r($urls, 1));
             if ($data['entity_type_id'] == 'node') {
               $this->assertEquals($data['source'], Url::fromRoute('entity.node.canonical', ['node' => $id], ['absolute' => TRUE])->toString());
             }

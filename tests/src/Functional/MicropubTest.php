@@ -526,11 +526,13 @@ class MicropubTest extends IndiewebBrowserTestBase {
     $edit = ['bookmark_create_node' => 1, 'bookmark_node_type' => 'bookmark', 'bookmark_link_field' => 'field_bookmark_link', 'bookmark_content_field' => 'body', 'bookmark_auto_send_webmention' => 1, 'bookmark_uid' => $this->adminUser->getUsername() . ' (' . $this->adminUser->id() . ')'];
     $this->drupalPostForm('admin/config/services/indieweb/micropub', $edit, 'Save configuration');
     $this->drupalLogout();
-    $code = $this->sendMicropubRequest($this->bookmark);
+    $b = $this->bookmark;
+    $b['mp-syndicate-to'] = ['https://brid.gy/publish/twitter'];
+    $code = $this->sendMicropubRequest($b);
     self::assertEquals(201, $code);
     $this->assertNodeCount(1, 'bookmark');
     $nid = $this->getLastNid('bookmark');
-    $this->assertWebmentionQueueItems([$this->bookmark['bookmark-of']], $nid);
+    $this->assertWebmentionQueueItems([$this->bookmark['bookmark-of'], 'https://brid.gy/publish/twitter'], $nid);
     if ($nid) {
       /** @var \Drupal\node\NodeInterface $node */
       $node = \Drupal::entityTypeManager()->getStorage('node')->load($nid);

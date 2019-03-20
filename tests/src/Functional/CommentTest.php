@@ -40,7 +40,7 @@ class CommentTest extends IndiewebBrowserTestBase {
     parent::setUp();
 
     // Create node types.
-    $this->createNodeTypes(['reply']);
+    $this->createNodeTypes(['reply', 'like']);
 
     $this->grantPermissions(Role::load(RoleInterface::ANONYMOUS_ID), ['view published webmention entities', 'access comments']);
   }
@@ -250,10 +250,25 @@ class CommentTest extends IndiewebBrowserTestBase {
     $this->assertRaw('value="https://example.com/a-link-to-appear-when-replying"');
 
     // ------------------------------------------------------------------------
-    // Test micropub reply post to create a comment.
+    // Test micropub reply post to create a comment and a like on a webmention
+    // url.
 
     $this->drupalLogin($this->adminUser);
-    $edit = ['micropub_enable' => 1, 'reply_create_comment' => 1, 'reply_create_node' => 1, 'reply_node_type' => 'reply', 'reply_link_field' => 'field_reply_link', 'reply_content_field' => 'body', 'reply_auto_send_webmention' => 1, 'reply_uid' => $this->adminUser->getUsername() . ' (' . $this->adminUser->id() . ')'];
+    $edit = [
+      'micropub_enable' => 1,
+      'reply_create_comment' => 1,
+      'reply_create_node' => 1,
+      'reply_node_type' => 'reply',
+      'reply_link_field' => 'field_reply_link',
+      'reply_content_field' => 'body',
+      'reply_auto_send_webmention' => 1,
+      'reply_uid' => $this->adminUser->getUsername() . ' (' . $this->adminUser->id() . ')',
+      'like_create_node' => 1,
+      'like_node_type' => 'like',
+      'like_link_field' => 'field_like_link',
+      'like_auto_send_webmention' => 1,
+      'like_uid' => $this->adminUser->getUsername() . ' (' . $this->adminUser->id() . ')'
+    ];
     $this->drupalPostForm('admin/config/services/indieweb/micropub', $edit, 'Save configuration');
 
     // Set IndieAuth token endpoint.
@@ -315,6 +330,7 @@ class CommentTest extends IndiewebBrowserTestBase {
     $this->assertSession()->responseContains('Reply with node target');
 
     // Micropub reply request with 'in-reply-to' set to previous comment.
+    $this->clearQueue();
     $previous_cid = $cid;
     $reply['content'] = 'Reply with comment target';
     $reply['in-reply-to'] = '/comment/indieweb/' . $previous_cid;
@@ -366,7 +382,37 @@ class CommentTest extends IndiewebBrowserTestBase {
 
     $this->drupalGet('node/' . $article->id());
     $this->assertSession()->responseContains('Reply with webmention target');
-    $this->assertWebmentionQueueItems(['https://twitter.com/jgmac1106/status/1039835297159282688', 'https://brid.gy/publish/twitter'], $article->id());
+    $this->assertWebmentionQueueItems(['https://brid.gy/publish/twitter'], $article->id());
+    $this->clearQueue();
+
+    // Micropub like request with 'like-of' set to previous webmention.
+    $like = [
+      'h' => 'entry',
+      'like-of' => '/admin/content/webmention/5',
+      'mp-syndicate-to' => ['https://brid.gy/publish/twitter'],
+    ];
+
+    $this->sendMicropubRequest($like);
+    $this->assertNodeCount(1, 'like');
+
+    $node = NULL;
+    $nid = \Drupal::database()->query('SELECT nid FROM {node_field_data} ORDER by nid DESC limit 1')->fetchField();
+    if ($nid) {
+      $node = \Drupal::entityTypeManager()->getStorage('node')->load($nid);
+
+      $link_field_value = NULL;
+      if (isset($node->field_like_link)) {
+        $link_field_value = $node->get('field_like_link')->uri;
+      }
+      self::assertEquals('Like of https://twitter.com/jgmac1106/status/1039835297159282688', $node->label());
+      self::assertEquals('https://twitter.com/jgmac1106/status/1039835297159282688', $link_field_value);
+    }
+    else {
+      // Explicit failure.
+      $this->assertTrue($nid, 'No like found');
+    }
+
+    $this->assertWebmentionQueueItems(['https://brid.gy/publish/twitter'], $node->id());
   }
 
 }

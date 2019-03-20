@@ -561,6 +561,26 @@ class MicropubController extends ControllerBase {
 
       // Like support.
       if ($this->createNodeFromPostType('like') && $this->isHEntry() && $this->hasRequiredInput(['like-of'])) {
+
+        // This can be a like on a webmention, usually a reply or mention. Get
+        // the url of the webmention and replace the like-of value.
+        $like = $this->input['like-of'][0];
+        $like = indieweb_get_path($like);
+        $path = \Drupal::service('path.alias_manager')->getPathByAlias($like);
+        try {
+          $params = Url::fromUri("internal:" . $path)->getRouteParameters();
+          if (!empty($params) && key($params) == 'indieweb_webmention') {
+            /** @var \Drupal\indieweb_webmention\Entity\WebmentionInterface $webmention_target */
+            $webmention_target = \Drupal::entityTypeManager()->getStorage('indieweb_webmention')->load($params['indieweb_webmention']);
+            if ($webmention_target) {
+              $url = $webmention_target->getUrl();
+              if (!empty($url)) {
+                $this->input['like-of'][0] = $url;
+              }
+            }
+          }
+        } catch (\Exception $ignored) {}
+
         $this->createNode('Like of ' . $this->input['like-of'][0], 'like', 'like-of');
         $response = $this->saveNode();
         if ($response instanceof Response) {
@@ -780,7 +800,7 @@ class MicropubController extends ControllerBase {
       $files = $this->saveUpload('file', 'public://micropub/' . $sub_directory, $validators);
       if ($files) {
 
-        // Get first file.
+        // Get first file as $files is an array.
         /** @var \Drupal\file\FileInterface $file */
         $file = $files[0];
 
@@ -930,7 +950,7 @@ class MicropubController extends ControllerBase {
     // Add link to syndicate to.
     if ($link_input_name && $this->config->get($post_type . '_auto_send_webmention')) {
       if (isset($this->input['mp-syndicate-to'])) {
-        $this->input['mp-syndicate-to'] += $this->input[$link_input_name];
+        $this->input['mp-syndicate-to'][] = $this->input[$link_input_name][0];
       }
       else {
         $this->input['mp-syndicate-to'] = $this->input[$link_input_name];
@@ -940,6 +960,7 @@ class MicropubController extends ControllerBase {
     // Allow code to change the values and payload.
     \Drupal::moduleHandler()->alter('indieweb_micropub_node_pre_create', $this->values, $this->input);
 
+    // Create node.
     $this->node = Node::create($this->values);
 
     // Content.
