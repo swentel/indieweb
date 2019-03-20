@@ -53,21 +53,23 @@ class RSVPForm extends FormBase {
     $rsvp = $this->getRSVP();
     if (!empty($rsvp->id)) {
       \Drupal::entityTypeManager()->getStorage('indieweb_webmention')->updateRSVP($rsvp_value, $rsvp->id);
+      $this->messenger()->addMessage($this->t('Your RSVP has been updated.'));
     }
     else {
       $values = [
-        'uid' => \Drupal::currentUser()->id(),
+        'uid' => $this->currentUser()->id(),
         'rsvp' => $rsvp_value,
         'property' => 'rsvp',
-        'author_name' => \Drupal::currentUser()->getAccountName(),
+        'type' => 'entry',
+        'author_name' => $this->currentUser()->getAccountName(),
         'target' => \Drupal::request()->getPathInfo(),
         'source' => \Drupal::request()->getSchemeAndHttpHost()
       ];
       $mention = \Drupal::entityTypeManager()->getStorage('indieweb_webmention')->create($values);
       $mention->save();
-    }
 
-    $this->messenger()->addMessage($this->t('Your RSVP has been updated.'));
+      $this->messenger()->addMessage($this->t('Your RSVP has been added.'));
+    }
   }
 
   /**
@@ -79,7 +81,7 @@ class RSVPForm extends FormBase {
    * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    */
   protected function getRSVP() {
-    return \Drupal::entityTypeManager()->getStorage('indieweb_webmention')->getWebmentionByTargetPropertyAndUid(\Drupal::request()->getPathInfo(), 'rsvp', \Drupal::currentUser()->id());
+    return \Drupal::entityTypeManager()->getStorage('indieweb_webmention')->getWebmentionByTargetPropertyAndUid(\Drupal::request()->getPathInfo(), 'rsvp', $this->currentUser()->id());
   }
 
 }
