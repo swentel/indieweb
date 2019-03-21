@@ -41,19 +41,23 @@ class WebmentionController extends ControllerBase {
       ($target = $request->request->get('target')) &&
       $source != $target) {
 
-      // Save the entity, processing happens later.
-      $values = [
-        'source' => $source,
-        'target' => $target,
-        'type' => 'webmention',
-        'property' => 'received',
-        'status' => 0,
-        'uid' => $config->get('webmention_uid'),
-      ];
-      $webmention = $this->entityTypeManager()->getStorage('indieweb_webmention')->create($values);
-      $webmention->save();
+      // Check if the source is blocked.
+      if (!$this->sourceIsBlocked($source)) {
 
-      $response_code = 202;
+        // Save the entity, processing happens later.
+        $values = [
+          'source' => $source,
+          'target' => $target,
+          'type' => 'webmention',
+          'property' => 'received',
+          'status' => 0,
+          'uid' => $config->get('webmention_uid'),
+        ];
+        $webmention = $this->entityTypeManager()->getStorage('indieweb_webmention')->create($values);
+        $webmention->save();
+
+        $response_code = 202;
+      }
     }
 
     return new Response("", $response_code);
@@ -277,6 +281,7 @@ class WebmentionController extends ControllerBase {
    * Validate pingback.
    *
    * @param \Symfony\Component\HttpFoundation\Request $request
+   * @param \Drupal\Core\Config\ImmutableConfig $config
    *
    * @return \Symfony\Component\HttpFoundation\Response
    */
@@ -290,7 +295,7 @@ class WebmentionController extends ControllerBase {
       ($target = $request->request->get('target')) &&
       $source != $target) {
 
-      if ($this->validateSource($source, $target)) {
+      if (!$this->sourceIsBlocked($source) && $this->validateSource($source, $target)) {
 
         $values = [
           'uid' => $config->get('webmention_uid'),
@@ -340,6 +345,30 @@ class WebmentionController extends ControllerBase {
     }
 
     return $valid;
+  }
+
+  /**
+   * Validates if a source is blocked.
+   *
+   * @param $source
+   *
+   * @return bool
+   */
+  protected function sourceIsBlocked($source) {
+    $blocked = FALSE;
+
+    $domains = explode("\n", trim($this->config('indieweb_webmention.settings')->get('blocked_domains')));
+    if (!empty($domains)) {
+      foreach ($domains as $domain) {
+        if (strpos($source, $domain) !== FALSE) {
+          $blocked = TRUE;
+          $this->getLogger('indieweb_webmention')->notice('Domain @domain is blocked to send webmentions or pingbacks', ['@domain' => $source]);
+          break;
+        }
+      }
+    }
+
+    return $blocked;
   }
 
   /**

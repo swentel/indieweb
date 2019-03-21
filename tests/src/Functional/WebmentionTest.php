@@ -916,6 +916,28 @@ class WebmentionTest extends IndiewebBrowserTestBase {
   }
 
   /**
+   * Test blocked domains.
+   *
+   * @throws \GuzzleHttp\Exception\GuzzleException
+   */
+  public function testBlockedDomains() {
+
+    $this->httpClient = $this->container->get('http_client_factory')
+      ->fromOptions(['base_uri' => $this->baseUrl]);
+
+    $this->drupalLogin($this->adminUser);
+    $this->configureWebmention(['blocked_domains' => "example.com", 'webmention_internal' => TRUE, 'webmention_internal_handler' => 'drush', 'webmention_detect_identical' => TRUE, 'webmention_notify' => FALSE]);
+    $this->drupalLogout();
+
+    $response = $this->sendWebmentionInternalRequest("https://www.example.com/page-1", '/node/1');
+    self::assertEquals(400, $response->getStatusCode());
+    $this->assertNumberOfWebmentions(0);
+    $response = $this->sendWebmentionInternalRequest("https://www.example2.com/page-1", '/node/1');
+    self::assertEquals(202, $response->getStatusCode());
+    $this->assertNumberOfWebmentions(1);
+  }
+
+  /**
    * Get latest webmention.
    *
    * @return \Drupal\indieweb_webmention\Entity\WebmentionInterface|null

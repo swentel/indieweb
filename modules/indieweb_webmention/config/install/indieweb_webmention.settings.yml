@@ -20,3 +20,4 @@ send_link_fields: ''
 send_log_response: false
 send_comment_webmention_field: ''
 send_comment_permission_fields: true
+blocked_domains: ''

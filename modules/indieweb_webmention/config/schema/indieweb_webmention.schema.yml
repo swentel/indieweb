@@ -51,6 +51,9 @@ indieweb_webmention.settings:
     webmention_expose_link_tag:
       type: boolean
       label: 'Whether to expose the webmention link tag'
+    blocked_domains:
+      type: 'string'
+      label: 'Block domains for incoming webmentions or pingbacks'
     pingback_internal:
       type: boolean
       label: 'Whether to use the internal pingback endpoint'

@@ -157,7 +157,7 @@ class WebmentionSettingsForm extends ConfigFormBase {
       '#title' => $this->t('External pingback endpoint'),
       '#type' => 'textfield',
       '#default_value' => $config->get('pingback_endpoint'),
-      '#description' => $this->t('If you use webmention.io, the endpoint will look like <strong>https://webmention.io/webmention?forward=@domain/pingback/notify', ['@domain' => \Drupal::request()->getSchemeAndHttpHost()]),
+      '#description' => $this->t('If you use webmention.io, the endpoint will look like <strong>https://webmention.io/webmention?forward=@domain/pingback/notify</strong>', ['@domain' => \Drupal::request()->getSchemeAndHttpHost()]),
       '#states' => array(
         'visible' => array(
           ':input[name="pingback_internal"]' => array('checked' => FALSE),
@@ -168,6 +168,13 @@ class WebmentionSettingsForm extends ConfigFormBase {
     $form['other'] = [
       '#type' => 'fieldset',
       '#title' => $this->t('Other'),
+    ];
+
+    $form['other']['blocked_domains'] = [
+      '#type' => 'textarea',
+      '#title' => $this->t('Block domains'),
+      '#description' => $this->t('Block domains from sending webmentions or pingbacks. Enter domains line per line.'),
+      '#default_value' => $config->get('blocked_domains'),
     ];
 
     $form['other']['webmention_uid'] = [
@@ -222,6 +229,7 @@ class WebmentionSettingsForm extends ConfigFormBase {
       ->set('pingback_expose_link_tag', $form_state->getValue('pingback_expose_link_tag'))
       ->set('pingback_notify', $form_state->getValue('pingback_notify'))
       ->set('pingback_endpoint', $form_state->getValue('pingback_endpoint'))
+      ->set('blocked_domains', $form_state->getValue('blocked_domains'))
       ->save();
 
     Cache::invalidateTags(['rendered']);
