@@ -154,12 +154,13 @@ class MicropubTest extends IndiewebBrowserTestBase {
    *
    * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
    * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
+   * @throws \Behat\Mink\Exception\ExpectationException
    */
   public function testUpload() {
     $this->drupalLogin($this->adminUser);
     $this->drupalPostForm('admin/config/services/indieweb/micropub', ['micropub_enable' => 1, 'micropub_expose_link_tag' => 1, 'micropub_media_enable' => 1], 'Save configuration');
     $this->setIndieAuthEndPoints();
-    $edit = ['article_create_node' => 1, 'article_node_type' => 'article', 'article_uid' => $this->adminUser->getUsername() . ' (' . $this->adminUser->id() . ')', 'article_upload_field' => 'field_image'];
+    $edit = ['article_create_node' => 1, 'article_node_type' => 'article', 'article_uid' => 'admin (1)', 'article_upload_field' => 'field_image'];
     $this->drupalPostForm('admin/config/services/indieweb/micropub', $edit, 'Save configuration');
 
     // Single image.
@@ -200,7 +201,7 @@ class MicropubTest extends IndiewebBrowserTestBase {
     self::assertEquals(2, count($node->field_image->getValue()));
     /** @var \Drupal\file\FileInterface $file */
     $file = \Drupal::entityTypeManager()->getStorage('file')->load($node->field_image->target_id);
-    self::assertEquals(2, $file->getOwnerId());
+    self::assertEquals(1, $file->getOwnerId());
 
     // Test with 3 images.
     $post = $this->article;
@@ -235,12 +236,23 @@ class MicropubTest extends IndiewebBrowserTestBase {
     $file_path = \Drupal::service('file_system')->realpath($file->uri);
     $post['photo'][] = fopen($file_path, 'r');
 
-    $code = $this->sendMicropubRequest($post, 'is_valid', TRUE);
+    $code = $this->sendMicropubRequest($post, 'is_valid');
     self::assertEquals(201, $code);
     $this->assertNodeCount(4, 'article');
     $nid = $this->getLastNid('article');
     $node = \Drupal::entityTypeManager()->getStorage('node')->load($nid);
     self::assertEquals(0, count($node->field_image->getValue()));
+
+    // Check q=last
+    $auth = 'Bearer is_valid';
+    $headers = [
+      'Accept' => 'application/json',
+      'Authorization' => $auth,
+    ];
+    $this->drupalGet('indieweb/micropub/media', ['query' => ['q' => 'last']], $headers);
+    $this->assertSession()->statusCodeEquals(200);
+    $this->assertSession()->responseContains("url");
+    $this->assertSession()->responseContains('image-test_3.png');
   }
 
   /**
