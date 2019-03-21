@@ -360,10 +360,13 @@ class WebmentionController extends ControllerBase {
     $domains = explode("\n", trim($this->config('indieweb_webmention.settings')->get('blocked_domains')));
     if (!empty($domains)) {
       foreach ($domains as $domain) {
-        if (strpos($source, $domain) !== FALSE) {
-          $blocked = TRUE;
-          $this->getLogger('indieweb_webmention')->notice('Domain @domain is blocked to send webmentions or pingbacks', ['@domain' => $source]);
-          break;
+        $trim = trim($domain);
+        if (strlen($trim) > 0) {
+          if (strpos($source, $domain) !== FALSE) {
+            $blocked = TRUE;
+            $this->getLogger('indieweb_webmention')->notice('Domain @domain is blocked to send webmentions or pingbacks', ['@domain' => $source]);
+            break;
+          }
         }
       }
     }
