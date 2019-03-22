@@ -1168,8 +1168,16 @@ class MicropubController extends ControllerBase {
       if ($files) {
         $file_values = [];
         /** @var \Drupal\file\FileInterface $file */
-        foreach ($files as $file) {
-          $file_values[] = $file->id();
+        foreach ($files as $delta => $file) {
+          if (isset($this->input['photo_alt'][$delta]) && !empty($this->input['photo_alt'][$delta])) {
+            $file_values[] = [
+              'target_id' => $file->id(),
+              'alt' => $this->input['photo_alt'][$delta],
+            ];
+          }
+          else {
+            $file_values[] = $file->id();
+          }
 
           // Set owner of file.
           $file->setOwnerId($this->values['uid'])->save();

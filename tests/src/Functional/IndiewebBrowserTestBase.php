@@ -364,6 +364,14 @@ abstract class IndiewebBrowserTestBase extends BrowserTestBase {
               ];
             }
           }
+          elseif (is_array($value)) {
+            foreach ($value as $k => $v) {
+              $new_post[] = [
+                'name' => $key . '[]',
+                'contents' => $v,
+              ];
+            }
+          }
           else {
             $new_post[] = [
               'name' => $key,
