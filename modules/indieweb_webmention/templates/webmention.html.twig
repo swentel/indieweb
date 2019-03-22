@@ -37,6 +37,11 @@
     {% if content %}
 
       <div class="webmention-content">
+
+        {% if show_photo and photo %}
+            <div class="photo"><img src="{{ photo }}" /></div>
+        {% endif %}
+
         {{ content }}
       </div>
 

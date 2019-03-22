@@ -188,6 +188,27 @@ class Webmention extends ContentEntityBase implements WebmentionInterface {
   /**
    * {@inheritdoc}
    */
+  public function getPhoto() {
+    return $this->get('photo')->value;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getVideo() {
+    return $this->get('video')->value;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getAudio() {
+    return $this->get('audio')->value;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function reprocess() {
     try {
 

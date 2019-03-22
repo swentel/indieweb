@@ -28,6 +28,7 @@ class EntityReferenceWebmentionFormatter extends EntityReferenceFormatterBase {
       'show_avatar' => FALSE,
       'show_summary' => FALSE,
       'show_created' => FALSE,
+      'show_photo' => FALSE,
       'replace_comment_user_picture' => TRUE,
     ];
   }
@@ -58,6 +59,13 @@ class EntityReferenceWebmentionFormatter extends EntityReferenceFormatterBase {
       '#description' => $this->t('This will only show up if summary is enabled. Use this if you are doing custom comment templating.'),
     ];
 
+    $elements['show_photo'] = [
+      '#title' => t('Show photo'),
+      '#type' => 'checkbox',
+      '#default_value' => $this->getSetting('show_photo'),
+      '#description' => $this->t('This will be rendered by default above the content'),
+    ];
+
     $elements['replace_comment_user_picture'] = [
       '#title' => t('Replace comment user picture'),
       '#type' => 'checkbox',
@@ -75,6 +83,7 @@ class EntityReferenceWebmentionFormatter extends EntityReferenceFormatterBase {
     $summary = [];
     $summary[] = t('Show summary') . ': ' . ($this->getSetting('show_summary') ? t('yes') : t('no'));
     $summary[] = t('Show avatar') . ': ' . ($this->getSetting('show_avatar') ? t('yes') : t('no'));
+    $summary[] = t('Show photo') . ': ' . ($this->getSetting('show_photo') ? t('yes') : t('no'));
     $summary[] = t('Show created time') . ': ' . ($this->getSetting('show_created') ? t('yes') : t('no'));
     $summary[] = t('Replace comment user picture') . ': ' . ($this->getSetting('replace_comment_user_picture') ? t('yes') : t('no'));
     return $summary;
@@ -96,14 +105,18 @@ class EntityReferenceWebmentionFormatter extends EntityReferenceFormatterBase {
           '#show_summary' => $this->getSetting('show_summary'),
           '#show_avatar' => $this->getSetting('show_avatar'),
           '#show_created' => $this->getSetting('show_created'),
+          '#show_photo' => $this->getSetting('show_photo'),
           '#replace_comment_user_picture' => $this->getSetting('replace_comment_user_picture'),
           '#property' => $entity->getProperty(),
           '#author_name' => $entity->getAuthorName(),
-          '#author_photo' => $entity->getAuthorAvatar(),
+          '#author_photo' => \Drupal::service('indieweb.media_cache.client')->applyImageCache($entity->getAuthorAvatar()),
           '#created' => $entity->getCreatedTime(),
           '#source' => $entity->getSource(),
           '#content_text' => $entity->getPlainContent(),
           '#content_html' => $entity->getHTMLContent(),
+          '#photo' => \Drupal::service('indieweb.media_cache.client')->applyImageCache($entity->getPhoto(), 'photo'),
+          '#video' => $entity->getVideo(),
+          '#audio' => $entity->getAudio(),
           // Create a cache tag entry for the referenced entity. In the case
           // that the referenced entity is deleted, the cache for referring
           // entities must be cleared.

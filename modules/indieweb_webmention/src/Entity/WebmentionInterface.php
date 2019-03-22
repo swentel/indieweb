@@ -114,6 +114,27 @@ interface WebmentionInterface extends ContentEntityInterface, EntityChangedInter
   public function getUrl();
 
   /**
+   * Returns the photo.
+   *
+   * @return string
+   */
+  public function getPhoto();
+
+  /**
+   * Returns the video.
+   *
+   * @return string
+   */
+  public function getVideo();
+
+  /**
+   * Returns the audio.
+   *
+   * @return string
+   */
+  public function getAudio();
+
+  /**
    * Reprocess a webmention.
    */
   public function reprocess();

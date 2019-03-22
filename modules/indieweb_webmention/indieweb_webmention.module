@@ -85,6 +85,7 @@ function indieweb_webmention_theme() {
         'show_summary' => NULL,
         'show_created' => NULL,
         'show_avatar' => FALSE,
+        'show_photo' => FALSE,
         'replace_comment_user_picture' => FALSE,
         'property' => NULL,
         'author_photo' => NULL,
@@ -93,6 +94,7 @@ function indieweb_webmention_theme() {
         'source' => NULL,
         'content_text' => NULL,
         'content_html' => NULL,
+        'photo' => NULL,
       ],
     ],
     'webmention_author_photo' => [
