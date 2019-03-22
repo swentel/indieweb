@@ -537,6 +537,7 @@ class IndieAuthController extends ControllerBase {
             /** @var \Drupal\user\UserInterface $account */
             $account = $this->entityTypeManager()->getStorage('user')->load($this->currentUser()->id());
             $external_auth->linkExistingAccount($authname, 'indieweb', $account);
+            $this->moduleHandler()->invokeAll('indieweb_indieauth_login', ['account' => $account, 'indieauth_response' => $json]);
           }
           // Login or register the user.
           // The username can only be 60 chars long. Provide it ourselves as
@@ -551,6 +552,7 @@ class IndieAuthController extends ControllerBase {
             $account = $external_auth->loginRegister($authname, 'indieweb', ['name' => $username]);
           }
           if ($account) {
+            $this->moduleHandler()->invokeAll('indieweb_indieauth_login', ['account' => $account, 'indieauth_response' => $json]);
             return new RedirectResponse($account->toUrl()->toString(), 302);
           }
           else {

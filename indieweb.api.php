@@ -6,6 +6,7 @@
  */
 
 use Drupal\node\NodeInterface;
+use Drupal\user\UserInterface;
 
 /**
  * Act on the values and input before a node is created with Node::create().
@@ -94,4 +95,17 @@ function hook_micropub_geo_response_alter($response) {
       'url' => 'https://example.com/place'
     ],
   ];
+}
+
+/**
+ * Act when a user registers or logs in with IndieAuth.
+ *
+ * This is the perfect moment to save additional properties on the account.
+ *
+ * @param $account
+ *   The Drupal user account.
+ * @param $indieauth_response
+ *   The IndieAuth response, which is a JSON object.
+ */
+function hook_indieweb_indieauth_login(UserInterface $account, $indieauth_response) {
 }
