@@ -443,26 +443,32 @@ class MicropubController extends ControllerBase {
           $geouri = $this->input['checkin'][0];
         }
 
-        // Latitude and longitude.
-        $geo = explode(':', $geouri);
-        if (!empty($geo[0]) && $geo[0] == 'geo' && !empty($geo[1])) {
-          $lat_lon = explode(',', $geo[1]);
-          if (!empty((float) $lat_lon[0]) && !empty((float) $lat_lon[1])) {
-            $lat = trim($lat_lon[0]);
-            $lon = trim($lat_lon[1]);
-            if (!empty($lat) && !empty($lon)) {
-              $this->location['lat'] = $lat;
-              $this->location['lon'] = $lon;
-            }
-          }
-        }
+        // Only go if this is a string.
+        if (is_string($geouri)) {
 
-        // Additional parameters.
-        $additional_params = explode(';', $geouri);
-        foreach ($additional_params as $additional_param) {
-          $ex = explode('=', $additional_param);
-          if (!empty($ex[0]) && !empty($ex[1])) {
-            $this->location[$ex[0]] = $ex[1];
+          // Latitude and longitude.
+          $geo = explode(':', $geouri);
+
+          if (!empty($geo[0]) && $geo[0] == 'geo' && !empty($geo[1])) {
+            $lat_lon = explode(',', $geo[1]);
+            if (!empty((float) $lat_lon[0]) && !empty((float) $lat_lon[1])) {
+              $lat = trim($lat_lon[0]);
+              $lon = trim($lat_lon[1]);
+              if (!empty($lat) && !empty($lon)) {
+                $this->location['lat'] = $lat;
+                $this->location['lon'] = $lon;
+              }
+            }
+
+            // Additional parameters.
+            $additional_params = explode(';', $geouri);
+            foreach ($additional_params as $additional_param) {
+              $ex = explode('=', $additional_param);
+              if (!empty($ex[0]) && !empty($ex[1])) {
+                $this->location[$ex[0]] = $ex[1];
+              }
+            }
+
           }
         }
       }
