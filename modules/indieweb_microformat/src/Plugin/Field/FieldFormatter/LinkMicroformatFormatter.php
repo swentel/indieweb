@@ -41,12 +41,13 @@ class LinkMicroformatFormatter extends LinkFormatter {
         'u-bookmark-of' => $this->t('Bookmark'),
         'u-bookmark-of h-cite' => $this->t('Bookmark and cite'),
         'u-in-reply-to' => $this->t('In reply to'),
-        'u-repost-of' => $this->t('Repost of'),
+        'u-repost-of' => $this->t('Repost or Quotation'),
         'u-follow-of' => $this->t('Follow of'),
         'p-author h-card' => $this->t('Author'),
       ],
       '#title' => t('Class'),
       '#default_value' => $this->getSetting('microformat_class'),
+      '#description' => $this->t('Note: if a repost link field contains a title, "h-cite u-quotation-of" will be used, "repost-of" otherwise.')
     ];
 
     return $elements;
@@ -76,7 +77,19 @@ class LinkMicroformatFormatter extends LinkFormatter {
 
     if (!empty($element) && !empty($settings['microformat_class'])) {
       foreach ($element as $delta => $item) {
-        $element[$delta]['#options']['attributes']['class'][] = $settings['microformat_class'];
+
+        if ($settings['microformat_class'] == 'u-repost-of') {
+          if (!empty($item['#title']) && $item['#title'] != $item['#url']->getUri()) {
+            $element[$delta]['#prefix'] = '<cite class="h-cite u-quotation-of">';
+            $element[$delta]['#suffix'] = '</cite>';
+          }
+          else {
+            $element[$delta]['#options']['attributes']['class'][] = $settings['microformat_class'];
+          }
+        }
+        else {
+          $element[$delta]['#options']['attributes']['class'][] = $settings['microformat_class'];
+        }
       }
     }
 

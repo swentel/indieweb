@@ -36,8 +36,8 @@ class MicropubSettingsForm extends ConfigFormBase {
         'send_webmention' => TRUE,
       ],
       'repost' => [
-        'description' => $this->t("A repost request contains a URL in 'repost-of' and 'h' value is 'entry'."),
-        'optional_body' => TRUE,
+        'description' => $this->t("A repost request contains a URL in 'repost-of' and 'h' value is 'entry'. When content is found, this will be stored in the title of the link which will make microformat parsers handle this as a quotation. It does not make sense to have a body field for this content type."),
+        'no_body' => TRUE,
         'link_field' => TRUE,
         'send_webmention' => TRUE,
       ],
@@ -445,23 +445,25 @@ class MicropubSettingsForm extends ConfigFormBase {
       }
 
       // Content field.
-      $optional_body = [];
-      if (isset($configuration['optional_body'])) {
-        $optional_body = ['' => $this->t('Do not store content')];
-      }
-      $form[$post_type][$post_type . '_content_field'] = [
-        '#type' => 'select',
-        '#title' => $this->t('Content field'),
-        '#description' => $this->t('Select the field which will be used to store the content. Make sure the field exists on the node type.'),
-        '#options' => $optional_body + $text_fields,
-        '#default_value' => $config->get($post_type . '_content_field'),
-        '#states' => array(
-          'visible' => array(
-            ':input[name="micropub_enable"]' => array('checked' => TRUE),
-            ':input[name="' . $post_type . '_create_node"]' => array('checked' => TRUE),
+      if (!isset($configuration['no_body'])) {
+        $optional_body = [];
+        if (isset($configuration['optional_body'])) {
+          $optional_body = ['' => $this->t('Do not store content')];
+        }
+        $form[$post_type][$post_type . '_content_field'] = [
+          '#type' => 'select',
+          '#title' => $this->t('Content field'),
+          '#description' => $this->t('Select the field which will be used to store the content. Make sure the field exists on the node type.'),
+          '#options' => $optional_body + $text_fields,
+          '#default_value' => $config->get($post_type . '_content_field'),
+          '#states' => array(
+            'visible' => array(
+              ':input[name="micropub_enable"]' => array('checked' => TRUE),
+              ':input[name="' . $post_type . '_create_node"]' => array('checked' => TRUE),
+            ),
           ),
-        ),
-      ];
+        ];
+      }
 
       // Upload field.
       $form[$post_type][$post_type . '_upload_field'] = [
@@ -546,9 +548,12 @@ class MicropubSettingsForm extends ConfigFormBase {
         ->set($post_type . '_status', $form_state->getValue($post_type . '_status'))
         ->set($post_type . '_uid', $form_state->getValue($post_type . '_uid'))
         ->set($post_type . '_node_type', $form_state->getValue($post_type . '_node_type'))
-        ->set($post_type . '_content_field', $form_state->getValue($post_type . '_content_field'))
         ->set($post_type . '_upload_field', $form_state->getValue($post_type . '_upload_field'))
         ->set($post_type . '_tags_field', $form_state->getValue($post_type . '_tags_field'));
+
+      if (!isset($configuration['no_body'])) {
+        $config->set($post_type . '_content_field', $form_state->getValue($post_type . '_content_field'));
+      }
 
       if (isset($configuration['link_field'])) {
         $config->set($post_type . '_link_field', $form_state->getValue($post_type . '_link_field'));

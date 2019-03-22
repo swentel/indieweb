@@ -147,9 +147,6 @@ indieweb_micropub.settings:
     repost_node_type:
       type: string
       label: 'The node type for the repost'
-    repost_content_field:
-      type: string
-      label: 'The node content field for the repost'
     repost_link_field:
       type: string
       label: 'The node link field for the repost'
