@@ -479,9 +479,7 @@ class MicrosubController extends ControllerBase {
       $channel_id = 0;
     }
 
-    // Get individual entries. There's also an option to mark everything read
-    // by using 'last_read_entry'. Currently we simply mark everything as read
-    // then as that makes most sense.
+    // We only support a single id or an array for now.
     $entries = $this->request->get('entry');
 
     if ($channel_id || $channel_id === 0) {

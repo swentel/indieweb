@@ -72,8 +72,12 @@ class MicrosubItemStorage extends SqlContentEntityStorage implements MicrosubIte
       ->condition('channel_id', $channel_id)
       ->condition('is_read', 0);
 
-    if (!empty($entries) && is_array($entries)) {
-      $query->condition('id', $entries, 'IN');
+    if (!empty($entries)) {
+      $operator = '=';
+      if (is_array($entries)) {
+        $operator = 'IN';
+      }
+      $query->condition('id', $entries, $operator);
     }
 
     $query->execute();
