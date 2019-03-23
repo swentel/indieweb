@@ -765,15 +765,13 @@ class MicropubController extends ControllerBase {
   /**
    * Upload files through the media endpoint.
    *
-   * @param \Symfony\Component\HttpFoundation\Request $request
-   *
    * @return \Symfony\Component\HttpFoundation\JsonResponse
    *
    * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
    * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    * @throws \Drupal\Core\Entity\EntityStorageException
    */
-  public function mediaEndpoint(Request $request) {
+  public function mediaEndpoint() {
     $this->indieAuth = \Drupal::service('indieweb.indieauth.client');
     $this->config = \Drupal::config('indieweb_micropub.settings');
     $micropub_media_enabled = $this->config->get('micropub_media_enable');
@@ -784,7 +782,7 @@ class MicropubController extends ControllerBase {
     }
 
     // Default message.
-    $response_message = '';
+    $response_message = 'Bad request';
 
     // Get authorization header, response early if none found.
     $auth_header = $this->indieAuth->getAuthorizationHeader();
@@ -792,7 +790,7 @@ class MicropubController extends ControllerBase {
       return new JsonResponse('', 401);
     }
 
-    if ($this->indieAuth->isValidToken($auth_header, 'media') && in_array($request->getMethod(), ['GET', 'POST'])) {
+    if ($this->indieAuth->isValidToken($auth_header, 'media')) {
 
       $uid = 1;
       // Override uid if using internal indieauth.
@@ -800,56 +798,31 @@ class MicropubController extends ControllerBase {
         $uid = $tokenOwnerId;
       }
 
-      // Last uploaded file.
-      if ($request->getMethod() == 'GET' && $request->get('q') == 'last') {
-        $response_code = 200;
+      $response_code = 200;
+      $extensions = 'jpg jpeg gif png';
+      $validators['file_validate_extensions'] = [];
+      $validators['file_validate_extensions'][0] = $extensions;
+      $sub_directory = date('Y') . '/' . date('m');
+      $files = $this->saveUpload('file', 'public://micropub/' . $sub_directory, $validators);
+      if ($files) {
 
-        $files = \Drupal::entityQuery('file')
-          ->condition('status', 1)
-          ->condition('uid', $uid)
-          ->sort('fid', 'desc')
-          ->range(0, 1)
-          ->execute();
+        // Get first file as $files is an array.
+        /** @var \Drupal\file\FileInterface $file */
+        $file = $files[0];
 
-        if ($files) {
-          $file_id = array_pop($files);
-          /** @var \Drupal\file\FileInterface $file */
-          $file = $this->entityTypeManager()->getStorage('file')->load($file_id);
-          if ($file) {
-            $response_message = ['url' => file_create_url($file->getFileUri())];
-          }
-        }
+        // Set owner.
+        $file->setOwnerId($uid);
 
-      }
-      // Upload file.
-      else {
+        // Set permanent.
+        $file->setPermanent();
+        $file->save();
 
-        $response_code = 200;
-        $extensions = 'jpg jpeg gif png';
-        $validators['file_validate_extensions'] = [];
-        $validators['file_validate_extensions'][0] = $extensions;
-        $sub_directory = date('Y') . '/' . date('m');
-        $files = $this->saveUpload('file', 'public://micropub/' . $sub_directory, $validators);
-        if ($files) {
-
-          // Get first file as $files is an array.
-          /** @var \Drupal\file\FileInterface $file */
-          $file = $files[0];
-
-          // Set owner.
-          $file->setOwnerId($uid);
-
-          // Set permanent.
-          $file->setPermanent();
-          $file->save();
-
-          // Return the url in Location.
-          $response_code = 201;
-          $file_url = file_create_url($file->getFileUri());
-          $response_message = [];
-          $response_message['url'] = $file_url;
-          header('Location: ' . $file_url);
-        }
+        // Return the url in Location.
+        $response_code = 201;
+        $file_url = file_create_url($file->getFileUri());
+        $response_message = [];
+        $response_message['url'] = $file_url;
+        header('Location: ' . $file_url);
       }
     }
     else {

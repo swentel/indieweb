@@ -57,7 +57,7 @@ class IndiewebTestController extends ControllerBase {
       }
 
       $data['me'] = $me;
-      $data['scope'] = 'create update delete read channels follow media';
+      $data['scope'] = 'create update delete read channels follow';
     }
 
     return new JsonResponse($data, $status);
