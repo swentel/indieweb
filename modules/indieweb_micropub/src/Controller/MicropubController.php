@@ -1014,6 +1014,7 @@ class MicropubController extends ControllerBase {
       // Repost (so it becomes a quotation.
       if ($post_type == 'repost' && !empty($this->input['content'][0])) {
         $title = $this->input['content'][0];
+        $this->node->set('title', $title);
       }
 
       if (!empty($this->location['url'])) {

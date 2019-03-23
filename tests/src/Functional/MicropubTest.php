@@ -815,6 +815,7 @@ class MicropubTest extends IndiewebBrowserTestBase {
       /** @var \Drupal\node\NodeInterface $node */
       $node = \Drupal::entityTypeManager()->getStorage('node')->load($nid);
       self::assertEquals(FALSE, $node->isPublished());
+      self::assertEquals($post['content'], $node->label());
       self::assertEquals($this->repost['repost-of'], $node->get('field_repost_link')->uri);
       self::assertEquals($post['content'], $node->get('field_repost_link')->title);
     }

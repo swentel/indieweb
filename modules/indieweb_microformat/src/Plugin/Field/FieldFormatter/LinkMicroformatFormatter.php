@@ -80,6 +80,7 @@ class LinkMicroformatFormatter extends LinkFormatter {
 
         if ($settings['microformat_class'] == 'u-repost-of') {
           if (!empty($item['#title']) && $item['#title'] != $item['#url']->getUri()) {
+            $element[$delta]['#options']['attributes']['class'][] = 'u-url';
             $element[$delta]['#prefix'] = '<cite class="h-cite u-quotation-of">';
             $element[$delta]['#suffix'] = '</cite>';
           }
