@@ -158,8 +158,9 @@ class MicrosubController extends ControllerBase {
 
         case 'timeline':
           $method = $request->get('method');
-          if ($method == 'mark_read') {
-            $response = $this->timelineMarkRead();
+          if (in_array($method, ['mark_read', 'mark_unread'])) {
+            $status = $method == 'mark_read' ? 1 : 0;
+            $response = $this->timelineChangeReadStatus($status);
           }
 
           if ($method == 'remove') {
@@ -463,14 +464,17 @@ class MicrosubController extends ControllerBase {
   }
 
   /**
-   * Mark items read for a channel.
+   * Mark items (un)read for a channel.
+   *
+   * @param int $status
+   *   The status.
    *
    * @return array
    *
    * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
    * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    */
-  protected function timelineMarkRead() {
+  protected function timelineChangeReadStatus($status) {
 
     $channel_id = $this->request->get('channel');
 
@@ -483,7 +487,7 @@ class MicrosubController extends ControllerBase {
     $entries = $this->request->get('entry');
 
     if ($channel_id || $channel_id === 0) {
-      $this->entityTypeManager()->getStorage('indieweb_microsub_item')->markItemsRead($channel_id, $entries);
+      $this->entityTypeManager()->getStorage('indieweb_microsub_item')->changeReadStatus($channel_id, $status, $entries);
     }
 
     return ['response' => [], 'code' => 200];

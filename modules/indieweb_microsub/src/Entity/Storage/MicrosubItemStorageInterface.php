@@ -55,14 +55,16 @@ interface MicrosubItemStorageInterface extends ContentEntityStorageInterface {
   public function loadByChannel($channel_id, $limit = 20);
 
   /**
-   * Mark items as read.
+   * Change read status of one or more items.
    *
    * @param $channel_id
    *   The channel id
+   * @param $status
+   *   The status
    * @param $entries
    *   Array of single items.
    */
-  public function markItemsRead($channel_id, $entries = NULL);
+  public function changeReadStatus($channel_id, $status, $entries = NULL);
 
   /**
    * Remove an item.

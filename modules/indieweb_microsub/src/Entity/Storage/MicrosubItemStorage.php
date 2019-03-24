@@ -66,11 +66,12 @@ class MicrosubItemStorage extends SqlContentEntityStorage implements MicrosubIte
   /**
    * {@inheritdoc}
    */
-  public function markItemsRead($channel_id, $entries = NULL) {
+  public function changeReadStatus($channel_id, $status, $entries = NULL) {
+    $is_read_condition = $status ? 0 : 1;
     $query = $this->database->update('microsub_item')
-      ->fields(['is_read' => 1])
+      ->fields(['is_read' => $status])
       ->condition('channel_id', $channel_id)
-      ->condition('is_read', 0);
+      ->condition('is_read', $is_read_condition);
 
     if (!empty($entries)) {
       $operator = '=';
