@@ -483,8 +483,13 @@ class MicrosubController extends ControllerBase {
       $channel_id = 0;
     }
 
-    // We only support a single id or an array for now.
+    // Check entry or last_read_entry. If last_read_entry is passed in, we
+    // completely ignore entries, this usually just means 'Mark all as read'.
     $entries = $this->request->get('entry');
+    $last_read_entry = $this->request->get('last_read_entry');
+    if (!empty($last_read_entry)) {
+      $entries = NULL;
+    }
 
     if ($channel_id || $channel_id === 0) {
       $this->entityTypeManager()->getStorage('indieweb_microsub_item')->changeReadStatus($channel_id, $status, $entries);
