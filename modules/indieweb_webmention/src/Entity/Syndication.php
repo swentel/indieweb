@@ -22,6 +22,7 @@ use Drupal\Core\Field\BaseFieldDefinition;
  *   persistent_cache = FALSE,
  *   admin_permission = "administer webmention entities",
  *   handlers = {
+ *     "views_data" = "Drupal\views\EntityViewsData",
  *     "storage" = "Drupal\indieweb_webmention\Entity\Storage\SyndicationStorage",
  *     "list_builder" = "Drupal\indieweb_webmention\Entity\SyndicationListBuilder",
  *     "form" = {
