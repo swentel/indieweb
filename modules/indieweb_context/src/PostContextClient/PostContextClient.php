@@ -14,6 +14,12 @@ class PostContextClient implements PostContextClientInterface {
    * {@inheritdoc}
    */
   public function createQueueItem($url, $entity_id, $entity_type_id) {
+
+    // mobile.twitter.com doesn't have the necessary tags.
+    if (strpos($url, 'mobile.twitter.com') !== FALSE) {
+      $url = str_replace('mobile.twitter.com', 'twitter.com', $url);
+    }
+
     $data = [
       'url' => $url,
       'entity_id' => $entity_id,
