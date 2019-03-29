@@ -1154,10 +1154,10 @@ class MicropubController extends ControllerBase {
         $file_values = [];
         /** @var \Drupal\file\FileInterface $file */
         foreach ($files as $delta => $file) {
-          if (isset($this->input['photo_alt'][$delta]) && !empty($this->input['photo_alt'][$delta])) {
+          if (isset($this->input['mp-photo-alt'][$delta]) && !empty($this->input['mp-photo-alt'][$delta])) {
             $file_values[] = [
               'target_id' => $file->id(),
-              'alt' => $this->input['photo_alt'][$delta],
+              'alt' => $this->input['mp-photo-alt'][$delta],
             ];
           }
           else {

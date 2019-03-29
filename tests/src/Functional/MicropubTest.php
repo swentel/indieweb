@@ -210,18 +210,18 @@ class MicropubTest extends IndiewebBrowserTestBase {
     $image = $this->getTestFiles('image')[0];
     $image_path = \Drupal::service('file_system')->realpath($image->uri);
     $post['photo'][] = fopen($image_path, 'r');
-    $post['photo_alt'] = [];
-    $post['photo_alt'][] = 'Image alt 1';
+    $post['mp-photo-alt'] = [];
+    $post['mp-photo-alt'][] = 'Image alt 1';
 
     $image = $this->getTestFiles('image')[1];
     $image_path = \Drupal::service('file_system')->realpath($image->uri);
     $post['photo'][] = fopen($image_path, 'r');
-    $post['photo_alt'][] = 'Image alt 2';
+    $post['mp-photo-alt'][] = 'Image alt 2';
 
     $image = $this->getTestFiles('image')[2];
     $image_path = \Drupal::service('file_system')->realpath($image->uri);
     $post['photo'][] = fopen($image_path, 'r');
-    $post['photo_alt'][] = 'Image alt 3';
+    $post['mp-photo-alt'][] = 'Image alt 3';
 
     $code = $this->sendMicropubRequest($post);
     self::assertEquals(201, $code);
