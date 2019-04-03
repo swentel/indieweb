@@ -5,3 +5,5 @@ microsub_endpoint: ''
 microsub_expose_link_tag: false
 aperture_enable_micropub: false
 aperture_api_key: ''
+push_notification_indigenous: false
+push_notification_indigenous_key: ''

@@ -328,7 +328,45 @@ class MicrosubClient implements MicrosubClientInterface {
         \Drupal::logger('indieweb_microsub')->notice('Error saving notification for @url : @message', ['@url' => $url, '@message' => $e->getMessage()]);
       }
     }
+  }
 
+  /**
+   * {@inheritdoc}
+   */
+  public function sendPushNotification($webmentions) {
+
+    $microsub = \Drupal::config('indieweb_microsub.settings');
+
+    // Send to Indigenous.
+    if ($microsub->get('microsub_internal') && $microsub->get('push_notification_indigenous') && !empty($microsub->get('push_notification_indigenous_key')) && !empty($webmentions)) {
+
+      if (count($webmentions) == 1) {
+        /** @var \Drupal\indieweb_webmention\Entity\WebmentionInterface $webmention */
+        $webmention = reset($webmentions);
+        if (!empty($webmention->getAuthorName())) {
+          $content = t('You have a notification from @author !', array('@author' => $webmention->getAuthorName()));
+        }
+        else {
+          $content = t('You have one new notification!');
+        }
+      }
+      else {
+        $content = t('You have @count new notifications!', ['@count' => count($webmentions)]);
+      }
+
+      $post = [
+        'apiToken' => $microsub->get('push_notification_indigenous_key'),
+        'content' => $content->render(),
+      ];
+
+      $client = \Drupal::httpClient();
+      try {
+        $client->post("https://indigenous.realize.be/send-notification", ['form_params' => $post]);
+      }
+      catch (\Exception $e) {
+        \Drupal::logger('indieweb_microsub_push')->error('Error sending push notification: @message', ['@message' => $e->getMessage()]);
+      }
+    }
   }
 
   /**

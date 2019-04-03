@@ -116,6 +116,29 @@ class MicrosubSettingsForm extends ConfigFormBase {
       '#default_value' => $config->get('aperture_api_key'),
     ];
 
+    $form['indigenous'] = [
+      '#type' => 'fieldset',
+      '#title' => $this->t('Indigenous'),
+      '#description' => $this->t('If you use <a href="https://indigenous.realize.be" target="_blank">Indigenous for Android</a>, you can send a push notification when a webmention is added to the notifications channel.<br />You need an account and a registered device, see <a href="https://indigenous.realize.be/push-notifications" target="_blank">https://indigenous.realize.be/push-notifications</a>.<br />This feature only works if you use the built-in webmention and microsub endpoint.'),
+      '#states' => array(
+        'visible' => array(
+          ':input[name="microsub_internal"]' => array('checked' => TRUE),
+        ),
+      ),
+    ];
+
+    $form['indigenous']['push_notification_indigenous'] = [
+      '#title' => $this->t('Send push notification to Indigenous'),
+      '#type' => 'checkbox',
+      '#default_value' => $config->get('push_notification_indigenous'),
+    ];
+
+    $form['indigenous']['push_notification_indigenous_key'] = [
+      '#title' => $this->t('Push notification API key'),
+      '#type' => 'textfield',
+      '#default_value' => $config->get('push_notification_indigenous_key'),
+    ];
+
     return parent::buildForm($form, $form_state);
   }
 
@@ -132,6 +155,8 @@ class MicrosubSettingsForm extends ConfigFormBase {
       ->set('microsub_expose_link_tag', $form_state->getValue('microsub_expose_link_tag'))
       ->set('aperture_enable_micropub', $form_state->getValue('aperture_enable_micropub'))
       ->set('aperture_api_key', $form_state->getValue('aperture_api_key'))
+      ->set('push_notification_indigenous', $form_state->getValue('push_notification_indigenous'))
+      ->set('push_notification_indigenous_key', $form_state->getValue('push_notification_indigenous_key'))
       ->save();
 
     Cache::invalidateTags(['rendered']);

@@ -164,6 +164,9 @@ class WebmentionClient implements WebmentionClientInterface {
     // Allow local domain URL matching, used for testbot.
     $allow_local_domain = ['allow_local_domain' => (bool) drupal_valid_test_ua()];
 
+    // Store valid webmentions for push notifications.
+    $valid_webmentions = [];
+
     /** @var \Drupal\indieweb_webmention\Entity\WebmentionInterface[] $webmentions */
     $webmentions = \Drupal::entityTypeManager()->getStorage('indieweb_webmention')->loadByProperties($values);
     foreach ($webmentions as $webmention) {
@@ -322,6 +325,7 @@ class WebmentionClient implements WebmentionClientInterface {
           if (\Drupal::hasService('indieweb.microsub.client')) {
             $client = \Drupal::service('indieweb.microsub.client');
             $client->sendNotification($webmention, $parsed);
+            $valid_webmentions[] = $webmention;
           }
 
           // Create a comment.
@@ -349,6 +353,15 @@ class WebmentionClient implements WebmentionClientInterface {
 
       }
     }
+
+    // Send push notification.
+    if (!empty($valid_webmentions)) {
+      if (\Drupal::hasService('indieweb.microsub.client')) {
+        $client = \Drupal::service('indieweb.microsub.client');
+        $client->sendPushNotification($valid_webmentions);
+      }
+    }
+
   }
 
   /**

@@ -24,3 +24,9 @@ indieweb_microsub.settings:
     aperture_api_key:
       type: string
       label: 'ApertureClient channel API key'
+    push_notification_indigenous:
+      type: boolean
+      label: 'Enable push notification Indigenous'
+    push_notification_indigenous_key:
+      type: string
+      label: 'Push notification Indigenous API key'
