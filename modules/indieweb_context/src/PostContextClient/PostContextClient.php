@@ -128,7 +128,6 @@ class PostContextClient implements PostContextClientInterface {
   public function parseTwitter($body) {
     $text = '';
     $image = [];
-    $video = [];
     $post_type = '';
     $status_id = NULL;
 
@@ -156,7 +155,7 @@ class PostContextClient implements PostContextClientInterface {
           'text' => $text,
         ],
         'photo' => $image,
-        'video' => $video,
+        'video' => [],
         'post-type' => $post_type,
       ];
     }
