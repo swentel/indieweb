@@ -27,6 +27,8 @@ function indieweb_context_theme() {
         'class' => NULL,
         'content' => NULL,
         'content_truncated' => NULL,
+        'images' => NULL,
+        'videos' => NULL,
       ],
     ],
   ];
@@ -296,11 +298,30 @@ function _indieweb_extra_fields_display(array &$build, EntityInterface $entity, 
     $suggestion = str_replace(['in-', '-to', '-of', 'u-'], '', $post_type_class);
     $contexts = \Drupal::service('indieweb.post_context.client')->getPostContexts($entity->id(), $entity->getEntityTypeId());
     foreach ($contexts as $context) {
+
+      // Content.
       $text = isset($context['data']['content']->text) ? $context['data']['content']->text : '';
-      if (!empty($text)) {
-        $build['post_context'][] = [
+
+      // Images.
+      $image_urls = [];
+      $images = !empty($context['data']['photo']) ? $context['data']['photo'] : [];
+      foreach ($images as $image) {
+        $image_urls[] = \Drupal::service('indieweb.media_cache.client')->applyImageCache($image);
+      }
+
+      // Video.
+      $video_urls = [];
+      $videos = !empty($context['data']['video']) ? $context['data']['video'] : [];
+      foreach ($videos as $video) {
+        $video_urls[] = $video;
+      }
+
+      if (!empty($text) || !empty($image_urls) || !empty($video_urls)) {
+        $build['post_context'] = [
           '#class' => $post_type_class,
           '#theme' => 'indieweb_post_context__' . $suggestion,
+          '#images' => $image_urls ? $image_urls : NULL,
+          '#videos' => $video_urls ? $video_urls : NULL,
           '#content' => ['#markup' => nl2br($text)],
           '#content_truncated' => ['#markup' => Unicode::truncate(nl2br($text), 300, TRUE, TRUE)],
           '#name' => isset($context['data']['name']) ? $context['data']['name'] : '',

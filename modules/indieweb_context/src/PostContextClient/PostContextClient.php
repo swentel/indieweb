@@ -127,6 +127,10 @@ class PostContextClient implements PostContextClientInterface {
    */
   public function parseTwitter($body) {
     $text = '';
+    $image = [];
+    $video = [];
+    $post_type = '';
+    $status_id = NULL;
 
     $dom = new domDocument;
     libxml_use_internal_errors(TRUE);
@@ -137,15 +141,23 @@ class PostContextClient implements PostContextClientInterface {
       if ($element->getAttribute('property') == 'og:description') {
         $text = str_replace(['“', '”'], '', $element->getAttribute('content'));
       }
+      if ($element->getAttribute('property') == 'og:image') {
+        $image[] = $element->getAttribute('content');
+        if ($post_type != 'video') {
+          $post_type = 'image';
+        }
+      }
     }
 
-    if ($text) {
+    if ($text || !empty($image) || !empty($video)) {
       return [
         'type' => 'entry',
         'content' => [
           'text' => $text,
         ],
-        'post-type' => 'note',
+        'photo' => $image,
+        'video' => $video,
+        'post-type' => $post_type,
       ];
     }
 

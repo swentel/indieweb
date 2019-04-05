@@ -9,6 +9,8 @@
  *  - name: title of the reference
  *  - content_truncated: truncated text of the reference
  *  - content: full content
+ *  - images: a collection of images
+ *  - videos: a collection of videos
  *  - class: the class needed for this context
  */
 #}
@@ -21,6 +23,24 @@
 
   {% if content_truncated %}
     <div class="p-content">{{ content_truncated }}</div>
+  {% endif %}
+
+  {#
+    If there are videos, print them. Usually only one. Images will probably be not empty either, in most cases, that's
+    the still image. We're not using that in this default template though.
+   #}
+  {% if videos %}
+    <p>
+      <video width="400" controls="controls">
+      {% for video in videos %}
+        <source src="{{ video }}" />
+      {% endfor %}
+      </video>
+    </p>
+  {% elseif images %}
+    {% for image in images %}
+      <p><img src="{{ image }}" width="400" /></p>
+    {% endfor %}
   {% endif %}
 
 </div>
