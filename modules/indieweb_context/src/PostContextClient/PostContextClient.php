@@ -142,9 +142,7 @@ class PostContextClient implements PostContextClientInterface {
       }
       if ($element->getAttribute('property') == 'og:image') {
         $image[] = $element->getAttribute('content');
-        if ($post_type != 'video') {
-          $post_type = 'image';
-        }
+        $post_type = 'image';
       }
     }
 
