@@ -114,7 +114,7 @@ class EntityReferenceWebmentionFormatter extends EntityReferenceFormatterBase {
           '#source' => $entity->getSource(),
           '#content_text' => $entity->getPlainContent(),
           '#content_html' => $entity->getHTMLContent(),
-          '#photo' => \Drupal::service('indieweb.media_cache.client')->applyImageCache($entity->getPhoto(), 'photo'),
+          '#photo' => \Drupal::service('indieweb.media_cache.client')->applyImageCache($entity->getPhoto(), 'photo', 'webmention_image'),
           '#video' => $entity->getVideo(),
           '#audio' => $entity->getAudio(),
           // Create a cache tag entry for the referenced entity. In the case

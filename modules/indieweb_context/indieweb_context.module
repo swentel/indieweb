@@ -306,7 +306,7 @@ function _indieweb_extra_fields_display(array &$build, EntityInterface $entity, 
       $image_urls = [];
       $images = !empty($context['data']['photo']) ? $context['data']['photo'] : [];
       foreach ($images as $image) {
-        $image_urls[] = \Drupal::service('indieweb.media_cache.client')->applyImageCache($image);
+        $image_urls[] = \Drupal::service('indieweb.media_cache.client')->applyImageCache($image, 'photo', 'post_context_image');
       }
 
       // Video.

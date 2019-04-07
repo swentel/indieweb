@@ -23,7 +23,7 @@ class MediaCacheClientDefault implements MediaCacheClientInterface {
   /**
    * {@inheritdoc}
    */
-  public function applyImageCache($filename, $type = 'avatar') {
+  public function applyImageCache($filename, $type = 'avatar', $context = '') {
     return $filename;
   }
 

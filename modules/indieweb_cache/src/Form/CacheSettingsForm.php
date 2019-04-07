@@ -57,7 +57,7 @@ class CacheSettingsForm extends ConfigFormBase {
       '#default_value' => $config->get('use_imagecache_external'),
       '#title' => $this->t('Use imagecache external'),
       '#disabled' => !$imagecache_external_module_enabled,
-      '#description' => $this->t('Uses the Imagecache external module to download image files locally. This is applied to author avatars and images in microsub posts.'),
+      '#description' => $this->t('Uses the Imagecache external module to download image files locally. This is applied to author avatars and images in webmentions and microsub posts.'),
     ];
 
     $form['imagecache_external']['image_style_avatar'] = [
@@ -104,6 +104,22 @@ class CacheSettingsForm extends ConfigFormBase {
       ),
     ];
 
+    $form['imagecache_external']['protect_webmention_image_from_flush'] = [
+      '#type' => 'checkbox',
+      '#default_value' => $config->get('protect_webmention_image_from_flush'),
+      '#title' => $this->t('Protect webmention images from flush'),
+      '#disabled' => !$imagecache_external_module_enabled,
+      '#description' => $this->t('Stores images in webmentions outside the imagecache external directory so they never need to be downloaded again. Enable this if you periodically flush the imagecache externals directory.'),
+    ];
+
+    $form['imagecache_external']['protect_post_context_image_from_flush'] = [
+      '#type' => 'checkbox',
+      '#default_value' => $config->get('protect_post_context_image_from_flush'),
+      '#title' => $this->t('Protect post context images from flush'),
+      '#disabled' => !$imagecache_external_module_enabled,
+      '#description' => $this->t('Stores images in post contexts outside the imagecache external directory so they never need to be downloaded again. Enable this if you periodically flush the imagecache externals directory.'),
+    ];
+
     return parent::buildForm($form, $form_state);
   }
 
@@ -115,6 +131,8 @@ class CacheSettingsForm extends ConfigFormBase {
     $this->config('indieweb_cache.settings')
       ->set('enable', $form_state->getValue('enable'))
       ->set('use_imagecache_external', $form_state->getValue('use_imagecache_external'))
+      ->set('protect_webmention_image_from_flush', $form_state->getValue('protect_webmention_image_from_flush'))
+      ->set('protect_post_context_image_from_flush', $form_state->getValue('protect_post_context_image_from_flush'))
       ->set('image_style_avatar', $form_state->getValue('image_style_avatar'))
       ->set('image_style_photo', $form_state->getValue('image_style_photo'))
       ->set('ignore_webmention_io', $form_state->getValue('ignore_webmention_io'))
