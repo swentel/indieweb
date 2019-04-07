@@ -31,7 +31,7 @@ class MediaCacheClientTest extends MediaCacheClientDefault {
   /**
    * {@inheritdoc}
    */
-  public function applyImageCache($filename, $type = 'avatar') {
+  public function applyImageCache($filename, $type = 'avatar', $context = '') {
     return str_replace('.png', '.jpg', $filename);
   }
 
