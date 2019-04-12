@@ -105,7 +105,7 @@ class MicrosubController extends ControllerBase {
           break;
 
         case 'search':
-          $response = $this->searchUrl();
+          $response = $this->search();
           break;
 
         case 'preview':
@@ -181,7 +181,7 @@ class MicrosubController extends ControllerBase {
           break;
 
         case 'search':
-          $response = $this->searchUrl();
+          $response = $this->search();
           break;
 
         case 'preview':
@@ -252,12 +252,15 @@ class MicrosubController extends ControllerBase {
   /**
    * Handle timeline request.
    *
+   * @param $search
+   *   Searches in posts.
+   *
    * @return array $response
    *
    * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
    * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    */
-  protected function getTimeline() {
+  protected function getTimeline($search = NULL) {
     $response = [];
 
     $items = [];
@@ -283,10 +286,21 @@ class MicrosubController extends ControllerBase {
       $channel = 0;
     }
 
-    if ($channel || $channel === 0) {
+    if (($channel || $channel === 0) && empty($search)) {
       $microsub_items = $this->entityTypeManager()
         ->getStorage('indieweb_microsub_item')
         ->loadByChannel($channel);
+    }
+
+    // ---------------------------------------------------------
+    // Search in a channel.
+    // ---------------------------------------------------------
+
+    if (!empty($search)) {
+      $filter_by_channel = ($channel || $channel === 0) ? $channel : NULL;
+      $microsub_items = $this->entityTypeManager()
+        ->getStorage('indieweb_microsub_item')
+        ->searchItems($search, $filter_by_channel);
     }
 
     // ---------------------------------------------------------
@@ -612,28 +626,55 @@ class MicrosubController extends ControllerBase {
   }
 
   /**
-   * Search url.
+   * Search.
+   *
+   * This either searches for posts, or for new feeds to subscribe to.
    *
    * @return array
+   *
+   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    */
-  protected function searchUrl() {
+  protected function search() {
     $return = ['response' => [], 'code' => 400];
 
-    $url = $this->request->get('query');
-    if (!empty($url)) {
-      /** @var \Drupal\indieweb_microsub\MicrosubClient\MicrosubClientInterface $microsubClient */
-      $microsubClient = \Drupal::service('indieweb.microsub.client');
-      $feeds = $microsubClient->searchFeeds($url);
-      if (!empty($feeds['feeds'])) {
-        $result_list = [];
-        foreach ($feeds['feeds'] as $feed) {
-          $result_list[] = (object) [
-            'type' => $feed['type'],
-            'url' => $feed['url'],
-          ];
-        }
-        $return = ['response' => (object) ['results' => $result_list], 'code' => 200];
+    $channel = NULL;
+    $query = $this->request->get('query');
+
+    // Search for posts, but only in a POST request.
+    if ($this->request->getMethod() == 'POST') {
+      $channel = $this->request->get('channel');
+
+      // Notifications is stored as channel 0.
+      if ($channel == 'notifications') {
+        $channel = 0;
       }
+    }
+
+    if (!empty($query)) {
+
+      // Search for posts.
+      if ($channel || $channel === 0) {
+        $return = $this->getTimeline($query);
+      }
+
+      // Search for feeds.
+      else {
+        /** @var \Drupal\indieweb_microsub\MicrosubClient\MicrosubClientInterface $microsubClient */
+        $microsubClient = \Drupal::service('indieweb.microsub.client');
+        $feeds = $microsubClient->searchFeeds($query);
+        if (!empty($feeds['feeds'])) {
+          $result_list = [];
+          foreach ($feeds['feeds'] as $feed) {
+            $result_list[] = (object) [
+              'type' => $feed['type'],
+              'url' => $feed['url'],
+            ];
+          }
+          $return = ['response' => (object) ['results' => $result_list], 'code' => 200];
+        }
+      }
+
     }
 
     return $return;

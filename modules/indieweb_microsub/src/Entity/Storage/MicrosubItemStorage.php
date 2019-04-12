@@ -169,6 +169,36 @@ class MicrosubItemStorage extends SqlContentEntityStorage implements MicrosubIte
   /**
    * {@inheritdoc}
    */
+  public function searchItems($search, $channel_id = NULL, $limit = 20) {
+    $query = \Drupal::entityQuery('indieweb_microsub_item')
+      ->condition('status', 1);
+
+    if ($channel_id) {
+      $query->condition('channel_id', $channel_id);
+    }
+
+    // We're a bit limited by our current storage which stores json. Search in
+    // guid and data, but we should always optimize this later.
+    $group = $query
+      ->orConditionGroup()
+      ->condition('guid', '%' . db_like($search) . '%', 'LIKE')
+      ->condition('data', '%' . db_like($search) . '%', 'LIKE');
+    $query->condition($group);
+
+    $query
+      ->sort('created', 'DESC')
+      ->sort('id', 'ASC');
+
+    if (!empty($limit)) {
+      $query->pager($limit);
+    }
+
+    return $this->loadMultiple($query->execute());
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function itemExists($source_id, $guid) {
 
     $query = \Drupal::entityQuery('indieweb_microsub_item')
