@@ -510,7 +510,7 @@ class IndieAuthController extends ControllerBase {
         $authorization_endpoint = $_SESSION['indieauth_authorization_endpoint'];
         $response = $client->post($authorization_endpoint, ['form_params' => $body, 'headers' => $headers]);
         $json = json_decode($response->getBody()->getContents());
-        if (isset($json->me) && isset($_SESSION['indieauth_domain']) && $json->me == $_SESSION['indieauth_domain']) {
+        if (isset($json->me) && isset($_SESSION['indieauth_domain']) && rtrim($json->me, '/') == rtrim($_SESSION['indieauth_domain'], '/')) {
           $domain = $_SESSION['indieauth_domain'];
           unset($_SESSION['indieauth_domain']);
           unset($_SESSION['indieauth_start']);
