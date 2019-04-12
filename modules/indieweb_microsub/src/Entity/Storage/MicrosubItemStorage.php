@@ -150,6 +150,25 @@ class MicrosubItemStorage extends SqlContentEntityStorage implements MicrosubIte
   /**
    * {@inheritdoc}
    */
+  public function loadBySource($source_id, $limit = 20) {
+    $query = \Drupal::entityQuery('indieweb_microsub_item')
+      ->condition('status', 1)
+      ->condition('source_id', $source_id);
+
+    $query
+      ->sort('created', 'DESC')
+      ->sort('id', 'ASC');
+
+    if (!empty($limit)) {
+      $query->pager($limit);
+    }
+
+    return $this->loadMultiple($query->execute());
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function itemExists($source_id, $guid) {
 
     $query = \Drupal::entityQuery('indieweb_microsub_item')

@@ -55,6 +55,19 @@ interface MicrosubItemStorageInterface extends ContentEntityStorageInterface {
   public function loadByChannel($channel_id, $limit = 20);
 
   /**
+   * Loads microsub items filtered by a source.
+   *
+   * @param int $source_id
+   *   The source ID to filter by.
+   * @param int $limit
+   *   (optional) The number of items to return. Defaults to 20.
+   *
+   * @return \Drupal\indieweb_microsub\Entity\MicrosubItemInterface[]
+   *   An array of the items.
+   */
+  public function loadBySource($source_id, $limit = 20);
+
+  /**
    * Change read status of one or more items.
    *
    * @param $channel_id

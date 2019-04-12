@@ -260,6 +260,22 @@ class MicrosubController extends ControllerBase {
   protected function getTimeline() {
     $response = [];
 
+    $items = [];
+    $paging = [];
+
+    /** @var \Drupal\indieweb_microsub\Entity\MicrosubItemInterface[] $microsub_items */
+    $microsub_items = [];
+
+    // Set pager.
+    $page = $this->request->get('after', 0);
+    if ($page > 0) {
+      \Drupal::request()->query->set('page', $page);
+    }
+
+    // ---------------------------------------------------------
+    // Get items from a channel.
+    // ---------------------------------------------------------
+
     $channel = $this->request->get('channel');
 
     // Notifications is stored as channel 0.
@@ -267,24 +283,28 @@ class MicrosubController extends ControllerBase {
       $channel = 0;
     }
 
-    // Get items for a specific channel.
     if ($channel || $channel === 0) {
+      $microsub_items = $this->entityTypeManager()
+        ->getStorage('indieweb_microsub_item')
+        ->loadByChannel($channel);
+    }
 
-      $items = [];
-      $paging = [];
+    // ---------------------------------------------------------
+    // Get items from a source.
+    // ---------------------------------------------------------
 
-      // Set pager.
-      $page = $this->request->get('after', 0);
-      if ($page > 0) {
-        \Drupal::request()->query->set('page', $page);
-      }
+    $source = $this->request->get('source');
+    if ($source) {
+      $microsub_items = $this->entityTypeManager()
+        ->getStorage('indieweb_microsub_item')
+        ->loadBySource($source);
+    }
 
-      /** @var \Drupal\indieweb_microsub\Entity\MicrosubItemInterface[] $microsub_items */
-      $microsub_items = $this->entityTypeManager()->getStorage('indieweb_microsub_item')->loadByChannel($channel);
+    // If microsub items found, go get them.
+    if (!empty($microsub_items)) {
       foreach ($microsub_items as $item) {
 
         $data = $item->getData();
-
         // See https://github.com/swentel/indieweb/issues/325
         $fields_to_fix = ['in-reply-to', 'like-of', 'repost-of'];
         foreach ($fields_to_fix as $field) {
@@ -305,6 +325,7 @@ class MicrosubController extends ControllerBase {
         $entry = $data;
         $entry->_id = $item->id();
         $entry->_is_read = $item->isRead();
+        $entry->_source = $item->getSourceId();
 
         // Get context.
         if (!isset($entry->refs) && ($context = $item->getContext())) {
