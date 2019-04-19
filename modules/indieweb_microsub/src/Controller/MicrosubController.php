@@ -358,6 +358,13 @@ class MicrosubController extends ControllerBase {
       }
 
       $response = ['items' => $items, 'paging' => (object) $paging];
+
+      if ($source) {
+        $microsub_source = $this->entityTypeManager()->getStorage('indieweb_microsub_source')->load($source);
+        if ($microsub_source) {
+          $response['source'] = (object) ['name' => $microsub_source->label()];
+        }
+      }
     }
 
     return ['response' => $response, 'code' => 200];
