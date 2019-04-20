@@ -110,6 +110,11 @@ class CacheSettingsForm extends ConfigFormBase {
       '#title' => $this->t('Protect webmention images from flush'),
       '#disabled' => !$imagecache_external_module_enabled,
       '#description' => $this->t('Stores images in webmentions outside the imagecache external directory so they never need to be downloaded again. Enable this if you periodically flush the imagecache externals directory.'),
+      '#states' => array(
+        'visible' => array(
+          ':input[name="use_imagecache_external"]' => array('checked' => TRUE),
+        ),
+      ),
     ];
 
     $form['imagecache_external']['protect_post_context_image_from_flush'] = [
@@ -118,6 +123,11 @@ class CacheSettingsForm extends ConfigFormBase {
       '#title' => $this->t('Protect post context images from flush'),
       '#disabled' => !$imagecache_external_module_enabled,
       '#description' => $this->t('Stores images in post contexts outside the imagecache external directory so they never need to be downloaded again. Enable this if you periodically flush the imagecache externals directory.'),
+      '#states' => array(
+        'visible' => array(
+          ':input[name="use_imagecache_external"]' => array('checked' => TRUE),
+        ),
+      ),
     ];
 
     return parent::buildForm($form, $form_state);
