@@ -61,6 +61,19 @@ class WebmentionSettingsForm extends ConfigFormBase {
       ),
     ];
 
+    $form['webmention']['webmention_content_domain'] = [
+      '#type' => 'textfield',
+      '#title' => $this->t('Content domain'),
+      '#description' => $this->t('If your content is served on a different domain, add it in here. No trailing slash.<br />When sending a webmention, the queue will also check whether the content already exists or not (e.g. for decoupled / static generators).'),
+      '#placeholder' => 'https://example.com',
+      '#default_value' => $config->get('webmention_content_domain'),
+      '#states' => array(
+        'visible' => array(
+          ':input[name="webmention_internal"]' => array('checked' => TRUE),
+        ),
+      ),
+    ];
+
     $form['webmention']['webmention_log_processing'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('Log messages in watchdog when the webmention is processed.'),
@@ -218,6 +231,7 @@ class WebmentionSettingsForm extends ConfigFormBase {
       ->set('webmention_uid', $form_state->getValue('webmention_uid'))
       ->set('webmention_internal', $form_state->getValue('webmention_internal'))
       ->set('webmention_internal_handler', $form_state->getValue('webmention_internal_handler'))
+      ->set('webmention_content_domain', $form_state->getValue('webmention_content_domain'))
       ->set('webmention_log_processing', $form_state->getValue('webmention_log_processing'))
       ->set('webmention_notify', $form_state->getValue('webmention_notify'))
       ->set('webmention_log_payload', $form_state->getValue('webmention_log_payload'))

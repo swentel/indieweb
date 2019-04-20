@@ -2,6 +2,7 @@ webmention_endpoint: ''
 webmention_secret: ''
 webmention_internal: false
 webmention_internal_handler: 'disabled'
+webmention_content_domain: ''
 webmention_log_processing: false
 webmention_notify: false
 webmention_expose_link_tag: false

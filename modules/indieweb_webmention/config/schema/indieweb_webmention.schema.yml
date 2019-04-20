@@ -42,6 +42,9 @@ indieweb_webmention.settings:
     webmention_internal_handler:
       type: 'string'
       label: 'Internal handler to process the webmention'
+    webmention_content_domain:
+      type: 'string'
+      label: 'The domain where the content is served'
     webmention_log_processing:
       type: boolean
       label: 'Whether to log the processing of received webmentions'

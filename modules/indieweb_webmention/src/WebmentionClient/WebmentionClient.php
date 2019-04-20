@@ -24,6 +24,13 @@ class WebmentionClient implements WebmentionClientInterface {
       'entity_type_id' => $entity_type_id,
     ];
 
+    // Different domain for content.
+    $config = \Drupal::config('indieweb_webmention.settings');
+    $content_domain = $config->get('webmention_content_domain');
+    if (!empty($content_domain)) {
+      $data['source'] = str_replace(\Drupal::request()->getSchemeAndHttpHost(), $content_domain, $data['source']);
+    }
+
     // Bail out when target is one of the silos, but not actually the webmention
     // endpoint. This can happen with reply urls to twitter for example.
     if ($this->isSiloURL($target)) {
@@ -43,53 +50,71 @@ class WebmentionClient implements WebmentionClientInterface {
    */
   public function handleQueue() {
     $end = time() + 15;
+    $remove_queue_item = TRUE;
     $syndication_targets = indieweb_get_syndication_targets();
     while (time() < $end && ($item = \Drupal::queue(INDIEWEB_WEBMENTION_QUEUE)->claimItem())) {
       $data = $item->data;
 
       $store_send = FALSE;
+      $send_mention = TRUE;
       if (!empty($data['source']) && !empty($data['target'])) {
-
 
         try {
 
           $sourceURL = $data['source'];
           $targetURL = $data['target'];
 
-          // Send with IndieWeb client.
-          $response = $this->sendWebmention($sourceURL, $targetURL);
-
-          if ($response) {
-            $store_send = TRUE;
-
-            // Store the syndication when the targetUrl is in the syndication
-            // targets.
-            if (isset($syndication_targets[$targetURL])) {
-              if ($response->getStatusCode() == 201 && !empty($response->getHeader('Location'))) {
-
-                if (!empty($data['entity_id']) && !empty($data['entity_type_id'])) {
-                  $values = [
-                    'entity_id' => $data['entity_id'],
-                    'entity_type_id' => $data['entity_type_id'],
-                    'url' => $response->getHeader('Location')[0],
-                  ];
-
-                  $syndication = \Drupal::entityTypeManager()->getStorage('indieweb_syndication')->create($values);
-                  $syndication->save();
-
-                  Cache::invalidateTags([$data['entity_type_id'] . ':' . $data['entity_id']]);
-                }
-              }
+          // Check if the content exists if a content domain is configured.
+          $config = \Drupal::config('indieweb_webmention.settings');
+          $content_domain = $config->get('webmention_content_domain');
+          if (!empty($content_domain)) {
+            try {
+              \Drupal::httpClient()->get($sourceURL . '?time=' . time());
+            }
+            catch (\Exception $exception) {
+              // This is a 404 (well, normally it should be).
+              $send_mention = FALSE;
+              $remove_queue_item = FALSE;
             }
           }
 
-          // Log the response if configured.
-          if (\Drupal::config('indieweb_webmention.settings')->get('send_log_response')) {
+          // Send with IndieWeb client.
+          if ($send_mention) {
+
+            $response = $this->sendWebmention($sourceURL, $targetURL);
+
             if ($response) {
-              \Drupal::logger('indieweb_send')->notice('response code for @source to @target: @code', ['@code' => $response->getStatusCode(), '@source' => $sourceURL, '@target' => $targetURL]);
+              $store_send = TRUE;
+
+              // Store the syndication when the targetUrl is in the syndication
+              // targets.
+              if (isset($syndication_targets[$targetURL])) {
+                if ($response->getStatusCode() == 201 && !empty($response->getHeader('Location'))) {
+
+                  if (!empty($data['entity_id']) && !empty($data['entity_type_id'])) {
+                    $values = [
+                      'entity_id' => $data['entity_id'],
+                      'entity_type_id' => $data['entity_type_id'],
+                      'url' => $response->getHeader('Location')[0],
+                    ];
+
+                    $syndication = \Drupal::entityTypeManager()->getStorage('indieweb_syndication')->create($values);
+                    $syndication->save();
+
+                    Cache::invalidateTags([$data['entity_type_id'] . ':' . $data['entity_id']]);
+                  }
+                }
+              }
             }
-            else {
-              \Drupal::logger('indieweb_send')->notice('No webmention endpoint found for @source to @target', ['@source' => $sourceURL, '@target' => $targetURL]);
+
+            // Log the response if configured.
+            if (\Drupal::config('indieweb_webmention.settings')->get('send_log_response')) {
+              if ($response) {
+                \Drupal::logger('indieweb_send')->notice('response code for @source to @target: @code', ['@code' => $response->getStatusCode(), '@source' => $sourceURL, '@target' => $targetURL]);
+              }
+              else {
+                \Drupal::logger('indieweb_send')->notice('No webmention endpoint found for @source to @target', ['@source' => $sourceURL, '@target' => $targetURL]);
+              }
             }
           }
         }
@@ -118,8 +143,10 @@ class WebmentionClient implements WebmentionClientInterface {
         }
       }
 
-      // Remove the item - always.
-      \Drupal::queue(INDIEWEB_WEBMENTION_QUEUE)->deleteItem($item);
+      // Remove the queue item.
+      if ($remove_queue_item) {
+        \Drupal::queue(INDIEWEB_WEBMENTION_QUEUE)->deleteItem($item);
+      }
     }
   }
 
@@ -160,7 +187,6 @@ class WebmentionClient implements WebmentionClientInterface {
       'type' => 'webmention',
     ];
 
-
     // Allow local domain URL matching, used for testbot.
     $allow_local_domain = ['allow_local_domain' => (bool) drupal_valid_test_ua()];
 
@@ -177,6 +203,7 @@ class WebmentionClient implements WebmentionClientInterface {
 
         // Get the source body.
         $source = $webmention->getSource();
+
         $target = $webmention->getTarget();
         $response = \Drupal::httpClient()->get($source);
         $body = $response->getBody()->getContents();

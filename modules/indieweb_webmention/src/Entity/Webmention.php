@@ -214,7 +214,14 @@ class Webmention extends ContentEntityBase implements WebmentionInterface {
 
       $target = $this->getTarget();
       if (strpos($target, \Drupal::request()->getSchemeAndHttpHost()) === FALSE) {
-        $target = \Drupal::request()->getSchemeAndHttpHost() . $target;
+        $config = \Drupal::config('indieweb_webmention.settings');
+        $content_domain = $config->get('webmention_content_domain');
+        if (!empty($content_domain)) {
+          $target = $content_domain . $target;
+        }
+        else {
+          $target = \Drupal::request()->getSchemeAndHttpHost() . $target;
+        }
       }
       $this->set('target', $target);
       $this->set('type', 'webmention');

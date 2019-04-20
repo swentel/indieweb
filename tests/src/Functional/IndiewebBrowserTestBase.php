@@ -537,8 +537,9 @@ abstract class IndiewebBrowserTestBase extends BrowserTestBase {
    *
    * @param array $urls
    * @param $id
+   * @param $domain
    */
-  protected function assertWebmentionQueueItems($urls = [], $id = NULL) {
+  protected function assertWebmentionQueueItems($urls = [], $id = NULL, $domain = NULL) {
     if ($urls) {
       $count = \Drupal::queue(INDIEWEB_WEBMENTION_QUEUE)->numberOfItems();
       $this->assertTrue($count == count($urls), 'Items in queue: ' . $count . ' - total passed: ' . count($urls));
@@ -546,7 +547,7 @@ abstract class IndiewebBrowserTestBase extends BrowserTestBase {
       // We use a query here, don't want to use a while loop. When there's
       // nothing in the queue yet, the table won't exist, so the query will
       // fail. When the first item is inserted, we'll be fine.
-      try {
+      if (\Drupal::database()->schema()->tableExists('queue')) {
         $query = 'SELECT * FROM {queue} WHERE name = :name';
         $records = \Drupal::database()->query($query, [':name' => INDIEWEB_WEBMENTION_QUEUE]);
         foreach ($records as $record) {
@@ -554,16 +555,18 @@ abstract class IndiewebBrowserTestBase extends BrowserTestBase {
           if (!empty($data['source']) && !empty($data['target']) && $id) {
             $this->assertTrue(in_array($data['target'], $urls), 'Found ' . $data['target'] . ' in ' . print_r($urls, 1));
             if ($data['entity_type_id'] == 'node') {
-              $this->assertEquals($data['source'], Url::fromRoute('entity.node.canonical', ['node' => $id], ['absolute' => TRUE])->toString());
+              if (!empty($domain)) {
+                $this->assertEquals($domain . '/node/' . $id, $data['source']);
+              }
+              else {
+                $this->assertEquals($data['source'], Url::fromRoute('entity.node.canonical', ['node' => $id], ['absolute' => TRUE])->toString());
+              }
             }
             elseif ($data['entity_type_id'] == 'comment') {
               $this->assertEquals($data['source'], Url::fromRoute('entity.comment.canonical', ['comment' => $id], ['absolute' => TRUE])->toString());
             }
           }
         }
-      }
-      catch (\Exception $ignored) {
-        //debug($ignored->getMessage());
       }
     }
     else {

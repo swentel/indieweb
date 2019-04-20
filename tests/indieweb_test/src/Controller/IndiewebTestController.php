@@ -124,6 +124,13 @@ class IndiewebTestController extends ControllerBase {
   public function webmentionPostType($theme, $nid) {
     if ($nid) {
       $url = Url::fromRoute('entity.node.canonical', ['node' => $nid], ['absolute' => TRUE])->toString();
+
+      $config = $this->config('indieweb_webmention.settings');
+      $content_domain = $config->get('webmention_content_domain');
+      if (!empty($content_domain)) {
+        $url = str_replace(\Drupal::request()->getSchemeAndHttpHost(), $content_domain, $url);
+      }
+
     }
     else {
       $url = \Drupal::request()->getSchemeAndHttpHost() . '/';
@@ -135,7 +142,6 @@ class IndiewebTestController extends ControllerBase {
    * Feed callback.
    *
    * @param $theme
-   * @param $nid
    *
    * @return array
    */

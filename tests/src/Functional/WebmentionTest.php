@@ -708,6 +708,88 @@ class WebmentionTest extends IndiewebBrowserTestBase {
   }
 
   /**
+   * Tests sending and receiving webmentions with a decoupled domain.
+   *
+   * This is not enabled on the testbot since it can't handle two domains.
+   * The domains used in this test are realize.front and realize.local
+   *
+   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
+   * @throws \GuzzleHttp\Exception\GuzzleException
+   * @throws \Drupal\Core\Entity\EntityStorageException
+   * @throws \Behat\Mink\Exception\ExpectationException
+   */
+  public function _testWebmentionDecoupledDomain() {
+
+    $this->httpClient = $this->container->get('http_client_factory')
+      ->fromOptions(['base_uri' => $this->baseUrl]);
+
+    $this->drupalLogin($this->adminUser);
+    $this->configureWebmention([
+      'webmention_internal' => TRUE,
+      'webmention_internal_handler' => 'drush',
+      'webmention_content_domain' => 'http://realize.front',
+      'webmention_detect_identical' => TRUE,
+      'webmention_notify' => FALSE
+    ]);
+
+    $edit = ['send_webmention_handler' => 'cron'];
+    $this->drupalPostForm('admin/config/services/indieweb/send', $edit, 'Save configuration');
+
+    $this->drupalLogout();
+
+    $values = [
+      'title' => 'haaai',
+      'uid' => 1,
+      'status' => 1,
+      'type' => 'page',
+    ];
+    $node_1 = \Drupal::entityTypeManager()->getStorage('node')->create($values);
+    $node_1->save();
+
+    // Receiving.
+    $node_1_path = 'http://realize.front/node/1';
+    $source = Url::fromRoute('indieweb_test.webmention_like_twitter', [], ['absolute' => TRUE])->toString();
+    $response = $this->sendWebmentionInternalRequest($source, $node_1_path);
+    self::assertEquals(202, $response->getStatusCode());
+    $this->processWebmentions();
+    $expected = [
+      'source' => $source,
+      'property' => 'like-of',
+      'target' => '/node/1',
+      'type' => 'entry',
+      'author_name' => 'Pieter Frenssen',
+      'author_photo' => 'https://pbs.twimg.com/profile_images/589400481572790273/UDzrzoyO.jpg',
+      'author_url' => 'https://twitter.com/pfrenssen',
+      'url' => 'https://twitter.com/swentel/status/1057282744458317825#favorited-by-190024882',
+      'uid' => $this->adminUser->id(),
+      'status' => 1,
+      'content_html' => '',
+      'content_text' => '',
+      'private' => 0,
+      'rsvp' => '',
+    ];
+    $this->assertWebmention($expected);
+
+    // Sending one. It should not be send as long as the node does not exist on
+    // front.
+    $this->drupalLogin($this->adminUser);
+    $targets_queued = [];
+    $targets_queued[] = 'https://brid.gy/publish/twitter';
+    $edit = [];
+    foreach ($targets_queued as $url) {
+      $edit['indieweb_syndication_targets[' . $url . ']'] = TRUE;
+    }
+    $this->drupalPostForm('node/1/edit', $edit, 'Save');
+    $this->assertWebmentionQueueItems($targets_queued, 1, 'http://realize.front');
+    $this->drupalPostForm('node/1/delete', [], 'Delete');
+    $this->runWebmentionQueue();
+    $this->drupalGet('node/1');
+    $this->assertSession()->statusCodeEquals(404);
+    $this->assertWebmentionQueueItems($targets_queued, 1, 'http://realize.front');
+  }
+
+  /**
    * Tests sending webmentions.
    *
    * @throws \Behat\Mink\Exception\ExpectationException
