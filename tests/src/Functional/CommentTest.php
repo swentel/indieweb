@@ -382,7 +382,7 @@ class CommentTest extends IndiewebBrowserTestBase {
 
     $this->drupalGet('node/' . $article->id());
     $this->assertSession()->responseContains('Reply with webmention target');
-    $this->assertWebmentionQueueItems(['https://brid.gy/publish/twitter'], $article->id());
+    $this->assertWebmentionQueueItems(['https://brid.gy/publish/twitter'], $cid);
     $this->clearQueue();
 
     // Micropub like request with 'like-of' set to previous webmention.

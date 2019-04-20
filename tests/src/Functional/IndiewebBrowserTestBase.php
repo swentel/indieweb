@@ -559,11 +559,11 @@ abstract class IndiewebBrowserTestBase extends BrowserTestBase {
                 $this->assertEquals($domain . '/node/' . $id, $data['source']);
               }
               else {
-                $this->assertEquals($data['source'], Url::fromRoute('entity.node.canonical', ['node' => $id], ['absolute' => TRUE])->toString());
+                $this->assertEquals(Url::fromRoute('entity.node.canonical', ['node' => $id], ['absolute' => TRUE])->toString(), $data['source']);
               }
             }
             elseif ($data['entity_type_id'] == 'comment') {
-              $this->assertEquals($data['source'], Url::fromRoute('entity.comment.canonical', ['comment' => $id], ['absolute' => TRUE])->toString());
+              $this->assertEquals(Url::fromRoute('indieweb.comment.canonical', ['comment' => $id], ['absolute' => TRUE])->toString(), $data['source']);
             }
           }
         }
