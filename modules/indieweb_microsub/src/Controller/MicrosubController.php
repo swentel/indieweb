@@ -362,7 +362,11 @@ class MicrosubController extends ControllerBase {
       if ($source) {
         $microsub_source = $this->entityTypeManager()->getStorage('indieweb_microsub_source')->load($source);
         if ($microsub_source) {
-          $response['source'] = (object) ['name' => $microsub_source->label()];
+          $name = $microsub_source->label();
+          if (strpos($name, 'granary') !== FALSE) {
+            $name = 'Granary';
+          }
+          $response['source'] = (object) ['name' => $name];
         }
       }
     }
