@@ -150,14 +150,14 @@ class IndieAuthClient implements IndieAuthClientInterface {
 
         // Remove old key.
         if (file_exists($key_uri)) {
-          drupal_unlink($key_uri);
+          \Drupal::service('file_system')->unlink($key_uri);
         }
 
         // Write key content to key file.
         file_put_contents($key_uri, $keys[$name]);
 
         // Set correct permission to key file.
-        drupal_chmod($key_uri, 0600);
+        \Drupal::service('file_system')->chmod($key_uri, 0600);
 
         $paths[$name . '_key'] = $key_uri;
       }

@@ -247,7 +247,7 @@ class CommentTest extends IndiewebBrowserTestBase {
     $edit['send_comment_webmention_field'] = 'indieweb_webmention';
     $this->drupalPostForm('admin/config/services/indieweb/send', $edit, 'Save configuration');
     $this->drupalGet('comment/reply/node/1/comment/2');
-    $this->assertRaw('value="https://example.com/a-link-to-appear-when-replying"');
+    $this->assertSession()->responseContains('value="https://example.com/a-link-to-appear-when-replying"');
 
     // ------------------------------------------------------------------------
     // Test micropub reply post to create a comment and a like on a webmention
@@ -262,12 +262,12 @@ class CommentTest extends IndiewebBrowserTestBase {
       'reply_link_field' => 'field_reply_link',
       'reply_content_field' => 'body',
       'reply_auto_send_webmention' => 1,
-      'reply_uid' => $this->adminUser->getUsername() . ' (' . $this->adminUser->id() . ')',
+      'reply_uid' => $this->adminUser->getDisplayName() . ' (' . $this->adminUser->id() . ')',
       'like_create_node' => 1,
       'like_node_type' => 'like',
       'like_link_field' => 'field_like_link',
       'like_auto_send_webmention' => 1,
-      'like_uid' => $this->adminUser->getUsername() . ' (' . $this->adminUser->id() . ')'
+      'like_uid' => $this->adminUser->getDisplayName() . ' (' . $this->adminUser->id() . ')'
     ];
     $this->drupalPostForm('admin/config/services/indieweb/micropub', $edit, 'Save configuration');
 

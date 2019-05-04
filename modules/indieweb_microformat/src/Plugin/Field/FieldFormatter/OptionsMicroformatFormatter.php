@@ -24,8 +24,6 @@ use Drupal\Core\Form\OptGroup;
  */
 class OptionsMicroformatFormatter extends FormatterBase {
 
-  use AllowedTagsXssTrait;
-
   /**
    * {@inheritdoc}
    */

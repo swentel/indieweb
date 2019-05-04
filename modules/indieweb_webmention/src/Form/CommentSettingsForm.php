@@ -162,7 +162,7 @@ class CommentSettingsForm extends ConfigFormBase {
   protected function getCommentTypes() {
     return array_map(function ($bundle_info) {
       return $bundle_info['label'];
-    }, \Drupal::entityManager()->getBundleInfo('comment'));
+    }, \Drupal::service('entity_type.bundle.info')->getBundleInfo('comment'));
   }
 
 }

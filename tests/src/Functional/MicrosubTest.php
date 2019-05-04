@@ -68,7 +68,7 @@ class MicrosubTest extends IndiewebBrowserTestBase {
     $this->createNodeTypes(['reply']);
 
     // Set microformat class to in-reply-to
-    $display = entity_get_display('node', 'reply', 'default');
+    $display = \Drupal::entityTypeManager()->getStorage('entity_view_display')->load('node.reply.default');
     $options = [
       'region' => 'content',
       'type' => 'link_microformat',
@@ -208,18 +208,18 @@ class MicrosubTest extends IndiewebBrowserTestBase {
     $query = [];
     $type = 'get';
     $response = $this->sendMicrosubRequest($query, $type, 'no_auth_header');
-    self::assertEqual($response['code'], 401);
+    self::assertEquals($response['code'], 401);
 
     $response = $this->sendMicrosubRequest($query, $type);
-    self::assertEqual($response['code'], 400);
+    self::assertEquals($response['code'], 400);
 
     $query = ['action' => 'timeline'];
     $response = $this->sendMicrosubRequest($query, $type, 'is_totally_invalid');
-    self::assertEqual($response['code'], 403);
+    self::assertEquals($response['code'], 403);
 
     $query = ['action' => 'channels'];
     $response = $this->sendMicrosubRequest($query);
-    self::assertEqual($response['code'], 200);
+    self::assertEquals($response['code'], 200);
     $body = json_decode($response['body']);
     self::assertEquals('Channel 1', $body->channels[1]->name);
     self::assertEquals('Channel 2', $body->channels[2]->name);
@@ -293,7 +293,7 @@ class MicrosubTest extends IndiewebBrowserTestBase {
     self::assertTrue(!empty($item->getContext()));
     $context_data = $item->getContext();
     $url = $page->toUrl('canonical', ['absolute' => TRUE])->toString();
-    self::assertEqual($page->get('body')->value, $context_data->{$url}->content);
+    self::assertEquals($page->get('body')->value, $context_data->{$url}->content);
 
     $query = ['action' => 'timeline', 'channel' => 1];
     $response = $this->sendMicrosubRequest($query);

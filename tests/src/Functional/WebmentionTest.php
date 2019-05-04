@@ -65,6 +65,7 @@ class WebmentionTest extends IndiewebBrowserTestBase {
   /**
    * UI tests for syndication.
    *
+   * @throws \Behat\Mink\Exception\ExpectationException
    * @throws \Behat\Mink\Exception\ResponseTextException
    */
   public function testSyndicationForm() {
@@ -81,7 +82,7 @@ class WebmentionTest extends IndiewebBrowserTestBase {
     $this->assertSession()->pageTextContains($page->label());
 
     $this->drupalPostForm('admin/content/syndication/1/delete', [], 'Delete');
-    $this->assertUrl('admin/content/syndication');
+    $this->assertSession()->addressEquals('admin/content/syndication');
     $this->assertSession()->pageTextNotContains($page->label());
 
     $edit = [
@@ -485,7 +486,7 @@ class WebmentionTest extends IndiewebBrowserTestBase {
 
     /** @var \Drupal\comment\CommentInterface $comment */
     $comment = \Drupal::entityTypeManager()->getStorage('comment')->load(1);
-    self::assertEqual($comment->getCreatedTime(), $expected['created']);
+    self::assertEquals($comment->getCreatedTime(), $expected['created']);
 
     $source = Url::fromRoute('indieweb_test.webmention_reply_fediverse', [], ['absolute' => TRUE])->toString();
     $response = $this->sendWebmentionInternalRequest($source, $node_1_path);

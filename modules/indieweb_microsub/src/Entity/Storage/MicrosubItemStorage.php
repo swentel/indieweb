@@ -181,8 +181,8 @@ class MicrosubItemStorage extends SqlContentEntityStorage implements MicrosubIte
     // guid and data, but we should always optimize this later.
     $group = $query
       ->orConditionGroup()
-      ->condition('guid', '%' . db_like($search) . '%', 'LIKE')
-      ->condition('data', '%' . db_like($search) . '%', 'LIKE');
+      ->condition('guid', '%' . $this->database->escapeLike($search) . '%', 'LIKE')
+      ->condition('data', '%' . $this->database->escapeLike($search) . '%', 'LIKE');
     $query->condition($group);
 
     $query

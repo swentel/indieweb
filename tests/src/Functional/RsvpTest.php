@@ -70,8 +70,8 @@ class RsvpTest extends IndiewebBrowserTestBase {
 
     $this->drupalLogin($this->adminUser);
     $this->drupalPostForm('node/1/edit', [
-      'field_date[0][value][date]' => format_date(time() + (86400 * 2), 'custom', 'Y-m-d'),
-      'field_date[0][end_value][date]' => format_date(time() + (86400 * 3), 'custom', 'Y-m-d'),
+      'field_date[0][value][date]' => \Drupal::service('date.formatter')->format(time() + (86400 * 2), 'custom', 'Y-m-d'),
+      'field_date[0][end_value][date]' => \Drupal::service('date.formatter')->format(time() + (86400 * 3), 'custom', 'Y-m-d'),
       'field_date[0][value][time]' => '00:00:00',
       'field_date[0][end_value][time]' => '00:00:00',
     ], 'Save');
@@ -108,7 +108,7 @@ class RsvpTest extends IndiewebBrowserTestBase {
     $this->drupalLogout();
     $this->drupalGet('node/1');
     $this->assertSession()->responseContains('RSVP title block');
-    $this->assertText('Sign in to RSVP to this event');
+    $this->assertSession()->pageTextContains('Sign in to RSVP to this event');
 
     $this->drupalGet('node/2');
     $this->assertSession()->responseNotContains('RSVP title block');

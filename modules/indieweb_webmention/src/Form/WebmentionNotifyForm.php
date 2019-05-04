@@ -6,7 +6,7 @@ use Drupal\Component\Utility\UrlHelper;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 
-class webmentionNotifyForm extends FormBase {
+class WebmentionNotifyForm extends FormBase {
 
   /**
    * {@inheritdoc}

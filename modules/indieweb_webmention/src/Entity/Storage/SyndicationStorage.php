@@ -2,6 +2,7 @@
 
 namespace Drupal\indieweb_webmention\Entity\Storage;
 
+use Drupal\Core\Database\Database;
 use Drupal\Core\Entity\Sql\SqlContentEntityStorage;
 
 /**
@@ -43,7 +44,7 @@ class SyndicationStorage extends SqlContentEntityStorage implements SyndicationS
    * {@inheritdoc}
    */
   public function checkIdenticalSyndication($like) {
-    return $this->database->query("SELECT count(url) as count FROM {webmention_syndication} WHERE url LIKE :match_url", [':match_url' => '%/' . db_like($like)])->fetchField();
+    return $this->database->query("SELECT count(url) as count FROM {webmention_syndication} WHERE url LIKE :match_url", [':match_url' => '%/' . Database::getConnection()->escapeLike($like)])->fetchField();
   }
 
 }

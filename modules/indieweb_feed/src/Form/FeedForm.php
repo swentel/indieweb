@@ -152,7 +152,7 @@ class FeedForm extends EntityForm {
     $options = [];
     foreach (\Drupal::entityTypeManager()->getDefinitions() as $entityType) {
       if ($entityType instanceof ContentEntityTypeInterface) {
-        $bundles = \Drupal::entityManager()->getBundleInfo($entityType->id());
+        $bundles = \Drupal::service('entity_type.bundle.info')->getBundleInfo($entityType->id());
         if (!empty($bundles)) {
           $label = $entityType->id();
           $options[$label] = [];

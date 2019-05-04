@@ -85,7 +85,7 @@ class CommentController extends ControllerBase {
    *   The translated comment subject.
    */
   public function commentPermalinkTitle(CommentInterface $comment) {
-    return $this->entityManager()->getTranslationFromContext($comment)->label();
+    return \Drupal::service('entity.repository')->getTranslationFromContext($comment)->label();
   }
 
 }

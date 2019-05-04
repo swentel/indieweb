@@ -742,7 +742,7 @@ class MicrosubController extends ControllerBase {
    * @return array
    */
   public function channelOverview() {
-    return $this->entityManager()->getListBuilder('indieweb_microsub_channel')->render();
+    return $this->entityTypeManager()->getListBuilder('indieweb_microsub_channel')->render();
   }
 
   /**
@@ -753,7 +753,7 @@ class MicrosubController extends ControllerBase {
    * @return array
    */
   public function sourcesOverview(MicrosubChannelInterface $indieweb_microsub_channel) {
-    return $this->entityManager()->getListBuilder('indieweb_microsub_source')->render($indieweb_microsub_channel);
+    return $this->entityTypeManager()->getListBuilder('indieweb_microsub_source')->render($indieweb_microsub_channel);
   }
 
   /**

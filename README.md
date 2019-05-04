@@ -9,6 +9,7 @@ Current functionality:
 
 - Receive webmentions and pingbacks via Webmention.io or internal endpoint
 - Send webmentions and syndicate content, likes etc via [brid.gy](https://brid.gy), store syndications
+- Configure a content domain for sending and receiving webmentions (static generators or decoupled setup)
 - Microformats for content, images and more
 - Allow users to login and create accounts with IndieAuth
 - Built-in IndieAuth Authorization and Authentication API, or use external service
