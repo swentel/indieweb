@@ -278,9 +278,23 @@ function _indieweb_webmention_entity_form_alter(&$form, FormStateInterface $form
     }
 
     // Comment webmention.
-    if ($entity->getEntityTypeId() == 'comment' && ($reference_field = \Drupal::config('indieweb_webmention.settings')->get('send_comment_webmention_field')) && $entity->hasField($reference_field) && !empty($options)) {
+    if ($entity->getEntityTypeId() == 'comment' && ($reference_field = \Drupal::config('indieweb_webmention.settings')->get('send_comment_webmention_field')) && $entity->hasField($reference_field)) {
       /** @var \Drupal\comment\CommentInterface $comment */
       $comment = $entity;
+
+      // Print the webmention in a details element so you have some more context
+      // as an administrator.
+      if (\Drupal::currentUser()->hasPermission('send webmentions') && !empty($comment->get($reference_field)->target_id)) {
+        try {
+          $webmention = $comment->get($reference_field)->entity;
+          $form['webmention_context_wrapper'] = [
+            '#type' => 'details',
+            '#title' => t('Webmention info'),
+          ];
+          $form['webmention_context_wrapper']['wrapper'] = \Drupal::entityTypeManager()->getViewBuilder('indieweb_webmention')->view($webmention);
+        }
+        catch (Exception $ignored) {}
+      }
 
       if (\Drupal::config('indieweb_webmention.settings')->get('send_comment_permission_fields')) {
         $form[$reference_field]['#access'] = \Drupal::currentUser()->hasPermission('send webmentions');
@@ -498,6 +512,9 @@ function indieweb_webmention_comment_view(array &$build, CommentInterface $comme
  * @param array $build
  * @param \Drupal\Core\Entity\EntityInterface $entity
  * @param \Drupal\Core\Entity\Display\EntityViewDisplayInterface $display
+ *
+ * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+ * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
  */
 function _indieweb_webmention_extra_fields_display(array &$build, EntityInterface $entity, EntityViewDisplayInterface $display) {
   // Syndication targets fields.
