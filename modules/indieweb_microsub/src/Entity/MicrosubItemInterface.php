@@ -10,6 +10,14 @@ use Drupal\Core\Entity\ContentEntityInterface;
 interface MicrosubItemInterface extends ContentEntityInterface {
 
   /**
+   * Returns the channel id of microsub item.
+   *
+   * @return int
+   *   The channel id.
+   */
+  public function getChannelId();
+
+  /**
    * Returns the source id of microsub item.
    *
    * @return int

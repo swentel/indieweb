@@ -275,6 +275,9 @@ class MicrosubController extends ControllerBase {
       \Drupal::request()->query->set('page', $page);
     }
 
+    // Is read.
+    $is_read = $this->request->get('is_read');
+
     // ---------------------------------------------------------
     // Get items from a channel.
     // ---------------------------------------------------------
@@ -289,7 +292,7 @@ class MicrosubController extends ControllerBase {
     if (($channel || $channel === 0) && empty($search)) {
       $microsub_items = $this->entityTypeManager()
         ->getStorage('indieweb_microsub_item')
-        ->loadByChannel($channel);
+        ->loadByChannel($channel, $is_read);
     }
 
     // ---------------------------------------------------------
@@ -300,7 +303,7 @@ class MicrosubController extends ControllerBase {
       $filter_by_channel = ($channel || $channel === 0) ? $channel : NULL;
       $microsub_items = $this->entityTypeManager()
         ->getStorage('indieweb_microsub_item')
-        ->searchItems($search, $filter_by_channel);
+        ->searchItems($search, $filter_by_channel, $is_read);
     }
 
     // ---------------------------------------------------------
@@ -311,7 +314,7 @@ class MicrosubController extends ControllerBase {
     if ($source) {
       $microsub_items = $this->entityTypeManager()
         ->getStorage('indieweb_microsub_item')
-        ->loadBySource($source);
+        ->loadBySource($source, $is_read);
     }
 
     // If microsub items found, go get them.
@@ -340,6 +343,16 @@ class MicrosubController extends ControllerBase {
         $entry->_id = $item->id();
         $entry->_is_read = $item->isRead();
         $entry->_source = $item->getSourceId();
+
+        // Channel information.
+        $channel_id = $item->getChannelId();
+        if ($channel_id > 0) {
+          $channel = $item->getSource()->getChannel()->label();
+        }
+        else {
+          $channel = 'Notifications';
+        }
+        $entry->_channel = ['name' => $channel, 'id' => $channel_id];
 
         // Get context.
         if (!isset($entry->refs) && ($context = $item->getContext())) {
@@ -532,9 +545,11 @@ class MicrosubController extends ControllerBase {
     // Check entry or last_read_entry. If last_read_entry is passed in, we
     // completely ignore entries, this usually just means 'Mark all as read'.
     $entries = $this->request->get('entry');
-    $last_read_entry = $this->request->get('last_read_entry');
-    if (!empty($last_read_entry)) {
-      $entries = NULL;
+    if ($channel_id != 'global') {
+      $last_read_entry = $this->request->get('last_read_entry');
+      if (!empty($last_read_entry)) {
+        $entries = NULL;
+      }
     }
 
     if ($channel_id || $channel_id === 0) {

@@ -67,11 +67,20 @@ class MicrosubItemStorage extends SqlContentEntityStorage implements MicrosubIte
    * {@inheritdoc}
    */
   public function changeReadStatus($channel_id, $status, $entries = NULL) {
+
+    // Do not execute in case the channel id is global and there are no entries.
+    if (empty($entries) && $channel_id == 'global') {
+      return;
+    }
+
     $is_read_condition = $status ? 0 : 1;
     $query = $this->database->update('microsub_item')
       ->fields(['is_read' => $status])
-      ->condition('channel_id', $channel_id)
       ->condition('is_read', $is_read_condition);
+
+    if (is_numeric($channel_id)) {
+      $query->condition('channel_id', $channel_id);
+    }
 
     if (!empty($entries)) {
       $operator = '=';
@@ -117,7 +126,7 @@ class MicrosubItemStorage extends SqlContentEntityStorage implements MicrosubIte
   /**
    * {@inheritdoc}
    */
-  public function loadByChannel($channel_id, $limit = 20) {
+  public function loadByChannel($channel_id, $is_read = NULL, $limit = 20) {
     $exclude = [];
 
     /** @var \Drupal\indieweb_microsub\Entity\MicrosubChannelInterface $channel */
@@ -129,8 +138,17 @@ class MicrosubItemStorage extends SqlContentEntityStorage implements MicrosubIte
     }
 
     $query = \Drupal::entityQuery('indieweb_microsub_item')
-      ->condition('status', 1)
-      ->condition('channel_id', $channel_id);
+      ->condition('status', 1);
+
+    // Filter on channel id.
+    if (is_numeric($channel_id)) {
+      $query->condition('channel_id', $channel_id);
+    }
+
+    // Is read or not.
+    if (isset($is_read)) {
+      $query->condition('is_read', (int) $is_read);
+    }
 
     if ($exclude) {
       $query->condition('post_type', $exclude, 'NOT IN');
@@ -150,10 +168,14 @@ class MicrosubItemStorage extends SqlContentEntityStorage implements MicrosubIte
   /**
    * {@inheritdoc}
    */
-  public function loadBySource($source_id, $limit = 20) {
+  public function loadBySource($source_id, $is_read = NULL, $limit = 20) {
     $query = \Drupal::entityQuery('indieweb_microsub_item')
       ->condition('status', 1)
       ->condition('source_id', $source_id);
+
+    if (isset($is_read)) {
+      $query->condition('is_read', (int) $is_read);
+    }
 
     $query
       ->sort('created', 'DESC')
@@ -169,12 +191,17 @@ class MicrosubItemStorage extends SqlContentEntityStorage implements MicrosubIte
   /**
    * {@inheritdoc}
    */
-  public function searchItems($search, $channel_id = NULL, $limit = 20) {
+  public function searchItems($search, $channel_id = NULL, $is_read = NULL, $limit = 20) {
     $query = \Drupal::entityQuery('indieweb_microsub_item')
       ->condition('status', 1);
 
-    if ($channel_id) {
+    if (is_numeric($channel_id)) {
       $query->condition('channel_id', $channel_id);
+    }
+
+    // Is read or not.
+    if (isset($is_read)) {
+      $query->condition('is_read', (int) $is_read);
     }
 
     // We're a bit limited by our current storage which stores json. Search in

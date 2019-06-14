@@ -46,26 +46,30 @@ interface MicrosubItemStorageInterface extends ContentEntityStorageInterface {
    *
    * @param int $channel_id
    *   The channel ID to filter by.
+   * @param $is_read
+   *   is_read or not.
    * @param int $limit
    *   (optional) The number of items to return. Defaults to 20.
    *
    * @return \Drupal\indieweb_microsub\Entity\MicrosubItemInterface[]
    *   An array of the items.
    */
-  public function loadByChannel($channel_id, $limit = 20);
+  public function loadByChannel($channel_id, $is_read = NULL, $limit = 20);
 
   /**
    * Loads microsub items filtered by a source.
    *
    * @param int $source_id
    *   The source ID to filter by.
+   * @param $is_read
+   *   is_read or not.
    * @param int $limit
    *   (optional) The number of items to return. Defaults to 20.
    *
    * @return \Drupal\indieweb_microsub\Entity\MicrosubItemInterface[]
    *   An array of the items.
    */
-  public function loadBySource($source_id, $limit = 20);
+  public function loadBySource($source_id, $is_read = NULL, $limit = 20);
 
   /**
    * Searches microsub items optionally filtered by a channel.
@@ -74,13 +78,15 @@ interface MicrosubItemStorageInterface extends ContentEntityStorageInterface {
    *   The search query.
    * @param int $channel_id
    *   The channel ID to filter by.
+   * @param $is_read
+   *   is_read or not.
    * @param int $limit
    *   (optional) The number of items to return. Defaults to 20.
    *
    * @return \Drupal\indieweb_microsub\Entity\MicrosubItemInterface[]
    *   An array of the items.
    */
-  public function searchItems($search, $channel_id = NULL, $limit = 20);
+  public function searchItems($search, $channel_id = NULL, $is_read = NULL, $limit = 20);
 
   /**
    * Change read status of one or more items.
