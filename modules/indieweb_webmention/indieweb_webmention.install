@@ -1,0 +1,34 @@
+<?php
+
+/**
+ * @file
+ * Install file
+ */
+
+use Drupal\Core\Field\BaseFieldDefinition;
+
+/**
+ * Installs the uuid field for syndications.
+ */
+function indieweb_webmention_update_8001() {
+  $field_storage_definition = BaseFieldDefinition::create('uuid')
+      ->setLabel(t('UUID'));
+
+    \Drupal::entityDefinitionUpdateManager()
+      ->installFieldStorageDefinition('uuid', 'indieweb_syndication', 'indieweb_webmention', $field_storage_definition);
+}
+
+/**
+ * Generate uuid values for syndications.
+ */
+function indieweb_webmention_update_8002() {
+  $uuid = \Drupal::service('uuid');
+  /** @var \Drupal\indieweb_webmention\Entity\Syndication[] $syndications */
+  $syndications = \Drupal::entityTypeManager()->getStorage('indieweb_syndication')->loadMultiple();
+  foreach ($syndications as $syndication) {
+    if (empty($syndication->uuid())) {
+      $syndication->set('uuid', $uuid->generate());
+      $syndication->save();
+    }
+  }
+}

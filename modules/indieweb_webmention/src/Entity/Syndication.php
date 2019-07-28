@@ -35,6 +35,7 @@ use Drupal\Core\Field\BaseFieldDefinition;
  *   base_table = "webmention_syndication",
  *   entity_keys = {
  *     "id" = "id",
+ *     "uuid" = "uuid"
  *   },
  *   links = {
  *     "delete-form" = "/admin/content/syndication/{indieweb_syndication}/delete",

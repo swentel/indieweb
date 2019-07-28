@@ -784,7 +784,8 @@ abstract class IndiewebBrowserTestBase extends BrowserTestBase {
     $values = [
       'entity_id' => $entity_id,
       'entity_type_id' => $entity_type_id,
-      'url' => $url
+      'url' => $url,
+      'uuid' => 'uuid-default',
     ];
 
     \Drupal::database()
