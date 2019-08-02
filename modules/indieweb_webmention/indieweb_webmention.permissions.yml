@@ -1,10 +1,14 @@
-view indieweb syndications:
+view syndication entities:
   title: 'View syndications'
-  description: 'Allow access to the overview page of all syndications.'
+  description: 'Allow to view syndications.'
+
+administer syndication entities:
+  title: 'Administer syndication entities'
+  description: 'Allow to access the administration form to manage syndications.'
 
 administer webmention entities:
   title: 'Administer webmention entities'
-  description: 'Allow to access the administration form to configure webmentions.'
+  description: 'Allow to access the administration form to manage webmentions.'
 
 add webmention entities:
   title: 'Create new webmention'

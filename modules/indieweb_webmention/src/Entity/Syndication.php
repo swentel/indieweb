@@ -20,7 +20,7 @@ use Drupal\Core\Field\BaseFieldDefinition;
  *     plural = "@count Syndications",
  *   ),
  *   persistent_cache = FALSE,
- *   admin_permission = "administer webmention entities",
+ *   admin_permission = "administer syndication entities",
  *   handlers = {
  *     "views_data" = "Drupal\views\EntityViewsData",
  *     "storage" = "Drupal\indieweb_webmention\Entity\Storage\SyndicationStorage",
@@ -28,6 +28,7 @@ use Drupal\Core\Field\BaseFieldDefinition;
  *     "form" = {
  *       "delete" = "Drupal\Core\Entity\ContentEntityDeleteForm",
  *     },
+ *     "access" = "Drupal\indieweb_webmention\Entity\SyndicationAccessControlHandler",
  *     "route_provider" = {
  *      "html" = "Drupal\Core\Entity\Routing\AdminHtmlRouteProvider",
  *     },
