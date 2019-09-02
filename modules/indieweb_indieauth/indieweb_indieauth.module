@@ -18,8 +18,8 @@ function indieweb_indieauth_page_attachments_alter(array &$attachments) {
     if (($config = \Drupal::config('indieweb_indieauth.settings')) && ($config->get('expose_link_tag'))) {
 
       if ($config->get('auth_internal')) {
-        $authorization_endpoint = Url::fromRoute('indieweb.indieauth.auth_endpoint', [], ['absolute' => TRUE])->toString();
-        $token_endpoint = Url::fromRoute('indieweb.indieauth.token_endpoint', [], ['absolute' => TRUE])->toString();
+        $authorization_endpoint = Url::fromRoute('indieweb.indieauth.auth', [], ['absolute' => TRUE])->toString();
+        $token_endpoint = Url::fromRoute('indieweb.indieauth.token', [], ['absolute' => TRUE])->toString();
       }
       else {
         $authorization_endpoint = $config->get('authorization_endpoint');

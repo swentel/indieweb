@@ -139,8 +139,8 @@ class IndieAuthController extends ControllerBase {
     // ------------------------------------------------------------------------
     // GET request: redirect to the auth/form url. We work like this since
     // submitting the 'Authorize' form, we get into a POST request, which gets
-    // into the this controller again and we want to verify authorization
-    // requests here as well.
+    // into this controller again and we want to verify authorization requests
+    // here as well.
     // See https://indieauth.spec.indieweb.org/#authentication-request
     // ------------------------------------------------------------------------
 

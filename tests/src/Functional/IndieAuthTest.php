@@ -272,6 +272,11 @@ class IndieAuthTest extends IndiewebBrowserTestBase {
     // Enable internal.
     $this->setIndieAuthInternal();
 
+    $this->drupalGet('<front>');
+    $this->assertSession()->statusCodeEquals(200);
+    $this->assertSession()->responseContains('indieauth/auth');
+    $this->assertSession()->responseContains('indieauth/token');
+
     // -------------------------------------------------------
     // Try to authorize as a normal user with no permission
     // -------------------------------------------------------
