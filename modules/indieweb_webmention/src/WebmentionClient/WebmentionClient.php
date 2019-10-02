@@ -244,7 +244,7 @@ class WebmentionClient implements WebmentionClientInterface {
 
                 // Trigger cache if configured.
                 if ($key == 'photo') {
-                  \Drupal::service('indieweb.media_cache.client')->applyImageCache($author_value);
+                  \Drupal::service('indieweb.media_cache.client')->applyImageCache($author_value, 'avatar', 'webmention_avatar');
                 }
               }
             }

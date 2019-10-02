@@ -109,7 +109,7 @@ class EntityReferenceWebmentionFormatter extends EntityReferenceFormatterBase {
           '#replace_comment_user_picture' => $this->getSetting('replace_comment_user_picture'),
           '#property' => $entity->getProperty(),
           '#author_name' => $entity->getAuthorName(),
-          '#author_photo' => \Drupal::service('indieweb.media_cache.client')->applyImageCache($entity->getAuthorAvatar()),
+          '#author_photo' => \Drupal::service('indieweb.media_cache.client')->applyImageCache($entity->getAuthorAvatar(), 'avatar', 'webmention_avatar'),
           '#created' => $entity->getCreatedTime(),
           '#source' => $entity->getSource(),
           '#content_text' => $entity->getPlainContent(),

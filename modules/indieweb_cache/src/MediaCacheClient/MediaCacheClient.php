@@ -53,6 +53,7 @@ class MediaCacheClient extends MediaCacheClientDefault {
 
         // Store images forever.
         if (
+            ($context == 'webmention_avatar' && $cache->get('protect_webmention_avatar_from_flush')) ||
             ($context == 'webmention_image' && $cache->get('protect_webmention_image_from_flush')) ||
             ($context == 'post_context_image' && $cache->get('protect_webmention_image_from_flush'))
           ) {

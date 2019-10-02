@@ -1,5 +1,6 @@
 enable: false
 use_imagecache_external: false
+protect_webmention_avatar_from_flush: false
 protect_webmention_image_from_flush: false
 protect_post_context_image_from_flush: false
 image_style_avatar: ''

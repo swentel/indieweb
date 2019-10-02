@@ -14,6 +14,9 @@ indieweb_cache.settings:
     image_style_photo:
       type: string
       label: 'The image style to apply to the downloaded image for any other photo'
+    protect_webmention_avatar_from_flush:
+      type: boolean
+      label: 'Protect webmention avatars from flush'
     protect_webmention_image_from_flush:
       type: boolean
       label: 'Protect webmention images from flush'

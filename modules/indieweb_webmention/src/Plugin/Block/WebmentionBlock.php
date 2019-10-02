@@ -158,7 +158,7 @@ class WebmentionBlock extends BlockBase {
         '#show_created' => $show_created,
         '#property' => $record->property,
         '#author_name' => $record->author_name,
-        '#author_photo' => \Drupal::service('indieweb.media_cache.client')->applyImageCache($record->author_photo),
+        '#author_photo' => \Drupal::service('indieweb.media_cache.client')->applyImageCache($record->author_photo, 'avatar', 'webmention_avatar'),
         '#created' => $record->created,
         '#source' => $record->source,
         '#content_text' => $record->content_text,

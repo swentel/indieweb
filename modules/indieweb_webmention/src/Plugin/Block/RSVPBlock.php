@@ -148,7 +148,7 @@ class RSVPBlock extends BlockBase {
 
       $image = '';
       if ($show_avatar && !empty($record->author_photo)) {
-        $image = '<img width="40" src="' . \Drupal::service('indieweb.media_cache.client')->applyImageCache($record->author_photo) . '" />&nbsp;';
+        $image = '<img width="40" src="' . \Drupal::service('indieweb.media_cache.client')->applyImageCache($record->author_photo, 'avatar', 'webmention_avatar') . '" />&nbsp;';
       }
 
       $rsvp = $record->rsvp;
