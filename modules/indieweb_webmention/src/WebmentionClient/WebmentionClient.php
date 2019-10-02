@@ -269,6 +269,11 @@ class WebmentionClient implements WebmentionClientInterface {
             $webmention->setCreatedTime(strtotime($data['published']));
           }
 
+          // Updated.
+          if (isset($data['updated']) && !empty($data['updated'])) {
+            $webmention->setChangedTime(strtotime($data['updated']));
+          }
+
           // Property. 'mention-of' is the default if we can't detect anything
           // specific. In case rsvp is set, set $data['url'] to 'in-reply-to'.
           $property = 'mention-of';
