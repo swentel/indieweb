@@ -26,8 +26,12 @@ class WebmentionBlock extends BlockBase {
       'show_reposts' => FALSE,
       'show_replies' => FALSE,
       'show_avatar' => TRUE,
+      'show_bookmarks' => FALSE,
+      'show_mentions' => FALSE,
       'show_created' => FALSE,
       'number_of_posts' => 10,
+      'sort_field' => 'id',
+      'sort_direction' => 'DESC',
       'detect_identical' => FALSE,
     ];
   }
@@ -52,6 +56,18 @@ class WebmentionBlock extends BlockBase {
       '#type' => 'checkbox',
       '#title' => $this->t('Reposts'),
       '#default_value' => $this->configuration['show_reposts'],
+    ];
+
+    $form['webmentions']['show_mentions'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Mentions'),
+      '#default_value' => $this->configuration['show_mentions'],
+    ];
+
+    $form['webmentions']['show_bookmarks'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Bookmarks'),
+      '#default_value' => $this->configuration['show_bookmarks'],
     ];
 
     $form['webmentions']['show_replies'] = [
@@ -79,6 +95,27 @@ class WebmentionBlock extends BlockBase {
       '#default_value' => $this->configuration['number_of_posts'],
     ];
 
+    $form['webmentions']['sort_field'] = [
+      '#type' => 'select',
+      '#title' => $this->t('Sort by'),
+      '#default_value' => $this->configuration['sort_field'],
+      '#options' => [
+        'id' => 'Webmention ID',
+        'created' => 'Created time',
+        'changed' => 'Updated time',
+      ],
+    ];
+
+    $form['webmentions']['sort_direction'] = [
+      '#type' => 'select',
+      '#title' => $this->t('Sort direction'),
+      '#default_value' => $this->configuration['sort_direction'],
+      '#options' => [
+        'DESC' => $this->t('Descending'),
+        'ASC' => $this->t('Ascending')
+      ],
+    ];
+
     $form['webmentions']['detect_identical'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('Detect identical mentions'),
@@ -97,9 +134,13 @@ class WebmentionBlock extends BlockBase {
     $this->configuration['show_likes'] = $values['show_likes'];
     $this->configuration['show_reposts'] = $values['show_reposts'];
     $this->configuration['show_replies'] = $values['show_replies'];
+    $this->configuration['show_mentions'] = $values['show_mentions'];
+    $this->configuration['show_bookmarks'] = $values['show_bookmarks'];
     $this->configuration['show_avatar'] = $values['show_avatar'];
     $this->configuration['show_created'] = $values['show_created'];
     $this->configuration['number_of_posts'] = $values['number_of_posts'];
+    $this->configuration['sort_field'] = $values['sort_field'];
+    $this->configuration['sort_direction'] = $values['sort_direction'];
     $this->configuration['detect_identical'] = $values['detect_identical'];
   }
 
@@ -113,6 +154,8 @@ class WebmentionBlock extends BlockBase {
       'like-of' => 'like-of',
       'repost-of' => 'repost-of',
       'in-reply-to' => 'in-reply-to',
+      'bookmark-of' => 'bookmark-of',
+      'mention-of' => 'mention-of',
     ];
     if (!$this->configuration['show_replies']) {
       unset($types['in-reply-to']);
@@ -123,6 +166,12 @@ class WebmentionBlock extends BlockBase {
     if (!$this->configuration['show_reposts']) {
       unset($types['repost-of']);
     }
+    if (!$this->configuration['show_mentions']) {
+      unset($types['mention-of']);
+    }
+    if (!$this->configuration['show_bookmarks']) {
+      unset($types['bookmark-of']);
+    }
 
     // Return early if no types selected.
     if (empty($types)) {
@@ -131,12 +180,14 @@ class WebmentionBlock extends BlockBase {
 
     $show_avatar = $this->configuration['show_avatar'];
     $show_created = $this->configuration['show_created'];
+    $sort_field = $this->configuration['sort_field'];
+    $sort_direction = $this->configuration['sort_direction'];
 
     $items = [];
 
     // Get mentions. We use a query and not entity api at all to make sure this
     // block is fast because if you have tons of webmentions, this can be rough.
-    $records = \Drupal::entityTypeManager()->getStorage('indieweb_webmention')->getWebmentions($types, \Drupal::request()->getPathInfo(), $this->configuration['number_of_posts']);
+    $records = \Drupal::entityTypeManager()->getStorage('indieweb_webmention')->getWebmentions($types, \Drupal::request()->getPathInfo(), $this->configuration['number_of_posts'], $sort_field, $sort_direction);
 
     $identical = [];
     foreach ($records as $record) {

@@ -1,4 +1,4 @@
-# Schema for the views plugins of the Indieweb module.
+# Schema for the views plugins of the Indieweb webmention module.
 
 views.field.webmention_bulk_form:
   type: views_field_bulk_form
@@ -7,3 +7,23 @@ views.field.webmention_bulk_form:
 views.filter.webmention_filter_select:
   type: views.filter.many_to_one
   label: 'Webmention select'
+
+views.row.webmention_template:
+  type: views_row
+  label: 'Render options'
+  mapping:
+    show_avatar:
+      type: integer
+      label: 'Show avatar'
+    show_summary:
+      type: boolean
+      label: 'Show summary'
+    show_photo:
+      type: boolean
+      label: 'Show photo'
+    show_created:
+      type: boolean
+      label: 'Show created'
+    replace_comment_user_picture:
+      type: string
+      label: 'Replace comment user picture'

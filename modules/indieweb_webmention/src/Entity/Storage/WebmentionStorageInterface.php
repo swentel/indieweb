@@ -15,10 +15,14 @@ interface WebmentionStorageInterface extends ContentEntityStorageInterface {
    *   The target path.
    * @param int $number_of_posts
    *   The number of posts
+   * @param string $sort_field
+   *   The field to sort by
+   * @param string $sort_direction
+   *   The direction to sort by
    *
    * @return mixed
    */
-  public function getWebmentions($types, $target, $number_of_posts = 0);
+  public function getWebmentions($types, $target, $number_of_posts = 0, $sort_field = 'id', $sort_direction = 'DESC');
 
   /**
    * Returns options for a single webmention property.

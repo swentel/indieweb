@@ -121,6 +121,9 @@ field.formatter.settings.entity_reference_webmention:
     show_summary:
       type: boolean
       label: 'Show summary'
+    show_photo:
+      type: boolean
+      label: 'Show photo'
     show_created:
       type: boolean
       label: 'Show created'

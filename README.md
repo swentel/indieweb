@@ -109,6 +109,10 @@ You can also use the built-in endpoint so you don't need to rely on external ser
 - RSVP: shows people attending, interested for an event
 - Pingbacks: render all urls to site pinging back per page
 
+You can also use Views to create pages or blocks. In case of a block, you can use the 'Webmention current path' option
+for the 'Target' field in the contextual filters section of views. Use the 'Webmention template' row plugin to render
+the webmentions.
+
 **Theming**
 
 Webmentions are rendered through templates. Suggestions are available per property (e.g. webmention--like-of.tpl.php).

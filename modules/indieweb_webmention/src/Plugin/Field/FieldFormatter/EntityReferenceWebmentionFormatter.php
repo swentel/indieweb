@@ -42,21 +42,21 @@ class EntityReferenceWebmentionFormatter extends EntityReferenceFormatterBase {
       '#title' => t('Show summary'),
       '#type' => 'checkbox',
       '#default_value' => $this->getSetting('show_summary'),
-      '#description' => $this->t('Use this if you are doing custom comment templating.'),
+      '#description' => $this->t('Shows meta information, like author and created time.'),
     ];
 
     $elements['show_avatar'] = [
       '#title' => t('Show avatar'),
       '#type' => 'checkbox',
       '#default_value' => $this->getSetting('show_avatar'),
-      '#description' => $this->t('This will only show up if summary is enabled. Use this if you are doing custom comment templating.'),
+      '#description' => $this->t('This will only show up if summary is enabled.'),
     ];
 
     $elements['show_created'] = [
       '#title' => t('Show created time'),
       '#type' => 'checkbox',
       '#default_value' => $this->getSetting('show_created'),
-      '#description' => $this->t('This will only show up if summary is enabled. Use this if you are doing custom comment templating.'),
+      '#description' => $this->t('This will only show up if summary is enabled.'),
     ];
 
     $elements['show_photo'] = [
@@ -82,9 +82,11 @@ class EntityReferenceWebmentionFormatter extends EntityReferenceFormatterBase {
   public function settingsSummary() {
     $summary = [];
     $summary[] = t('Show summary') . ': ' . ($this->getSetting('show_summary') ? t('yes') : t('no'));
-    $summary[] = t('Show avatar') . ': ' . ($this->getSetting('show_avatar') ? t('yes') : t('no'));
+    if ($this->getSetting('show_summary')) {
+      $summary[] = t('Show avatar') . ': ' . ($this->getSetting('show_avatar') ? t('yes') : t('no'));
+      $summary[] = t('Show created time') . ': ' . ($this->getSetting('show_created') ? t('yes') : t('no'));
+    }
     $summary[] = t('Show photo') . ': ' . ($this->getSetting('show_photo') ? t('yes') : t('no'));
-    $summary[] = t('Show created time') . ': ' . ($this->getSetting('show_created') ? t('yes') : t('no'));
     $summary[] = t('Replace comment user picture') . ': ' . ($this->getSetting('replace_comment_user_picture') ? t('yes') : t('no'));
     return $summary;
   }

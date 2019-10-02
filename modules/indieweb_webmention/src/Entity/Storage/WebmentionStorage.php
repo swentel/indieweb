@@ -15,7 +15,7 @@ class WebmentionStorage extends SqlContentEntityStorage implements WebmentionSto
   /**
    * {@inheritdoc}
    */
-  public function getWebmentions($types, $target, $number_of_posts = 0) {
+  public function getWebmentions($types, $target, $number_of_posts = 0, $sort_field = 'id', $sort_direction = 'DESC') {
     $query = $this->database
       ->select('webmention_received', 'w')
       ->fields('w')
@@ -23,7 +23,7 @@ class WebmentionStorage extends SqlContentEntityStorage implements WebmentionSto
       ->condition('target', $target)
       ->condition('property', $types, 'IN');
 
-    $query->orderBy('id', 'DESC');
+    $query->orderBy($sort_field, $sort_direction);
 
     if ($number_of_posts) {
       $query->range(0, $number_of_posts);

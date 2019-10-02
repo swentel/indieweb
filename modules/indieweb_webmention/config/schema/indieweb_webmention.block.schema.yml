@@ -11,6 +11,12 @@ block.settings.indieweb_webmention:
     show_replies:
       type: boolean
       label: 'Show replies'
+    show_mentions:
+      type: boolean
+      label: 'Show mentions'
+    show_bookmarks:
+      type: boolean
+      label: 'Show bookmarks'
     show_avatar:
       type: boolean
       label: 'Show avatar'
@@ -20,6 +26,12 @@ block.settings.indieweb_webmention:
     number_of_posts:
       type: integer
       label: 'Number of posts in block'
+    sort_field:
+      type: string
+      label: 'Field to sort by'
+    sort_direction:
+      type: string
+      label: 'Direction to sort by'
     detect_identical:
       type: boolean
       label: 'Whether to detect identical mentions by author and type'

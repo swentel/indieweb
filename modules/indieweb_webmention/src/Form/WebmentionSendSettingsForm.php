@@ -60,7 +60,7 @@ class WebmentionSendSettingsForm extends ConfigFormBase {
     $form['custom_wrapper'] = [
       '#type' => 'fieldset',
       '#title' => $this->t('Custom URL\'s for content'),
-      '#description' => $this->t('The "Publish to" fieldset on content can contain two additional ways to send webmentions to other sites: a textfield to enter a custom URL or a select which listens to a "link" field on node types.'),
+      '#description' => $this->t('The "Publish to" fieldset on content can contain two additional ways to send webmentions to other sites: a textfield to enter a custom URL or a select field which listens to a "link" field on the current form.'),
     ];
 
     $comment_enabled = \Drupal::moduleHandler()->moduleExists('comment');
@@ -93,8 +93,8 @@ class WebmentionSendSettingsForm extends ConfigFormBase {
 
     $form['custom_wrapper']['send_custom_url'] = [
       '#type' => 'checkbox',
-      '#title' => $this->t('Expose textfield'),
-      '#description' => $this->t('Add a textfield to enter a custom URL to send a webmention.'),
+      '#title' => $this->t('Custom URL'),
+      '#description' => $this->t('Add a textfield to enter a custom URL to send a webmention to.'),
       '#default_value' => $config->get('send_custom_url'),
     ];
 
