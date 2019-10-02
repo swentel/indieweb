@@ -580,10 +580,3 @@ function _indieweb_webmention_extra_fields_display(array &$build, EntityInterfac
     }
   }
 }
-
-/**
- * Implements hook_views_plugins_row_alter().
- */
-function indieweb_webmention_views_plugins_row_alter(array &$plugins) {
-  kint($plugins);
-}
