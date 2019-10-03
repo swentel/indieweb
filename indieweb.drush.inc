@@ -22,7 +22,8 @@ function indieweb_drush_command() {
       'required-arguments' => 2,
       'arguments' => [
         'search' => 'The avatar to search',
-        'replace' => 'The avatar to replace'
+        'replace' => 'The avatar to replace',
+        'field_name' => 'The condition field'
       ],
     ],
     'indieweb-process-webmentions' => [
