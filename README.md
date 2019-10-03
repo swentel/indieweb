@@ -432,6 +432,7 @@ drush -l https://example.com indieweb-send-webmentions
 
 - indieweb-send-webmentions: handles the queue for sending webmentions.
 - indieweb-process-webmentions: process the webmention received on the internal endpoint
+- indieweb-replace-avatar: replaces author avatars in webmentions
 - indieweb-external-auth-map: maps an existing user account with a domain.
 - indieweb-microsub-fetch-items: fetch items for the built-in microsub server.
 - indieweb-fetch-post-contexts: fetches context for a post

@@ -16,6 +16,15 @@ function indieweb_drush_command() {
       'description' => 'Send webmentions',
       'aliases' => ['isw'],
     ],
+    'indieweb-replace-avatar' => [
+      'description' => 'Replace avatar',
+      'aliases' => ['ira', 'indieweb-replace-avatar'],
+      'required-arguments' => 2,
+      'arguments' => [
+        'search' => 'The avatar to search',
+        'replace' => 'The avatar to replace'
+      ],
+    ],
     'indieweb-process-webmentions' => [
       'description' => 'Process webmentions',
       'aliases' => ['ipw'],
@@ -85,4 +94,32 @@ function drush_indieweb_microsub_fetch_items() {
  */
 function drush_indieweb_externalauth_map_account($uid = 0, $domain = '') {
   \Drupal::service('indieweb.indieauth.client')->externalauthMapAccount($uid, $domain, TRUE);
+}
+
+/**
+ * Replace avatar.
+ *
+ * @param string $search
+ * @param string $replace
+ * @param string $field_name
+ *
+ * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+ * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
+ * @throws \Drupal\Core\Entity\EntityStorageException
+ */
+function drush_indieweb_replace_avatar($search = '', $replace = '', $field_name = 'author_photo') {
+  $ids = \Drupal::entityQuery('indieweb_webmention')
+    ->condition($field_name, $search)
+    ->execute();
+
+  if (!empty($ids)) {
+    /** @var \Drupal\indieweb_webmention\Entity\WebmentionInterface[] $webmentions */
+    $webmentions = \Drupal::entityTypeManager()->getStorage('indieweb_webmention')->loadMultiple($ids);
+    foreach ($webmentions as $webmention) {
+      $webmention->set('author_photo', $replace);
+      $webmention->save();
+    }
+  }
+
+  drush_print('Replaced avatars: ' . count($ids));
 }
