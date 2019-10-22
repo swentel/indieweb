@@ -45,11 +45,15 @@ class MicrosubSourceForm extends ContentEntityForm {
       $options[$channel->id()] = $channel->label();
     }
 
+    $default_channel = $source->getChannelId();
+    if (!empty(\Drupal::request()->get('channel'))) {
+      $default_channel = \Drupal::request()->get('channel');
+    }
     $form['channel_id'] = [
       '#type' => 'select',
       '#title' => $this->t('Channel'),
       '#options' => $options,
-      '#default_value' => $source->getChannelId(),
+      '#default_value' => $default_channel,
     ];
 
     // contexts
