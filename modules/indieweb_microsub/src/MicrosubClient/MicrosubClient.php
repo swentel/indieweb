@@ -55,15 +55,6 @@ class MicrosubClient implements MicrosubClientInterface {
 
           // Parse the body.
           $parsed = $xray->parse($url, $body, ['expect' => 'feed']);
-
-          // Some feeds start with <rss (e.g. wumo). It isn't possible yet to
-          // add our own parsers, so do it here.
-          if ($parsed && isset($parsed['data']['type']) && $parsed['data']['type'] == 'unknown') {
-            if (substr($body, 0, 4) == '<rss') {
-              $parsed = Formats\XML::parse($body, $url);
-            }
-          }
-
           if ($parsed && isset($parsed['data']['type']) && $parsed['data']['type'] == 'feed') {
 
             $context = $post_context_enabled ? $source->getPostContext() : [];
@@ -538,7 +529,7 @@ class MicrosubClient implements MicrosubClientInterface {
           }
         }
 
-        $parsed = Formats\HTML::parse(NULL, $body, $url, ['expect' => 'feed']);
+        $parsed = Formats\HTML::parse(NULL, ['body' => $body, 'url' => $url, 'code' => 200], ['expect' => 'feed']);
         if ($parsed && isset($parsed['data']['type']) && $parsed['data']['type'] == 'feed') {
           $feeds[] = [
             'url' => $url,
