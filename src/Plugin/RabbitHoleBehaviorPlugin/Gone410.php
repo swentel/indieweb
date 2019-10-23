@@ -2,8 +2,8 @@
 
 namespace Drupal\indieweb\Plugin\RabbitHoleBehaviorPlugin;
 
+use Drupal\Core\Entity\EntityInterface;
 use Symfony\Component\HttpFoundation\Response;
-use Drupal\Core\Entity\Entity;
 use Drupal\rabbit_hole\Plugin\RabbitHoleBehaviorPluginBase;
 use Symfony\Component\HttpKernel\Exception\GoneHttpException;
 
@@ -20,7 +20,7 @@ class Gone410 extends RabbitHoleBehaviorPluginBase {
   /**
    * {@inheritdoc}
    */
-  public function performAction(Entity $entity, Response $current_response = NULL) {
+  public function performAction(EntityInterface $entity, Response $current_response = NULL) {
     throw new GoneHttpException('This content is gone');
   }
 
