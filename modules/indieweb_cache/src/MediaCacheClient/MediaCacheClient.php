@@ -3,6 +3,7 @@
 namespace Drupal\indieweb_cache\MediaCacheClient;
 
 use Drupal\Component\Utility\UrlHelper;
+use Drupal\Core\File\FileSystemInterface;
 use Drupal\image\Entity\ImageStyle;
 use Drupal\indieweb\MediaCacheClient\MediaCacheClientDefault;
 
@@ -125,7 +126,7 @@ class MediaCacheClient extends MediaCacheClientDefault {
       $directory = $default_scheme . '://' . $config->get('imagecache_directory');
     }
 
-    if (file_prepare_directory($directory, FILE_CREATE_DIRECTORY | FILE_MODIFY_PERMISSIONS)) {
+    if (\Drupal::service('file_system')->prepareDirectory($directory, FileSystemInterface::CREATE_DIRECTORY | FileSystemInterface::MODIFY_PERMISSIONS)) {
       $needs_refresh = FALSE;
       $filepath = $directory . '/' . $filename;
       // Allow modules to add custom logic to check if it needs to be re-fetched.

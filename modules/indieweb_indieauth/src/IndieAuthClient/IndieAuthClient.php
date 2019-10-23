@@ -2,6 +2,7 @@
 
 namespace Drupal\indieweb_indieauth\IndieAuthClient;
 
+use Drupal\Core\File\FileSystemInterface;
 use Drupal\Core\Site\Settings;
 use Lcobucci\JWT\Parser;
 use Lcobucci\JWT\Signer\Rsa\Sha512;
@@ -141,7 +142,7 @@ class IndieAuthClient implements IndieAuthClientInterface {
 
       $paths = [];
       $dir_path = Settings::get('indieauth_keys_path', 'public://indieauth');
-      file_prepare_directory($dir_path, FILE_CREATE_DIRECTORY | FILE_MODIFY_PERMISSIONS);
+      \Drupal::service('file_system')->prepareDirectory($dir_path, FileSystemInterface::CREATE_DIRECTORY | FileSystemInterface::MODIFY_PERMISSIONS);
 
       foreach (['public', 'private'] as $name) {
 

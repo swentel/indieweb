@@ -5,6 +5,8 @@
  * IndieWeb Micropub install file.
  */
 
+use Drupal\Core\File\FileSystemInterface;
+
 /**
  * Implements hook_requirements().
  */
@@ -15,7 +17,7 @@ function indieweb_micropub_requirements($phase) {
 
     $directory = 'public://micropub';
     if (!is_dir($directory)) {
-      file_prepare_directory($directory, FILE_CREATE_DIRECTORY | FILE_MODIFY_PERMISSIONS);
+      \Drupal::service('file_system')->prepareDirectory($directory, FileSystemInterface::CREATE_DIRECTORY | FileSystemInterface::MODIFY_PERMISSIONS);
     }
 
     if (!is_dir($directory)) {

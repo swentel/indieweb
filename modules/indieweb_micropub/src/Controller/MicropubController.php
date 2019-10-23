@@ -5,6 +5,7 @@ namespace Drupal\indieweb_micropub\Controller;
 use Drupal\comment\CommentInterface;
 use Drupal\comment\Entity\Comment;
 use Drupal\Core\Controller\ControllerBase;
+use Drupal\Core\File\FileSystemInterface;
 use Drupal\Core\Language\LanguageInterface;
 use Drupal\Core\Site\Settings;
 use Drupal\Core\Url;
@@ -1126,7 +1127,7 @@ class MicropubController extends ControllerBase {
           continue;
         }
 
-        file_prepare_directory($destination, FILE_CREATE_DIRECTORY);
+        \Drupal::service('file_system')->prepareDirectory($destination, FileSystemInterface::CREATE_DIRECTORY);
         if ($file = file_save_upload($file_key, $validators, $destination, $delta)) {
           $uploaded_files[] = $file;
         }
