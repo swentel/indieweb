@@ -483,7 +483,7 @@ class MicropubController extends ControllerBase {
 
         $geocache_title = 'Geocache';
         if (!empty($this->location['name'])) {
-          $log_type = $this->input['geocache-log-type'] == 'found' ? 'Found' : 'Did not find';
+          $log_type = $this->input['geocache-log-type'][0] == 'found' ? 'Found' : 'Did not find';
           $geocache_title = $log_type . ' ' . $this->location['name'];
         }
 
