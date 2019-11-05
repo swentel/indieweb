@@ -17,14 +17,14 @@ class MicrosubController extends ControllerBase {
    * @var  \Drupal\Core\Config\Config
    */
   protected $config;
-  
+
   /**
    * Request object.
    *
    * @var \Symfony\Component\HttpFoundation\Request $request
    */
   protected $request;
-  
+
   /**
    * @var \Drupal\indieweb_indieauth\IndieAuthClient\IndieAuthClientInterface
    */
@@ -166,6 +166,11 @@ class MicrosubController extends ControllerBase {
           if ($method == 'remove') {
             $response = $this->removeItem();
           }
+
+          if ($method == 'move') {
+            $response = $this->moveItem();
+          }
+
           break;
 
         // ---------------------------------------------------------
@@ -261,7 +266,7 @@ class MicrosubController extends ControllerBase {
    * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    */
   protected function getTimeline($search = NULL) {
-    $response = [];
+    $response = ['items' => []];
 
     $items = [];
     $paging = [];
@@ -746,6 +751,31 @@ class MicrosubController extends ControllerBase {
     $entry_id = $this->request->get('entry');
     if ($entry_id) {
      $this->entityTypeManager()->getStorage('indieweb_microsub_item')->removeItem($entry_id);
+    }
+
+    return ['response' => [], 'code' => 200];
+  }
+
+  /**
+   * Moves a microsub item.
+   *
+   * @return array
+   *
+   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
+   */
+  protected function moveItem() {
+
+    $channel_id = $this->request->get('channel');
+
+    // Notifications is stored as channel 0.
+    if ($channel_id == 'notifications') {
+      $channel_id = 0;
+    }
+
+    $entries = $this->request->get('entry');
+    if ($entries && ($channel_id || $channel_id === 0)) {
+      $this->entityTypeManager()->getStorage('indieweb_microsub_item')->moveItem($entries, $channel_id);
     }
 
     return ['response' => [], 'code' => 200];

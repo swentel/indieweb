@@ -123,6 +123,14 @@ interface MicrosubItemStorageInterface extends ContentEntityStorageInterface {
   public function removeAllItemsBySource($source_id);
 
   /**
+   * Moves items from one channel to another.
+   *
+   * @param $entries
+   * @param $channel_id
+   */
+  public function moveItem($entries, $channel_id);
+
+    /**
    * Updates the items of this source to the new channel.
    *
    * @param $source_id

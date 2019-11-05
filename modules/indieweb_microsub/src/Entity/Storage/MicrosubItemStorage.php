@@ -116,6 +116,22 @@ class MicrosubItemStorage extends SqlContentEntityStorage implements MicrosubIte
   /**
    * {@inheritdoc}
    */
+  public function moveItem($entries, $channel_id) {
+
+    $operator = '=';
+    if (is_array($entries)) {
+      $operator = 'IN';
+    }
+
+    $this->database->update('microsub_item')
+      ->fields(['channel_id' => $channel_id])
+      ->condition('id', $entries, $operator)
+      ->execute();
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function updateItemsToNewChannel($source_id, $channel_id) {
     $this->database->update('microsub_item')
       ->fields(['channel_id' => $channel_id])
