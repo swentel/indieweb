@@ -324,6 +324,7 @@ class MicrosubController extends ControllerBase {
 
     // If microsub items found, go get them.
     if (!empty($microsub_items)) {
+      $author_name = '';
       foreach ($microsub_items as $item) {
 
         $data = $item->getData();
@@ -337,6 +338,11 @@ class MicrosubController extends ControllerBase {
             }
             $data->{$field} = $flat;
           }
+        }
+
+        // Check author name.
+        if ($source && !empty($data->author->name)) {
+          $author_name = $data->author->name;
         }
 
         // Apply media cache.
@@ -380,11 +386,14 @@ class MicrosubController extends ControllerBase {
       if ($source) {
         $microsub_source = $this->entityTypeManager()->getStorage('indieweb_microsub_source')->load($source);
         if ($microsub_source) {
-          $name = $microsub_source->label();
-          if (strpos($name, 'granary') !== FALSE) {
-            $name = 'Granary';
+          $source_name = $microsub_source->label();
+          if (strpos($source_name, 'granary') !== FALSE) {
+            $source_name = 'Granary';
           }
-          $response['source'] = (object) ['name' => $name];
+          elseif (!empty($author_name)) {
+            $source_name = $author_name;
+          }
+          $response['source'] = (object) ['name' => $source_name];
         }
       }
     }
