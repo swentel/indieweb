@@ -190,6 +190,9 @@ class MicrosubClient implements MicrosubClientInterface {
 
     if (isset($item['published'])) {
       $values['timestamp'] = strtotime($item['published']);
+      if (empty($values['timestamp']) || !$values['timestamp'] || (is_numeric($values['timestamp']) && $values['timestamp'] < 0)) {
+        $values['timestamp'] = \Drupal::time()->getCurrentTime();
+      }
     }
     else {
       $values['timestamp'] = \Drupal::time()->getCurrentTime();
