@@ -574,7 +574,7 @@ class MicrosubController extends ControllerBase {
   }
 
   /**
-   * Follow a source.
+   * Follow or update a source.
    *
    * @return array
    *
@@ -587,6 +587,8 @@ class MicrosubController extends ControllerBase {
 
     $url = $this->request->get('url');
     $channel_id = $this->request->get('channel');
+    $method = $this->request->get('method');
+
     if (!empty($channel_id) && !empty($url)) {
       $channel = $this->entityTypeManager()->getStorage('indieweb_microsub_channel')->load($channel_id);
       if ($channel) {
@@ -596,14 +598,25 @@ class MicrosubController extends ControllerBase {
           $uid = $token_uid;
         }
 
-        $values = [
-          'uid' => $uid,
-          'url' => $url,
-          'channel_id' => $channel_id,
-          'fetch_interval' => 86400,
-        ];
-        $source = $this->entityTypeManager()->getStorage('indieweb_microsub_source')->create($values);
-        $source->save();
+        if ($method == 'update') {
+          /** @var \Drupal\indieweb_microsub\Entity\MicrosubSourceInterface $source */
+          $sources = $this->entityTypeManager()->getStorage('indieweb_microsub_source')->loadByProperties(['url' => $url]);
+          if (!empty($sources) && count($sources) == 1) {
+            $source = array_shift($sources);
+            $source->set('channel_id', $channel_id);
+            $source->save();
+          }
+        }
+        else {
+          $values = [
+            'uid' => $uid,
+            'url' => $url,
+            'channel_id' => $channel_id,
+            'fetch_interval' => 86400,
+          ];
+          $source = $this->entityTypeManager()->getStorage('indieweb_microsub_source')->create($values);
+          $source->save();
+        }
         $return = ['response' => ['type' => 'feed', 'url' => $url], 'code' => 200];
       }
     }
