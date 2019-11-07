@@ -1,0 +1,23 @@
+# schema for indieweb_websub.settings
+indieweb_websub.settings:
+  type: config_object
+  label: 'Indieweb WebSub'
+  mapping:
+    hub_endpoint:
+      type: string
+      label: 'WebSub Hub endpoint'
+    expose_link_tag:
+      type: boolean
+      label: 'Expose WebSub link tag'
+    log_payload:
+      type: boolean
+      label: 'Log the payloads'
+    node_element:
+      type: string
+      label: 'Add WebSub element to node edit forms'
+    send_pub_handler:
+      type: string
+      label: 'How to handle the webmention send queue'
+    pages:
+      type: string
+      label: 'On which pages to expose the hub links'

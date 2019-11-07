@@ -1,0 +1,115 @@
+<?php
+
+/**
+ * @file
+ * IndieWeb WebSub module.
+ */
+
+use Drupal\Core\Entity\ContentEntityInterface;
+use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Form\FormStateInterface;
+
+define('INDIEWEB_WEBSUB_QUEUE', 'indieweb_websub');
+
+/**
+ * Implements hook_page_attachments_alter().
+ */
+function indieweb_websub_page_attachments_alter(array &$attachments) {
+
+  if (($config = \Drupal::config('indieweb_websub.settings')) && ($config->get('expose_link_tag'))) {
+    $current_path = \Drupal::request()->getRequestUri();
+    if (($pages = $config->get('pages')) && \Drupal::service('path.matcher')->matchPath($current_path, $pages)) {
+      $link = [
+        '#tag' => 'link',
+        '#attributes' => [
+          'rel' => 'hub',
+          'href' => $config->get('hub_endpoint'),
+        ],
+      ];
+      $attachments['#attached']['html_head'][] = [$link, 'hub_endpoint'];
+
+      $link = [
+        '#tag' => 'link',
+        '#attributes' => [
+          'rel' => 'self',
+          'href' => \Drupal::request()->getSchemeAndHttpHost() . $current_path,
+        ],
+      ];
+      $attachments['#attached']['html_head'][] = [$link, 'self_endpoint'];
+    }
+  }
+}
+
+/**
+ * Implements hook_form_BASE_FORM_ID_alter() for \Drupal\node\NodeForm.
+ */
+function indieweb_websub_form_node_form_alter(&$form, FormStateInterface $form_state) {
+  if (\Drupal::config('indieweb_websub.settings')->get('node_element') != 'none') {
+    _indieweb_websub_entity_form_alter($form, $form_state);
+  }
+}
+
+/**
+ * Helper function to add IndieWeb WebSub to fieldsets.
+ *
+ * @param $form
+ * @param \Drupal\Core\Form\FormStateInterface $form_state
+ */
+function _indieweb_websub_entity_form_alter(&$form, FormStateInterface $form_state) {
+  /** @var \Drupal\Core\Entity\EntityInterface $entity */
+  $entity = $form_state->getFormObject()->getEntity();
+  if ($entity && !\Drupal::service('indieweb.websub.client')->checkPublished($entity->id(), $entity->getEntityTypeId())) {
+    $default = \Drupal::config('indieweb_websub.settings')->get('node_element');
+    $form['indieweb_websub_wrapper'] = [
+      '#type' => 'details',
+      '#title' => t('WebSub'),
+      '#access' => \Drupal::currentUser()->hasPermission('publish to hub'),
+      '#group' => 'advanced',
+    ];
+    $form['indieweb_websub_wrapper']['publish_to_hub'] = [
+      '#type' => 'checkbox',
+      '#title' => t('Publish to hub'),
+      '#default_value' => ($default == 'expose_default') ? TRUE : FALSE,
+    ];
+    foreach (array_keys($form['actions']) as $action) {
+      if ($action != 'preview' && isset($form['actions'][$action]['#type']) && $form['actions'][$action]['#type'] === 'submit') {
+        $form['actions'][$action]['#submit'][] = '_indieweb_websub_entity_content_form_submit';
+      }
+    }
+  }
+}
+
+/**
+ * Form submission handler for indieweb WebSub.
+ *
+ * @param $form
+ * @param \Drupal\Core\Form\FormStateInterface $form_state
+ *
+ * @see indieweb_websub_form_node_form_alter()
+ */
+function _indieweb_websub_entity_content_form_submit($form, FormStateInterface $form_state) {
+  /** @var \Drupal\Core\Entity\EntityInterface $entity */
+  $entity = $form_state->getFormObject()->getEntity();
+  if (method_exists($entity, 'isPublished') && $entity->isPublished() && $form_state->getValue('publish_to_hub')) {
+    \Drupal::service('indieweb.websub.client')->createQueueItem($entity->id(), $entity->getEntityTypeId());
+  }
+}
+
+/**
+ * Implements hook_entity_delete().
+ */
+function indieweb_websub_entity_delete(EntityInterface $entity) {
+  if ($entity instanceof ContentEntityInterface) {
+    \Drupal::entityTypeManager()->getStorage('indieweb_websubpub')->deleteByIdAndType($entity->id(), $entity->getEntityTypeId());
+  }
+}
+
+/**
+ * Implements hook_cron().
+ */
+function indieweb_websub_cron() {
+  if (\Drupal::config('indieweb_websub.settings')->get('send_pub_handler') == 'cron') {
+    \Drupal::service('indieweb.websub.client')->handleQueue();
+  }
+}
+

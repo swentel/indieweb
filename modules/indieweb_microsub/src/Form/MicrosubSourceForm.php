@@ -69,6 +69,28 @@ class MicrosubSourceForm extends ContentEntityForm {
       '#default_value' => $source->getPostContext(),
     ];
 
+    // WebSub integration.
+    if (\Drupal::moduleHandler()->moduleExists('indieweb_websub')) {
+      if ($source->usesWebSub()) {
+        $form['websub_unsubscribe'] = [
+          '#type' => 'checkbox',
+          '#title' => $this->t('Unsubscribe WebSub'),
+          '#default_value' => FALSE,
+          '#weight' => 11,
+          '#description' => $this->t('This source is updated via WebSub notifications. Click to unsubscribe and start polling again.')
+        ];
+      }
+      else {
+        $form['websub_subscribe'] = [
+          '#type' => 'checkbox',
+          '#title' => $this->t('Subscribe WebSub'),
+          '#default_value' => FALSE,
+          '#weight' => 11,
+          '#description' => $this->t('If the feed supports WebSub, updates will come in via PuSH notifications.<br />A subscribe request will be send after submit.')
+        ];
+      }
+    }
+
     return $form;
   }
 
@@ -81,15 +103,43 @@ class MicrosubSourceForm extends ContentEntityForm {
 
     $source->set('post_context', serialize($form_state->getValue('post_context')));
 
+    // Save
     $status = parent::save($form, $form_state);
+
+    // Unsubscribe WebSub.
+    if ($form_state->hasValue('websub_unsubscribe') && $form_state->getValue('websub_unsubscribe')) {
+
+      /** @var \Drupal\indieweb_websub\WebSubClient\WebSubClientInterface $websub_service */
+      $websub_service = \Drupal::service('indieweb.websub.client');
+      if ($hub = $websub_service->discoverHub($source->label())) {
+        $this->messenger()->addStatus($this->t('An unsubscribe request has been send.'));
+        $websub_service->subscribe($source->label(), $hub,'unsubscribe');
+      }
+      else {
+        $this->messenger()->addStatus($this->t('No hub was found for this feed.'));
+      }
+    }
+
+    // Subscribe
+    if ($form_state->hasValue('websub_subscribe') && $form_state->getValue('websub_subscribe')) {
+      /** @var \Drupal\indieweb_websub\WebSubClient\WebSubClientInterface $websub_service */
+      $websub_service = \Drupal::service('indieweb.websub.client');
+      if ($hub = $websub_service->discoverHub($source->label())) {
+        $websub_service->subscribe($source->label(), $hub,'subscribe');
+        $this->messenger()->addStatus($this->t('A subscribe request has been send.'));
+      }
+      else {
+        $this->messenger()->addStatus($this->t('No hub was found for this feed.'));
+      }
+    }
 
     switch ($status) {
       case SAVED_NEW:
-        $this->messenger()->addMessage($this->t('Created %label.', ['%label' => $source->label(),]));
+        $this->messenger()->addMessage($this->t('Created %label', ['%label' => $source->label()]));
         break;
 
       default:
-        $this->messenger()->addMessage($this->t('Saved %label', ['%label' => $source->label(),]));
+        $this->messenger()->addMessage($this->t('Saved %label', ['%label' => $source->label()]));
     }
     $form_state->setRedirectUrl(Url::fromRoute('indieweb.admin.microsub_sources', ['indieweb_microsub_channel' => $source->getChannelId()]));
 

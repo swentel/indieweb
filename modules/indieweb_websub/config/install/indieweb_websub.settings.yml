@@ -1,0 +1,6 @@
+expose_link_tag: true
+node_element: expose
+hub_endpoint: 'https://switchboard.p3k.io/'
+log_payload: false
+send_pub_handler: disabled
+pages: ''

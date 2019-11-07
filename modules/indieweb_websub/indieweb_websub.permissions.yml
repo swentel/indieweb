@@ -1,0 +1,7 @@
+publish to hub:
+  title: 'Publish content to hub'
+  description: 'Allow access to the "Publish to hub" component on the node edit forms.'
+
+administer websubpub entities:
+  title: 'Administer WebSubPub entities'
+  description: 'Allow to access the administration pages to manage WebSubPub entities.'

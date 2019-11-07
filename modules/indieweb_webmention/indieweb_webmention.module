@@ -352,7 +352,7 @@ function _indieweb_webmention_entity_form_alter(&$form, FormStateInterface $form
  * @param $form
  * @param \Drupal\Core\Form\FormStateInterface $form_state
  *
- * @see indieweb_form_node_form_alter()
+ * @see indieweb_webmention_form_node_form_alter()
  *
  * @throws \Drupal\Core\Entity\EntityMalformedException
  */

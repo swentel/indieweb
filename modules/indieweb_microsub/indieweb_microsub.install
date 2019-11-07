@@ -1,0 +1,34 @@
+<?php
+
+use Drupal\Core\Field\BaseFieldDefinition;
+
+/**
+ * @file
+ * IndieWeb Microsub install file.
+ */
+
+/**
+ * Installs the WebSub field.
+ */
+function indieweb_microsub_update_8001() {
+  $field_storage_definition = BaseFieldDefinition::create('boolean')
+    ->setLabel(t('WebSub'))
+    ->setDefaultValue(0);
+
+  \Drupal::entityDefinitionUpdateManager()
+    ->installFieldStorageDefinition('websub', 'indieweb_microsub_source', 'indieweb_microsub', $field_storage_definition);
+}
+
+/**
+ * Set all websub values to 0.
+ */
+function indieweb_microsub_update_8002() {
+  /** @var \Drupal\indieweb_microsub\Entity\MicrosubSourceInterface[] $sources */
+  $sources = \Drupal::entityTypeManager()->getStorage('indieweb_microsub_source')->loadMultiple();
+  foreach ($sources as $source) {
+    if (!$source->usesWebSub()) {
+      $source->set('websub', 0);
+      $source->save();
+    }
+  }
+}

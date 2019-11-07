@@ -1,0 +1,15 @@
+indieweb.admin.websub_settings:
+  title: 'WebSub'
+  route_name: indieweb.admin.websub_settings
+  base_route: indieweb.admin.dashboard
+  weight: 60
+
+indieweb.admin.websub_settings_tab:
+  title: 'Settings'
+  route_name: indieweb.admin.websub_settings
+  parent_id: indieweb.admin.websub_settings
+
+indieweb.websubpub.list_tab:
+  title: 'WebSubPub'
+  route_name: entity.indieweb_websubpub.collection
+  base_route: system.admin_content

@@ -16,7 +16,8 @@
   "require": {
     "indieweb/mention-client": "^1.2",
     "p3k/xray": "^1.7",
-    "p3k/Micropub": "^0.0.2",
+    "p3k/micropub": "^0.0.2",
+    "p3k/websub": "^0.0.1",
     "indieauth/client": "^0.4.1",
     "lcobucci/jwt": "^3.0"
   },

@@ -48,3 +48,50 @@ function indieweb_microsub_cron() {
   }
 
 }
+
+/**
+ * Implements hook_indieweb_websub_subscribe().
+ */
+function indieweb_microsub_indieweb_websub_subscribe($url, $seconds) {
+  /** @var \Drupal\indieweb_microsub\Entity\MicrosubSourceInterface[] $sources */
+  $sources = \Drupal::entityTypeManager()->getStorage('indieweb_microsub_source')->loadByProperties(['url' => $url]);
+  if ($sources) {
+    $source = array_shift($sources);
+    if ($seconds) {
+      $source->setNextFetch($seconds);
+    }
+    $source->set('websub', 1);
+    $source->save();
+    return TRUE;
+  }
+
+  return NULL;
+}
+
+/**
+ * Implements hook_indieweb_websub_unsubscribe().
+ */
+function indieweb_microsub_indieweb_websub_unsubscribe($url) {
+  /** @var \Drupal\indieweb_microsub\Entity\MicrosubSourceInterface[] $sources */
+  $sources = \Drupal::entityTypeManager()->getStorage('indieweb_microsub_source')->loadByProperties(['url' => $url]);
+  if ($sources) {
+    $source = array_shift($sources);
+    $source->set('websub', 0);
+    $source->save();
+    return TRUE;
+  }
+
+  return NULL;
+}
+
+/**
+ * Implements hook_indieweb_websub_notification().
+ */
+function indieweb_microsub_indieweb_websub_notification($url, $hub, $content) {
+  /** @var \Drupal\indieweb_microsub\Entity\MicrosubSourceInterface[] $sources */
+  $sources = \Drupal::entityTypeManager()->getStorage('indieweb_microsub_source')->loadByProperties(['url' => $url]);
+  if ($sources) {
+    $source = array_shift($sources);
+    \Drupal::service('indieweb.microsub.client')->fetchItems($source->label());
+  }
+}

@@ -1,0 +1,15 @@
+indieweb.admin.websub_settings:
+  path: '/admin/config/services/indieweb/websub'
+  defaults:
+    _form: '\Drupal\indieweb_websub\Form\WebSubSettingsForm'
+    _title: 'WebSub'
+  requirements:
+    _permission: 'administer websub'
+
+indieweb.websub.callback:
+  path: '/websub/callback'
+  defaults:
+    _controller: '\Drupal\indieweb_websub\Controller\WebSubController::callback'
+    _title: 'Callback endpoint'
+  requirements:
+    _access: 'TRUE'

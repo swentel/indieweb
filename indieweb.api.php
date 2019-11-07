@@ -109,3 +109,42 @@ function hook_micropub_geo_response_alter($response) {
  */
 function hook_indieweb_indieauth_login(UserInterface $account, $indieauth_response) {
 }
+
+/**
+ * Act on a WebSub subscribe event.
+ *
+ * @param $url
+ *   The url to subscribe.
+ * @param $seconds
+ *   The lease seconds, if available.
+ *
+ * @return mixed TRUE|NULL
+ */
+function hook_indieweb_websub_subscribe($url, $seconds) {
+  return NULL;
+}
+
+/**
+ * Act on a WebSub unsubscribe event.
+ *
+ * @param $url
+ *   The url to unsubscribe.
+ *
+ * @return mixed TRUE|NULL
+ */
+function hook_indieweb_websub_unsubscribe($url) {
+  return NULL;
+}
+
+/**
+ * Act on incoming WebSub notification.
+ *
+ * @param $url
+ *   The URL which was updated.
+ * @param $hub
+ *   The hub where it came from
+ * @param $content
+ *   The content, if any.
+ */
+function hook_indieweb_websub_notification($url, $hub, $content) {
+}

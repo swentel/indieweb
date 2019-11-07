@@ -4,11 +4,11 @@ view syndication entities:
 
 administer syndication entities:
   title: 'Administer syndication entities'
-  description: 'Allow to access the administration form to manage syndications.'
+  description: 'Allow to access the administration pages to manage syndications.'
 
 administer webmention entities:
   title: 'Administer webmention entities'
-  description: 'Allow to access the administration form to manage webmentions.'
+  description: 'Allow to access the administration pages to manage webmentions.'
 
 add webmention entities:
   title: 'Create new webmention'

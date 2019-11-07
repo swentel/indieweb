@@ -25,6 +25,7 @@ Current functionality:
 - Reply on comments and send webmention
 - Feeds: microformats, atom and jf2
 - Send a micropub post to Aperture on incoming webmentions
+- WebSub PuSH 0.4 for publishing and subscribing
 - Fetch post context for content or microsub items
 - Blocks for rendering webmentions, RSVP, signing in
 - Fediverse integration via https://fed.brid.gy/
@@ -41,6 +42,7 @@ The functionality is split into several modules:
 - Feeds: create Microformats2, Atom and JF2 feeds
 - Post context: store context for content and microsub items
 - Media cache: store images locally for internal webmention and microsub endpoint
+- WebSub: WebSub PuSH 0.4 for publishing and subscribing
 
 Additional useful modules
 
@@ -74,7 +76,8 @@ composer packages:
 - composer require indieweb/mention-client
 - composer require indieauth/client
 - composer require p3k/xray
-- composer require p3k/Micropub
+- composer require p3k/micropub
+- composer require p3k/websub
 - composer require lcobucci/jwt
 
 - go to admin/modules and toggle 'IndieWeb' to enable the module.
@@ -367,6 +370,24 @@ by this site. The canonical example is to label that channel name as "Notificati
 webmentions on readers like Monocle or Indigenous. Following webmentions are send: likes, reposts, bookmarks, mentions
 and replies.
 
+## WebSub
+
+WebSub (previously known as PubSubHubbub or PuSH, and briefly PubSub) is a notification-based protocol for web 
+publishing and subscribing to streams and legacy feed files in real time. This module allows you to publish your content
+to a hub and also receive notifications from a hub for Microsub feeds. The default hub is switchboard.p3k.io which works
+perfect with the implementation in this module. https://pubsubhubbub.appspot.com/ and https://superfeedr.com/ work fine
+as well.
+
+When you toggle to publish, an entry is created in the queue which you can either handle with drush or by cron. This 
+will send a request to the configured hub. An overview of published content is at admin/content/websub.
+
+The drush command is 'indieweb-websub-publish'
+
+More configuration is at configuration at admin/config/services/indieweb/websub.
+
+If you have Microsub enabled, you can also tell configure feeds to check whether they have a hub and subscribe so that 
+polling isn't necessary.
+
 ## Post contexts
 
 When you create a post with a link which is a reply, like, repost or bookmark of an external post, you can fetch content 
@@ -436,6 +457,8 @@ drush -l https://example.com indieweb-send-webmentions
 - indieweb-external-auth-map: maps an existing user account with a domain.
 - indieweb-microsub-fetch-items: fetch items for the built-in microsub server.
 - indieweb-fetch-post-contexts: fetches context for a post
+- indieweb-websub-publish: sends a request to the configured hub
+
 
 ## Hooks
 

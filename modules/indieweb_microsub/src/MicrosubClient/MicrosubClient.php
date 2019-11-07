@@ -13,7 +13,7 @@ class MicrosubClient implements MicrosubClientInterface {
   /**
    * {@inheritdoc}
    */
-  public function fetchItems() {
+  public function fetchItems($url = '') {
     $xray = new XRay();
 
     $post_context_handler = \Drupal::config('indieweb_context.settings')->get('handler');
@@ -23,7 +23,12 @@ class MicrosubClient implements MicrosubClientInterface {
     $cleanup_old_items = \Drupal::config('indieweb_microsub.settings')->get('microsub_internal_cleanup_items');
 
     /** @var \Drupal\indieweb_microsub\Entity\MicrosubSourceInterface[] $sources */
-    $sources = \Drupal::entityTypeManager()->getStorage('indieweb_microsub_source')->getSourcesToRefresh();
+    if ($url) {
+      $sources = \Drupal::entityTypeManager()->getStorage('indieweb_microsub_source')->loadByProperties(['url' => $url]);
+    }
+    else {
+      $sources = \Drupal::entityTypeManager()->getStorage('indieweb_microsub_source')->getSourcesToRefresh();
+    }
     foreach ($sources as $source) {
 
       // Continue if the channel is disabled.
@@ -170,7 +175,7 @@ class MicrosubClient implements MicrosubClientInterface {
     $tries = 0;
 
     // Cleanup data and trigger caches.
-    // We don't store caches for the media channel.
+    // We don't store caches for the notifications channel.
     if (empty($channel_id)) {
       $disable_image_cache = TRUE;
     }

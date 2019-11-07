@@ -19,6 +19,7 @@ class MicrosubSourceStorage extends SqlContentEntityStorage implements MicrosubS
 
     $query = \Drupal::entityQuery('indieweb_microsub_source')
       ->condition('status', 1)
+      ->condition('websub', 0)
       ->condition('fetch_next', \Drupal::time()->getRequestTime(), '<');
 
     return $this->loadMultiple($query->execute());

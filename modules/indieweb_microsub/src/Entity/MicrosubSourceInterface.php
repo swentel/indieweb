@@ -130,8 +130,15 @@ interface MicrosubSourceInterface extends ContentEntityInterface {
   /**
    * Whether to disable image cache or not.
    *
-   * @return mixed
+   * @return bool
    */
   public function disableImageCache();
+
+  /**
+   * Whether this feed uses WebSub or not.
+   *
+   * @return bool
+   */
+  public function usesWebSub();
 
 }

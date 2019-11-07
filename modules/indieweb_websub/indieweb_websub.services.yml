@@ -1,0 +1,3 @@
+services:
+  indieweb.websub.client:
+    class: Drupal\indieweb_websub\WebSubClient\WebSubClient

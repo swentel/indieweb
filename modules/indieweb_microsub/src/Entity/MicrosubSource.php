@@ -185,6 +185,13 @@ class MicrosubSource extends ContentEntityBase implements MicrosubSourceInterfac
   /**
    * {@inheritdoc}
    */
+  public function usesWebSub() {
+    return (bool) $this->get('websub')->value;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function postSave(EntityStorageInterface $storage, $update = TRUE) {
     parent::postSave($storage, $update);
 
@@ -222,6 +229,10 @@ class MicrosubSource extends ContentEntityBase implements MicrosubSourceInterfac
     $fields['status'] = BaseFieldDefinition::create('integer')
       ->setLabel(t('Status of the source'))
       ->setDefaultValue(1);
+
+    $fields['websub'] = BaseFieldDefinition::create('boolean')
+      ->setLabel(t('Whether this uses WebSub or not'))
+      ->setDefaultValue(0);
 
     $fields['channel_id'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Channel'))
