@@ -20,7 +20,7 @@ interface WebSubClientInterface {
   public function createQueueItem($entity_id, $entity_type_id);
 
   /**
-   * Checks whether this entity has been published or not
+   * Checks whether this entity has been published or not to the hub.
    *
    * @param string $entity_id
    *   (optional) The entity id
@@ -29,10 +29,10 @@ interface WebSubClientInterface {
    *
    * @return bool
    */
-  public function checkPublished($entity_id, $entity_type_id);
+  public function isPublishedToHub($entity_id, $entity_type_id);
 
   /**
-   * Subscribe or unsubscribe to a URL
+   * Subscribe or unsubscribe to a URL.
    *
    * @param $url
    *   The URL you want to subscribe to.

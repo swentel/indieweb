@@ -1057,6 +1057,9 @@ class MicropubController extends ControllerBase {
       // Syndicate.
       $this->syndicateToNode();
 
+      // WebSub.
+      $this->publishToHub();
+
       // Allow modules to react after the node is saved.
       \Drupal::moduleHandler()->invokeAll('indieweb_micropub_node_saved', [$this->node, $this->values, $this->input, $this->payload_original]);
 
@@ -1308,6 +1311,17 @@ class MicropubController extends ControllerBase {
         foreach ($this->input['mp-syndicate-to'] as $target) {
           \Drupal::service('indieweb.webmention.client')->createQueueItem($source, $target, $this->node->id(), 'node');
         }
+      }
+    }
+  }
+
+  /**
+   * Publish to hub for WebSub.
+   */
+  protected function publishToHub() {
+    if (\Drupal::moduleHandler()->moduleExists('indieweb_websub')) {
+      if ($this->config('indieweb_websub.settings')->get('micropub_publish_to_hub') && $this->node->isPublished()) {
+        \Drupal::service('indieweb.websub.client')->createQueueItem($this->node->id(), 'node');
       }
     }
   }

@@ -58,7 +58,7 @@ function indieweb_websub_form_node_form_alter(&$form, FormStateInterface $form_s
 function _indieweb_websub_entity_form_alter(&$form, FormStateInterface $form_state) {
   /** @var \Drupal\Core\Entity\EntityInterface $entity */
   $entity = $form_state->getFormObject()->getEntity();
-  if ($entity && !\Drupal::service('indieweb.websub.client')->checkPublished($entity->id(), $entity->getEntityTypeId())) {
+  if ($entity && !\Drupal::service('indieweb.websub.client')->isPublishedToHub($entity->id(), $entity->getEntityTypeId())) {
     $default = \Drupal::config('indieweb_websub.settings')->get('node_element');
     $form['indieweb_websub_wrapper'] = [
       '#type' => 'details',

@@ -67,11 +67,11 @@ class WebSubSettingsForm extends ConfigFormBase {
         'expose_default' => $this->t('Expose and set checked')
       ],
       '#default_value' => $config->get('node_element'),
-      '#description' => $this->t('This allows you tell to toggle a checkbox to send a notification to the hub.<br />This is also controlled by the "Publish to hub" permission.'),
+      '#description' => $this->t('This allows you tell to toggle a checkbox to send a publication to the hub.<br />This is also controlled by the "Publish to hub" permission.'),
     ];
 
     $form['general']['send_pub_handler'] = [
-      '#title' => $this->t('Send publication'),
+      '#title' => $this->t('How to send the publication to the hub'),
       '#type' => 'radios',
       '#options' => [
         'disabled' => $this->t('Disabled'),
@@ -80,6 +80,18 @@ class WebSubSettingsForm extends ConfigFormBase {
       ],
       '#default_value' => $config->get('send_pub_handler'),
       '#description' => $this->t('Publications are not send immediately, but are stored in a queue when the content is published.<br />The drush command is <strong>indieweb-websub-publish</strong>')
+    ];
+
+    $form['general']['micropub_publish_to_hub'] = [
+      '#title' => $this->t('Publish to the hub when you create a post with Micropub.'),
+      '#type' => 'checkbox',
+      '#default_value' => $config->get('micropub_publish_to_hub'),
+    ];
+
+    $form['general']['microsub_api_subscribe'] = [
+      '#title' => $this->t('Send a subscribe or unsubscribe request when managing feeds through the Microsub API.'),
+      '#type' => 'checkbox',
+      '#default_value' => $config->get('microsub_api_subscribe'),
     ];
 
     $form['general']['log_payload'] = [
@@ -103,9 +115,13 @@ class WebSubSettingsForm extends ConfigFormBase {
       ->set('hub_endpoint', $form_state->getValue('hub_endpoint'))
       ->set('pages', $form_state->getValue('pages'))
       ->set('send_pub_handler', $form_state->getValue('send_pub_handler'))
+      ->set('micropub_publish_to_hub', $form_state->getValue('micropub_publish_to_hub'))
+      ->set('microsub_api_subscribe', $form_state->getValue('microsub_api_subscribe'))
       ->save();
 
     Cache::invalidateTags(['rendered']);
+
+    parent::submitForm($form, $form_state);
   }
 
 }

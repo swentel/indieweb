@@ -617,6 +617,16 @@ class MicrosubController extends ControllerBase {
           ];
           $source = $this->entityTypeManager()->getStorage('indieweb_microsub_source')->create($values);
           $source->save();
+
+          // Send subscribe request.
+          if (\Drupal::moduleHandler()->moduleExists('indieweb_websub') && $this->config('indieweb_websub.settings')->get('microsub_api_subscribe')) {
+            /** @var \Drupal\indieweb_websub\WebSubClient\WebSubClientInterface $websub_service */
+            $websub_service = \Drupal::service('indieweb.websub.client');
+            if ($hub = $websub_service->discoverHub($source->label())) {
+              $websub_service->subscribe($source->label(), $hub, 'subscribe');
+            }
+          }
+
         }
         $return = ['response' => ['type' => 'feed', 'url' => $url], 'code' => 200];
       }
@@ -632,6 +642,7 @@ class MicrosubController extends ControllerBase {
    *
    * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
    * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
+   * @throws \Drupal\Core\Entity\EntityStorageException
    */
   protected function deleteSource() {
     $return = ['response' => [], 'code' => 400];
@@ -639,10 +650,23 @@ class MicrosubController extends ControllerBase {
     $url = $this->request->get('url');
     $channel_id = $this->request->get('channel');
     if (!empty($channel_id) && !empty($url)) {
+      /** @var \Drupal\indieweb_microsub\Entity\MicrosubSourceInterface[] $sources */
       $sources = $this->entityTypeManager()->getStorage('indieweb_microsub_source')->loadByProperties(['url' => $url, 'channel_id' => $channel_id]);
       if (count($sources) == 1) {
         $source = array_shift($sources);
         $source->delete();
+
+        // Send unsubscribe request.
+        if (\Drupal::moduleHandler()->moduleExists('indieweb_websub') && $this->config('indieweb_websub.settings')->get('microsub_api_subscribe')) {
+          if ($source->usesWebSub()) {
+            /** @var \Drupal\indieweb_websub\WebSubClient\WebSubClientInterface $websub_service */
+            $websub_service = \Drupal::service('indieweb.websub.client');
+            if ($hub = $websub_service->discoverHub($source->label())) {
+              $websub_service->subscribe($source->label(), $hub, 'unsubscribe');
+            }
+          }
+        }
+
         $return = ['response' => [], 'code' => 200];
       }
     }

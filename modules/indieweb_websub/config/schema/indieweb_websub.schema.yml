@@ -21,3 +21,9 @@ indieweb_websub.settings:
     pages:
       type: string
       label: 'On which pages to expose the hub links'
+    micropub_publish_to_hub:
+      type: boolean
+      label: 'Send publication to hub when posting via micropub'
+    microsub_api_subscribe:
+      type: boolean
+      label: 'Subscribe to WebSub if a feed is created via the Microsub API'
