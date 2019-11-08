@@ -126,8 +126,8 @@ class WebSubClient implements WebSubClientInterface {
 
     try {
       $response = $webSubClient->discover($url);
-      if (!empty($response['hub'])) {
-        return $response['hub'];
+      if (!empty($response['hub']) && !empty($response['self'])) {
+        return ['hub' => $response['hub'], 'self' => $response['self']];
       }
     }
     catch (\Exception $e) {

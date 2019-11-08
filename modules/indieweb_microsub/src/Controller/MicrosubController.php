@@ -622,8 +622,9 @@ class MicrosubController extends ControllerBase {
           if (\Drupal::moduleHandler()->moduleExists('indieweb_websub') && $this->config('indieweb_websub.settings')->get('microsub_api_subscribe')) {
             /** @var \Drupal\indieweb_websub\WebSubClient\WebSubClientInterface $websub_service */
             $websub_service = \Drupal::service('indieweb.websub.client');
-            if ($hub = $websub_service->discoverHub($source->label())) {
-              $websub_service->subscribe($source->label(), $hub, 'subscribe');
+            if ($info = $websub_service->discoverHub($source->label())) {
+              $source->set('url', $info['self'])->save();
+              $websub_service->subscribe($info['self'], $info['hub'], 'subscribe');
             }
           }
 
@@ -661,8 +662,8 @@ class MicrosubController extends ControllerBase {
           if ($source->usesWebSub()) {
             /** @var \Drupal\indieweb_websub\WebSubClient\WebSubClientInterface $websub_service */
             $websub_service = \Drupal::service('indieweb.websub.client');
-            if ($hub = $websub_service->discoverHub($source->label())) {
-              $websub_service->subscribe($source->label(), $hub, 'unsubscribe');
+            if ($info = $websub_service->discoverHub($source->label())) {
+              $websub_service->subscribe($info['self'], $info['hub'], 'unsubscribe');
             }
           }
         }

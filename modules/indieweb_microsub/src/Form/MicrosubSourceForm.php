@@ -111,9 +111,9 @@ class MicrosubSourceForm extends ContentEntityForm {
 
       /** @var \Drupal\indieweb_websub\WebSubClient\WebSubClientInterface $websub_service */
       $websub_service = \Drupal::service('indieweb.websub.client');
-      if ($hub = $websub_service->discoverHub($source->label())) {
+      if ($info = $websub_service->discoverHub($source->label())) {
         $this->messenger()->addStatus($this->t('An unsubscribe request has been send.'));
-        $websub_service->subscribe($source->label(), $hub,'unsubscribe');
+        $websub_service->subscribe($info['self'], $info['hub'],'unsubscribe');
       }
       else {
         $this->messenger()->addStatus($this->t('No hub was found for this feed.'));
@@ -124,8 +124,9 @@ class MicrosubSourceForm extends ContentEntityForm {
     if ($form_state->hasValue('websub_subscribe') && $form_state->getValue('websub_subscribe')) {
       /** @var \Drupal\indieweb_websub\WebSubClient\WebSubClientInterface $websub_service */
       $websub_service = \Drupal::service('indieweb.websub.client');
-      if ($hub = $websub_service->discoverHub($source->label())) {
-        $websub_service->subscribe($source->label(), $hub,'subscribe');
+      if ($info = $websub_service->discoverHub($source->label())) {
+        $source->set('url', $info['self'])->save();
+        $websub_service->subscribe($info['self'], $info['hub'],'subscribe');
         $this->messenger()->addStatus($this->t('A subscribe request has been send.'));
       }
       else {
