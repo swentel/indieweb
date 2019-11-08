@@ -19,9 +19,6 @@ class WebSubClient implements WebSubClientInterface {
     foreach ($config_pages as $page) {
       $page = trim($page);
       if (!empty($page)) {
-        if ($page == '<front>') {
-          $page = '';
-        }
         $pages[] = \Drupal::request()->getSchemeAndHttpHost() . $page;
       }
     }

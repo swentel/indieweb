@@ -47,7 +47,7 @@ class WebSubSettingsForm extends ConfigFormBase {
       '#title' => $this->t('Discovery'),
       '#type' => 'textarea',
       '#default_value' => $config->get('pages'),
-      '#description' => $this->t('Specify pages by using their paths to which people can subscribe to. Enter one path per line and do not use wildcards. &lt;front&gt; is the frontpage.'),
+      '#description' => $this->t('Specify pages by using their paths to which people can subscribe to. Enter one path per line and do not use wildcards. / is the frontpage.'),
       '#required' => TRUE,
     ];
 
