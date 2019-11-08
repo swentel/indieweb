@@ -57,9 +57,10 @@ function indieweb_microsub_indieweb_websub_subscribe($url, $seconds) {
   $sources = \Drupal::entityTypeManager()->getStorage('indieweb_microsub_source')->loadByProperties(['url' => $url]);
   if ($sources) {
     $source = array_shift($sources);
-    if ($seconds) {
-      $source->setNextFetch($seconds);
+    if (!$seconds) {
+      $seconds = 86400 * 7;
     }
+    $source->setNextFetch(\Drupal::time()->getRequestTime() + $seconds);
     $source->set('websub', 1);
     $source->save();
     return TRUE;
@@ -76,6 +77,7 @@ function indieweb_microsub_indieweb_websub_unsubscribe($url) {
   $sources = \Drupal::entityTypeManager()->getStorage('indieweb_microsub_source')->loadByProperties(['url' => $url]);
   if ($sources) {
     $source = array_shift($sources);
+    $source->setNextFetch(0);
     $source->set('websub', 0);
     $source->save();
     return TRUE;

@@ -60,22 +60,24 @@ class MicrosubSourceListBuilder extends EntityListBuilder {
     $row['media_cache'] = $entity->disableImageCache() ? t('Disabled') : t('Enabled');
     $row['items'] = $entity->getItemCount();
 
-    if ($entity->usesWebSub()) {
-      $fetch_next = 'WebSub';
-    }
-    else {
-      $next = $entity->getNextFetch();
-
-      $fetch_next = '/';
-      if ($entity->getStatus() && $entity->getChannel()->getStatus()) {
-        if ($next < \Drupal::time()->getRequestTime()) {
-          $fetch_next = $this->t('imminently');
-        }
-        else {
-          $fetch_next = $this->t('%time left', ['%time' => \Drupal::service('date.formatter')->formatInterval($next - \Drupal::time()->getRequestTime())]);
+    $next = $entity->getNextFetch();
+    $fetch_next = '/';
+    if (($entity->getStatus() && $entity->getChannel()->getStatus()) || $entity->usesWebSub()) {
+      if ($next < \Drupal::time()->getRequestTime()) {
+        $fetch_next = $this->t('imminently');
+        if ($entity->usesWebSub()) {
+          $fetch_next = $this->t('WebSub subscription ended');
         }
       }
+      else {
+        $time_string = '%time left';
+        if ($entity->usesWebSub()) {
+          $time_string = 'WebSub subscription ends in %time';
+        }
+        $fetch_next = $this->t($time_string, ['%time' => \Drupal::service('date.formatter')->formatInterval($next - \Drupal::time()->getRequestTime())]);
+      }
     }
+
     $row['fetch_next'] = $fetch_next;
     $row['in_keep'] = $entity->getItemsInFeed() . '/' . $entity->getKeepItemsInFeed();
     return $row + parent::buildRow($entity);
