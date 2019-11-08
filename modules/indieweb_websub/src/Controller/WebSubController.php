@@ -22,12 +22,26 @@ class WebSubController extends ControllerBase {
     // Notification callback.
     if ($request->getMethod() == 'POST') {
 
-      $url = $request->headers->get('self');
-      $hub = $request->headers->get('hub');
+      $url = $hub = '';
 
-      if (!empty($link) && !empty($hub)) {
-        $status = 200;
+      // Check link header.
+      try {
+        $result = \IndieWeb\http_rels($request->headers);
+        if (!empty($result['self'])) {
+          $url = $result['self'][0];
+        }
+        if (!empty($result['hub'])) {
+          $hub = $result['hub'][0];
+        }
+      }
+      catch (\Exception $ignored) {}
+
+      // TODO move once working
+      $status = 200;
+
+      if (!empty($url) && !empty($hub)) {
         $content = $request->getContent();
+        \Drupal::logger('indieweb_websub')->notice('Checking new content for @url via @hub', ['@url' => $url, '@hub' => $hub]);
         \Drupal::moduleHandler()->invokeAll('indieweb_websub_notification', [$url, $hub, $content]);
       }
 

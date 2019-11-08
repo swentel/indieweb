@@ -11,8 +11,10 @@ interface MicrosubClientInterface {
    *
    * @param string $url
    *   Only fetch items for a specific URL.
+   * @param string $content
+   *   The body for the url.
    */
-  public function fetchItems($url = '');
+  public function fetchItems($url = '', $content = '');
 
   /**
    * Send notification from a webmention.

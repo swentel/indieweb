@@ -92,6 +92,6 @@ function indieweb_microsub_indieweb_websub_notification($url, $hub, $content) {
   $sources = \Drupal::entityTypeManager()->getStorage('indieweb_microsub_source')->loadByProperties(['url' => $url]);
   if ($sources) {
     $source = array_shift($sources);
-    \Drupal::service('indieweb.microsub.client')->fetchItems($source->label());
+    \Drupal::service('indieweb.microsub.client')->fetchItems($source->label(), $content);
   }
 }

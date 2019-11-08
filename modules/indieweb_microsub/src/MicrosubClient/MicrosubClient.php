@@ -13,7 +13,7 @@ class MicrosubClient implements MicrosubClientInterface {
   /**
    * {@inheritdoc}
    */
-  public function fetchItems($url = '') {
+  public function fetchItems($url = '', $content = '') {
     $xray = new XRay();
 
     $post_context_handler = \Drupal::config('indieweb_context.settings')->get('handler');
@@ -52,9 +52,17 @@ class MicrosubClient implements MicrosubClientInterface {
 
       try {
 
-        // Get content.
-        $response = \Drupal::httpClient()->get($url);
-        $body = ltrim($response->getBody()->getContents());
+        // Body can already be supplied, e.g. via WebSub.
+        if (!empty($url) && !empty($content)) {
+          $body = ltrim($content);
+          \Drupal::logger('microsub_websub')->notice('Got content for @url, parsing that', ['@url' => $url]);
+        }
+        else {
+          // Get content.
+          $response = \Drupal::httpClient()->get($url);
+          $body = ltrim($response->getBody()->getContents());
+        }
+
         $hash = md5($body);
         if ($source->getHash() != $hash) {
 

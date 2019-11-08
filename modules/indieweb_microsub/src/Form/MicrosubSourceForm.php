@@ -106,7 +106,7 @@ class MicrosubSourceForm extends ContentEntityForm {
     // Save
     $status = parent::save($form, $form_state);
 
-    // Unsubscribe WebSub.
+    // Unsubscribe WebSub
     if ($form_state->hasValue('websub_unsubscribe') && $form_state->getValue('websub_unsubscribe')) {
 
       /** @var \Drupal\indieweb_websub\WebSubClient\WebSubClientInterface $websub_service */
@@ -120,7 +120,7 @@ class MicrosubSourceForm extends ContentEntityForm {
       }
     }
 
-    // Subscribe
+    // Subscribe WebSub
     if ($form_state->hasValue('websub_subscribe') && $form_state->getValue('websub_subscribe')) {
       /** @var \Drupal\indieweb_websub\WebSubClient\WebSubClientInterface $websub_service */
       $websub_service = \Drupal::service('indieweb.websub.client');
