@@ -381,8 +381,9 @@ for getting subscription and notifications.
 When you toggle to publish, an entry is created in the queue which you can either handle with drush or by cron. This 
 will send a request to the configured hub. An overview of published content is at admin/content/websub.
 
-The drush command is 'indieweb-websub-publish'
-Don't forget to add the -l param with your domain as well.
+To publish your content to the hub via drush, run the following command: 'indieweb-websub-publish'
+To resubscribe to your WebSub subscriptions via drush, run the following command: 'indieweb-websub-resubscribe'
+Once a day is fine for the latter. Don't forget to add the -l param with your domain as well.
 
 More configuration is at configuration at admin/config/services/indieweb/websub.
 
@@ -456,6 +457,7 @@ drush -l https://example.com indieweb-send-webmentions
 - indieweb-microsub-fetch-items: fetch items for the built-in microsub server.
 - indieweb-fetch-post-contexts: fetches context for a post
 - indieweb-websub-publish: sends a request to the configured hub
+- indieweb-websub-resubscribe: resubscribes your websub subscriptions
 
 
 ## Hooks

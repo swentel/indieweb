@@ -111,5 +111,10 @@ function indieweb_websub_cron() {
   if (\Drupal::config('indieweb_websub.settings')->get('send_pub_handler') == 'cron') {
     \Drupal::service('indieweb.websub.client')->handleQueue();
   }
+
+  if (\Drupal::config('indieweb_websub.settings')->get('resubscribe_handler') == 'cron') {
+    \Drupal::service('indieweb.websub.client')->resubscribe();
+  }
+
 }
 

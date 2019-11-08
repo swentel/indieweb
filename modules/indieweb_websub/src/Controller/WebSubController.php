@@ -36,12 +36,9 @@ class WebSubController extends ControllerBase {
       }
       catch (\Exception $ignored) {}
 
-      // TODO move once working
-      $status = 200;
-
       if (!empty($url) && !empty($hub)) {
+        $status = 200;
         $content = $request->getContent();
-        \Drupal::logger('indieweb_websub')->notice('Checking new content for @url via @hub', ['@url' => $url, '@hub' => $hub]);
         \Drupal::moduleHandler()->invokeAll('indieweb_websub_notification', [$url, $hub, $content]);
       }
 

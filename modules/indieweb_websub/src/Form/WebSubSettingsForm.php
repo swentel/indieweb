@@ -82,6 +82,18 @@ class WebSubSettingsForm extends ConfigFormBase {
       '#description' => $this->t('Publications are not send immediately, but are stored in a queue when the content is published.<br />The drush command is <strong>indieweb-websub-publish</strong>')
     ];
 
+    $form['general']['resubscribe_handler'] = [
+      '#title' => $this->t('How to resubscribe to subscriptions'),
+      '#type' => 'radios',
+      '#options' => [
+        'disabled' => $this->t('Disabled'),
+        'cron' => $this->t('On cron run'),
+        'drush' => $this->t('With drush'),
+      ],
+      '#default_value' => $config->get('resubscribe_handler'),
+      '#description' => $this->t('Subscriptions are active for a limited time, usually not more then two weeks.<br />This allows you to automatically resubscribe, leave disabled if you do not have any WebSub subscriptions.<br />The drush command is <strong>indieweb-websub-resubscribe</strong>')
+    ];
+
     $form['general']['micropub_publish_to_hub'] = [
       '#title' => $this->t('Publish to the hub when you create a post with Micropub.'),
       '#type' => 'checkbox',
@@ -115,6 +127,7 @@ class WebSubSettingsForm extends ConfigFormBase {
       ->set('hub_endpoint', $form_state->getValue('hub_endpoint'))
       ->set('pages', $form_state->getValue('pages'))
       ->set('send_pub_handler', $form_state->getValue('send_pub_handler'))
+      ->set('resubscribe_handler', $form_state->getValue('resubscribe_handler'))
       ->set('micropub_publish_to_hub', $form_state->getValue('micropub_publish_to_hub'))
       ->set('microsub_api_subscribe', $form_state->getValue('microsub_api_subscribe'))
       ->save();

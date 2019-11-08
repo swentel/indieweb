@@ -18,6 +18,9 @@ indieweb_websub.settings:
     send_pub_handler:
       type: string
       label: 'How to handle the webmention send queue'
+    resubscribe_handler:
+      type: string
+      label: 'How to resubscribe to WebSub subscriptions'
     pages:
       type: string
       label: 'On which pages to expose the hub links'

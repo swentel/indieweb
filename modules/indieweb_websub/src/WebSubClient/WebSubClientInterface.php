@@ -20,6 +20,11 @@ interface WebSubClientInterface {
   public function createQueueItem($entity_id, $entity_type_id);
 
   /**
+   * Resubscribe to WebSub subscriptions.
+   */
+  public function resubscribe();
+
+  /**
    * Checks whether this entity has been published or not to the hub.
    *
    * @param string $entity_id

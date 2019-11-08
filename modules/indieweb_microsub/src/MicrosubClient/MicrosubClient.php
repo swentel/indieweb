@@ -57,7 +57,6 @@ class MicrosubClient implements MicrosubClientInterface {
         // Body can already be supplied, e.g. via WebSub.
         if (!empty($content)) {
           $body = ltrim($content);
-          \Drupal::logger('microsub_websub')->notice('Got content for @url, parsing that', ['@url' => $url]);
         }
         else {
           // Get content.

@@ -47,7 +47,31 @@ function indieweb_drush_command() {
         'domain' => 'The domain to map.'
       ],
     ],
+    'indieweb-websub-publish' => [
+      'description' => 'WebSub publish',
+    ],
+    'indieweb-websub-resubscribe' => [
+      'description' => 'WebSub resubscribe',
+    ],
   ];
+}
+
+/**
+ * Handles WebSub publish.
+ */
+function drush_indieweb_websub_publish() {
+  if (\Drupal::config('indieweb_websub.settings')->get('send_pub_handler') == 'drush') {
+    \Drupal::service('indieweb.websub.client')->handleQueue();
+  }
+}
+
+/**
+ * Handles WebSub resubscribe.
+ */
+function drush_indieweb_websub_resubscribe() {
+  if (\Drupal::config('indieweb_websub.settings')->get('resubscribe_handler') == 'drush') {
+    \Drupal::service('indieweb.websub.client')->resubscribe();
+  }
 }
 
 /**

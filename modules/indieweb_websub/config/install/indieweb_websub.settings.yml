@@ -3,6 +3,7 @@ node_element: expose
 hub_endpoint: 'https://switchboard.p3k.io/'
 log_payload: false
 send_pub_handler: disabled
+resubscribe_handler: disabled
 pages: ''
 micropub_publish_to_hub: false
 microsub_api_subscribe: false

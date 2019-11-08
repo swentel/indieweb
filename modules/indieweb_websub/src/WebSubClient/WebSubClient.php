@@ -78,6 +78,13 @@ class WebSubClient implements WebSubClientInterface {
   /**
    * {@inheritdoc}
    */
+  public function resubscribe() {
+    // TODO: Implement resubscribe() method.
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function isPublishedToHub($entity_id, $entity_type_id) {
     if ($entity_id && $entity_type_id) {
       $published = \Drupal::entityTypeManager()->getStorage('indieweb_websubpub')->loadByProperties(['entity_id' => $entity_id, 'entity_type_id' => $entity_type_id]);
