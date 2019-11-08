@@ -283,18 +283,20 @@ class MicrosubController extends ControllerBase {
     // Is read.
     $is_read = $this->request->get('is_read');
 
+    // Get source and channel variables.
+    $source = $this->request->get('source');
+    $channel = $this->request->get('channel');
+
     // ---------------------------------------------------------
     // Get items from a channel.
     // ---------------------------------------------------------
-
-    $channel = $this->request->get('channel');
 
     // Notifications is stored as channel 0.
     if ($channel == 'notifications') {
       $channel = 0;
     }
 
-    if (($channel || $channel === 0) && empty($search)) {
+    if (($channel || $channel === 0) && empty($search) && empty($source)) {
       $microsub_items = $this->entityTypeManager()
         ->getStorage('indieweb_microsub_item')
         ->loadByChannel($channel, $is_read);
@@ -315,7 +317,6 @@ class MicrosubController extends ControllerBase {
     // Get items from a source.
     // ---------------------------------------------------------
 
-    $source = $this->request->get('source');
     if ($source) {
       $microsub_items = $this->entityTypeManager()
         ->getStorage('indieweb_microsub_item')
@@ -381,7 +382,7 @@ class MicrosubController extends ControllerBase {
         $paging = ['after' => $page];
       }
 
-      $response = ['items' => $items, 'paging' => (object) $paging];
+      $response = ['paging' => (object) $paging, 'items' => $items];
 
       if ($source) {
         $microsub_source = $this->entityTypeManager()->getStorage('indieweb_microsub_source')->load($source);
