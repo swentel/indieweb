@@ -15,6 +15,7 @@ class MicrosubClient implements MicrosubClientInterface {
    */
   public function fetchItems($url = '', $content = '') {
     $xray = new XRay();
+    $set_next_fetch = TRUE;
 
     $post_context_handler = \Drupal::config('indieweb_context.settings')->get('handler');
     $post_context_enabled = !empty($post_context_handler) && $post_context_handler != 'disabled';
@@ -24,6 +25,7 @@ class MicrosubClient implements MicrosubClientInterface {
 
     /** @var \Drupal\indieweb_microsub\Entity\MicrosubSourceInterface[] $sources */
     if ($url) {
+      $set_next_fetch = FALSE;
       $sources = \Drupal::entityTypeManager()->getStorage('indieweb_microsub_source')->loadByProperties(['url' => $url]);
     }
     else {
@@ -53,7 +55,7 @@ class MicrosubClient implements MicrosubClientInterface {
       try {
 
         // Body can already be supplied, e.g. via WebSub.
-        if (!empty($url) && !empty($content)) {
+        if (!empty($content)) {
           $body = ltrim($content);
           \Drupal::logger('microsub_websub')->notice('Got content for @url, parsing that', ['@url' => $url]);
         }
@@ -131,7 +133,9 @@ class MicrosubClient implements MicrosubClientInterface {
           $source->setHash($hash);
         }
 
-        $source->setNextFetch();
+        if ($set_next_fetch) {
+          $source->setNextFetch();
+        }
         $source->setTries($tries);
         $source->save();
 
