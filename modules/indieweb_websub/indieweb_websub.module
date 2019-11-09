@@ -117,4 +117,3 @@ function indieweb_websub_cron() {
   }
 
 }
-

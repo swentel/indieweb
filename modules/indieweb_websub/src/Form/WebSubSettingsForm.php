@@ -47,7 +47,7 @@ class WebSubSettingsForm extends ConfigFormBase {
       '#title' => $this->t('Discovery'),
       '#type' => 'textarea',
       '#default_value' => $config->get('pages'),
-      '#description' => $this->t('Specify pages by using their paths to which people can subscribe to. Enter one path per line and do not use wildcards. / is the frontpage.'),
+      '#description' => $this->t('Specify pages by using their paths to which people can subscribe to. Enter one path per line and do not use wildcards. / is the frontpage.<br />You can also include RSS pages managed by Views using the "RSS Feed with WebSub discovery" format and disabling the views cache.'),
       '#required' => TRUE,
     ];
 
@@ -91,7 +91,7 @@ class WebSubSettingsForm extends ConfigFormBase {
         'drush' => $this->t('With drush'),
       ],
       '#default_value' => $config->get('resubscribe_handler'),
-      '#description' => $this->t('Subscriptions are active for a limited time, usually not more then two weeks.<br />This allows you to automatically resubscribe, leave disabled if you do not have any WebSub subscriptions.<br />The drush command is <strong>indieweb-websub-resubscribe</strong>')
+      '#description' => $this->t('Subscriptions are active for a limited time, usually not more than two weeks.<br />This allows you to automatically resubscribe, leave disabled if you do not have any WebSub subscriptions.<br />The drush command is <strong>indieweb-websub-resubscribe</strong>')
     ];
 
     $form['general']['micropub_publish_to_hub'] = [

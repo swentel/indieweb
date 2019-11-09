@@ -376,7 +376,8 @@ WebSub (previously known as PubSubHubbub or PuSH, and briefly PubSub) is a notif
 publishing and subscribing to streams and legacy feed files in real time. This module allows you to publish your content
 to a hub and also receive notifications from a hub for Microsub feeds so that polling isn't necessary. The default hub 
 for publishing is https://switchboard.p3k.io. https://pubsubhubbub.appspot.com/ and https://superfeedr.com/ work as well 
-for getting subscription and notifications.
+for getting subscription and notifications. People can subscribe to Microformats2 feeds (use the IndieWeb feeds module
+for that) or RSS views using the 'RSS Feed with WebSub discovery' format.
 
 When you toggle to publish, an entry is created in the queue which you can either handle with drush or by cron. This 
 will send a request to the configured hub. An overview of published content is at admin/content/websub.
