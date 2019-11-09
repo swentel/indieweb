@@ -97,3 +97,10 @@ function indieweb_microsub_indieweb_websub_notification($url, $hub, $content) {
     \Drupal::service('indieweb.microsub.client')->fetchItems($source->label(), $content);
   }
 }
+
+/**
+ * Implements hook_indieweb_websub_needs_resubscribe().
+ */
+function indieweb_microsub_indieweb_websub_needs_resubscribe() {
+  return \Drupal::entityTypeManager()->getStorage('indieweb_microsub_source')->getSourcesToResubscribe();
+}

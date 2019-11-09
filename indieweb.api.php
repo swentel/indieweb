@@ -148,3 +148,13 @@ function hook_indieweb_websub_unsubscribe($url) {
  */
 function hook_indieweb_websub_notification($url, $hub, $content) {
 }
+
+/**
+ * Act on the resubscribe moment.
+ *
+ * @return array
+ *   A collection urls to resubscribe.
+ */
+function hook_indieweb_websub_needs_resubscribe() {
+  return ['url1', 'url2'];
+}

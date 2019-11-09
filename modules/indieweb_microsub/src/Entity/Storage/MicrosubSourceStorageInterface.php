@@ -17,4 +17,11 @@ interface MicrosubSourceStorageInterface extends ContentEntityStorageInterface {
    */
   public function getSourcesToRefresh();
 
+  /**
+   * Get the sources which need to resubscribe to their WebSub hub.
+   *
+   * @return array $urls
+   *   A collection of urls that need to resubscribe for WebSub.
+   */
+  public function getSourcesToResubscribe();
 }
