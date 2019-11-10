@@ -8,6 +8,7 @@ use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\File\FileSystemInterface;
 use Drupal\Core\Language\LanguageInterface;
 use Drupal\Core\Site\Settings;
+use Drupal\Core\StreamWrapper\PublicStream;
 use Drupal\Core\Url;
 use Drupal\datetime\Plugin\Field\FieldType\DateTimeItemInterface;
 use Drupal\field\FieldStorageConfigInterface;
@@ -1104,6 +1105,9 @@ class MicropubController extends ControllerBase {
    *   Limit number of uploads.
    *
    * @return array $uploaded_files
+   *
+   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    */
   protected function saveUpload($file_key, $destination = 'public://', $validators = [], $limit = NULL) {
     $uploaded_files = [];
@@ -1111,6 +1115,27 @@ class MicropubController extends ControllerBase {
     // Return early if there are no uploads.
     $files = \Drupal::request()->files->get($file_key);
     if (empty($files)) {
+
+      // Check if there's a photo in input, meaning that a file was uploaded
+      // through the Media endpoint and what we have then are full file urls.
+      if (!empty($this->input[$file_key])) {
+        if (is_string($this->input[$file_key])) {
+          $photos = [$this->input[$file_key]];
+        }
+        else {
+          $photos = $this->input[$file_key];
+        }
+        $search = [\Drupal::request()->getSchemeAndHttpHost() . '/', PublicStream::basePath() . '/'];
+        $replace = ['',  'public://'];
+        foreach ($photos as $photo_filename) {
+          $photo_filename = str_replace($search, $replace, $photo_filename);
+          $load = $this->entityTypeManager()->getStorage('file')->loadByProperties(['uri' => $photo_filename]);
+          if (!empty($load)) {
+            $uploaded_files[] = array_shift($load);
+          }
+        }
+      }
+
       return $uploaded_files;
     }
 
