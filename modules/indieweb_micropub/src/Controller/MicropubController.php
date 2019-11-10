@@ -1033,7 +1033,7 @@ class MicropubController extends ControllerBase {
     }
 
     // Uploads.
-    $this->handleUpload($post_type . '_upload_field');
+    $this->handleUploads($post_type);
 
     // Categories.
     $this->handleCategories($post_type . '_tags_field');
@@ -1175,56 +1175,62 @@ class MicropubController extends ControllerBase {
   }
 
   /**
-   * Handle uploads
+   * Handle uploads.
    *
-   * @param $upload_field
+   * @param string $post_type
    *
-   * @throws \Drupal\Core\TypedData\Exception\MissingDataException
+   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    * @throws \Drupal\Core\Entity\EntityStorageException
+   * @throws \Drupal\Core\TypedData\Exception\MissingDataException
    */
-  protected function handleUpload($upload_field) {
-    $file_field_name = $this->config->get($upload_field);
-    if ($file_field_name && $this->node->hasField($file_field_name)) {
+  protected function handleUploads($post_type) {
+    foreach (['upload_field' => 'photo', 'audio_field' => 'audio', 'video_field' => 'video'] as $field_name => $upload_key) {
+      $upload_field = $post_type . '_' . $field_name;
 
-      // Validators, destination and cardinality.
-      $items = $this->node->get($file_field_name);
-      /** @var \Drupal\file\Plugin\Field\FieldType\FileItem $field */
-      $field = $items->first() ?: $items->appendItem();
-      $validators = $field->getUploadValidators();
-      $field_settings = $field->getFieldDefinition()->getSettings();
-      $destination = $field->getUploadLocation();
+      $file_field_name = $this->config->get($upload_field);
+      if ($file_field_name && $this->node->hasField($file_field_name)) {
 
-      // Resolution.
-      if ($field_settings['max_resolution'] || $field_settings['min_resolution']) {
-        $validators['file_validate_image_resolution'] = [$field_settings['max_resolution'], $field_settings['min_resolution']];
-      }
+        // Validators, destination and cardinality.
+        $items = $this->node->get($file_field_name);
+        /** @var \Drupal\file\Plugin\Field\FieldType\FileItem $field */
+        $field = $items->first() ?: $items->appendItem();
+        $validators = $field->getUploadValidators();
+        $field_settings = $field->getFieldDefinition()->getSettings();
+        $destination = $field->getUploadLocation();
 
-      // Cardinality.
-      $limit = NULL;
-      $cardinality = $field->getFieldDefinition()->getFieldStorageDefinition()->getCardinality();
-      if ($cardinality > FieldStorageConfigInterface::CARDINALITY_UNLIMITED) {
-        $limit = $cardinality;
-      }
-
-      $files = $this->saveUpload('photo', $destination, $validators, $limit);
-      if ($files) {
-        $file_values = [];
-        /** @var \Drupal\file\FileInterface $file */
-        foreach ($files as $delta => $file) {
-          if (isset($this->input['mp-photo-alt'][$delta]) && !empty($this->input['mp-photo-alt'][$delta])) {
-            $file_values[] = [
-              'target_id' => $file->id(),
-              'alt' => $this->input['mp-photo-alt'][$delta],
-            ];
-          }
-          else {
-            $file_values[] = $file->id();
-          }
-
-          // Set owner of file.
-          $file->setOwnerId($this->values['uid'])->save();
+        // Resolution.
+        if (isset($field_settings['max_resolution']) || isset($field_settings['min_resolution'])) {
+          $validators['file_validate_image_resolution'] = [$field_settings['max_resolution'], $field_settings['min_resolution']];
         }
-        $this->node->set($file_field_name, $file_values);
+
+        // Cardinality.
+        $limit = NULL;
+        $cardinality = $field->getFieldDefinition()->getFieldStorageDefinition()->getCardinality();
+        if ($cardinality > FieldStorageConfigInterface::CARDINALITY_UNLIMITED) {
+          $limit = $cardinality;
+        }
+
+        $files = $this->saveUpload($upload_key, $destination, $validators, $limit);
+        if ($files) {
+          $file_values = [];
+          /** @var \Drupal\file\FileInterface $file */
+          foreach ($files as $delta => $file) {
+            if (isset($this->input['mp-photo-alt'][$delta]) && !empty($this->input['mp-photo-alt'][$delta])) {
+              $file_values[] = [
+                'target_id' => $file->id(),
+                'alt' => $this->input['mp-photo-alt'][$delta],
+              ];
+            }
+            else {
+              $file_values[] = $file->id();
+            }
+
+            // Set owner of file.
+            $file->setOwnerId($this->values['uid'])->save();
+          }
+          $this->node->set($file_field_name, $file_values);
+        }
       }
     }
   }
