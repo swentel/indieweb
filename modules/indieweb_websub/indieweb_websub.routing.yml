@@ -7,9 +7,10 @@ indieweb.admin.websub_settings:
     _permission: 'administer websub'
 
 indieweb.websub.callback:
-  path: '/websub/callback'
+  path: '/websub/callback/{websub_hash}'
   defaults:
     _controller: '\Drupal\indieweb_websub\Controller\WebSubController::callback'
     _title: 'Callback endpoint'
+    websub_hash: ''
   requirements:
     _access: 'TRUE'

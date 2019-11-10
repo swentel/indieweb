@@ -59,4 +59,13 @@ interface WebSubClientInterface {
    */
   public function discoverHub($url);
 
+  /**
+   * Returns the hash of a URL.
+   *
+   * @param $url
+   *
+   * @return string $hash
+   */
+  public function getHash($url);
+
 }

@@ -2,6 +2,8 @@
 
 namespace Drupal\indieweb_websub\WebSubClient;
 
+use Drupal\Component\Utility\Crypt;
+use Drupal\Core\Site\Settings;
 use Drupal\Core\Url;
 use p3k\WebSub\Client;
 
@@ -108,7 +110,7 @@ class WebSubClient implements WebSubClientInterface {
       'form_params' => [
         'hub.mode' => $mode,
         'hub.topic' => $url,
-        'hub.callback' => Url::fromRoute('indieweb.websub.callback', [], ['absolute' => TRUE])->toString()
+        'hub.callback' => Url::fromRoute('indieweb.websub.callback', ['websub_hash' => $this->getHash($url)], ['absolute' => TRUE])->toString()
       ]
     ];
 
@@ -144,6 +146,13 @@ class WebSubClient implements WebSubClientInterface {
     }
 
     return FALSE;
+  }
+
+  /**
+   *{@inheritdoc}
+   */
+  public function getHash($url) {
+    return Crypt::hashBase64(Settings::getHashSalt() . $url);
   }
 
 }

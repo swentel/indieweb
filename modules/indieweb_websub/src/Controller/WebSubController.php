@@ -2,6 +2,7 @@
 
 namespace Drupal\indieweb_websub\Controller;
 
+use Drupal\Component\Utility\Crypt;
 use Drupal\Core\Controller\ControllerBase;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -12,12 +13,16 @@ class WebSubController extends ControllerBase {
    * General callback endpoint.
    *
    * @param \Symfony\Component\HttpFoundation\Request $request
+   * @param $websub_hash
    *
    * @return \Symfony\Component\HttpFoundation\Response
    */
-  public function callback(Request $request) {
+  public function callback(Request $request, $websub_hash) {
     $status = 404;
     $response = '';
+
+    /** @var \Drupal\indieweb_websub\WebSubClient\WebSubClientInterface $websub_client */
+    $websub_client = \Drupal::service('indieweb.websub.client');
 
     // Notification callback.
     if ($request->getMethod() == 'POST') {
@@ -36,7 +41,8 @@ class WebSubController extends ControllerBase {
       }
       catch (\Exception $ignored) {}
 
-      if (!empty($url) && !empty($hub)) {
+
+      if (!empty($url) && !empty($hub) && Crypt::hashEquals($websub_hash, $websub_client->getHash($url))) {
         $status = 200;
         $content = $request->getContent();
         \Drupal::moduleHandler()->invokeAll('indieweb_websub_notification', [$url, $hub, $content]);
@@ -49,7 +55,7 @@ class WebSubController extends ControllerBase {
 
     }
     // Subscribe or unsubscribe callback.
-    elseif ($request->get('hub_mode') && $request->get('hub_topic') && $request->get('hub_challenge')) {
+    elseif ($request->get('hub_mode') && $request->get('hub_topic') && $request->get('hub_challenge') && Crypt::hashEquals($websub_hash, $websub_client->getHash($request->get('hub_topic')))) {
 
       $method = $request->get('hub_mode');
 
