@@ -298,10 +298,18 @@ class WebmentionClient implements WebmentionClientInterface {
 
           // Get the path without hostname.
           $target = indieweb_get_path($target);
-          if (empty($target)) {
-            $target = '/';
-          }
           $webmention->set('target', $target);
+
+          // In case of a comment, let's set the parent target to the node.
+          if (strpos($target, 'comment') !== FALSE) {
+            $comment_id = str_replace(['/comment/indieweb/', '/comment/'], '', $target);
+            /** @var \Drupal\comment\CommentInterface $comment */
+            $comment = \Drupal::entityTypeManager()->getStorage('comment')->load($comment_id);
+            if ($comment && $comment->getCommentedEntityTypeId() == 'node' && ($parent_target_id = $comment->getCommentedEntityId())) {
+              $parent_target = Url::fromRoute('entity.node.canonical', ['node' => $parent_target_id])->toString();
+              $webmention->set('parent_target', $parent_target);
+            }
+          }
 
           // Check identical webmentions. If the source, target and property are
           // the same, trigger an error.

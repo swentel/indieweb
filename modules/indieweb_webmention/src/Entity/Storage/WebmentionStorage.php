@@ -2,6 +2,7 @@
 
 namespace Drupal\indieweb_webmention\Entity\Storage;
 
+use Drupal\Core\Database\Query\Condition;
 use Drupal\Core\Entity\Sql\SqlContentEntityStorage;
 
 /**
@@ -20,8 +21,12 @@ class WebmentionStorage extends SqlContentEntityStorage implements WebmentionSto
       ->select('webmention_received', 'w')
       ->fields('w')
       ->condition('status', 1)
-      ->condition('target', $target)
       ->condition('property', $types, 'IN');
+
+    $or = new Condition('OR');
+    $or->condition('target', $target);
+    $or->condition('parent_target', $target);
+    $query->condition($or);
 
     $query->orderBy($sort_field, $sort_direction);
 

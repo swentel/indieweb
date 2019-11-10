@@ -32,3 +32,31 @@ function indieweb_webmention_update_8002() {
     }
   }
 }
+
+/**
+ * Installs the parent_target field for webmentions.
+ */
+function indieweb_webmention_update_8003() {
+  $field_storage_definition = BaseFieldDefinition::create('string')
+    ->setLabel(t('Parent target'))
+    ->setSettings([
+      'max_length' => 255,
+      'text_processing' => 0,
+    ])
+    ->setDisplayOptions('view', [
+      'label' => 'above',
+      'type' => 'string',
+      'weight' => 2,
+    ])
+    ->setDisplayOptions('form', [
+      'type' => 'string_textfield',
+      'weight' => 2,
+    ])
+    ->setDisplayConfigurable('form', TRUE)
+    ->setDisplayConfigurable('view', TRUE)
+    ->setDefaultValue('')
+    ->setRequired(FALSE);
+
+  \Drupal::entityDefinitionUpdateManager()
+    ->installFieldStorageDefinition('parent_target', 'indieweb_webmention', 'indieweb_webmention', $field_storage_definition);
+}

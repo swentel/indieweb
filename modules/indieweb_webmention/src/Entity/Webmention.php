@@ -132,6 +132,13 @@ class Webmention extends ContentEntityBase implements WebmentionInterface {
   /**
    * {@inheritdoc}
    */
+  public function getParentTarget() {
+    return $this->get('parent_target')->value;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function getType() {
     return $this->get('type')->value;
   }
@@ -266,6 +273,7 @@ class Webmention extends ContentEntityBase implements WebmentionInterface {
     $additional_fields = [
       'source' => 'Source',
       'target' => 'Target',
+      'parent_target' => 'Parent target',
       'type' => 'Type',
       'property' => 'Property',
       'author_name' => 'Author name',
@@ -281,7 +289,7 @@ class Webmention extends ContentEntityBase implements WebmentionInterface {
     $weight = 0;
     foreach ($additional_fields as $key => $label) {
 
-      $required = $weight < 4;
+      $required = $weight < 4 && $key != 'parent_target';
       $max_length = 255;
       if ($key == 'rsvp') {
         $max_length = 20;

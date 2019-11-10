@@ -58,6 +58,13 @@ interface WebmentionInterface extends ContentEntityInterface, EntityChangedInter
   public function getTarget();
 
   /**
+   * Returns the parent target.
+   *
+   * @return string
+   */
+  public function getParentTarget();
+
+  /**
    * Returns the type.
    *
    * @return string
