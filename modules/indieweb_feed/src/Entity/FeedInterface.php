@@ -17,13 +17,6 @@ interface FeedInterface extends ConfigEntityInterface {
   public function excludeIndexing();
 
   /**
-   * Whether to expose an Atom feed.
-   *
-   * @return bool
-   */
-  public function exposeAtomFeed();
-
-  /**
    * Whether to expose a jf2 feed.
    *
    * @return bool
@@ -36,27 +29,6 @@ interface FeedInterface extends ConfigEntityInterface {
    * @return bool
    */
   public function exposeRelLinkTag();
-
-  /**
-   * Whether to expose the application/atom+xml header link.
-   *
-   * @return bool
-   */
-  public function exposeAtomLinkTag();
-
-  /**
-   * Whether to use a hub.
-   *
-   * @return bool
-   */
-  public function useHub();
-
-  /**
-   * Returns the hub URL.
-   *
-   * @return string
-   */
-  public function getHubUrl();
 
   /**
    * Whether to expose the application/jf2feed+json header link.

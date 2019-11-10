@@ -91,27 +91,6 @@ class Feed extends ConfigEntityBase implements FeedInterface {
   protected $excludeIndexing = FALSE;
 
   /**
-   * Whether to create an atom feed.
-   *
-   * @var bool
-   */
-  protected $atom;
-
-  /**
-   * Whether to use a hub or not.
-   *
-   * @var bool
-   */
-  protected $hub;
-
-  /**
-   * The default hub URL.
-   *
-   * @var string
-   */
-  protected $hubUrl;
-
-  /**
    * Whether to create a jf2 feed.
    *
    * @var bool
@@ -124,13 +103,6 @@ class Feed extends ConfigEntityBase implements FeedInterface {
    * @var bool
    */
   protected $feedLinkTag;
-
-  /**
-   * Whether to expose application/atom+xml
-   *
-   * @var bool
-   */
-  protected $atomLinkTag;
 
   /**
    * Whether to expose application/jf2feed+json
@@ -163,13 +135,6 @@ class Feed extends ConfigEntityBase implements FeedInterface {
   /**
    * {@inheritdoc}
    */
-  public function exposeAtomFeed() {
-    return $this->atom;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
   public function exposeJf2Feed() {
     return $this->jf2;
   }
@@ -184,29 +149,8 @@ class Feed extends ConfigEntityBase implements FeedInterface {
   /**
    * {@inheritdoc}
    */
-  public function exposeAtomLinkTag() {
-    return $this->atomLinkTag;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function useHub() {
-    return $this->hub;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
   public function exposeJf2LinkTag() {
     return $this->jf2LinkTag;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getHubUrl() {
-    return $this->hubUrl;
   }
 
   /**

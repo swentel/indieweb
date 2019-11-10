@@ -1,6 +1,6 @@
 name: Feeds
 type: module
-description: Create Microformats2, JF2 and Atom feeds.
+description: Create Microformats2 and JF2 feeds.
 core: 8.x
 package: IndieWeb
 dependencies:

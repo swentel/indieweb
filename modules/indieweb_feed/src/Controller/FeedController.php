@@ -97,23 +97,6 @@ class FeedController extends ControllerBase {
   }
 
   /**
-   * Routing callback: returns an Atom feed.
-   *
-   * @param \Drupal\indieweb_feed\Entity\FeedInterface $indieweb_feed
-   */
-  public function feedAtom(FeedInterface $indieweb_feed) {
-    $feed_url = Url::fromRoute('indieweb.feeds.microformat.' . $indieweb_feed->id(), [], ['absolute' => TRUE])->toString(FALSE);
-    $atom_url = 'https://granary.io/url?url=' . $feed_url . '&input=html&output=atom';
-
-    if ($indieweb_feed->useHub()) {
-      $atom_url .= "&hub=" . $indieweb_feed->getHubUrl();
-    }
-
-    header("Location: " . $atom_url, FALSE, 301);
-    exit();
-  }
-
-  /**
    * Routing callback: returns a JF2 feed.
    *
    * @param \Drupal\indieweb_feed\Entity\FeedInterface $indieweb_feed

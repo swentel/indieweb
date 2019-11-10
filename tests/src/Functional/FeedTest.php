@@ -38,13 +38,6 @@ class FeedTest extends IndiewebBrowserTestBase {
   protected $timeline_path_2 = '/timeline/all/2';
 
   /**
-   * Timeline atom path.
-   *
-   * @var string
-   */
-  protected $timeline_atom_path = '/timeline-all.xml';
-
-  /**
    * Timeline jf2 path.
    *
    * @var string
@@ -57,13 +50,6 @@ class FeedTest extends IndiewebBrowserTestBase {
    * @var string
    */
   protected $header_feed_link_tag = '<link rel="feed"';
-
-  /**
-   * The atom header link.
-   *
-   * @var string
-   */
-  protected $header_atom_link_tag = '<link rel="alternate" type="application/atom+xml"';
 
   /**
    * The jf2 header link.
@@ -122,7 +108,6 @@ class FeedTest extends IndiewebBrowserTestBase {
 
     $this->drupalGet('<front>');
     $this->assertSession()->responseNotContains($this->header_feed_link_tag);
-    $this->assertSession()->responseNotContains($this->header_atom_link_tag);
     $this->assertSession()->responseNotContains($this->header_jfd_link_tag);
 
     $this->drupalGet($this->timeline_path);
@@ -131,8 +116,6 @@ class FeedTest extends IndiewebBrowserTestBase {
     $this->assertSession()->responseContains('noindex, nofollow');
 
     $this->drupalGet($this->timeline_jf2_path);
-    $this->assertSession()->statusCodeEquals(404);
-    $this->drupalGet($this->timeline_atom_path);
     $this->assertSession()->statusCodeEquals(404);
 
     // Create an article.
@@ -152,13 +135,11 @@ class FeedTest extends IndiewebBrowserTestBase {
     $this->drupalGet('admin/config/services/indieweb/feeds');
     $this->clickLink('Update items');
 
-    // Also expose headers and jf2 and atom.
+    // Also expose headers and jf2.
     $edit = [
       'excludeIndexing' => FALSE,
-      'atom' => TRUE,
       'jf2' => TRUE,
       'feedLinkTag' => TRUE,
-      'atomLinkTag' => TRUE,
       'jf2LinkTag' => TRUE,
     ];
     $this->drupalPostForm('admin/config/services/indieweb/feeds/timeline/edit', $edit, 'Save');
@@ -167,11 +148,9 @@ class FeedTest extends IndiewebBrowserTestBase {
     $this->drupalLogout();
     $this->drupalGet('<front>');
     $this->assertSession()->responseContains($this->header_feed_link_tag);
-    $this->assertSession()->responseContains($this->header_atom_link_tag);
     $this->assertSession()->responseContains($this->header_jfd_link_tag);
     $this->assertSession()->responseContains('/timeline/all');
     $this->assertSession()->responseContains('/timeline-all.jf2');
-    $this->assertSession()->responseContains('/timeline-all.xml');
 
     // Check timelines.
     $this->drupalGet($this->timeline_path);

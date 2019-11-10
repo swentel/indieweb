@@ -33,21 +33,6 @@ function indieweb_feed_page_attachments_alter(array &$attachments) {
         $attachments['#attached']['html_head'][] = [$link, 'feed_endpoint_' . $feed->id()];
       }
 
-      // Atom feed.
-      if ($feed->exposeAtomFeed() && $feed->exposeAtomLinkTag()) {
-        $link = [
-          '#tag' => 'link',
-          '#attributes' => [
-            'rel' => 'alternate',
-            'type' => 'application/atom+xml',
-            'href' => Url::fromUri('internal:/' . str_replace('/', '-', $feed->getPath()) . '.xml', ['absolute' => TRUE])
-              ->toString(),
-          ],
-        ];
-
-        $attachments['#attached']['html_head'][] = [$link, 'feed_endpoint_atom_' . $feed->id()];
-      }
-
       // JF2 feed.
       if ($feed->exposeJf2Feed() && $feed->exposeJf2LinkTag()) {
         $link = [

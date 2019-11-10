@@ -43,7 +43,7 @@ class FeedForm extends EntityForm {
       '#title' => $this->t('Feed title'),
       '#maxlength' => 255,
       '#default_value' => $feed->getFeedTitle(),
-      '#description' => $this->t("Title for the feed. This will be printed hidden and used for atom feeds for instance"),
+      '#description' => $this->t("Title for the feed. This will be printed hidden."),
       '#required' => TRUE,
     ];
 
@@ -78,35 +78,6 @@ class FeedForm extends EntityForm {
       '#default_value' => $feed->excludeIndexing(),
     ];
 
-    $form['atom'] = [
-      '#type' => 'checkbox',
-      '#title' => $this->t('Expose Atom feed'),
-      '#default_value' => $feed->exposeAtomFeed(),
-      '#description' => $this->t('This uses https://granary.io to convert your content to an Atom feed.'),
-    ];
-
-    $form['hub'] = [
-      '#type' => 'checkbox',
-      '#title' => $this->t('Use a hub'),
-      '#default_value' => $feed->useHub(),
-      '#states' => array(
-        'visible' => array(
-          ':input[name="atom"]' => array('checked' => TRUE),
-        ),
-      ),
-    ];
-
-    $form['hubUrl'] = [
-      '#type' => 'textfield',
-      '#title' => $this->t('Hub URL'),
-      '#default_value' => $feed->getHubUrl(),
-      '#states' => array(
-        'visible' => array(
-          ':input[name="atom"]' => array('checked' => TRUE),
-        ),
-      ),
-    ];
-
     $form['jf2'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('Expose JF2 feed'),
@@ -118,17 +89,6 @@ class FeedForm extends EntityForm {
       '#type' => 'checkbox',
       '#title' => $this->t('Expose feed link tag'),
       '#default_value' => $feed->exposeRelLinkTag(),
-    ];
-
-    $form['atomLinkTag'] = [
-      '#type' => 'checkbox',
-      '#title' => $this->t('Expose Atom feed link tag'),
-      '#default_value' => $feed->exposeAtomLinkTag(),
-      '#states' => array(
-        'visible' => array(
-          ':input[name="atom"]' => array('checked' => TRUE),
-        ),
-      ),
     ];
 
     $form['jf2LinkTag'] = [

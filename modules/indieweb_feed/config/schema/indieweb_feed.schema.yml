@@ -19,15 +19,6 @@ indieweb_feed.indieweb_feed.*:
     jf2:
       type: boolean
       label: 'Whether to expose a JF2 feed'
-    atom:
-      type: boolean
-      label: 'Whether to expose an Atom feed'
-    hub:
-      type: boolean
-      label: 'Whether to use a hub'
-    hubUrl:
-      type: string
-      label: 'The URL of the hub'
     feedTitle:
       type: label
       label: 'Feed title'
@@ -37,9 +28,6 @@ indieweb_feed.indieweb_feed.*:
     feedLinkTag:
       type: boolean
       label: 'Whether to expose the rel="feed" header link'
-    atomLinkTag:
-      type: boolean
-      label: 'Whether to expose the application/atom+xml header link'
     jf2LinkTag:
       type: boolean
       label: 'Whether to expose the application/jf2feed+json header link'

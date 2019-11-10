@@ -23,7 +23,7 @@ Current functionality:
   - store location coordinates
 - Auto-create comments from 'in-reply-to'
 - Reply on comments and send webmention
-- Feeds: microformats, atom and jf2
+- Feeds: microformats and jf2
 - Send a micropub post to Aperture on incoming webmentions
 - WebSub PuSH 0.4 for publishing and subscribing
 - Fetch post context for content or microsub items
@@ -39,7 +39,7 @@ The functionality is split into several modules:
 - Microformats: apply Microformats2 to your markup
 - Micropub: expose a Micropub endpoint
 - Microsub: expose a Microsub endpoint, external or internal
-- Feeds: create Microformats2, Atom and JF2 feeds
+- Feeds: create Microformats2 and JF2 feeds
 - Post context: store context for content and microsub items
 - Media cache: store images locally for internal webmention and microsub endpoint
 - WebSub: WebSub PuSH 0.4 for publishing and subscribing
@@ -310,7 +310,7 @@ Configuration still in settings.php
 
 ## Feeds
 
-Generate feeds in Microformats2 , JF2 and Atom. Atom feeds are generated using https://granary.io/. 
+Generate feeds in Microformats2 , JF2.
 
 You will need feeds when:
 
@@ -330,7 +330,6 @@ For more information see
 
 - https://indieweb.org/feed
 - https://indieweb.org/jf2
-- https://indieweb.org/Atom
 
 ## Microsub
 
