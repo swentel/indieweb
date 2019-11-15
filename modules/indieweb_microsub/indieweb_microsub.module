@@ -89,7 +89,7 @@ function indieweb_microsub_indieweb_websub_unsubscribe($url) {
 /**
  * Implements hook_indieweb_websub_notification().
  */
-function indieweb_microsub_indieweb_websub_notification($url, $hub, $content) {
+function indieweb_microsub_indieweb_websub_notification($url, $content) {
   /** @var \Drupal\indieweb_microsub\Entity\MicrosubSourceInterface[] $sources */
   $sources = \Drupal::entityTypeManager()->getStorage('indieweb_microsub_source')->loadByProperties(['url' => $url]);
   if ($sources) {

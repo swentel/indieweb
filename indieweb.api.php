@@ -141,12 +141,10 @@ function hook_indieweb_websub_unsubscribe($url) {
  *
  * @param $url
  *   The URL which was updated.
- * @param $hub
- *   The hub where it came from
  * @param $content
  *   The content, if any.
  */
-function hook_indieweb_websub_notification($url, $hub, $content) {
+function hook_indieweb_websub_notification($url, $content) {
 }
 
 /**

@@ -27,25 +27,23 @@ class WebSubController extends ControllerBase {
     // Notification callback.
     if ($request->getMethod() == 'POST') {
 
-      $url = $hub = '';
+      $url = '';
 
       // Check link header.
       try {
+        // Note: we don't check on hub since not all hubs send that header.
         $result = \IndieWeb\http_rels($request->headers);
         if (!empty($result['self'])) {
           $url = $result['self'][0];
-        }
-        if (!empty($result['hub'])) {
-          $hub = $result['hub'][0];
         }
       }
       catch (\Exception $ignored) {}
 
 
-      if (!empty($url) && !empty($hub) && Crypt::hashEquals($websub_hash, $websub_client->getHash($url))) {
+      if (!empty($url) && Crypt::hashEquals($websub_hash, $websub_client->getHash($url))) {
         $status = 200;
         $content = $request->getContent();
-        \Drupal::moduleHandler()->invokeAll('indieweb_websub_notification', [$url, $hub, $content]);
+        \Drupal::moduleHandler()->invokeAll('indieweb_websub_notification', [$url, $content]);
       }
 
       // Log payload.
