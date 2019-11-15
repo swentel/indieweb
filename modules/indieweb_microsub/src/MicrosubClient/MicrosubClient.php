@@ -45,6 +45,8 @@ class MicrosubClient implements MicrosubClientInterface {
       $source_id = $source->id();
       $channel_id = $source->getChannelId();
       $disable_image_cache = $source->disableImageCache();
+      $exclude = $source->getChannel()->getPostTypesToExclude();
+
       $tries++;
 
       // Allow internal URL's, at the moment only for testing.
@@ -93,6 +95,12 @@ class MicrosubClient implements MicrosubClientInterface {
             $c = 0;
             $guids = [];
             foreach ($items_sorted as $item) {
+
+              // Exclude post types.
+              if ($exclude && !empty($item['post-type']) && in_array($item['post-type'], $exclude)) {
+                continue;
+              }
+
               $guids[] = $this->saveItem($item, $tries, $source_id, $channel_id, $empty, $context, $disable_image_cache);
 
               // If we have number of items to keep and we hit the amount, break

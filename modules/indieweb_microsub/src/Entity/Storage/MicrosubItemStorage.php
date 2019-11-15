@@ -17,27 +17,11 @@ class MicrosubItemStorage extends SqlContentEntityStorage implements MicrosubIte
    * {@inheritdoc}
    */
   public function getUnreadCountByChannel($channel_id) {
-    $exclude = [];
-
-    /** @var \Drupal\indieweb_microsub\Entity\MicrosubChannelInterface $channel */
-    if ($channel_id > 0) {
-      $channel = \Drupal::entityTypeManager()->getStorage('indieweb_microsub_channel')->load($channel_id);
-      if ($channel) {
-        $exclude = $channel->getPostTypesToExclude();
-      }
-    }
-
     $query = \Drupal::entityQuery('indieweb_microsub_item')
       ->condition('channel_id', $channel_id)
       ->condition('status', 1)
       ->condition('is_read', 0);
-
-    if ($exclude) {
-      $query->condition('post_type', $exclude, 'NOT IN');
-    }
-
     $query->count();
-
     return $query->execute();
   }
 
@@ -143,16 +127,6 @@ class MicrosubItemStorage extends SqlContentEntityStorage implements MicrosubIte
    * {@inheritdoc}
    */
   public function loadByChannel($channel_id, $is_read = NULL, $limit = 20) {
-    $exclude = [];
-
-    /** @var \Drupal\indieweb_microsub\Entity\MicrosubChannelInterface $channel */
-    if ($channel_id > 0) {
-      $channel = \Drupal::entityTypeManager()->getStorage('indieweb_microsub_channel')->load($channel_id);
-      if ($channel) {
-        $exclude = $channel->getPostTypesToExclude();
-      }
-    }
-
     $query = \Drupal::entityQuery('indieweb_microsub_item')
       ->condition('status', 1);
 
@@ -164,10 +138,6 @@ class MicrosubItemStorage extends SqlContentEntityStorage implements MicrosubIte
     // Is read or not.
     if (isset($is_read)) {
       $query->condition('is_read', (int) $is_read);
-    }
-
-    if ($exclude) {
-      $query->condition('post_type', $exclude, 'NOT IN');
     }
 
     $query

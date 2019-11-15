@@ -303,26 +303,33 @@ class MicrosubTest extends IndiewebBrowserTestBase {
     self::assertEquals($page->get('body')->value, $body->items[0]->refs->{$url}->content);
     self::assertTrue(!isset($body->items[1]->refs));
 
-    // Exclude replies from channel.
+    // Exclude articles from channel.
     $this->drupalLogin($this->adminUser);
-    $edit = ['exclude_post_type[reply]' => TRUE];
+    $edit = ['exclude_post_type[article]' => TRUE];
     $this->drupalPostForm('admin/config/services/indieweb/microsub/channels/1/edit', $edit, 'Save');
-    \Drupal::database()->update('microsub_item')->fields(['is_read' => 0])->condition('channel_id', 1)->execute();
-    $channel = \Drupal::entityTypeManager()->getStorage('indieweb_microsub_channel')->loadUnchanged(1);
-    $unread = (int) $channel->getUnreadCount();
-    self::assertEquals(1, $unread);
-    self::assertEquals(2, $channel->getItemCount());
+    // Clear static caching.
+    \Drupal::entityTypeManager()->getStorage('indieweb_microsub_channel')->loadUnchanged(1);
+    $this->microsubClear('item');
+    $this->drupalLogout();
+    $this->resetNextFetch(1);
+    $this->resetNextFetch(2);
+    $this->fetchItems();
+    $this->assertMicrosubItemCount('item', 5);
 
     $query = ['action' => 'timeline', 'channel' => 1];
     $response = $this->sendMicrosubRequest($query);
     $body = json_decode($response['body']);
     self::assertTrue(count($body->items) == 1);
     $type = 'post-type';
-    self::assertTrue($body->items[0]->{$type} == 'article');
+    self::assertTrue($body->items[0]->{$type} == 'reply');
 
     // Test disabled source.
     $this->drupalLogin($this->adminUser);
+    $edit = ['exclude_post_type[article]' => FALSE];
+    $this->drupalPostForm('admin/config/services/indieweb/microsub/channels/1/edit', $edit, 'Save');
     $this->drupalPostForm('admin/config/services/indieweb/microsub/sources/2/edit', ['status' => FALSE], 'Save');
+    // Clear static caching.
+    \Drupal::entityTypeManager()->getStorage('indieweb_microsub_channel')->loadUnchanged(1);
     $this->microsubClear('item');
     $this->drupalLogout();
     $this->resetNextFetch(1);
