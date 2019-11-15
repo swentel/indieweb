@@ -21,8 +21,10 @@ interface WebSubClientInterface {
 
   /**
    * Resubscribe to WebSub subscriptions.
+   *
+   * @param $debug
    */
-  public function resubscribe();
+  public function resubscribe($debug = FALSE);
 
   /**
    * Checks whether this entity has been published or not to the hub.

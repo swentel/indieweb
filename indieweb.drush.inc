@@ -67,10 +67,12 @@ function drush_indieweb_websub_publish() {
 
 /**
  * Handles WebSub resubscribe.
+ *
+ * @param $debug
  */
-function drush_indieweb_websub_resubscribe() {
+function drush_indieweb_websub_resubscribe($debug = FALSE) {
   if (\Drupal::config('indieweb_websub.settings')->get('resubscribe_handler') == 'drush') {
-    \Drupal::service('indieweb.websub.client')->resubscribe();
+    \Drupal::service('indieweb.websub.client')->resubscribe($debug);
   }
 }
 

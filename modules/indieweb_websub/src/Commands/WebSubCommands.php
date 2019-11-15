@@ -24,12 +24,14 @@ class WebSubCommands extends DrushCommands {
   /**
    * WebSub resubscribe
    *
+   * @param $debug
+   *
    * @command indieweb:websub-resubscribe
    * @aliases iwrs,indieweb-websub-resubscribe
    */
-  public function webSubResubscribe() {
+  public function webSubResubscribe($debug = FALSE) {
     if (\Drupal::config('indieweb_websub.settings')->get('resubscribe_handler') == 'drush') {
-      \Drupal::service('indieweb.websub.client')->resubscribe();
+      \Drupal::service('indieweb.websub.client')->resubscribe($debug);
     }
   }
 

@@ -80,8 +80,12 @@ class WebSubClient implements WebSubClientInterface {
   /**
    * {@inheritdoc}
    */
-  public function resubscribe() {
+  public function resubscribe($debug = FALSE) {
     $urls = \Drupal::moduleHandler()->invokeAll('indieweb_websub_needs_resubscribe');
+    if ($debug) {
+      print_r($urls);
+      exit;
+    }
     foreach ($urls as $url) {
       if ($info = $this->discoverHub($url)) {
         $this->subscribe($info['self'], $info['hub'], 'subscribe');
