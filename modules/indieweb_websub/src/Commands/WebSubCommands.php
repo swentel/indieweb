@@ -33,4 +33,19 @@ class WebSubCommands extends DrushCommands {
     }
   }
 
+  /**
+   * Command to test hub discovery.
+   *
+   * @param $url
+   *
+   * @command indieweb:websub-discover-hub
+   * @aliases indieweb-websub-discover-hub
+   */
+  public function webSubTestHubDiscovery($url) {
+    /** @var \Drupal\indieweb_websub\WebSubClient\WebSubClientInterface $websub_service */
+    $websub_service = \Drupal::service('indieweb.websub.client');
+    $info = $websub_service->discoverHub($url, TRUE);
+    print_r($info);
+  }
+
 }

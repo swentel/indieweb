@@ -54,10 +54,11 @@ interface WebSubClientInterface {
    * Discover if a URL has a hub.
    *
    * @param $url
+   * @param $debug
    *
    * @return mixed
    */
-  public function discoverHub($url);
+  public function discoverHub($url, $debug = FALSE);
 
   /**
    * Returns the hash of a URL.

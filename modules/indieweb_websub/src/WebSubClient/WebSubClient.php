@@ -132,12 +132,16 @@ class WebSubClient implements WebSubClientInterface {
   /**
    * {@inheritDoc}
    */
-  public function discoverHub($url) {
+  public function discoverHub($url, $debug = FALSE) {
     $webSubClient = new Client();
 
     try {
+
       $response = $webSubClient->discover($url);
       if (!empty($response['hub']) && !empty($response['self'])) {
+        if ($debug) {
+          print_r($response);
+        }
         return ['hub' => $response['hub'], 'self' => $response['self']];
       }
     }

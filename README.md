@@ -387,6 +387,9 @@ Once a day is fine for the latter. Don't forget to add the -l param with your do
 
 More configuration is at configuration at admin/config/services/indieweb/websub.
 
+You need https://github.com/swentel/p3k-websub/commit/4310388f712082e4ee310eb7de462d140023a388 as a patch on the
+p3k-websub package so all self and hub links are found.
+
 ## Post contexts
 
 When you create a post with a link which is a reply, like, repost or bookmark of an external post, you can fetch content 
