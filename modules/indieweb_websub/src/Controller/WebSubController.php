@@ -36,6 +36,11 @@ class WebSubController extends ControllerBase {
         if (!empty($result['self'])) {
           $url = $result['self'][0];
         }
+        // I know this looks a bit silly, but too lazy to fix it myself for now.
+        // This happens when the hub is not send along.
+        elseif (!empty($result['self";'])) {
+          $url = $result['self";'][0];
+        }
       }
       catch (\Exception $ignored) {}
 
