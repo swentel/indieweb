@@ -2,6 +2,7 @@ name: IndieAuth
 type: module
 description: Use your own domain to sign in to other sites and services.
 core: 8.x
+core_version_requirement: ^8 || ^9
 package: IndieWeb
 dependencies:
   - indieweb

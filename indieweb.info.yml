@@ -2,6 +2,7 @@ name: IndieWeb
 type: module
 description: IndieWeb main module, containing services, permissions and more.
 core: 8.x
+core_version_requirement: ^8 || ^9
 package: IndieWeb
 test_dependencies:
   - externalauth:externalauth

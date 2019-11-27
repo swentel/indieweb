@@ -2,6 +2,7 @@ name: Media Cache
 type: module
 description: Caches files like author avatars and images. Use this module if you are using the built-in Webmention or Microsub endpoint.
 core: 8.x
+core_version_requirement: ^8 || ^9
 package: IndieWeb
 dependencies:
   - indieweb

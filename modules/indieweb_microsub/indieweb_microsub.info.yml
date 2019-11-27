@@ -2,6 +2,7 @@ name: Microsub
 type: module
 description: Expose a Microsub link tag and use Aperture, or use the built-in microsub server.
 core: 8.x
+core_version_requirement: ^8 || ^9
 package: IndieWeb
 dependencies:
   - indieweb
