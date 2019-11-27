@@ -9,6 +9,7 @@ use Drupal\Tests\BrowserTestBase;
 use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Exception\ServerException;
 use Lcobucci\JWT\Builder;
+use Lcobucci\JWT\Signer\Key;
 use Lcobucci\JWT\Signer\Rsa\Sha512;
 
 /**
@@ -867,13 +868,12 @@ abstract class IndiewebBrowserTestBase extends BrowserTestBase {
     $signer = new Sha512();
 
     $JWT = (new Builder())
-      ->setIssuer(\Drupal::request()->getSchemeAndHttpHost())
-      ->setAudience('internal')
-      ->setId($access_token, true)
-      ->setIssuedAt($created)
-      ->set('uid', 1)
-      ->sign($signer,  file_get_contents(\Drupal::config('indieweb_indieauth.settings')->get('private_key')))
-      ->getToken();
+      ->issuedBy(\Drupal::request()->getSchemeAndHttpHost())
+      ->permittedFor('internal')
+      ->identifiedBy($access_token, true)
+      ->issuedAt($created)
+      ->withClaim('uid', 1)
+      ->getToken($signer,  new Key(file_get_contents(\Drupal::config('indieweb_indieauth.settings')->get('private_key'))));
 
     $values = [
       'expire' => 0,

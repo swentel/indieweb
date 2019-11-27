@@ -8,6 +8,7 @@ use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Url;
 use Drupal\indieweb_indieauth\Entity\IndieAuthTokenInterface;
 use Lcobucci\JWT\Builder;
+use Lcobucci\JWT\Signer\Key;
 use Lcobucci\JWT\Signer\Rsa\Sha512;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -434,13 +435,12 @@ class IndieAuthController extends ControllerBase {
     $signer = new Sha512();
 
     $JWT = (new Builder())
-      ->setIssuer(\Drupal::request()->getSchemeAndHttpHost())
-      ->setAudience($authorization_code->getClientId())
-      ->setId($access_token, true)
-      ->setIssuedAt($created)
-      ->set('uid', $authorization_code->getOwnerId())
-      ->sign($signer,  file_get_contents($config->get('private_key')))
-      ->getToken();
+      ->issuedBy(\Drupal::request()->getSchemeAndHttpHost())
+      ->permittedFor($authorization_code->getClientId())
+      ->identifiedBy($access_token, true)
+      ->issuedAt($created)
+      ->withClaim('uid', $authorization_code->getOwnerId())
+      ->getToken($signer,  new Key(file_get_contents($config->get('private_key'))));
 
     $values = [
       'expire' => 0,
