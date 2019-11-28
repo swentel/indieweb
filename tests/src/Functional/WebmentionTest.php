@@ -11,7 +11,7 @@ use Drupal\user\RoleInterface;
 /**
  * Tests integration of webmentions.
  *
- * @group indieweb
+ * @group indieweb_single
  */
 class WebmentionTest extends IndiewebBrowserTestBase {
 
@@ -350,6 +350,8 @@ class WebmentionTest extends IndiewebBrowserTestBase {
 
     $this->addDefaultCommentField('node', 'page');
 
+    $this->placeBlock('indieweb_webmention', ['region' => 'content', 'label' => 'Interactions', 'id' => 'webmention']);
+
     // Configure.
     $this->drupalLogin($this->adminUser);
     $edit = ['existing_storage_name' => 'indieweb_webmention', 'existing_storage_label' => 'Webmention reference'];
@@ -397,6 +399,10 @@ class WebmentionTest extends IndiewebBrowserTestBase {
       'rsvp' => '',
     ];
     $this->assertWebmention($expected);
+
+    // Expect the like to be visible.
+    $this->drupalGet('node/1');
+    $this->assertSession()->responseContains($expected['author_name']);
 
     // Reprocess.
     $webmention = $this->getLatestWebmention();
@@ -525,7 +531,7 @@ class WebmentionTest extends IndiewebBrowserTestBase {
       'property' => 'in-reply-to',
       'author_name' => 'Eddie Hinkle',
       'author_photo' => 'https://eddiehinkle.com/images/profile.jpg',
-      'author_url' => 'https://eddiehinkle.com/',
+      'author_url' => 'https://eddiehinkle.com',
       'url' => 'https://eddiehinkle.com',
       'uid' => $this->adminUser->id(),
       'status' => 1,

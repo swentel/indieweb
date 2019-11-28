@@ -228,7 +228,7 @@ class WebmentionController extends ControllerBase {
         }
 
         // Clear cache.
-        $this->clearCache($values['target']['value']);
+        $client->clearCache($values['target']['value']);
       }
 
     }
@@ -372,35 +372,6 @@ class WebmentionController extends ControllerBase {
     }
 
     return $blocked;
-  }
-
-  /**
-   * Clears the cache for the target URL.
-   *
-   * @param $target
-   */
-  protected function clearCache($target) {
-
-    $path = \Drupal::service('path.alias_manager')->getPathByAlias($target);
-    try {
-      $params = Url::fromUri("internal:" . $path)->getRouteParameters();
-      if (!empty($params)) {
-        $entity_type = key($params);
-
-        $storage = $this->entityTypeManager()->getStorage($entity_type);
-        if ($storage) {
-          /** @var \Drupal\Core\Entity\EntityInterface $entity */
-          $entity = $storage->load($params[$entity_type]);
-          if ($entity) {
-            $storage->resetCache([$entity->id()]);
-            Cache::invalidateTags([$entity_type . ':' . $entity->id()]);
-          }
-        }
-      }
-    }
-    catch (\Exception $e) {
-      $this->getLogger('indieweb_webmention')->notice('Error clearing cache for @target: @message', ['@target' => $target, '@message' => $e->getMessage()]);
-    }
   }
 
 }

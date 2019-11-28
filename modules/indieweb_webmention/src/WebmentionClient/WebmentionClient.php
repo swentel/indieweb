@@ -358,6 +358,11 @@ class WebmentionClient implements WebmentionClientInterface {
         $webmention->setPublished();
         $webmention->save();
 
+        // Clear cache.
+        if ($webmention->getProperty() != 'in-reply-to') {
+          $this->clearCache($webmention->getTarget());
+        }
+
         // Check syndication. If it exists, no need for further actions.
         if (!$this->sourceExistsAsSyndication($webmention)) {
 
@@ -526,7 +531,7 @@ class WebmentionClient implements WebmentionClientInterface {
    *
    * @return bool
    */
-  protected function isSiloURL($url) {
+  public function isSiloURL($url) {
     $is_silo_url = FALSE;
 
     if (strpos($url, 'twitter.com') !== FALSE) {
@@ -534,6 +539,32 @@ class WebmentionClient implements WebmentionClientInterface {
     }
 
     return $is_silo_url;
+  }
+
+  /**
+   * Clears the cache for a target.
+   *
+   * @param $target
+   */
+  public function clearCache($target) {
+    $path = \Drupal::service('path.alias_manager')->getPathByAlias($target);
+    try {
+      $params = Url::fromUri("internal:" . $path)->getRouteParameters();
+      if (!empty($params)) {
+        $entity_type = key($params);
+
+        $storage = \Drupal::entityTypeManager()->getStorage($entity_type);
+        if ($storage) {
+          /** @var \Drupal\Core\Entity\EntityInterface $entity */
+          $entity = $storage->load($params[$entity_type]);
+          if ($entity) {
+            $storage->resetCache([$entity->id()]);
+            Cache::invalidateTags([$entity_type . ':' . $entity->id()]);
+          }
+        }
+      }
+    }
+    catch (Exception $ignored) {}
   }
 
 }
