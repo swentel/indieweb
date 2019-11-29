@@ -497,7 +497,7 @@ class MicropubSettingsForm extends ConfigFormBase {
       $form[$post_type][$post_type . '_audio_field'] = [
         '#type' => 'select',
         '#title' => $this->t('Audio field'),
-        '#description' => $this->t('Select the field which will be used to store audio. Make sure the field exists on the node type.<br />Only images are allowed, multiple if the field has a cardinality other than 1.'),
+        '#description' => $this->t('Select the field which will be used to store audio. Make sure the field exists on the node type.<br />Only audio is allowed, multiple if the field has a cardinality other than 1.'),
         '#options' => ['' => $this->t('Do not allow uploads')] + $upload_fields,
         '#default_value' => $config->get($post_type . '_audio_field'),
         '#states' => array(
@@ -512,7 +512,7 @@ class MicropubSettingsForm extends ConfigFormBase {
       $form[$post_type][$post_type . '_video_field'] = [
         '#type' => 'select',
         '#title' => $this->t('Video field'),
-        '#description' => $this->t('Select the field which will be used to store videos. Make sure the field exists on the node type.<br />Only images are allowed, multiple if the field has a cardinality other than 1.'),
+        '#description' => $this->t('Select the field which will be used to store videos. Make sure the field exists on the node type.<br />Only video is allowed, multiple if the field has a cardinality other than 1.'),
         '#options' => ['' => $this->t('Do not allow uploads')] + $upload_fields,
         '#default_value' => $config->get($post_type . '_video_field'),
         '#states' => array(
