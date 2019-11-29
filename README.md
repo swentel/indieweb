@@ -44,6 +44,7 @@ The functionality is split into several modules:
 - Post context: store context for content and microsub items
 - Media cache: store images locally for internal webmention and microsub endpoint
 - WebSub: WebSub PuSH 0.4 for publishing and subscribing
+- Contacts: store contacts for Micropub contact query
 
 Additional useful modules
 
