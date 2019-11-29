@@ -236,11 +236,13 @@ class WebmentionClient implements WebmentionClientInterface {
           $webmention->set('type', $type);
 
           // Author.
+          $author_values = [];
           foreach (['name', 'photo', 'url'] as $key) {
             if (!empty($data['author'][$key])) {
               $author_value = trim($data['author'][$key]);
               if (!empty($author_value)) {
                 $webmention->set('author_' . $key, $author_value);
+                $author_values[$key] = $author_value;
 
                 // Trigger cache if configured.
                 if ($key == 'photo') {
@@ -248,6 +250,11 @@ class WebmentionClient implements WebmentionClientInterface {
                 }
               }
             }
+          }
+
+          // Contacts.
+          if (!empty($author_values) && \Drupal::moduleHandler()->moduleExists('indieweb_contact') && \Drupal::config('indieweb_contact.settings')->get('create_on_webmention')) {
+            \Drupal::service('indieweb.contact.client')->storeContact($author_values);
           }
 
           // Content.

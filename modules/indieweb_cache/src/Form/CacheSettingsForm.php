@@ -38,7 +38,7 @@ class CacheSettingsForm extends ConfigFormBase {
       '#title' => $this->t('Enable'),
       '#type' => 'checkbox',
       '#default_value' => $config->get('enable'),
-      '#description' => $this->t('Leave this disabled if you are not using the built-in webmention or microsub endpoint.')
+      '#description' => $this->t('Leave this disabled if you are not using the built-in webmention/microsub endpoint or contacts.')
     ];
 
     $form['imagecache_external'] = [
@@ -57,7 +57,7 @@ class CacheSettingsForm extends ConfigFormBase {
       '#default_value' => $config->get('use_imagecache_external'),
       '#title' => $this->t('Use imagecache external'),
       '#disabled' => !$imagecache_external_module_enabled,
-      '#description' => $this->t('Uses the Imagecache external module to download image files locally. This is applied to author avatars and images in webmentions and microsub posts.'),
+      '#description' => $this->t('Uses the Imagecache external module to download image files locally. This is applied to author avatars and images in webmentions, microsub posts and contacts.'),
     ];
 
     $form['imagecache_external']['image_style_avatar'] = [
@@ -143,6 +143,19 @@ class CacheSettingsForm extends ConfigFormBase {
       ),
     ];
 
+    $form['imagecache_external']['protect_contact_image_from_flush'] = [
+      '#type' => 'checkbox',
+      '#default_value' => $config->get('protect_contact_image_from_flush'),
+      '#title' => $this->t('Protect contact avatars from flush'),
+      '#disabled' => !$imagecache_external_module_enabled,
+      '#description' => $this->t('Stores contact avatars outside the imagecache external directory so they never need to be downloaded again. Enable this if you periodically flush the imagecache externals directory.'),
+      '#states' => array(
+        'visible' => array(
+          ':input[name="use_imagecache_external"]' => array('checked' => TRUE),
+        ),
+      ),
+    ];
+
     return parent::buildForm($form, $form_state);
   }
 
@@ -157,6 +170,7 @@ class CacheSettingsForm extends ConfigFormBase {
       ->set('protect_webmention_avatar_from_flush', $form_state->getValue('protect_webmention_avatar_from_flush'))
       ->set('protect_webmention_image_from_flush', $form_state->getValue('protect_webmention_image_from_flush'))
       ->set('protect_post_context_image_from_flush', $form_state->getValue('protect_post_context_image_from_flush'))
+      ->set('protect_contact_image_from_flush', $form_state->getValue('protect_contact_image_from_flush'))
       ->set('image_style_avatar', $form_state->getValue('image_style_avatar'))
       ->set('image_style_photo', $form_state->getValue('image_style_photo'))
       ->set('ignore_webmention_io', $form_state->getValue('ignore_webmention_io'))

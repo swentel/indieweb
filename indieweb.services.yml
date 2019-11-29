@@ -3,3 +3,5 @@ services:
     class: Drupal\indieweb\MediaCacheClient\MediaCacheClientDefault
   indieweb.post_context.client:
     class: Drupal\indieweb\PostContextClient\PostContextClient
+  indieweb.contact.client:
+    class: Drupal\indieweb\ContactClient\ContactClient

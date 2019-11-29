@@ -57,6 +57,14 @@ function indieweb_help($route_name, RouteMatchInterface $route_match) {
       'title' => 'Media cache',
       'text' => '<p>' . t('When using the built-in webmention or microsub endpoint, a lot of file urls are stored to external images. If you enable the Imagecache external module, the files are downloaded so they are cached locally. Use even more caching power by installing the CDN module.') . '</p>'
     ],
+    'indieweb.admin.contact_settings' => [
+      'title' => 'Contacts',
+      'text' => '<p>' . t('Stores contacts optionally on incoming webmentions. Contacts can be managed at admin/content/contacts.') . '</p>'
+    ],
+    'indieweb.admin.websub_settings' => [
+      'title' => 'Contacts',
+      'text' => '<p>' . t('Allows to notify hubs when you publish content. You can subscribe to WebSub enabled feeds in all Microsub sources.') . '</p>'
+    ],
     'indieweb.fediverse' => [
       'title' => 'Fediverse',
       'text' => 'Check the README file that comes with this module to know how to setup your site with the Fediverse via Bridgy fed.',

@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\indieweb_webmention\Plugin\Action;
+namespace Drupal\indieweb_contact\Plugin\Action;
 
 use Drupal\Core\Action\ActionBase;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
@@ -9,16 +9,16 @@ use Drupal\Core\TempStore\PrivateTempStoreFactory;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
- * Redirects to a webmention deletion form.
+ * Redirects to a contact deletion form.
  *
  * @Action(
- *   id = "webmention_delete_action",
- *   label = @Translation("Delete webmentions"),
- *   type = "indieweb_webmention",
- *   confirm_form_route_name = "indieweb.webmention.multiple_delete_confirm"
+ *   id = "indieweb_contact_delete_action",
+ *   label = @Translation("Delete contacts"),
+ *   type = "indieweb_contact",
+ *   confirm_form_route_name = "indieweb.contact.multiple_delete_confirm"
  * )
  */
-class DeleteWebmention extends ActionBase implements ContainerFactoryPluginInterface {
+class DeleteContact extends ActionBase implements ContainerFactoryPluginInterface {
 
   /**
    * The tempstore object.
@@ -35,7 +35,7 @@ class DeleteWebmention extends ActionBase implements ContainerFactoryPluginInter
   protected $currentUser;
 
   /**
-   * Constructs a new DeleteWebmention object.
+   * Constructs a new DeleteContact object.
    *
    * @param array $configuration
    *   A configuration array containing information about the plugin instance.
@@ -50,7 +50,7 @@ class DeleteWebmention extends ActionBase implements ContainerFactoryPluginInter
    */
   public function __construct(array $configuration, $plugin_id, $plugin_definition, PrivateTempStoreFactory $temp_store_factory, AccountInterface $current_user) {
     $this->currentUser = $current_user;
-    $this->tempStore = $temp_store_factory->get('webmention_multiple_delete_confirm');
+    $this->tempStore = $temp_store_factory->get('contact_multiple_delete_confirm');
 
     parent::__construct($configuration, $plugin_id, $plugin_definition);
   }
@@ -73,9 +73,9 @@ class DeleteWebmention extends ActionBase implements ContainerFactoryPluginInter
    */
   public function executeMultiple(array $entities) {
     $info = [];
-    /** @var \Drupal\indieweb_webmention\Entity\WebmentionInterface $webmention */
-    foreach ($entities as $webmention) {
-      $info[$webmention->id()] = $webmention->id();
+    /** @var \Drupal\indieweb_contact\Entity\ContactInterface $contact */
+    foreach ($entities as $contact) {
+      $info[$contact->id()] = $contact->id();
     }
     $this->tempStore->set($this->currentUser->id(), $info);
   }
@@ -91,7 +91,7 @@ class DeleteWebmention extends ActionBase implements ContainerFactoryPluginInter
    * {@inheritdoc}
    */
   public function access($object, AccountInterface $account = NULL, $return_as_object = FALSE) {
-    /** @var \Drupal\indieweb_webmention\Entity\WebmentionInterface $object */
+    /** @var \Drupal\indieweb_contact\Entity\ContactInterface $object */
     return $object->access('delete', $account, $return_as_object);
   }
 

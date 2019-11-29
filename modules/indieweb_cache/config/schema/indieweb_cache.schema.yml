@@ -23,6 +23,9 @@ indieweb_cache.settings:
     protect_post_context_image_from_flush:
       type: boolean
       label: 'Protect post context images from flush'
+    protect_contact_image_from_flush:
+      type: boolean
+      label: 'Protect contact images from flush'
     ignore_webmention_io:
       type: boolean
       label: 'Ignore webmention.io'

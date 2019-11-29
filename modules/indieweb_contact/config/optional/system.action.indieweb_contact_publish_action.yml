@@ -1,0 +1,10 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - indieweb_contact
+id: indieweb_contact_publish_action
+label: 'Publish contact'
+type: indieweb_contact
+plugin: entity:publish_action:indieweb_contact
+configuration: {  }

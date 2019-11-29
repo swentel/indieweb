@@ -160,6 +160,7 @@ class WebmentionController extends ControllerBase {
       }
 
       // Author info.
+      $author_values = [];
       foreach (['name', 'photo', 'url'] as $key) {
         if (!empty($mention['post']['author'][$key])) {
           $author_value = trim($mention['post']['author'][$key]);
@@ -167,6 +168,11 @@ class WebmentionController extends ControllerBase {
             $values['author_' . $key] = ['value' => $author_value];
           }
         }
+      }
+
+      // Contacts.
+      if (!empty($author_values) && \Drupal::moduleHandler()->moduleExists('indieweb_contact') && \Drupal::config('indieweb_contact.settings')->get('create_on_webmention')) {
+        \Drupal::service('indieweb.contact.client')->storeContact($author_values);
       }
 
       // Media.

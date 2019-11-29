@@ -1,0 +1,10 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - indieweb
+id: indieweb_contact_delete_action
+label: 'Delete contacts'
+type: indieweb_contact
+plugin: indieweb_contact_delete_action
+configuration: {  }

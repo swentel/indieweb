@@ -1,0 +1,5 @@
+indieweb.contact.add_form:
+  route_name: entity.indieweb_contact.add_form
+  title: 'Add contact'
+  appears_on:
+    - entity.indieweb_contact.collection

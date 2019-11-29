@@ -1,0 +1,18 @@
+administer indieweb contact entities:
+  title: 'Administer contact entities'
+  description: 'Allow to access the administration pages to manage contacts.'
+
+add indieweb contact entities:
+  title: 'Create new contact'
+
+edit indieweb contact entities:
+  title: 'Edit contact'
+
+delete indieweb contact entities:
+  title: 'Delete contact'
+
+view published indieweb contact entities:
+  title: 'View published contact'
+
+view unpublished indieweb contact entities:
+  title: 'View unpublished contact'

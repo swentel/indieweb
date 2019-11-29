@@ -2,10 +2,8 @@
 
 namespace Drupal\indieweb_context\Form;
 
-use Drupal\Core\Cache\Cache;
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\Url;
 
 class ContextSettingsForm extends ConfigFormBase {
 
@@ -20,7 +18,7 @@ class ContextSettingsForm extends ConfigFormBase {
    * {@inheritdoc}
    */
   public function getFormId() {
-    return 'indieweb_contexts_settings_form';
+    return 'indieweb_context_settings_form';
   }
 
   /**

@@ -107,7 +107,7 @@ class MicropubController extends ControllerBase {
    */
   public function postEndpoint(Request $request) {
     $this->indieAuth = \Drupal::service('indieweb.indieauth.client');
-    $this->config = \Drupal::config('indieweb_micropub.settings');
+    $this->config = $this->config('indieweb_micropub.settings');
     $micropub_enabled = $this->config->get('micropub_enable');
 
     // Early response when endpoint is not enabled.
@@ -156,8 +156,20 @@ class MicropubController extends ControllerBase {
       if ($this->indieAuth->isValidToken($auth_header)) {
         $response_code = 200;
 
-        $supported_queries = ['config', 'syndicate-to', 'category', 'source', 'geo'];
+        $supported_queries = ['config', 'syndicate-to'];
         $supported_properties = [];
+
+        if ($this->config->get('micropub_enable_source')) {
+          $supported_queries[] = 'source';
+        }
+
+        if ($this->config->get('micropub_enable_category')) {
+          $supported_queries[] = 'category';
+        }
+
+        if ($this->config->get('micropub_enable_contact')) {
+          $supported_queries[] = 'contact';
+        }
 
         $response_message = [
           'syndicate-to' => $this->getSyndicationTargets(),
@@ -172,7 +184,6 @@ class MicropubController extends ControllerBase {
         if ($this->config->get('micropub_media_enable')) {
           $response_message['media-endpoint'] = Url::fromRoute('indieweb.micropub.media.endpoint', [], ['absolute' => TRUE])->toString();
         }
-
 
       }
       else {
@@ -207,6 +218,30 @@ class MicropubController extends ControllerBase {
       return new JsonResponse($response_message, $response_code);
     }
 
+    // q=contact request.
+    if ($micropub_query == 'contact') {
+
+      // Early response when this is not enabled.
+      if (!$this->config->get('micropub_enable_contact')) {
+        return new JsonResponse('', 404);
+      }
+
+      // Get authorization header, response early if none found.
+      $auth_header = $this->indieAuth->getAuthorizationHeader();
+      if (!$auth_header) {
+        return new JsonResponse('', 401);
+      }
+
+      if ($this->indieAuth->isValidToken($auth_header)) {
+        $response_code = 200;
+        $response_message = $this->getContactsResponse($request);
+      }
+      else {
+        $response_code = 403;
+      }
+
+      return new JsonResponse($response_message, $response_code);
+    }
     // q=geo request.
     if ($micropub_query == 'geo') {
 
@@ -1616,6 +1651,24 @@ class MicropubController extends ControllerBase {
     $properties['published'] = [\Drupal::service('date.formatter')->format($node->getCreatedTime(), 'html_datetime')];
 
     return $properties;
+  }
+
+  /**
+   * Get contacts.
+   *
+   * @param \Symfony\Component\HttpFoundation\Request $request
+   *
+   * @return array
+   */
+  private function getContactsResponse(Request $request) {
+    if ($request->get('search')) {
+      $contacts = \Drupal::service('indieweb.contact.client')->searchContacts($request->get('search'));
+    }
+    else {
+      $contacts = \Drupal::service('indieweb.contact.client')->getAllContacts();
+    }
+
+    return ['contacts' => $contacts];
   }
 
   /**

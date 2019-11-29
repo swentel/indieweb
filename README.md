@@ -24,6 +24,7 @@ Current functionality:
 - Auto-create comments from 'in-reply-to'
 - Reply on comments and send webmention
 - Feeds: microformats and jf2
+- Contacts: store contacts, allowing for autocomplete
 - Send a micropub post to Aperture on incoming webmentions
 - WebSub PuSH 0.4 for publishing and subscribing
 - Fetch post context for content or microsub items
@@ -124,7 +125,7 @@ Webmentions are rendered through templates. Suggestions are available per proper
 
 ## Sending webmentions and syndicating content with Bridgy
 
-Syndicating and sending webmentions can be done per node in the "Publish to" fieldset, which is protected with the 
+Syndicating and sending webmentions can be done per node in the "Publish to" fieldset, which is protected with the
 "send webmentions" permission.
 
 For syndicating, a checkbox will be available on the node form for sending your content per target (e.g. twitter,
@@ -137,7 +138,7 @@ The drush command is 'indieweb-send-webmentions'
 
 Bridgy pulls comments, likes, and reshares on social networks back to your web site. You can also use it to post to
 social networks - or comment, like, reshare, or even RSVP - from your own web site. Bridgy is open source so you can
-also host the service yourself. To receive content from those networks, bridgy will send a webmention, so you only need 
+also host the service yourself. To receive content from those networks, bridgy will send a webmention, so you only need
 to enable the webmention endpoint.
 
 Your content needs to have proper microformat classes on your content, images etc and following snippet needs to
@@ -159,7 +160,7 @@ comment type. That field exposes that snippet. See indieweb_node_view() and indi
 this at https://brid.gy/about#webmentions. Currently this field will be printed, even if you do not syndicate to that
 target, that will be altered later.
 
-You can also configure to just enter a custom URL, or use a "link" field to send a webmention to. On comments, these 
+You can also configure to just enter a custom URL, or use a "link" field to send a webmention to. On comments, these
 link fields can be pre-filled when replying when the parent comment has a webmention reference.
 
 In case you have troubles sending webmentions (e.g. no webmention is found), apply following patch:
@@ -269,10 +270,10 @@ A media endpoint is also available where you can upload files, currently limited
 - Event: create an event
 - RSVP: create an rsvp
 - Issue: create an issue on a repo
-- Checkin: checkin at a location  
+- Checkin: checkin at a location
 - Geocache: log a geocache
 
-Important: Checkin and Geocache are experimental and use the checkin property with a Geo URI to get the info, e.g.  
+Important: Checkin and Geocache are experimental and use the checkin property with a Geo URI to get the info, e.g.
 geo:51.5258325,-0.1359825,0.0;name=london;url=https://hwclondon.co.uk
 
 Updating existing content is currently limited to change the published status, title and body of nodes and comments.
@@ -287,7 +288,7 @@ When a webmention is saved and is of property 'in-reply-to', it is possible to c
 webmention has comments enabled.
 
 You have to create an entity reference field on your comment type which points to a webmention. On the 'Manage display'
-page of the comment you can set the formatter of that reference field to 'Webmention'. The webmention preprocess 
+page of the comment you can set the formatter of that reference field to 'Webmention'. The webmention preprocess
 formats the text content using the 'restricted_html' content format which comes default in Drupal 8. Also, don't
 forget to set permissions to view webmentions. When replying, and the comment has a link field, this field can also
 be pre-filled, see the 'Sending' section. The module comes with a indieweb_webmention reference field, so use that!
@@ -321,7 +322,7 @@ You will need feeds when:
   some parsers don't go to the homepage to fetch that content.
 
 Because content can be nodes, comments, etc. it isn't possible to use views. However, this module allows you to create
-multiple feeds which aggregates all these content in a page and/or feed. The feeds are controlled by the 
+multiple feeds which aggregates all these content in a page and/or feed. The feeds are controlled by the
 'access content' permission.
 
 Configuration is at /admin/config/services/indieweb/feeds
@@ -342,7 +343,7 @@ For more information see
 - https://indieweb.org/Microsub
 - https://indieweb.org/Microsub-spec
 
-This module allows you to expose a microsub header link which can either be the built-in microsub server or set to an 
+This module allows you to expose a microsub header link which can either be the built-in microsub server or set to an
 external service. Channels and sources for the built-in server are managed at
 admin/config/services/indieweb/microsub/channels.
 
@@ -359,7 +360,7 @@ Want to follow Twitter, or Instagram in your reader? Checkout granary.io!
 Tip: use html formatting to to get the best context on posts.
 
 Note: when you configure a feed to cleanup old items, internally we count 5 items more by default. The reason is that
-some feeds use pinned items (e.g. Mastodon) which can come and go and mix up the total visual items on a page. Or 
+some feeds use pinned items (e.g. Mastodon) which can come and go and mix up the total visual items on a page. Or
 simply because a post was deleted later.
 
 **Aperture**
@@ -371,14 +372,14 @@ and replies.
 
 ## WebSub
 
-WebSub (previously known as PubSubHubbub or PuSH, and briefly PubSub) is a notification-based protocol for web 
+WebSub (previously known as PubSubHubbub or PuSH, and briefly PubSub) is a notification-based protocol for web
 publishing and subscribing to streams and legacy feed files in real time. This module allows you to publish your content
-to a hub and also receive notifications from a hub for Microsub feeds so that polling isn't necessary. The default hub 
-for publishing is https://switchboard.p3k.io. https://pubsubhubbub.appspot.com/ and https://superfeedr.com/ work as well 
+to a hub and also receive notifications from a hub for Microsub feeds so that polling isn't necessary. The default hub
+for publishing is https://switchboard.p3k.io. https://pubsubhubbub.appspot.com/ and https://superfeedr.com/ work as well
 for getting subscription and notifications. People can subscribe to Microformats2 feeds (use the IndieWeb feeds module
 for that) or RSS views using the 'RSS Feed with WebSub discovery' format.
 
-When you toggle to publish, an entry is created in the queue which you can either handle with drush or by cron. This 
+When you toggle to publish, an entry is created in the queue which you can either handle with drush or by cron. This
 will send a request to the configured hub. An overview of published content is at admin/content/websub.
 
 To publish your content to the hub via drush, run the following command: 'indieweb-websub-publish'
@@ -392,18 +393,30 @@ p3k-websub package so all self and hub links are found.
 
 ## Post contexts
 
-When you create a post with a link which is a reply, like, repost or bookmark of an external post, you can fetch content 
-from that URL so you can render more context. To enable this feature for node types, go to the node type settings screen 
-and select a link field. Then on the manage display pages, you can add the post context field to the display. 
+When you create a post with a link which is a reply, like, repost or bookmark of an external post, you can fetch content
+from that URL so you can render more context. To enable this feature for node types, go to the node type settings screen
+and select a link field. Then on the manage display pages, you can add the post context field to the display.
 For microsub items, you can configure this per source.
 
 The content for post contexts is fetched either by cron or drush. It's stored in the queue so it can be handled later.
-This can be configured at /admin/config/services/indieweb/post-context.  
+This can be configured at /admin/config/services/indieweb/post-context.
 
 Post contexts will be fetched from:
 
 - any site which supports microformats
 - twitter.com and geocaching.com
+
+## Contacts
+
+Allows storing contacts which can be used for a Micropub contact query.
+
+Contacts are listed at admin/content/contacts, configuration is at admin/config/services/indieweb/contacts.
+The Micropub 'contact' endpoint can be enabled admin/config/services/indieweb/micropub when the contacts module is
+enabled.
+
+More info at https://indieweb.org/nicknames-cache.
+
+There is no code to autocomplete contacts in a textarea. Pull requests are welcome.
 
 ## Fediverse via Bridgy Fed
 
@@ -421,10 +434,10 @@ content types or comments where needed. Posts, replies, likes, boosts and follow
 
 ## Caching of image files
 
-When using the built-in webmention or microsub endpoint, a lot of file urls are stored to external images. If you
-enable the Imagecache external module, the files are downloaded so they are cached locally. Use even more caching power
-by installing the CDN module. The cache is generated when the webmention or microsub items are processed so the impact
-on request is minimal.
+When using the built-in webmention/microsub endpoint or contacts, a lot of file urls are stored to external images. If
+you enable the Imagecache external module, the files are downloaded so they are cached locally. Use even more caching
+power by installing the CDN module. The cache is generated when the webmention or microsub items are processed so the
+impact on request is minimal.
 
 By default, imagecache_external stores all files in public://externals. If you want to make it more dynamic,
 for instance, by year and month, add following line to settings.php
@@ -436,7 +449,7 @@ Note that media in the notifications channel in microsub is never cached.
 ## 410 gone.
 
 This module exposes a Rabbit hole behavior plugin to return '410 Gone' response. This is useful when you want to delete
-a post on social media, fediverse via Bridgy Fed or just let it notice to an external site by sending a webmention.The 
+a post on social media, fediverse via Bridgy Fed or just let it notice to an external site by sending a webmention.The
 entity exist on the site, but then returns a 410 response.
 
 Install https://www.drupal.org/project/rabbit_hole and the option will be available globally or per entity.

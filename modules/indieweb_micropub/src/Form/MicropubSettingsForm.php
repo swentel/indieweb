@@ -232,6 +232,19 @@ class MicropubSettingsForm extends ConfigFormBase {
       ),
     ];
 
+    $form['general']['micropub_enable_contact'] = [
+      '#title' => $this->t('Enable contacts lookup'),
+      '#type' => 'checkbox',
+      '#access' => \Drupal::moduleHandler()->moduleExists('indieweb_contact'),
+      '#default_value' => $config->get('micropub_enable_contact'),
+      '#description' => $this->t('This will allow requests on q=contact for getting contacts.'),
+      '#states' => array(
+        'visible' => array(
+          ':input[name="micropub_enable"]' => array('checked' => TRUE),
+        ),
+      ),
+    ];
+
     $form['general']['micropub_log_payload'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('Log the payload in watchdog on the micropub endpoint.'),
@@ -561,6 +574,7 @@ class MicropubSettingsForm extends ConfigFormBase {
       ->set('micropub_enable_delete', $form_state->getValue('micropub_enable_delete'))
       ->set('micropub_enable_source', $form_state->getValue('micropub_enable_source'))
       ->set('micropub_enable_geo', $form_state->getValue('micropub_enable_geo'))
+      ->set('micropub_enable_contact', $form_state->getValue('micropub_enable_contact'))
       ->set('micropub_expose_link_tag', $form_state->getValue('micropub_expose_link_tag'))
       ->set('micropub_media_enable', $form_state->getValue('micropub_media_enable'))
       ->set('micropub_enable_category', $form_state->getValue('micropub_enable_category'))

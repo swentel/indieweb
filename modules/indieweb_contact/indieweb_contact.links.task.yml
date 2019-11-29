@@ -1,0 +1,27 @@
+indieweb.admin.contact_settings:
+  title: 'Contacts'
+  route_name: indieweb.admin.contact_settings
+  base_route: indieweb.admin.dashboard
+  weight: 90
+
+indieweb.contact.list_tab:
+  title: 'Contacts'
+  route_name: entity.indieweb_contact.collection
+  base_route: system.admin_content
+  weight: 30
+
+entity.indieweb_contact.canonical:
+  title: 'View'
+  route_name: entity.indieweb_contact.canonical
+  base_route: entity.indieweb_contact.canonical
+
+entity.indieweb_contact.edit_form:
+  title: 'Edit'
+  route_name: entity.indieweb_contact.edit_form
+  base_route: entity.indieweb_contact.canonical
+
+entity.indieweb_contact.delete_form:
+  title: 'Delete'
+  route_name:  entity.indieweb_contact.delete_form
+  base_route:  entity.indieweb_contact.canonical
+  weight: 10

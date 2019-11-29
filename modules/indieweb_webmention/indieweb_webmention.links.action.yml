@@ -3,3 +3,9 @@ indieweb.syndication.add_form:
   title: 'Add syndication'
   appears_on:
     - entity.indieweb_syndication.collection
+
+indieweb.webmention.add_form:
+  route_name: entity.indieweb_webmention.add_form
+  title: 'Add webmention'
+  appears_on:
+    - entity.indieweb_webmention.collection

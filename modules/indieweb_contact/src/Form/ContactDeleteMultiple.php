@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\indieweb_webmention\Form;
+namespace Drupal\indieweb_contact\Form;
 
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\ConfirmFormBase;
@@ -11,18 +11,18 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 
 /**
- * Provides a webmention deletion confirmation form.
+ * Provides a contact deletion confirmation form.
  *
  * @internal
  */
-class WebmentionDeleteMultiple extends ConfirmFormBase {
+class ContactDeleteMultiple extends ConfirmFormBase {
 
   /**
-   * The array of webmentions to delete.
+   * The array of contacts to delete.
    *
    * @var string[][]
    */
-  protected $webmentionInfo = [];
+  protected $contactInfo = [];
 
   /**
    * The tempstore factory.
@@ -44,14 +44,14 @@ class WebmentionDeleteMultiple extends ConfirmFormBase {
    * @param \Drupal\Core\TempStore\PrivateTempStoreFactory $temp_store_factory
    *   The tempstore factory.
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $manager
-   *   The entity type manager.
+   *   The entity manager.
    *
    * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
    * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    */
   public function __construct(PrivateTempStoreFactory $temp_store_factory, EntityTypeManagerInterface $manager) {
     $this->tempStoreFactory = $temp_store_factory;
-    $this->storage = $manager->getStorage('indieweb_webmention');
+    $this->storage = $manager->getStorage('indieweb_contact');
   }
 
   /**
@@ -68,21 +68,21 @@ class WebmentionDeleteMultiple extends ConfirmFormBase {
    * {@inheritdoc}
    */
   public function getFormId() {
-    return 'webmention_multiple_delete_confirm';
+    return 'contact_multiple_delete_confirm';
   }
 
   /**
    * {@inheritdoc}
    */
   public function getQuestion() {
-    return $this->formatPlural(count($this->webmentionInfo), 'Are you sure you want to delete this item?', 'Are you sure you want to delete these items?');
+    return $this->formatPlural(count($this->contactInfo), 'Are you sure you want to delete this item?', 'Are you sure you want to delete these items?');
   }
 
   /**
    * {@inheritdoc}
    */
   public function getCancelUrl() {
-    return new Url('entity.indieweb_webmention.collection');
+    return new Url('entity.indieweb_contact.collection');
   }
 
   /**
@@ -96,19 +96,19 @@ class WebmentionDeleteMultiple extends ConfirmFormBase {
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
-    $this->webmentionInfo = $this->tempStoreFactory->get('webmention_multiple_delete_confirm')->get(\Drupal::currentUser()->id());
-    if (empty($this->webmentionInfo)) {
+    $this->contactInfo = $this->tempStoreFactory->get('contact_multiple_delete_confirm')->get(\Drupal::currentUser()->id());
+    if (empty($this->contactInfo)) {
       return new RedirectResponse($this->getCancelUrl()->setAbsolute()->toString());
     }
-    /** @var \Drupal\indieweb_webmention\Entity\WebmentionInterface[] $webmentions */
-    $webmentions = $this->storage->loadMultiple(array_keys($this->webmentionInfo));
+    /** @var \Drupal\indieweb_contact\Entity\ContactInterface[] $contacts */
+    $contacts = $this->storage->loadMultiple(array_keys($this->contactInfo));
 
     $items = [];
-    foreach ($webmentions as $webmention) {
-      $items[$webmention->id()] = $webmention->label();
+    foreach ($contacts as $contact) {
+      $items[$contact->id()] = $contact->label();
     }
 
-    $form['webmentions'] = [
+    $form['contacts'] = [
       '#theme' => 'item_list',
       '#items' => $items,
     ];
@@ -121,25 +121,25 @@ class WebmentionDeleteMultiple extends ConfirmFormBase {
    * {@inheritdoc}
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
-    if ($form_state->getValue('confirm') && !empty($this->webmentionInfo)) {
+    if ($form_state->getValue('confirm') && !empty($this->contactInfo)) {
 
-      /** @var \Drupal\indieweb_webmention\Entity\WebmentionInterface[] $webmentions */
-      $webmentions = $this->storage->loadMultiple(array_keys($this->webmentionInfo));
-      $total_count = count($webmentions);
+      /** @var \Drupal\indieweb_contact\Entity\ContactInterface[] $contacts */
+      $contacts = $this->storage->loadMultiple(array_keys($this->contactInfo));
+      $total_count = count($contacts);
 
-      if ($webmentions) {
-        $this->storage->delete($webmentions);
-        $this->logger('indieweb_webmention')->notice('Deleted @count webmentions.', ['@count' => $total_count]);
+      if ($contacts) {
+        $this->storage->delete($contacts);
+        $this->logger('indieweb_contact')->notice('Deleted @count contacts.', ['@count' => $total_count]);
       }
 
       if ($total_count) {
-        $this->messenger()->addMessage($this->formatPlural($total_count, 'Deleted 1 webmention.', 'Deleted @count webmentions.'));
+        $this->messenger()->addMessage($this->formatPlural($total_count, 'Deleted 1 contact.', 'Deleted @count contacts.'));
       }
 
-      $this->tempStoreFactory->get('webmention_multiple_delete_confirm')->delete(\Drupal::currentUser()->id());
+      $this->tempStoreFactory->get('contact_multiple_delete_confirm')->delete(\Drupal::currentUser()->id());
     }
 
-    $form_state->setRedirect('entity.indieweb_webmention.collection');
+    $form_state->setRedirect('entity.indieweb_contact.collection');
   }
 
 }

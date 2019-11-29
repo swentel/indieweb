@@ -19,7 +19,8 @@
     "p3k/micropub": "^0.0.2",
     "p3k/websub": "^0.0.1",
     "indieauth/client": "^0.4.1",
-    "lcobucci/jwt": "^3.0"
+    "lcobucci/jwt": "^3.0",
+    "drupal/core": "^8.7|^9.0"
   },
   "extra": {
     "drush": {

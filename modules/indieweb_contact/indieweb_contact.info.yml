@@ -1,0 +1,8 @@
+name: Contacts
+type: module
+description: Stores contacts which can be used for autocomplete in a textarea or for Micropub search.
+core: 8.x
+core_version_requirement: ^8 || ^9
+package: IndieWeb
+dependencies:
+  - indieweb

@@ -1,0 +1,14 @@
+indieweb.admin.contact_settings:
+  path: '/admin/config/services/indieweb/contacts'
+  defaults:
+    _form: '\Drupal\indieweb_contact\Form\ContactSettingsForm'
+    _title: 'Contacts'
+  requirements:
+    _permission: 'administer indieweb'
+
+indieweb.contact.multiple_delete_confirm:
+  path: '/admin/content/contact/delete'
+  defaults:
+    _form: '\Drupal\indieweb_contact\Form\ContactDeleteMultiple'
+  requirements:
+    _permission: 'administer indieweb contact entities'
