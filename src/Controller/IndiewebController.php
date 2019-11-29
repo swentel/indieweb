@@ -29,6 +29,9 @@ markup after you\'ve done the configuration with this module (and optionally mor
       'https://www.drupal.org/project/rabbit_hole' => 'Rabbit hole',
       'https://www.drupal.org/project/imagecache_external' => 'Imagecache External',
       'https://www.drupal.org/project/cdn' => 'CDN',
+      'https://www.drupal.org/project/geofield' => 'Geofield',
+      'https://www.drupal.org/project/geocoder' => 'Geocoder',
+      'https://www.drupal.org/project/prepopulate' => 'Prepopulate',
     ];
 
     foreach ($modules as $url => $label) {
