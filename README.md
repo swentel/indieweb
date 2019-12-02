@@ -198,6 +198,10 @@ configuration page.
 
 You can configure this at /admin/config/services/indieweb/microformats
 
+There is a special case for quotations: in case you have link field and a body, the repost formatter will set a static
+variable so that the body field and the link field are moved inside a special container. This only works with the 'body'
+field, so make sure you use that field for content on a repost node type.
+
 ## IndieAuth: sign in with your domain name and create accounts or use for access tokens.
 
 IndieAuth is a way to use your own domain name to sign in to websites. It works by linking your website to one or more

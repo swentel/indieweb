@@ -36,8 +36,8 @@ class MicropubSettingsForm extends ConfigFormBase {
         'send_webmention' => TRUE,
       ],
       'repost' => [
-        'description' => $this->t("A repost request contains a URL in 'repost-of' and 'h' value is 'entry'. When content is found, this will be stored in the title of the link which will make microformat parsers handle this as a quotation. It does not make sense to have a body field for this content type. Note: if you create a quote tweet via the UI, the node title and the title of the link need to be the same."),
-        'no_body' => TRUE,
+        'description' => $this->t("A repost request contains a URL in 'repost-of' and 'h' value is 'entry'. In case content is stored, the link will be rendered as a quotation by the formatter."),
+        'optional_body' => TRUE,
         'link_field' => TRUE,
         'send_webmention' => TRUE,
       ],

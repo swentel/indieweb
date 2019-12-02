@@ -586,7 +586,7 @@ class MicropubTest extends IndiewebBrowserTestBase {
     $this->assertNodeCount(0, 'repost');
 
     $this->drupalLogin($this->adminUser);
-    $edit = ['repost_create_node' => 1, 'repost_node_type' => 'repost', 'repost_link_field' => 'field_repost_link', 'repost_auto_send_webmention' => 1, 'repost_uid' => $this->adminUser->getDisplayName() . ' (' . $this->adminUser->id() . ')'];
+    $edit = ['repost_create_node' => 1, 'repost_node_type' => 'repost', 'repost_link_field' => 'field_repost_link', 'repost_content_field' => 'body', 'repost_auto_send_webmention' => 1, 'repost_uid' => $this->adminUser->getDisplayName() . ' (' . $this->adminUser->id() . ')'];
     $this->drupalPostForm('admin/config/services/indieweb/micropub', $edit, 'Save configuration');
     $this->drupalLogout();
     $code = $this->sendMicropubRequest($this->repost);
@@ -815,9 +815,9 @@ class MicropubTest extends IndiewebBrowserTestBase {
       /** @var \Drupal\node\NodeInterface $node */
       $node = \Drupal::entityTypeManager()->getStorage('node')->load($nid);
       self::assertEquals(FALSE, $node->isPublished());
-      self::assertEquals($post['content'], $node->label());
+      self::assertEquals('Repost of ' . $this->repost['repost-of'], $node->getTitle());
       self::assertEquals($this->repost['repost-of'], $node->get('field_repost_link')->uri);
-      self::assertEquals($post['content'], $node->get('field_repost_link')->title);
+      self::assertEquals($post['content'], $node->get('body')->value);
     }
     else {
       // Explicit failure.

@@ -47,7 +47,7 @@ class LinkMicroformatFormatter extends LinkFormatter {
       ],
       '#title' => t('Class'),
       '#default_value' => $this->getSetting('microformat_class'),
-      '#description' => $this->t('Note: if a repost link field contains a title, "h-cite u-quotation-of" will be used, "repost-of" otherwise.')
+      '#description' => $this->t('Note: if a repost link field contains a title, "h-cite u-quotation-of" will be used, "repost-of" otherwise<br />In case of u-quotation-of, an extra e-content wrapper will be added which will include the body field.')
     ];
 
     return $elements;
@@ -80,6 +80,8 @@ class LinkMicroformatFormatter extends LinkFormatter {
 
         if ($settings['microformat_class'] == 'u-repost-of') {
           if (!empty($item['#title']) && $item['#title'] != $item['#url']->getUri()) {
+            drupal_static('indieweb_quotation_' . $items->getEntity()->getEntityTypeId() . '_' . $items->getEntity()->id(), $this->fieldDefinition->getFieldStorageDefinition()->getName());
+            $element[$delta]['#title'] = $item['#url']->toString();
             $element[$delta]['#options']['attributes']['class'][] = 'u-url';
             $element[$delta]['#prefix'] = '<cite class="h-cite u-quotation-of">';
             $element[$delta]['#suffix'] = '</cite>';

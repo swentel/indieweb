@@ -11,7 +11,7 @@ use Drupal\user\RoleInterface;
 /**
  * Tests integration of webmentions.
  *
- * @group indieweb_single
+ * @group indieweb
  */
 class WebmentionTest extends IndiewebBrowserTestBase {
 

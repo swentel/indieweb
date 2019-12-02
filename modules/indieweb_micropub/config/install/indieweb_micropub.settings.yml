@@ -49,6 +49,7 @@ repost_create_node: false
 repost_status: 1
 repost_node_type: ''
 repost_link_field: ''
+repost_content_field: ''
 repost_auto_send_webmention: false
 repost_tags_field: ''
 repost_upload_field: ''

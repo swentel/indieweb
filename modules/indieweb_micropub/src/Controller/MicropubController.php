@@ -1036,7 +1036,7 @@ class MicropubController extends ControllerBase {
 
     // Content.
     $content_field_name = $this->config->get($post_type . '_content_field');
-    if ($post_type != 'repost' && !empty($this->input['content'][0]) && $this->node->hasField($content_field_name)) {
+    if (!empty($this->input['content'][0]) && $this->node->hasField($content_field_name)) {
       $this->node->set($content_field_name, $this->input['content']);
     }
 
@@ -1047,12 +1047,6 @@ class MicropubController extends ControllerBase {
       $title = $uri = '';
       if (!empty($this->location['name'])) {
         $title = $this->location['name'];
-      }
-
-      // Repost (so it becomes a quotation.
-      if ($post_type == 'repost' && !empty($this->input['content'][0])) {
-        $title = $this->input['content'][0];
-        $this->node->set('title', $title);
       }
 
       if (!empty($this->location['url'])) {

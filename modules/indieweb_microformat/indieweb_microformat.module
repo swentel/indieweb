@@ -71,6 +71,22 @@ function indieweb_microformat_get_summary_fields() {
 }
 
 /**
+ * Returns whether, in case of a quotation, we should move the field.
+ *
+ * @param $id
+ * @param $type
+ *
+ * @return array|bool
+ */
+function indieweb_move_quotation_field($id, $type = 'node') {
+  if ($quotation_field = drupal_static('indieweb_quotation_' . $type . '_' . $id)) {
+    return $quotation_field;
+  }
+
+  return FALSE;
+}
+
+/**
  * Implements hook_preprocess_node().
  */
 function indieweb_microformat_preprocess_node(&$variables) {
@@ -89,6 +105,7 @@ function indieweb_microformat_preprocess_node(&$variables) {
       $variables['attributes']['class'][] = 'h-entry';
     }
 
+    // Add post meta data.
     if (\Drupal::config('indieweb_microformat.settings')->get('post_metadata')) {
       $date = \Drupal::service('date.formatter')->format($variables['node']->getCreatedTime(), 'custom', 'c');
 
@@ -143,6 +160,23 @@ function indieweb_microformat_preprocess_node(&$variables) {
       $date = \Drupal::service('date.formatter')->format($variables['node']->getCreatedTime(), 'custom', 'c');
       $variables['iso_datetime'] = $date;
     }
+
+    // Special case of moving the quote and body field inside a container.
+    // This currently only works on the 'body' field.
+    if ($quotation_field = indieweb_move_quotation_field($variables['node']->id())) {
+      if (isset($variables['content'][$quotation_field]) && isset($variables['content']['body'])) {
+        $variables['content']['quotation_container'] = [
+          '#type' => 'container',
+          '#attributes' => ['class' => ['e-content']],
+          '#weight' => $variables['content']['body']['#weight'],
+        ];
+        $variables['content'][$quotation_field]['#label_display'] = 'hidden';
+        $variables['content']['quotation_container'][] = $variables['content'][$quotation_field];
+        $variables['content']['quotation_container'][] = $variables['content']['body'];
+        unset($variables['content']['body']);
+        unset($variables['content'][$quotation_field]);
+      }
+    }
   }
 
 }
@@ -193,8 +227,9 @@ function indieweb_microformat_preprocess_field(&$variables) {
     return;
   }
 
-  // Put e-content on textarea fields.
-  if ($variables['field_name'] == 'body' && \Drupal::config('indieweb_microformat.settings')->get('e_content') || in_array($variables['field_name'], indieweb_microformat_get_content_fields())) {
+  // Put e-content on textarea fields, unless the quotation static is set.
+  // @see LinkMicroformatFormatter.
+  if (!indieweb_move_quotation_field($variables['element']['#object']->id(), $variables['element']['#object']->getEntityTypeId()) && (($variables['field_name'] == 'body' && \Drupal::config('indieweb_microformat.settings')->get('e_content')) || in_array($variables['field_name'], indieweb_microformat_get_content_fields()))) {
     $variables['attributes']['class'][] = 'e-content';
 
     $exclude_p_name_node_type = \Drupal::config('indieweb_microformat.settings')->get('p_name_exclude_node_type');
