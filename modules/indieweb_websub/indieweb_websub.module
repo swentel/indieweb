@@ -16,26 +16,37 @@ define('INDIEWEB_WEBSUB_QUEUE', 'indieweb_websub');
  */
 function indieweb_websub_page_attachments_alter(array &$attachments) {
 
-  if (($config = \Drupal::config('indieweb_websub.settings')) && ($config->get('expose_link_tag'))) {
+  if (($config = \Drupal::config('indieweb_websub.settings')) && ($config->get('expose_link_tag') || $config->get('expose_link_header'))) {
     $current_path = \Drupal::request()->getRequestUri();
     if (($pages = $config->get('pages')) && \Drupal::service('path.matcher')->matchPath($current_path, $pages)) {
-      $link = [
-        '#tag' => 'link',
-        '#attributes' => [
-          'rel' => 'hub',
-          'href' => $config->get('hub_endpoint'),
-        ],
-      ];
-      $attachments['#attached']['html_head'][] = [$link, 'hub_endpoint'];
 
-      $link = [
-        '#tag' => 'link',
-        '#attributes' => [
-          'rel' => 'self',
-          'href' => \Drupal::request()->getSchemeAndHttpHost() . $current_path,
-        ],
-      ];
-      $attachments['#attached']['html_head'][] = [$link, 'self_endpoint'];
+      if ($config->get('expose_link_header')) {
+        $attachments['#attached']['http_header'][] = ['Link', '<' . $config->get('hub_endpoint') . '>; rel="hub"'];
+        $attachments['#attached']['http_header'][] = ['Link', '<' . \Drupal::request()->getSchemeAndHttpHost() . $current_path . '>; rel="self"'];
+      }
+
+      if ($config->get('expose_link_tag')) {
+
+        $link_hub = [
+          '#tag' => 'link',
+          '#attributes' => [
+            'rel' => 'hub',
+            'href' => $config->get('hub_endpoint'),
+          ],
+        ];
+
+        $link_self = [
+          '#tag' => 'link',
+          '#attributes' => [
+            'rel' => 'self',
+            'href' => \Drupal::request()->getSchemeAndHttpHost() . $current_path,
+          ],
+        ];
+
+        $attachments['#attached']['html_head'][] = [$link_hub, 'hub_endpoint'];
+        $attachments['#attached']['html_head'][] = [$link_self, 'self_endpoint'];
+      }
+
     }
   }
 }

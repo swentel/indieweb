@@ -1,4 +1,5 @@
 expose_link_tag: true
+expose_link_header: false
 node_element: expose
 hub_endpoint: 'https://switchboard.p3k.io/'
 log_payload: false

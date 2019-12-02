@@ -69,11 +69,13 @@ class IndieAuthSettingsForm extends ConfigFormBase {
       '#type' => 'checkbox',
       '#default_value' => $config->get('expose_link_tag'),
       '#description' => $this->t('The link tag will be added on the front page. You can also add them yourself to html.html.twig e.g.:<br /><div class="indieweb-highlight-code">&lt;link rel="authorization_endpoint" href="https://indieauth.com/auth" /&gt;</div><br /><div class="indieweb-highlight-code">&lt;link rel="token_endpoint" href="https://tokens.indieauth.com/token" /&gt;</div>'),
-      '#states' => array(
-        'visible' => array(
-          ':input[name="enable"]' => array('checked' => TRUE),
-        ),
-      ),
+    ];
+
+    $form['auth']['expose_link_header'] = [
+      '#title' => $this->t('Expose authentication API header link'),
+      '#type' => 'checkbox',
+      '#default_value' => $config->get('expose_link_header'),
+      '#description' => $this->t('The link tag will be added on in response headers of the front page.'),
     ];
 
     $form['auth']['authorization_endpoint'] = [
@@ -162,6 +164,7 @@ class IndieAuthSettingsForm extends ConfigFormBase {
     $this->config('indieweb_indieauth.settings')
       ->set('auth_internal', $form_state->getValue('auth_internal'))
       ->set('expose_link_tag', $form_state->getValue('expose_link_tag'))
+      ->set('expose_link_header', $form_state->getValue('expose_link_header'))
       ->set('authorization_endpoint', $form_state->getValue('authorization_endpoint'))
       ->set('token_endpoint', $form_state->getValue('token_endpoint'))
       ->set('login_enable', $form_state->getValue('login_enable'))

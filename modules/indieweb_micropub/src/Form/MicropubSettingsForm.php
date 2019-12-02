@@ -136,6 +136,18 @@ class MicropubSettingsForm extends ConfigFormBase {
       ),
     ];
 
+    $form['general']['micropub_expose_link_header'] = [
+      '#title' => $this->t('Expose micropub endpoint header link'),
+      '#type' => 'checkbox',
+      '#default_value' => $config->get('micropub_expose_link_header'),
+      '#description' => $this->t('The link tag will be added on in response headers of the front page.'),
+      '#states' => array(
+        'visible' => array(
+          ':input[name="micropub_enable"]' => array('checked' => TRUE),
+        ),
+      ),
+    ];
+
     $form['general']['micropub_enable_update'] = [
       '#title' => $this->t('Enable post updates'),
       '#type' => 'checkbox',
@@ -576,6 +588,7 @@ class MicropubSettingsForm extends ConfigFormBase {
       ->set('micropub_enable_geo', $form_state->getValue('micropub_enable_geo'))
       ->set('micropub_enable_contact', $form_state->getValue('micropub_enable_contact'))
       ->set('micropub_expose_link_tag', $form_state->getValue('micropub_expose_link_tag'))
+      ->set('micropub_expose_link_header', $form_state->getValue('micropub_expose_link_header'))
       ->set('micropub_media_enable', $form_state->getValue('micropub_media_enable'))
       ->set('micropub_enable_category', $form_state->getValue('micropub_enable_category'))
       ->set('micropub_category_vocabulary', $form_state->getValue('micropub_category_vocabulary'))

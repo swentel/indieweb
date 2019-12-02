@@ -78,7 +78,14 @@ class MicrosubSettingsForm extends ConfigFormBase {
       '#type' => 'checkbox',
       '#title' => $this->t('Expose microsub endpoint link tag'),
       '#default_value' => $config->get('microsub_expose_link_tag'),
-      '#description' => $this->t('This link will be added on the front page. You can also add this manually to html.html.twig.<br /><div class="indieweb-highlight-code">&lt;link rel="micropub" href="https://@domain/indieweb/microsub" /&gt;</div>', ['@domain' => \Drupal::request()->getHttpHost()]),
+      '#description' => $this->t('This link will be added on the front page. You can also add this manually to html.html.twig.<br /><div class="indieweb-highlight-code">&lt;link rel="microsub" href="https://@domain/indieweb/microsub" /&gt;</div>', ['@domain' => \Drupal::request()->getHttpHost()]),
+    ];
+
+    $form['microsub']['microsub_expose_link_header'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Expose microsub endpoint header link'),
+      '#default_value' => $config->get('microsub_expose_link_header'),
+      '#description' => $this->t('The link tag will be added on in response headers of the front page.'),
     ];
 
     $form['microsub']['microsub_endpoint'] = [
@@ -153,6 +160,7 @@ class MicrosubSettingsForm extends ConfigFormBase {
       ->set('microsub_internal_cleanup_items', $form_state->getValue('microsub_internal_cleanup_items'))
       ->set('microsub_endpoint', $form_state->getValue('microsub_endpoint'))
       ->set('microsub_expose_link_tag', $form_state->getValue('microsub_expose_link_tag'))
+      ->set('microsub_expose_link_header', $form_state->getValue('microsub_expose_link_header'))
       ->set('aperture_enable_micropub', $form_state->getValue('aperture_enable_micropub'))
       ->set('aperture_api_key', $form_state->getValue('aperture_api_key'))
       ->set('push_notification_indigenous', $form_state->getValue('push_notification_indigenous'))

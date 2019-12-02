@@ -9,6 +9,9 @@ indieweb_indieauth.settings:
     expose_link_tag:
       type: boolean
       label: 'Expose IndieAuth link tag'
+    expose_link_header:
+      type: boolean
+      label: 'Expose IndieAuth link header'
     authorization_endpoint:
       type: string
       label: 'IndieAuth authorization endpoint'

@@ -99,6 +99,13 @@ class WebmentionSettingsForm extends ConfigFormBase {
       '#description' => $this->t('The link tag will be added on all non admin pages. Exposing a link tag is necessary so you can start receiving webmentions. You can also manually add to html.html.twig. e.g.<br /><div class="indieweb-highlight-code">&lt;link rel="webmention" href="https://webmention.io/@domain/webmention" /&gt;</div>', ['@domain' => \Drupal::request()->getHttpHost()]),
     ];
 
+    $form['webmention']['webmention_expose_link_header'] = [
+      '#title' => $this->t('Expose webmention header link'),
+      '#type' => 'checkbox',
+      '#default_value' => $config->get('webmention_expose_link_header'),
+      '#description' => $this->t('The link tag will be added on in response headers of all non admin pages.'),
+    ];
+
     $form['webmention']['webmention_endpoint'] = [
       '#title' => $this->t('External webmention endpoint'),
       '#type' => 'textfield',
@@ -148,10 +155,17 @@ class WebmentionSettingsForm extends ConfigFormBase {
     ];
 
     $form['pingback']['pingback_expose_link_tag'] = [
-      '#title' => $this->t('Expose webmention link tag'),
+      '#title' => $this->t('Expose pingback link tag'),
       '#type' => 'checkbox',
       '#default_value' => $config->get('pingback_expose_link_tag'),
-      '#description' => $this->t('The link tag will be added on all non admin pages. Exposing a link tag is necessary so you can start receiving webmentions. You can also manually add to html.html.twig. e.g.<br /><div class="indieweb-highlight-code">&lt;link rel="pingback" href="https://@domain/pingback/receive" /&gt;</div>', ['@domain' => \Drupal::request()->getHttpHost()]),
+      '#description' => $this->t('The link tag will be added on in response headers of all non admin pages.'),
+    ];
+
+    $form['pingback']['pingback_expose_link_header'] = [
+      '#title' => $this->t('Expose pingback header link'),
+      '#type' => 'checkbox',
+      '#default_value' => $config->get('pingback_expose_link_header'),
+      '#description' => $this->t('The link tag will be added on all non admin pages. Exposing a link tag is necessary so you can start receiving pingbacks. You can also manually add to html.html.twig. e.g.<br /><div class="indieweb-highlight-code">&lt;link rel="pingback" href="https://@domain/pingback/receive" /&gt;</div>', ['@domain' => \Drupal::request()->getHttpHost()]),
     ];
 
     $form['pingback']['pingback_notify'] = [
@@ -237,10 +251,12 @@ class WebmentionSettingsForm extends ConfigFormBase {
       ->set('webmention_log_payload', $form_state->getValue('webmention_log_payload'))
       ->set('webmention_detect_identical', $form_state->getValue('webmention_detect_identical'))
       ->set('webmention_expose_link_tag', $form_state->getValue('webmention_expose_link_tag'))
+      ->set('webmention_expose_link_header', $form_state->getValue('webmention_expose_link_header'))
       ->set('webmention_endpoint', $form_state->getValue('webmention_endpoint'))
       ->set('webmention_secret', $form_state->getValue('webmention_secret'))
       ->set('pingback_internal', $form_state->getValue('pingback_internal'))
       ->set('pingback_expose_link_tag', $form_state->getValue('pingback_expose_link_tag'))
+      ->set('pingback_expose_link_header', $form_state->getValue('pingback_expose_link_header'))
       ->set('pingback_notify', $form_state->getValue('pingback_notify'))
       ->set('pingback_endpoint', $form_state->getValue('pingback_endpoint'))
       ->set('blocked_domains', $form_state->getValue('blocked_domains'))

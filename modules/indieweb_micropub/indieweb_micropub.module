@@ -16,17 +16,22 @@ function indieweb_micropub_page_attachments_alter(array &$attachments) {
 
   if (\Drupal::service('path.matcher')->isFrontPage()) {
 
-    if (($config = \Drupal::config('indieweb_micropub.settings')) && ($config->get('micropub_enable')) && $config->get('micropub_expose_link_tag')) {
+    if (($config = \Drupal::config('indieweb_micropub.settings')) && ($config->get('micropub_enable')) && ($config->get('micropub_expose_link_tag') || $config->get('micropub_expose_link_header'))) {
 
-      $link = [
-        '#tag' => 'link',
-        '#attributes' => [
-          'rel' => 'micropub',
-          'href' => Url::fromRoute('indieweb.micropub.endpoint', [], ['absolute' => TRUE])->toString(),
-        ],
-      ];
+      if ($config->get('micropub_expose_link_header')) {
+        $attachments['#attached']['http_header'][] = ['Link', '<' . Url::fromRoute('indieweb.micropub.endpoint', [], ['absolute' => TRUE])->toString() . '>; rel="micropub"'];
+      }
 
-      $attachments['#attached']['html_head'][] = [$link, 'micropub_endpoint'];
+      if ($config->get('micropub_expose_link_tag')) {
+        $link = [
+          '#tag' => 'link',
+          '#attributes' => [
+            'rel' => 'micropub',
+            'href' => Url::fromRoute('indieweb.micropub.endpoint', [], ['absolute' => TRUE])->toString(),
+          ],
+        ];
+        $attachments['#attached']['html_head'][] = [$link, 'micropub_endpoint'];
+      }
     }
   }
 

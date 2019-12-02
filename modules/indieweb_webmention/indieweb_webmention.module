@@ -29,7 +29,7 @@ function indieweb_webmention_page_attachments_alter(array &$attachments) {
   if (!$is_admin) {
 
     $config = \Drupal::config('indieweb_webmention.settings');
-    if ($config->get('webmention_expose_link_tag')) {
+    if ($config->get('webmention_expose_link_tag') || $config->get('webmention_expose_link_header')) {
 
       $endpoint = '';
       if ($config->get('webmention_internal')) {
@@ -40,18 +40,25 @@ function indieweb_webmention_page_attachments_alter(array &$attachments) {
       }
 
       if (!empty($endpoint)) {
-        $link = [
-          '#tag' => 'link',
-          '#attributes' => [
-            'rel' => 'webmention',
-            'href' => $endpoint,
-          ],
-        ];
-        $attachments['#attached']['html_head'][] = [$link, 'webmention'];
+
+        if ($config->get('webmention_expose_link_header')) {
+          $attachments['#attached']['http_header'][] = ['Link', '<' . $endpoint . '>; rel="webmention"'];
+        }
+
+        if ($config->get('webmention_expose_link_tag')) {
+          $link = [
+            '#tag' => 'link',
+            '#attributes' => [
+              'rel' => 'webmention',
+              'href' => $endpoint,
+            ],
+          ];
+          $attachments['#attached']['html_head'][] = [$link, 'webmention'];
+        }
       }
     }
 
-    if ($config->get('pingback_expose_link_tag')) {
+    if ($config->get('pingback_expose_link_tag') || $config->get('pingback_expose_link_header')) {
 
       $endpoint = '';
       if ($config->get('pingback_internal')) {
@@ -62,14 +69,21 @@ function indieweb_webmention_page_attachments_alter(array &$attachments) {
       }
 
       if (!empty($endpoint)) {
-        $link = [
-          '#tag' => 'link',
-          '#attributes' => [
-            'rel' => 'pingback',
-            'href' => $endpoint,
-          ],
-        ];
-        $attachments['#attached']['html_head'][] = [$link, 'pingback'];
+
+        if ($config->get('pingback_expose_link_header')) {
+          $attachments['#attached']['http_header'][] = ['Link', '<' . $endpoint . '>; rel="pingback"'];
+        }
+
+        if ($config->get('pingback_expose_link_tag')) {
+          $link = [
+            '#tag' => 'link',
+            '#attributes' => [
+              'rel' => 'pingback',
+              'href' => $endpoint,
+            ],
+          ];
+          $attachments['#attached']['html_head'][] = [$link, 'pingback'];
+        }
       }
     }
   }

@@ -15,7 +15,7 @@ function indieweb_indieauth_page_attachments_alter(array &$attachments) {
 
   if (\Drupal::service('path.matcher')->isFrontPage()) {
 
-    if (($config = \Drupal::config('indieweb_indieauth.settings')) && ($config->get('expose_link_tag'))) {
+    if (($config = \Drupal::config('indieweb_indieauth.settings')) && ($config->get('expose_link_tag') || $config->get('expose_link_header'))) {
 
       if ($config->get('auth_internal')) {
         $authorization_endpoint = Url::fromRoute('indieweb.indieauth.auth', [], ['absolute' => TRUE])->toString();
@@ -26,23 +26,33 @@ function indieweb_indieauth_page_attachments_alter(array &$attachments) {
         $token_endpoint = $config->get('token_endpoint');
       }
 
-      $link = [
-        '#tag' => 'link',
-        '#attributes' => [
-          'rel' => 'authorization_endpoint',
-          'href' => $authorization_endpoint,
-        ],
-      ];
-      $attachments['#attached']['html_head'][] = [$link, 'authorization_endpoint'];
+      if ($config->get('expose_link_header')) {
+        $attachments['#attached']['http_header'][] = ['Link', '<' . $authorization_endpoint . '>; rel="authorization_endpoint"'];
+        $attachments['#attached']['http_header'][] = ['Link', '<' . $token_endpoint . '>; rel="token_endpoint"'];
+      }
 
-      $link = [
-        '#tag' => 'link',
-        '#attributes' => [
-          'rel' => 'token_endpoint',
-          'href' => $token_endpoint,
-        ],
-      ];
-      $attachments['#attached']['html_head'][] = [$link, 'token_endpoint'];
+      if ($config->get('expose_link_tag')) {
+
+        $link_authorization = [
+          '#tag' => 'link',
+          '#attributes' => [
+            'rel' => 'authorization_endpoint',
+            'href' => $authorization_endpoint,
+          ],
+        ];
+
+        $link_token = [
+          '#tag' => 'link',
+          '#attributes' => [
+            'rel' => 'token_endpoint',
+            'href' => $token_endpoint,
+          ],
+        ];
+
+        $attachments['#attached']['html_head'][] = [$link_authorization, 'authorization_endpoint'];
+        $attachments['#attached']['html_head'][] = [$link_token, 'token_endpoint'];
+      }
+
     }
   }
 }

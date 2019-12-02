@@ -1,5 +1,6 @@
 auth_internal: false
 expose_link_tag: false
+expose_link_header: false
 authorization_endpoint: 'https://indieauth.com/auth'
 token_endpoint: 'https://tokens.indieauth.com/token'
 login_enable: false

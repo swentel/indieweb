@@ -58,6 +58,13 @@ class WebSubSettingsForm extends ConfigFormBase {
       '#description' => $this->t('The link tags will be added on the front page. You can also add them yourself to html.html.twig e.g.:<br /><div class="indieweb-highlight-code">&lt;link rel="hub" href="@hub" /&gt;</div><br /><div class="indieweb-highlight-code">&lt;link rel="self" href="@self" /&gt;</div>', ['@hub' => $config->get('hub_endpoint'), '@self' => \Drupal::request()->getSchemeAndHttpHost()]),
     ];
 
+    $form['general']['expose_link_header'] = [
+      '#title' => $this->t('Expose WebSub header links'),
+      '#type' => 'checkbox',
+      '#default_value' => $config->get('expose_link_header'),
+      '#description' => $this->t('The link tag will be added on in response headers of the page that can be discovered.'),
+    ];
+
     $form['general']['node_element'] = [
       '#title' => $this->t('WebSub element on node edit forms'),
       '#type' => 'select',
@@ -123,6 +130,7 @@ class WebSubSettingsForm extends ConfigFormBase {
     $this->config('indieweb_websub.settings')
       ->set('log_payload', $form_state->getValue('log_payload'))
       ->set('expose_link_tag', $form_state->getValue('expose_link_tag'))
+      ->set('expose_link_header', $form_state->getValue('expose_link_header'))
       ->set('node_element', $form_state->getValue('node_element'))
       ->set('hub_endpoint', $form_state->getValue('hub_endpoint'))
       ->set('pages', $form_state->getValue('pages'))

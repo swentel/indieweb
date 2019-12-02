@@ -6,11 +6,13 @@ webmention_content_domain: ''
 webmention_log_processing: false
 webmention_notify: false
 webmention_expose_link_tag: false
+webmention_expose_link_header: false
 webmention_detect_identical: false
 pingback_internal: false
 pingback_notify: false
 pingback_endpoint: ''
 pingback_expose_link_tag: false
+pingback_expose_link_header: false
 webmention_uid: 1
 webmention_log_payload: true
 syndication_targets: "Twitter (bridgy)|https://brid.gy/publish/twitter"

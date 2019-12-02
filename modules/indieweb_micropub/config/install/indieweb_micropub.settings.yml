@@ -1,5 +1,6 @@
 micropub_enable: false
 micropub_expose_link_tag: true
+micropub_expose_link_header: false
 micropub_enable_update: false
 micropub_enable_delete: false
 micropub_enable_source: false

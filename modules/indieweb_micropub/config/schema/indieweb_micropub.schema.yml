@@ -9,6 +9,9 @@ indieweb_micropub.settings:
     micropub_expose_link_tag:
       type: boolean
       label: 'Expose micropub link tag'
+    micropub_expose_link_header:
+      type: boolean
+      label: 'Expose micropub link header'
     micropub_enable_update:
       type: boolean
       label: 'Enable post updates'

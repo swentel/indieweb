@@ -18,6 +18,9 @@ indieweb_microsub.settings:
     microsub_expose_link_tag:
       type: boolean
       label: 'Expose microsub link tag'
+    microsub_expose_link_header:
+      type: boolean
+      label: 'Expose microsub link tag'
     aperture_enable_micropub:
       type: boolean
       label: 'Enable micropub post to Aperture'

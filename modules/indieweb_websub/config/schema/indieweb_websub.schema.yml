@@ -9,6 +9,9 @@ indieweb_websub.settings:
     expose_link_tag:
       type: boolean
       label: 'Expose WebSub link tag'
+    expose_link_header:
+      type: boolean
+      label: 'Expose WebSub link headers'
     log_payload:
       type: boolean
       label: 'Log the payloads'
