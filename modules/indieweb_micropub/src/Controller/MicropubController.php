@@ -1141,12 +1141,14 @@ class MicropubController extends ControllerBase {
   protected function saveUpload($file_key, $destination = 'public://', $validators = [], $limit = NULL) {
     $uploaded_files = [];
 
-    // Return early if there are no uploads.
+    // Get files.
     $files = \Drupal::request()->files->get($file_key);
+
+    // Check if the key is in input in case no files are found. This means
+    // that files were uploaded with the Media endpoint and what we have then
+    // are file urls.
     if (empty($files)) {
 
-      // Check if there's a photo in input, meaning that a file was uploaded
-      // through the Media endpoint and what we have then are full file urls.
       if (!empty($this->input[$file_key])) {
         if (is_string($this->input[$file_key])) {
           $photos = [$this->input[$file_key]];
@@ -1676,7 +1678,7 @@ class MicropubController extends ControllerBase {
     $return = new \stdClass();
 
     /** @var \Drupal\geocoder\GeocoderInterface $geocoder */
-    if (!empty($request->get('lat')) && !empty($request->get('lon')) && ($geocoder = \Drupal::service('geocoder'))) {
+    if (!empty($request->get('lat')) && !empty($request->get('lon')) && \Drupal::hasService('geocoder') && ($geocoder = \Drupal::service('geocoder'))) {
       $plugin = Settings::get('indieweb_micropub_geo_plugins', []);
       if (!empty($plugin)) {
         $collections = $geocoder->reverse($request->get('lat'), $request->get('lon'), $plugin);
