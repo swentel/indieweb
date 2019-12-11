@@ -347,7 +347,7 @@ class MicropubController extends ControllerBase {
       try {
         $params = Url::fromUri("internal:" . $path)->getRouteParameters();
 
-        if (!empty($params) && in_array(key($params), ['comment', 'node', 'indieweb_webmention'])) {
+        if (!empty($params) && in_array(key($params), ['comment', 'node', 'indieweb_webmention', 'indieweb_contact'])) {
 
           /** @var \Drupal\Core\Entity\ContentEntityInterface $entity */
           $entity = $this->entityTypeManager()->getStorage(key($params))->load($params[key($params)]);
@@ -384,7 +384,7 @@ class MicropubController extends ControllerBase {
       try {
         $params = Url::fromUri("internal:" . $path)->getRouteParameters();
 
-        if (!empty($params) && in_array(key($params), ['comment', 'node'])) {
+        if (!empty($params) && in_array(key($params), ['comment', 'node', 'indieweb_contact'])) {
 
           /** @var \Drupal\Core\Entity\ContentEntityInterface $entity */
           $entity = $this->entityTypeManager()->getStorage(key($params))->load($params[key($params)]);
@@ -411,7 +411,7 @@ class MicropubController extends ControllerBase {
             if (!empty($this->input['replace']['name'][0])) {
               $update = TRUE;
               $label_field = 'title';
-              if ($entity->getEntityTypeId() == 'comment') {
+              if ($entity->getEntityTypeId() == 'comment' || $entity->getEntityTypeId() == 'indieweb_contact') {
                 $label_field = 'name';
               }
               $entity->set($label_field, $this->input['replace']['name'][0]);
@@ -420,11 +420,21 @@ class MicropubController extends ControllerBase {
             // Body.
             if (!empty($this->input['replace']['content'][0])) {
               $update = TRUE;
-              $label_field = 'body';
+              $content_field = 'body';
               if ($entity->getEntityTypeId() == 'comment') {
-                $label_field = 'comment_body';
+                $content_field = 'comment_body';
               }
-              $entity->set($label_field, $this->input['replace']['content'][0]);
+              $entity->set($content_field, $this->input['replace']['content'][0]);
+            }
+
+            // Indieweb contact.
+            if ($entity->getEntityTypeId() == 'indieweb_contact') {
+              foreach (['nickname', 'url', 'photo'] as $k) {
+                if (!empty($this->input['replace'][$k][0])) {
+                  $update = TRUE;
+                  $entity->set($k, $this->input['replace'][$k][0]);
+                }
+              }
             }
 
             if ($update) {
@@ -463,7 +473,7 @@ class MicropubController extends ControllerBase {
 
       // Log payload.
       if ($this->config->get('micropub_log_payload')) {
-        $this->getLogger('indieweb_micropub_payload')->notice('input: @input', ['@input' => print_r($this->input, 1)]);
+        $this->getLogger('indieweb_micropub_payload')->notice('type: @type, input: @input', ['@type' => $this->object_type, '@input' => print_r($this->input, 1)]);
       }
 
       // Check if we have a location or checkin property in the payload.
@@ -513,6 +523,23 @@ class MicropubController extends ControllerBase {
       // The order here is of importance. Don't change it, unless there's a good
       // reason for, see https://indieweb.org/post-type-discovery. This does not
       // follow the exact rules, because we can be more flexible in Drupal.
+
+      // HCard.
+      if ($this->isHCard() && $this->config->get('micropub_enable_contact') && $this->hasRequiredInput(['name'])) {
+        $contact = [];
+        foreach (['name', 'nickname', 'url', 'photo'] as $key) {
+          if (!empty($this->input[$key][0])) {
+            $contact[$key] = $this->input[$key][0];
+          }
+        }
+        if (!empty($contact)) {
+          $entityContact = \Drupal::service('indieweb.contact.client')->storeContact($contact);
+
+          header('Location: ' . $entityContact->toUrl('canonical', ['absolute' => TRUE])->toString());
+          return new Response('', 201);
+        }
+
+      }
 
       // Geocache support.
       if ($checkin && $this->createNodeFromPostType('geocache') && $this->hasRequiredInput(['geocache-log-type', 'checkin']) && $this->isHEntry()) {
@@ -905,6 +932,15 @@ class MicropubController extends ControllerBase {
    */
   protected function isHEntry() {
     return isset($this->object_type) && $this->object_type == 'h-entry';
+  }
+
+  /**
+   * Returns whether the input type is a h-card.
+   *
+   * @return bool
+   */
+  protected function isHCard() {
+    return isset($this->object_type) && $this->object_type == 'h-card';
   }
 
   /**

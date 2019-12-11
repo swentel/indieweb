@@ -245,11 +245,11 @@ class MicropubSettingsForm extends ConfigFormBase {
     ];
 
     $form['general']['micropub_enable_contact'] = [
-      '#title' => $this->t('Enable contacts lookup'),
+      '#title' => $this->t('Enable contacts'),
       '#type' => 'checkbox',
       '#access' => \Drupal::moduleHandler()->moduleExists('indieweb_contact'),
       '#default_value' => $config->get('micropub_enable_contact'),
-      '#description' => $this->t('This will allow requests on q=contact for getting contacts.'),
+      '#description' => $this->t('This will allow requests on q=contact for managing contacts. This includes listing, but also creating, updating or deleting contacts via micropub requests.'),
       '#states' => array(
         'visible' => array(
           ':input[name="micropub_enable"]' => array('checked' => TRUE),

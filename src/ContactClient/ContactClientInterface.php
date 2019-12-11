@@ -26,6 +26,8 @@ interface ContactClientInterface {
    * @param array $values
    *   Keys: name, nickname, photo, url
    *
+   * @return \Drupal\indieweb_contact\Entity\ContactInterface $contact|NULL
+   *
    * @return mixed
    */
   public function storeContact(array $values);

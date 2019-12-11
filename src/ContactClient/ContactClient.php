@@ -21,6 +21,8 @@ class ContactClient implements ContactClientInterface {
   /**
    * {@inheritdoc}
    */
-  public function storeContact(array $values) {}
+  public function storeContact(array $values) {
+    return NULL;
+  }
 
 }

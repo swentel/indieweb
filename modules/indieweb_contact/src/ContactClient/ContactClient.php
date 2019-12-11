@@ -56,9 +56,17 @@ class ContactClient implements ContactClientInterface {
           }
         }
 
-        \Drupal::entityTypeManager()->getStorage('indieweb_contact')->create($values)->save();
+        /** @var \Drupal\indieweb_contact\Entity\ContactInterface $entity */
+        try {
+          $entity = \Drupal::entityTypeManager()->getStorage('indieweb_contact')->create($values);
+          $entity->save();
+          return $entity;
+        }
+        catch (\Exception $ignored) {}
       }
     }
+
+    return NULL;
   }
 
   /**
@@ -67,6 +75,8 @@ class ContactClient implements ContactClientInterface {
    * @param \Drupal\indieweb_contact\Entity\ContactInterface[] $contacts
    *
    * @return array
+   *
+   * @throws \Drupal\Core\Entity\EntityMalformedException
    */
   protected function massageReturn($contacts) {
     $return = [];
@@ -76,6 +86,7 @@ class ContactClient implements ContactClientInterface {
         'nickname' => $contact->getNickname(),
         'photo' => \Drupal::service('indieweb.media_cache.client')->applyImageCache($contact->getPhoto(), 'avatar', 'contact_avatar'),
         'url' => $contact->getWebsite(),
+        '_internal_url' => $contact->toUrl('canonical', ['absolute' => TRUE])->toString(),
       ];
     }
     return $return;

@@ -171,7 +171,7 @@ class WebmentionController extends ControllerBase {
       }
 
       // Contacts.
-      if (!empty($author_values) && \Drupal::moduleHandler()->moduleExists('indieweb_contact') && \Drupal::config('indieweb_contact.settings')->get('create_on_webmention')) {
+      if (!empty($author_values) && \Drupal::config('indieweb_contact.settings')->get('create_on_webmention')) {
         \Drupal::service('indieweb.contact.client')->storeContact($author_values);
       }
 
