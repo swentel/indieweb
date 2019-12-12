@@ -13,8 +13,13 @@ class ContactClient implements ContactClientInterface {
    */
   public function getAllContacts() {
     /** @var \Drupal\indieweb_contact\Entity\ContactInterface[] $contacts */
-    $contacts = \Drupal::entityTypeManager()->getStorage('indieweb_contact')->loadMultiple();
-    return $this->massageReturn($contacts);
+    $ids = \Drupal::entityQuery('indieweb_contact')->sort('name', 'ASC')->execute();
+    if ($ids) {
+      /** @var \Drupal\indieweb_contact\Entity\ContactInterface[] $contacts */
+      $contacts = \Drupal::entityTypeManager()->getStorage('indieweb_contact')->loadMultiple($ids);
+      return $this->massageReturn($contacts);
+    }
+    return [];
   }
 
   /**

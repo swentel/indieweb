@@ -79,21 +79,21 @@ class Contact extends ContentEntityBase implements ContactInterface {
    * {@inheritdoc}
    */
   public function getNickname() {
-    return $this->get('nickname')->value;
+    return !empty($this->get('nickname')->value) ? $this->get('nickname')->value : "";
   }
 
   /**
    * {@inheritdoc}
    */
   public function getWebsite() {
-    return $this->get('url')->value;
+    return !empty($this->get('url')->value) ? $this->get('url')->value : "";
   }
 
   /**
    * {@inheritdoc}
    */
   public function getPhoto() {
-    return $this->get('photo')->value;
+    return !empty($this->get('photo')->value) ? $this->get('photo')->value : "";
   }
 
   /**

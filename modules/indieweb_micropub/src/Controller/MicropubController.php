@@ -533,6 +533,15 @@ class MicropubController extends ControllerBase {
           }
         }
         if (!empty($contact)) {
+
+          // Set default uid.
+          $contact['uid'] = 1;
+
+          // Override uid.
+          if ($tokenOwnerId = $this->indieAuth->checkAuthor()) {
+            $contact['uid'] = $tokenOwnerId;
+          }
+
           $entityContact = \Drupal::service('indieweb.contact.client')->storeContact($contact);
 
           header('Location: ' . $entityContact->toUrl('canonical', ['absolute' => TRUE])->toString());
