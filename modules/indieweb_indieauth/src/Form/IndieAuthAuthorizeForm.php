@@ -116,6 +116,8 @@ class IndieAuthAuthorizeForm extends FormBase {
       'client_id' => $params['client_id'],
       'scope' => implode(' ', $scopes),
       'redirect_uri' => $params['redirect_uri'],
+      'code_challenge' => !empty($params['code_challenge']) ? $params['code_challenge'] : '',
+      'code_challenge_method' => !empty($params['code_challenge']) ? (!empty($params['code_challenge_method']) ? $params['code_challenge_method'] : 'plain') : '',
       'expire' => \Drupal::time()->getRequestTime() + 3600,
     ];
     $authorization_code = \Drupal::entityTypeManager()->getStorage('indieweb_indieauth_code')->create($values);

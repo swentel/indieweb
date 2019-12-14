@@ -91,4 +91,18 @@ interface IndieAuthAuthorizationCodeInterface extends ContentEntityInterface {
    */
   public function getCode();
 
+  /**
+   * Returns the code challenge.
+   *
+   * @return string
+   */
+  public function getCodeChallenge();
+
+  /**
+   * Returns the code challenge method.
+   *
+   * @return string
+   */
+  public function getCodeChallengeMethod();
+
 }

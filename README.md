@@ -226,7 +226,7 @@ indieauth.com too and exchange access tokens for further requests. Only expose t
 micropub or microsub.
 
 You can also use the built-in auth and token endpoints. You then authorize yourself with a Drupal user. The user needs
-the 'Authorize with IndieAuth' permission.
+the 'Authorize with IndieAuth' permission. PKCE support is included.
 
 You can also allow users to register and login into this website. An account will created with the username based on the
 domain. Authenticated users can use the same "Web sign-in" block to map a domain with their account.

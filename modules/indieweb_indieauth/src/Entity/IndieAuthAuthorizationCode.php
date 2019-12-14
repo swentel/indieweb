@@ -132,6 +132,20 @@ class IndieAuthAuthorizationCode extends ContentEntityBase implements IndieAuthA
   /**
    * {@inheritdoc}
    */
+  public function getCodeChallenge() {
+    return $this->get('code_challenge')->value;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getCodeChallengeMethod() {
+    return $this->get('code_challenge_method')->value;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public static function baseFieldDefinitions(EntityTypeInterface $entity_type) {
     $fields = parent::baseFieldDefinitions($entity_type);
 
@@ -169,6 +183,16 @@ class IndieAuthAuthorizationCode extends ContentEntityBase implements IndieAuthA
       ->setLabel(t('redirect_uri'))
       ->setRequired(FALSE)
       ->setSetting('max_length', 255);
+
+    $fields['code_challenge'] = BaseFieldDefinition::create('string')
+      ->setLabel(t('Code challenge'))
+      ->setRequired(FALSE)
+      ->setSetting('max_length', 255);
+
+    $fields['code_challenge_method'] = BaseFieldDefinition::create('string')
+      ->setLabel(t('Code challenge method'))
+      ->setRequired(FALSE)
+      ->setSetting('max_length', 40);
 
     $fields['uid'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('The owner of the code'))

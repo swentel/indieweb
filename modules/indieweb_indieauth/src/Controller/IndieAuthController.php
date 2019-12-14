@@ -28,7 +28,9 @@ class IndieAuthController extends ControllerBase {
     'client_id',
     'me',
     'scope',
-    'state'
+    'state',
+    'code_challenge',
+    'code_challenge_method',
   ];
 
   /**
@@ -53,6 +55,7 @@ class IndieAuthController extends ControllerBase {
     'redirect_uri',
     'client_id',
     'grant_type',
+    'code_verifier',
   ];
 
   /**
@@ -210,6 +213,7 @@ class IndieAuthController extends ControllerBase {
 
     self::validateAuthorizeRequestParameters($request, $reason, $valid_request, TRUE);
     if (!$valid_request) {
+      unset($_SESSION['indieauth']);
       $this->getLogger('indieweb_indieauth')->notice('Missing or invalid parameters to authorize as user: @reason', ['@reason' => $reason]);
       return ['#markup' => 'Invalid request, missing parameters', '#cache' => ['max-age' => 0]];
     }
@@ -263,7 +267,7 @@ class IndieAuthController extends ControllerBase {
     foreach (self::$auth_parameters as $parameter) {
 
       $value = $in_session ? (isset($_SESSION['indieauth'][$parameter]) ? $_SESSION['indieauth'][$parameter] : '') : $request->query->get($parameter);
-      if (empty($value) && !in_array($parameter, ['response_type', 'scope'])) {
+      if (empty($value) && !in_array($parameter, ['response_type', 'scope', 'code_challenge', 'code_challenge_method'])) {
         $reason = "$parameter is empty";
         $valid_request = FALSE;
         break;
@@ -299,7 +303,7 @@ class IndieAuthController extends ControllerBase {
 
       $check = $request->request->get($parameter);
 
-      if (empty($check)) {
+      if (empty($check) && $parameter != 'code_verifier') {
         $reason = "$parameter is empty";
         $valid_request = FALSE;
         break;
@@ -423,6 +427,20 @@ class IndieAuthController extends ControllerBase {
     }
     if (empty($authorization_code->getScopes())) {
       return new JsonResponse(['error' => 'invalid_request', 'error_description' => 'Scope is empty, can not issue access token'], 400);
+    }
+
+    // -----------------------------------------------------------------
+    // Validate PKCE if available.
+    // -----------------------------------------------------------------
+
+    if ($code_challenge = $authorization_code->getCodeChallenge()) {
+      if (empty($params['code_verifier'])) {
+        return new JsonResponse(['error' => 'invalid_request', 'error_description' => 'No code verifier found to verify the code challenge'], 400);
+      }
+      elseif (!$this->verifyPKCE($code_challenge, $params['code_verifier'], $authorization_code->getCodeChallengeMethod())) {
+        $this->getLogger('indieweb_indieauth')->notice('Failed PKCE validation: verifier: @verifier - challenge: @challenge - method: @method', ['@verifier' => $params['code_verifier'], '@challenge' => $authorization_code->getCodeChallenge(), '@method' => $authorization_code->getCodeChallengeMethod()]);
+        return new JsonResponse(['error' => 'invalid_request', 'error_description' => 'PKCE validation failed'], 400);
+      }
     }
 
     // -----------------------------------------------------------------
@@ -630,6 +648,24 @@ class IndieAuthController extends ControllerBase {
     }
 
     return (object) $profile;
+  }
+
+  /**
+   * Verifies the code challenge.
+   *
+   * @see https://tools.ietf.org/html/rfc7636#appendix-A
+   *
+   * @param $code_challenge
+   * @param $code_verifier
+   * @param $method
+   *
+   * @return bool
+   */
+  protected function verifyPKCE($code_challenge, $code_verifier, $method) {
+    if ('S256' === $method) {
+      $code_verifier = rtrim(strtr(base64_encode(hash('sha256', $code_verifier, TRUE)), '+/', '-_' ), '=');
+    }
+    return (0 === strcmp($code_challenge, $code_verifier));
   }
 
 }

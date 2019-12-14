@@ -5,6 +5,7 @@
  * IndieWeb IndieAuth install file.
  */
 
+use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\File\FileSystemInterface;
 
 /**
@@ -36,4 +37,25 @@ function indieweb_indieauth_requirements($phase) {
   }
 
   return $requirements;
+}
+
+/**
+ * Installs the code challenge (method) fields for PKCE support.
+ */
+function indieweb_indieauth_update_8001() {
+  $field_storage_definition = BaseFieldDefinition::create('string')
+    ->setLabel(t('Code challenge'))
+    ->setRequired(FALSE)
+    ->setSetting('max_length', 255);
+
+  \Drupal::entityDefinitionUpdateManager()
+    ->installFieldStorageDefinition('code_challenge', 'indieweb_indieauth_code', 'indieweb_indieauth', $field_storage_definition);
+
+  $field_storage_definition = BaseFieldDefinition::create('string')
+    ->setLabel(t('Code challenge method'))
+    ->setRequired(FALSE)
+    ->setSetting('max_length', 255);
+
+  \Drupal::entityDefinitionUpdateManager()
+    ->installFieldStorageDefinition('code_challenge_method', 'indieweb_indieauth_code', 'indieweb_indieauth', $field_storage_definition);
 }
