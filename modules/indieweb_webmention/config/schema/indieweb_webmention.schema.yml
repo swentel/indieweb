@@ -21,6 +21,9 @@ indieweb_webmention.comment:
     comment_create_mail_notification:
       type: email
       label: 'Send mail notification'
+    comment_create_whitelist_domains:
+      type: 'string'
+      label: 'Automatically approve webmention comments from these domains'
 
 # schema for indieweb_webmention.settings
 indieweb_webmention.settings:

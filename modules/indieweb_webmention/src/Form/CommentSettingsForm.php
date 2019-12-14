@@ -134,6 +134,13 @@ class CommentSettingsForm extends ConfigFormBase {
       ),
     ];
 
+    $form['comment_create']['comment_create_whitelist_domains'] = [
+      '#type' => 'textarea',
+      '#title' => $this->t('Trusted domains'),
+      '#description' => $this->t('Automatically approve webmention comments from these domains. Enter domains line per line.'),
+      '#default_value' => $config->get('comment_create_whitelist_domains'),
+    ];
+
     return parent::buildForm($form, $form_state);
   }
 
@@ -149,6 +156,7 @@ class CommentSettingsForm extends ConfigFormBase {
       ->set('comment_create_webmention_reference_field', $form_state->getValue('comment_create_webmention_reference_field'))
       ->set('comment_create_node_comment_field', $form_state->getValue('comment_create_node_comment_field'))
       ->set('comment_create_mail_notification', $form_state->getValue('comment_create_mail_notification'))
+      ->set('comment_create_whitelist_domains', $form_state->getValue('comment_create_whitelist_domains'))
       ->save();
 
     parent::submitForm($form, $form_state);

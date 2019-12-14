@@ -476,6 +476,11 @@ class WebmentionClient implements WebmentionClientInterface {
                   ],
                 ];
 
+                // Auto approve
+                if (!$values['status'] && $this->autoApproveComment($config->get('comment_create_whitelist_domains'), $webmention->getSource())) {
+                  $values['status'] = 1;
+                }
+
                 // Match authors if possible.
                 $authors = Settings::get('indieweb_comment_authors', []);
                 $author_name = $webmention->get('author_name')->value;
@@ -572,6 +577,33 @@ class WebmentionClient implements WebmentionClientInterface {
       }
     }
     catch (Exception $ignored) {}
+  }
+
+  /**
+   * Auto approve comment or not.
+   *
+   * @param $trusted_domains
+   * @param $webmention_domain
+   *
+   * @return bool
+   */
+  public function autoApproveComment($trusted_domains, $webmention_domain) {
+    $approve = FALSE;
+
+    $domains = explode("\n", trim($trusted_domains));
+    if (!empty($domains)) {
+      foreach ($domains as $domain) {
+        $trim = trim($domain);
+        if (strlen($trim) > 0) {
+          if (strpos($webmention_domain, $domain) !== FALSE) {
+            $approve = TRUE;
+            break;
+          }
+        }
+      }
+    }
+
+    return $approve;
   }
 
 }
