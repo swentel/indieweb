@@ -1196,16 +1196,16 @@ class MicropubController extends ControllerBase {
 
       if (!empty($this->input[$file_key])) {
         if (is_string($this->input[$file_key])) {
-          $photos = [$this->input[$file_key]];
+          $urls = [$this->input[$file_key]];
         }
         else {
-          $photos = $this->input[$file_key];
+          $urls = $this->input[$file_key];
         }
         $search = [\Drupal::request()->getSchemeAndHttpHost() . '/', PublicStream::basePath() . '/'];
         $replace = ['',  'public://'];
-        foreach ($photos as $photo_filename) {
-          $photo_filename = str_replace($search, $replace, $photo_filename);
-          $load = $this->entityTypeManager()->getStorage('file')->loadByProperties(['uri' => $photo_filename]);
+        foreach ($urls as $url) {
+          $filename = str_replace($search, $replace, $filename);
+          $load = $this->entityTypeManager()->getStorage('file')->loadByProperties(['uri' => $filename]);
           if (!empty($load)) {
             $uploaded_files[] = array_shift($load);
           }

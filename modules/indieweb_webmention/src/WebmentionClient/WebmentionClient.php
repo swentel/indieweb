@@ -477,7 +477,7 @@ class WebmentionClient implements WebmentionClientInterface {
                 ];
 
                 // Auto approve
-                if (!$values['status'] && $this->autoApproveComment($config->get('comment_create_whitelist_domains'), $webmention->getSource())) {
+                if (!$values['status'] && ($trusted_domains = $config->get('comment_create_whitelist_domains')) && $this->autoApproveComment($trusted_domains, $webmention->getSource())) {
                   $values['status'] = 1;
                 }
 
