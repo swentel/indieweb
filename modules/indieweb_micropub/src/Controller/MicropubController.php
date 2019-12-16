@@ -1204,7 +1204,7 @@ class MicropubController extends ControllerBase {
         $search = [\Drupal::request()->getSchemeAndHttpHost() . '/', PublicStream::basePath() . '/'];
         $replace = ['',  'public://'];
         foreach ($urls as $url) {
-          $filename = str_replace($search, $replace, $filename);
+          $filename = str_replace($search, $replace, $url);
           $load = $this->entityTypeManager()->getStorage('file')->loadByProperties(['uri' => $filename]);
           if (!empty($load)) {
             $uploaded_files[] = array_shift($load);
