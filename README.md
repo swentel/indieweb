@@ -1,5 +1,7 @@
 # IndieWeb integration for Drupal 8
 
+<img src="https://www.drupal.org/files/styles/grid-3-2x/public/project-images/indieweb-drupal-logo.png?itok=YPcU0OBf" />
+
 ## About this module
 
 Integrates the philosophy of IndieWeb in your Drupal website.
@@ -63,6 +65,8 @@ More information is in this README
 Development happens on github: https://github.com/swentel/indieweb
 
 Releases are available on drupal.org: https://www.drupal.org/project/indieweb
+
+Logo designed by https://www.drupal.org/u/grienauer
 
 ## IndieWebify.me / sturdy-backbone.glitch.me / xray.p3k.io
 
