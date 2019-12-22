@@ -7,7 +7,7 @@
 Integrates the philosophy of IndieWeb in your Drupal website.
 For more information about IndieWeb, see https://indieweb.org/.
 
-Current functionality:
+Available features:
 
 - Receive webmentions and pingbacks via Webmention.io or internal endpoint
 - Send webmentions and syndicate content, likes etc via [brid.gy](https://brid.gy), store syndications
