@@ -478,7 +478,6 @@ Don't forget to pass on your domain in the drush commands as it's important for 
 
 ```
 drush -l https://example.com indieweb-send-webmentions
-
 ```
 
 - indieweb-send-webmentions: handles the queue for sending webmentions.
