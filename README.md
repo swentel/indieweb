@@ -1,6 +1,6 @@
 # IndieWeb integration for Drupal 8
 
-<img src="https://www.drupal.org/files/styles/grid-3-2x/public/project-images/indieweb-drupal-logo.png?itok=YPcU0OBf" />
+<img alt="IndieWeb for Drupal" src="https://www.drupal.org/files/styles/grid-3-2x/public/project-images/indieweb-drupal-logo.png?itok=YPcU0OBf" />
 
 ## About this module
 
@@ -77,6 +77,12 @@ Another good tool is http://xray.p3k.io, which displays the results in JSON.
 
 ## To install
 
+Which release to select:
+
+- 8.x-1.x on drupal.org and master on GitHub: single user site.
+- 8.x-2.x on drupal.org and multiuser on GitHub: support for multiple users on one site. This branch has an upgrade path
+if you are upgrading from 8.x-1.x. This is still in development and is not recommended for production.
+
 composer packages:
 
 - composer require indieweb/mention-client
@@ -86,7 +92,7 @@ composer packages:
 - composer require p3k/websub
 - composer require lcobucci/jwt
 
-- go to admin/modules and toggle 'IndieWeb' to enable the module.
+- go to admin/modules and toggle the modules you want to enable.
 
 ## Webmentions / Webmention.io
 
