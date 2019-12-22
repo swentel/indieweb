@@ -68,6 +68,13 @@ interface FeedInterface extends ConfigEntityInterface {
   public function getAuthor();
 
   /**
+   * Whether this feed is per user or not.
+   *
+   * @return boolean
+   */
+  public function isFeedPerUser();
+
+  /**
    * The bundles for this feed.
    *
    * @return array

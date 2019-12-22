@@ -79,6 +79,13 @@ class Feed extends ConfigEntityBase implements FeedInterface {
   protected $author;
 
   /**
+   * Whether this feed is per user or not.
+   *
+   * @var bool
+   */
+  protected $feedPerUser = false;
+
+  /**
    * The feed title.
    *
    * @var string
@@ -172,6 +179,13 @@ class Feed extends ConfigEntityBase implements FeedInterface {
    */
   public function getAuthor() {
     return $this->author;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function isFeedPerUser() {
+    return (bool) $this->feedPerUser;
   }
 
   /**

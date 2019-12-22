@@ -137,7 +137,7 @@ class CommentSettingsForm extends ConfigFormBase {
     $form['comment_create']['comment_create_whitelist_domains'] = [
       '#type' => 'textarea',
       '#title' => $this->t('Trusted domains'),
-      '#description' => $this->t('Automatically approve webmention comments from these domains. Enter domains line per line.'),
+      '#description' => $this->t('Automatically approve webmention comments from these domains. Enter domains line per line.') . '<br />' . $this->t('In case of multi-user site, users can override this setting.'),
       '#default_value' => $config->get('comment_create_whitelist_domains'),
     ];
 

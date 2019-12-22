@@ -28,11 +28,11 @@ interface IndieAuthClientInterface {
   public function isValidToken($auth_header, $scope_to_check = NULL);
 
   /**
-   * Checks the uid of the current request.
+   * Get the uid of the current request.
    *
    * @return boolean|integer
    */
-  public function checkAuthor();
+  public function getAuthor();
 
   /**
    * Gets the internal token, if available.

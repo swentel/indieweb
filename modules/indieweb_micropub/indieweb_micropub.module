@@ -14,7 +14,7 @@ use Drupal\node\NodeTypeInterface;
  */
 function indieweb_micropub_page_attachments_alter(array &$attachments) {
 
-  if (\Drupal::service('path.matcher')->isFrontPage()) {
+  if (indieweb_expose_endpoint()) {
 
     if (($config = \Drupal::config('indieweb_micropub.settings')) && ($config->get('micropub_enable')) && ($config->get('micropub_expose_link_tag') || $config->get('micropub_expose_link_header'))) {
 

@@ -5,3 +5,11 @@ indieweb.admin.dashboard:
     _title: 'IndieWeb'
   requirements:
     _permission: 'administer indieweb'
+
+indieweb.admin.settings:
+  path: '/admin/config/services/indieweb/settings'
+  defaults:
+    _form: '\Drupal\indieweb\Form\IndieWebSettingsForm'
+    _title: 'Settings'
+  requirements:
+    _permission: 'administer indieweb'

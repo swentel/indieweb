@@ -19,7 +19,9 @@
         <div><img class="u-photo" src="{{ image }}" title="{{ name }}" /></div>
     {% endif %}
     <div><a class="u-url p-name" rel="me" href="{{ domain }}">{{ name }}</a></div>
-    <div class="note">
-        {{ note }}
-    </div>
+    {% if note %}
+      <div class="note">
+          {{ note }}
+      </div>
+    {% endif %}
 </div>

@@ -67,9 +67,19 @@ class FeedForm extends EntityForm {
       '#type' => 'number',
       '#title' => $this->t('Owner id'),
       '#default_value' => $feed->getOwnerId(),
-      '#description' => $this->t('The author user id for the posts.'),
-      '#min' => 1,
+      '#description' => $this->t('The author user id for the posts. Set to 0 to allow all users for this feed.'),
+      '#min' => 0,
       '#required' => TRUE,
+    ];
+
+    $form['feedPerUser'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Per user feed'),
+      '#default_value' => $feed->isFeedPerUser(),
+      '#description' => $this->t('This feed lists posts for every user individually and will be available at user/x/{path}. This only applies if the Owner ID is set to 0.'),
+      '#states' => [
+        'visible' => [':input[name="ownerId"]' => ['value' => '0']]
+      ],
     ];
 
     $form['excludeIndexing'] = [
@@ -95,18 +105,21 @@ class FeedForm extends EntityForm {
       '#type' => 'checkbox',
       '#title' => $this->t('Expose JF2 feed link tag'),
       '#default_value' => $feed->exposeJf2LinkTag(),
-      '#states' => array(
-        'visible' => array(
+      '#states' => [
+        'visible' => [
           ':input[name="jf2"]' => array('checked' => TRUE),
-        ),
-      ),
+        ],
+      ],
     ];
 
     $form['author'] = [
       '#type' => 'textarea',
       '#title' => $this->t('Author'),
-      '#description' => $this->t('Put the h-card in here for the author information which will be printed in a hidden span. Leave empty if you already have an author element on the page. Example:<br /><span class="indieweb-highlight-code">&lt;a class="u-url p-name" href="/"&gt;Your name&lt;/a&gt;&lt;img src="https://example.com/image/avatar.png" class="u-photo hidden" alt="Your name"&gt;'),
+      '#description' => $this->t('Put the h-card in here for the author information which will be printed in a hidden span. Leave empty if you already have an author element on the page. Example:<br /><span class="indieweb-highlight-code">&lt;a class="u-url p-name" href="/"&gt;Your name&lt;/a&gt;&lt;img src="https://example.com/image/avatar.png" class="u-photo hidden" alt="Your name"&gt;</span>' . '<br />' . $this->t('This will be disabled in case this feed contains every user. The h-card will be automatically created then based on the user name and picture (if available).')),
       '#default_value' => $feed->getAuthor(),
+      '#states' => [
+        'disabled' => [':input[name="ownerId"]' => ['value' => '0']]
+      ],
     ];
 
     $options = [];

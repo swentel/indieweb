@@ -1,0 +1,7 @@
+manage channels and sources:
+  title: 'Manage channels and sources'
+  description: 'Management is available at user/x/microsub'
+
+disable image cache on source:
+  title: 'Disable image cache per source'
+  description: 'Allow to turn off media cache per source if the IndieWeb media cache module is enabled.'

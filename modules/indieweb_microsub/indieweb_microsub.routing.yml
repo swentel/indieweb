@@ -7,20 +7,22 @@ indieweb.admin.microsub_settings:
     _permission: 'administer indieweb'
 
 indieweb.admin.microsub_channels:
-  path: '/admin/config/services/indieweb/microsub/channels'
+  path: '/user/{user}/microsub'
   defaults:
     _controller: '\Drupal\indieweb_microsub\Controller\MicrosubController::channelOverview'
     _title: 'Channels'
   requirements:
-    _permission: 'administer indieweb'
+    user: \d+
+    _permission: 'manage channels and sources'
 
 indieweb.admin.microsub_sources:
-  path: '/admin/config/services/indieweb/microsub/channels/{indieweb_microsub_channel}/list'
+  path: '/user/{user}/microsub/{indieweb_microsub_channel}/list'
   defaults:
     _controller: '\Drupal\indieweb_microsub\Controller\MicrosubController::sourcesOverview'
     _title: 'Sources'
   requirements:
-    _permission: 'administer indieweb'
+    _permission: 'manage channels and sources'
+    user: \d+
     indieweb_microsub_channel: \d+
 
 indieweb.microsub.endpoint:

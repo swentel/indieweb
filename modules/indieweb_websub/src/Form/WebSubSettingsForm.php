@@ -51,18 +51,22 @@ class WebSubSettingsForm extends ConfigFormBase {
       '#required' => TRUE,
     ];
 
+    if (indieweb_is_multi_user()) {
+      $form['general']['pages']['#description'] .= '<br />' . $this->t('The site is set to multiple users, so if you have a feed that is configured for multiple users, the path will be appended to the user page. e.g "/timeline" automatically becomes "/user/x/timeline" and will be exposed on the user page.');
+    }
+
     $form['general']['expose_link_tag'] = [
       '#title' => $this->t('Expose WebSub link tags'),
       '#type' => 'checkbox',
       '#default_value' => $config->get('expose_link_tag'),
-      '#description' => $this->t('The link tags will be added on the front page. You can also add them yourself to html.html.twig e.g.:<br /><div class="indieweb-highlight-code">&lt;link rel="hub" href="@hub" /&gt;</div><br /><div class="indieweb-highlight-code">&lt;link rel="self" href="@self" /&gt;</div>', ['@hub' => $config->get('hub_endpoint'), '@self' => \Drupal::request()->getSchemeAndHttpHost()]),
+      '#description' => indieweb_is_multi_user() ? $this->t('Depending on the feed setting, the link tag will either be added on the exact path or the user page.') : $this->t('The link tags will be added on the front page. You can also add them yourself to html.html.twig e.g.:<br /><div class="indieweb-highlight-code">&lt;link rel="hub" href="@hub" /&gt;</div><br /><div class="indieweb-highlight-code">&lt;link rel="self" href="@self" /&gt;</div>', ['@hub' => $config->get('hub_endpoint'), '@self' => \Drupal::request()->getSchemeAndHttpHost()]),
     ];
 
     $form['general']['expose_link_header'] = [
       '#title' => $this->t('Expose WebSub header links'),
       '#type' => 'checkbox',
       '#default_value' => $config->get('expose_link_header'),
-      '#description' => $this->t('The link tag will be added on in response headers of the page that can be discovered.'),
+      '#description' => indieweb_is_multi_user() ? $this->t('Depending on the feed setting, the link tag will be added to the response of the exact tag or on the user page.') : $this->t('The link tag will be added on in response headers of the page that can be discovered.'),
     ];
 
     $form['general']['node_element'] = [

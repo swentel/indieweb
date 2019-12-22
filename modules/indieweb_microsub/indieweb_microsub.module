@@ -12,7 +12,7 @@ use Drupal\Core\Url;
  */
 function indieweb_microsub_page_attachments_alter(array &$attachments) {
 
-  if (\Drupal::service('path.matcher')->isFrontPage()) {
+  if (indieweb_expose_endpoint()) {
 
     if (($config = \Drupal::config('indieweb_microsub.settings')) && ($config->get('microsub_expose_link_tag') || $config->get('microsub_expose_link_header'))) {
 

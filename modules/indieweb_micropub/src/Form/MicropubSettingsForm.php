@@ -15,7 +15,7 @@ class MicropubSettingsForm extends ConfigFormBase {
    * @return array
    */
   protected function getPostTypes() {
-    $post_types = [
+    return [
       'article' => [
         'geo_field' => TRUE,
         'description' => $this->t("An article request contains 'content', 'name' and the 'h' value is 'entry'. Think of it as a blog post."),
@@ -80,8 +80,6 @@ class MicropubSettingsForm extends ConfigFormBase {
         'geo_field' => TRUE,
       ],
     ];
-
-    return $post_types;
   }
 
   /**
@@ -231,6 +229,20 @@ class MicropubSettingsForm extends ConfigFormBase {
       ),
     ];
 
+    $form['general']['micropub_private_taxonomy'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Use private taxonomy'),
+      '#default_value' => $config->get('micropub_private_taxonomy'),
+      '#disabled' => !\Drupal::moduleHandler()->moduleExists('private_taxonomy'),
+      '#description' => $this->t('Get tags per user. This requires the <a href=https://drupal.org/project/private_taxonomy target="_blank">Private taxonomy</a> module to be enabled and using the internal IndieAuth endpoint.'),
+      '#states' => array(
+        'visible' => array(
+          ':input[name="micropub_enable"]' => array('checked' => TRUE),
+          ':input[name="micropub_enable_category"]' => array('checked' => TRUE),
+        ),
+      ),
+    ];
+
     $form['general']['micropub_enable_geo'] = [
       '#title' => $this->t('Enable geo lookup'),
       '#type' => 'checkbox',
@@ -292,7 +304,7 @@ class MicropubSettingsForm extends ConfigFormBase {
       if (in_array($field->getType(), ['geofield'])) {
         $geo_fields[$key] = $field_types[$field->getType()]['label'] . ': ' . $field->getName();
       }
-      if (in_array($field->getType(), ['entity_reference'])) {
+      if (in_array($field->getType(), ['entity_reference', 'private_taxonomy_term_reference'])) {
         $settings = $field->getSettings();
         if (isset($settings['target_type']) && $settings['target_type'] == 'taxonomy_term') {
           $tag_fields[$key] = $field_types[$field->getType()]['label'] . ': ' . $field->getName();
@@ -592,8 +604,8 @@ class MicropubSettingsForm extends ConfigFormBase {
       ->set('micropub_media_enable', $form_state->getValue('micropub_media_enable'))
       ->set('micropub_enable_category', $form_state->getValue('micropub_enable_category'))
       ->set('micropub_category_vocabulary', $form_state->getValue('micropub_category_vocabulary'))
+      ->set('micropub_private_taxonomy', $form_state->getValue('micropub_private_taxonomy'))
       ->set('micropub_log_payload', $form_state->getValue('micropub_log_payload'));
-
 
     // Reply create comment.
     $config->set('reply_create_comment', $form_state->getValue('reply_create_comment'));

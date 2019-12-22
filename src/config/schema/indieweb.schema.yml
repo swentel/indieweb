@@ -1,0 +1,7 @@
+indieweb.settings:
+  type: config_object
+  label: 'Indieweb'
+  mapping:
+    multi_user:
+      type: boolean
+      label: 'Whether the site site is multi-user or not.'

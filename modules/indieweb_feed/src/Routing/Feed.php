@@ -61,6 +61,11 @@ class Feed implements ContainerInjectionInterface {
         'indieweb_feed' => $feed->id(),
       ];
 
+      // Set feed per user.
+      if ($feed->isFeedPerUser()) {
+        $path = 'user/{user}/' . $path;
+      }
+
       $routes['indieweb.feeds.microformat.' . $feed->id()] = new Route(
         $path,
         $args,
@@ -70,7 +75,14 @@ class Feed implements ContainerInjectionInterface {
       );
 
       if ($feed->exposeJf2Feed()) {
+        $path = $feed->getPath();
         $jf2_path = str_replace('/', '-', $path) . '.jf2';
+
+        // Set feed per user.
+        if ($feed->isFeedPerUser()) {
+          $jf2_path = 'user/{user}/' . $jf2_path;
+        }
+
         $args['_controller'] = 'Drupal\indieweb_feed\Controller\FeedController::feedJf2';
         $routes['indieweb.feeds.jf2.' . $feed->id()] = new Route(
           $jf2_path,

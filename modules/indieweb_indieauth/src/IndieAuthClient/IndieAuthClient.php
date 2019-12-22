@@ -60,7 +60,7 @@ class IndieAuthClient implements IndieAuthClientInterface {
   /**
    * {@inheritdoc}
    */
-  public function checkAuthor() {
+  public function getAuthor() {
     $indieauth = \Drupal::config('indieweb_indieauth.settings');
     $internal = $indieauth->get('auth_internal');
     if ($internal) {
@@ -259,6 +259,21 @@ class IndieAuthClient implements IndieAuthClientInterface {
         if (empty($scopes) || !in_array($scope_to_check, $scopes)) {
           $valid_token = FALSE;
           \Drupal::Logger('indieweb_scope')->notice('Scope "@scope" insufficient', ['@scope' => $scope_to_check]);
+        }
+      }
+
+      // Check if the user is valid.
+      if ($indieAuthToken->getOwnerId()) {
+        /** @var \Drupal\user\UserInterface $account */
+        $account = \Drupal::entityTypeManager()->getStorage('user')->load($indieAuthToken->getOwnerId());
+        if (!$account || $account->isBlocked()) {
+          $valid_token = FALSE;
+          if (!$account) {
+            \Drupal::logger('indieweb_indieauth_user')->notice('No user (@uid) found for this token.', ['@uid' => $indieAuthToken->getOwnerId()]);
+          }
+          else {
+            \Drupal::logger('indieweb_indieauth_user')->notice('User @uid is blocked.', ['@uid' => $indieAuthToken->getOwnerId()]);
+          }
         }
       }
 

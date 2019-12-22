@@ -4,6 +4,7 @@ namespace Drupal\indieweb_microsub\Entity\Storage;
 
 use Drupal\Core\Entity\Query\QueryInterface;
 use Drupal\Core\Entity\Sql\SqlContentEntityStorage;
+use Drupal\user\UserInterface;
 
 /**
  * Controller class for microsub items.
@@ -28,10 +29,14 @@ class MicrosubItemStorage extends SqlContentEntityStorage implements MicrosubIte
   /**
    * {@inheritdoc}
    */
-  public function getItemCountByChannel($channel_id) {
+  public function getItemCountByChannel($channel_id, UserInterface $user = NULL) {
     $query = \Drupal::entityQuery('indieweb_microsub_item')
       ->condition('channel_id', $channel_id)
       ->count();
+
+    /*if ($user && $user->id() > 0) {
+      $query->condition('uid', $user->id());
+    }*/
 
     return $query->execute();
   }

@@ -538,7 +538,7 @@ class MicropubController extends ControllerBase {
           $contact['uid'] = 1;
 
           // Override uid.
-          if ($tokenOwnerId = $this->indieAuth->checkAuthor()) {
+          if ($tokenOwnerId = $this->indieAuth->getAuthor()) {
             $contact['uid'] = $tokenOwnerId;
           }
 
@@ -869,7 +869,7 @@ class MicropubController extends ControllerBase {
 
       $uid = 1;
       // Override uid if using internal indieauth.
-      if ($tokenOwnerId = $this->indieAuth->checkAuthor()) {
+      if ($tokenOwnerId = $this->indieAuth->getAuthor()) {
         $uid = $tokenOwnerId;
       }
 
@@ -1044,7 +1044,7 @@ class MicropubController extends ControllerBase {
     ];
 
     // Override uid.
-    if ($tokenOwnerId = $this->indieAuth->checkAuthor()) {
+    if ($tokenOwnerId = $this->indieAuth->getAuthor()) {
       $this->values['uid'] = $tokenOwnerId;
     }
 
@@ -1500,17 +1500,32 @@ class MicropubController extends ControllerBase {
    *
    * @return array $terms
    *   A list of terms.
-   *
-   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
-   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    */
   protected function getCategories() {
     $terms = [];
     $vocabulary = $this->config->get('micropub_category_vocabulary');
-    $tree = $this->entityTypeManager()->getStorage('taxonomy_term')->loadTree($vocabulary);
-    foreach ($tree as $term) {
+
+    $query = \Drupal::database()->select('taxonomy_term_field_data', 't');
+    $query->join('taxonomy_term__parent', 'p', 't.tid = p.entity_id');
+    $query->addExpression('parent_target_id', 'parent');
+    $query
+      ->addTag('taxonomy_term_access')
+      ->fields('t')
+      ->condition('t.vid', $vocabulary)
+      ->condition('t.default_langcode', 1)
+      ->orderBy('t.weight')
+      ->orderBy('t.name');
+
+    // Private taxonomy.
+    if ($this->config->get('micropub_private_taxonomy')) {
+      $query->leftJoin('user_term', 'user_term', 't.tid = user_term.tid');
+      $query->condition('user_term.uid', $this->indieAuth->getAuthor());
+    }
+
+    foreach ($query->execute() as $term) {
       $terms[] = $term->name;
     }
+
     return $terms;
   }
 
@@ -1544,16 +1559,27 @@ class MicropubController extends ControllerBase {
           $entity = $this->entityTypeManager()->getStorage(key($params))->load($params[key($params)]);
           if ($entity) {
 
-            $properties = [];
-            switch ($entity->getEntityTypeId()) {
-              case 'node':
-                $properties = $this->getNodeProperties($entity);
-                break;
-              case 'comment':
-                $properties = $this->getCommentProperties($entity);
-                break;
+            $return_response = TRUE;
+
+            // Check author if using internal.
+            if (indieweb_is_multi_user() ($uid = $this->indieAuth->getAuthor())) {
+              if ($entity->getOwnerId() != $uid) {
+                $return_response = FALSE;
+              }
             }
-            $return = ['properties' => (object) $properties];
+
+            if ($return_response) {
+              $properties = [];
+              switch ($entity->getEntityTypeId()) {
+                case 'node':
+                  $properties = $this->getNodeProperties($entity);
+                  break;
+                case 'comment':
+                  $properties = $this->getCommentProperties($entity);
+                  break;
+              }
+              $return = ['properties' => (object) $properties];
+            }
           }
         }
       }
@@ -1613,6 +1639,11 @@ class MicropubController extends ControllerBase {
 
         if ($filter) {
           $query->condition('type', $filter);
+        }
+
+        // Check author if using internal.
+        if (indieweb_is_multi_user() && ($uid = $this->indieAuth->getAuthor())) {
+          $query->condition('uid', $this->indieAuth->getAuthor());
         }
 
         $ids = $query->execute();
@@ -1702,11 +1733,17 @@ class MicropubController extends ControllerBase {
    * @return array
    */
   private function getContactsResponse(Request $request) {
+    $uid = 0;
+
+    if (indieweb_is_multi_user()) {
+      $uid = $this->indieAuth->getAuthor();
+    }
+
     if ($request->get('search')) {
-      $contacts = \Drupal::service('indieweb.contact.client')->searchContacts($request->get('search'));
+      $contacts = \Drupal::service('indieweb.contact.client')->searchContacts($request->get('search'), $uid);
     }
     else {
-      $contacts = \Drupal::service('indieweb.contact.client')->getAllContacts();
+      $contacts = \Drupal::service('indieweb.contact.client')->getAllContacts($uid);
     }
 
     return ['contacts' => $contacts];

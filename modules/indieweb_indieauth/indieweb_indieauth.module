@@ -13,7 +13,7 @@ use Drupal\Core\Url;
  */
 function indieweb_indieauth_page_attachments_alter(array &$attachments) {
 
-  if (\Drupal::service('path.matcher')->isFrontPage()) {
+  if (indieweb_expose_endpoint()) {
 
     if (($config = \Drupal::config('indieweb_indieauth.settings')) && ($config->get('expose_link_tag') || $config->get('expose_link_header'))) {
 

@@ -3,6 +3,7 @@
 namespace Drupal\indieweb_microsub\Entity\Storage;
 
 use Drupal\Core\Entity\ContentEntityStorageInterface;
+use Drupal\user\UserInterface;
 
 /**
  * Defines an interface for microsub item entity storage classes.
@@ -24,11 +25,13 @@ interface MicrosubItemStorageInterface extends ContentEntityStorageInterface {
    *
    * @param $channel_id
    *   The channel id.
+   * @param \Drupal\user\UserInterface|null $user
+   *   The user to get the count for
    *
    * @return int
    *   The count of items associated with a channel.
    */
-  public function getItemCountByChannel($channel_id);
+  public function getItemCountByChannel($channel_id, UserInterface $user = NULL);
 
   /**
    * Returns the count of the items in a source.

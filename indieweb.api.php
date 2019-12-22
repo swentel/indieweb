@@ -156,3 +156,24 @@ function hook_indieweb_websub_notification($url, $content) {
 function hook_indieweb_websub_needs_resubscribe() {
   return ['url1', 'url2'];
 }
+
+/**
+ * Returns the elements that can a user can override when the site is set to
+ * multi-user.
+ *
+ * @param \Drupal\user\UserInterface $user
+ *
+ * @return array
+ */
+function hook_indieweb_settings_user_override(UserInterface $user) {
+  return [
+    'comment_create_whitelist_domains' => [
+      'module' => 'indieweb_webmention',
+      'form_element' => [
+        '#title' => t('Trusted domains'),
+        '#type' => 'textarea',
+        '#default_value' => \Drupal::service('user.data')->get('indieweb_webmention', $user->id(), 'comment_create_whitelist_domains')
+      ]
+    ],
+  ];
+}

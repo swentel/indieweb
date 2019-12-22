@@ -61,21 +61,22 @@ class IndieAuthSettingsForm extends ConfigFormBase {
       '#title' => $this->t('Use built-in authentication endpoint'),
       '#type' => 'checkbox',
       '#default_value' => $config->get('auth_internal'),
-      '#description' => $this->t("Use the internal authorize and token endpoints to authenticate with a Drupal user. The user needs the 'Authorize with IndieAuth' permission.<br />The endpoints are available at <strong>https://@domain/indieauth/auth</strong> and <strong>https://@domain/indieauth/token</strong>", ['@domain' => \Drupal::request()->getHttpHost()])
+      '#description' => $this->t("Use the internal authorize and token endpoints to authenticate with a Drupal user. The user needs the 'Authorize with IndieAuth' permission.<br />The endpoints are available at <strong>https://@domain/indieauth/auth</strong> and <strong>https://@domain/indieauth/token</strong>", ['@domain' => \Drupal::request()->getHttpHost()]),
+      '#disabled' => indieweb_is_multi_user(),
     ];
 
     $form['auth']['expose_link_tag'] = [
       '#title' => $this->t('Expose authentication API link tag'),
       '#type' => 'checkbox',
       '#default_value' => $config->get('expose_link_tag'),
-      '#description' => $this->t('The link tag will be added on the front page. You can also add them yourself to html.html.twig e.g.:<br /><div class="indieweb-highlight-code">&lt;link rel="authorization_endpoint" href="https://indieauth.com/auth" /&gt;</div><br /><div class="indieweb-highlight-code">&lt;link rel="token_endpoint" href="https://tokens.indieauth.com/token" /&gt;</div>'),
+      '#description' => indieweb_is_multi_user() ? $this->t('The link tag will be added on the user page.') : $this->t('The link tag will be added on the front page. You can also add them yourself to html.html.twig e.g.:<br /><div class="indieweb-highlight-code">&lt;link rel="authorization_endpoint" href="https://indieauth.com/auth" /&gt;</div><br /><div class="indieweb-highlight-code">&lt;link rel="token_endpoint" href="https://tokens.indieauth.com/token" /&gt;</div>'),
     ];
 
     $form['auth']['expose_link_header'] = [
       '#title' => $this->t('Expose authentication API header link'),
       '#type' => 'checkbox',
       '#default_value' => $config->get('expose_link_header'),
-      '#description' => $this->t('The link tag will be added on in response headers of the front page.'),
+      '#description' => indieweb_is_multi_user() ? $this->t('The link tag will be added in the response of the user page.') : $this->t('The link tag will be added on in response headers of the front page.'),
     ];
 
     $form['auth']['authorization_endpoint'] = [

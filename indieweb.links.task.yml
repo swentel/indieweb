@@ -3,3 +3,13 @@ indieweb.admin.dashboard:
   route_name: indieweb.admin.dashboard
   base_route: indieweb.admin.dashboard
   weight: 0
+
+indieweb.admin.intro_tab:
+  title: 'Intro'
+  route_name: indieweb.admin.dashboard
+  parent_id: indieweb.admin.dashboard
+
+indieweb.admin.indieweb_settings_tab:
+  title: 'Settings'
+  route_name: indieweb.admin.settings
+  parent_id: indieweb.admin.dashboard

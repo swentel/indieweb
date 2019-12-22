@@ -11,9 +11,14 @@ class ContactClient implements ContactClientInterface {
   /**
    * {@inheritdoc}
    */
-  public function getAllContacts() {
+  public function getAllContacts($uid = 0) {
     /** @var \Drupal\indieweb_contact\Entity\ContactInterface[] $contacts */
-    $ids = \Drupal::entityQuery('indieweb_contact')->sort('name', 'ASC')->execute();
+    $query = \Drupal::entityQuery('indieweb_contact');
+    if ($uid) {
+      $query->condition('uid', $uid);
+    }
+    $query->sort('name', 'ASC');
+    $ids = $query->execute();
     if ($ids) {
       /** @var \Drupal\indieweb_contact\Entity\ContactInterface[] $contacts */
       $contacts = \Drupal::entityTypeManager()->getStorage('indieweb_contact')->loadMultiple($ids);
@@ -25,14 +30,19 @@ class ContactClient implements ContactClientInterface {
   /**
    * {@inheritdoc}
    */
-  public function searchContacts($search) {
+  public function searchContacts($search, $uid = 0) {
     $or = new Condition('OR');
     $or->condition('name', '%' . Database::getConnection()->escapeLike($search) . '%', 'LIKE');
     $or->condition('nickname', '%' . Database::getConnection()->escapeLike($search) . '%', 'LIKE');
-    $ids = \Drupal::entityQuery('indieweb_contact')
-      ->condition($or)
-      ->sort('name', 'ASC')
-      ->execute();
+
+    $query = \Drupal::entityQuery('indieweb_contact');
+    $query->condition($or);
+    $query->sort('name', 'ASC');
+    if ($uid) {
+      $query->condition('uid', $uid);
+    }
+
+    $ids = $query->execute();
 
     if ($ids) {
       /** @var \Drupal\indieweb_contact\Entity\ContactInterface[] $contacts */

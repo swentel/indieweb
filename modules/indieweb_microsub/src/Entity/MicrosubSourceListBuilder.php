@@ -4,11 +4,20 @@ namespace Drupal\indieweb_microsub\Entity;
 
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityListBuilder;
+use Drupal\Core\Url;
+use Drupal\user\UserInterface;
 
 /**
  * Defines a class to build a listing of microsub source entities.
  */
 class MicrosubSourceListBuilder extends EntityListBuilder {
+
+  /**
+   * The user.
+   *
+   * @var \Drupal\user\UserInterface $user
+   */
+  protected $user;
 
   /**
    * The channel.
@@ -17,12 +26,13 @@ class MicrosubSourceListBuilder extends EntityListBuilder {
    */
   protected $channel;
 
-    /**
+  /**
    * {@inheritdoc}
    */
   protected function getEntityIds() {
     return $this->getStorage()->getQuery()
       ->condition('channel_id', $this->channel->id())
+      ->condition('uid', $this->user->id())
       ->sort($this->entityType->getKey('label'))
       ->execute();
   }
@@ -30,8 +40,9 @@ class MicrosubSourceListBuilder extends EntityListBuilder {
   /**
    * {@inheritdoc}
    */
-  public function render(MicrosubChannelInterface $channel = NULL) {
+  public function render(UserInterface $user = NULL, MicrosubChannelInterface $channel = NULL) {
     $this->channel = $channel;
+    $this->user = $user;
     $build = parent::render();
     $build['#title'] = $this->t('Sources in channel: @channel', ['@channel' => $this->channel->label()]);
     return $build;
@@ -43,7 +54,11 @@ class MicrosubSourceListBuilder extends EntityListBuilder {
   public function buildHeader() {
     $header['label'] = $this->t('Source');
     $header['status'] = $this->t('Status');
-    $header['media_cache'] = $this->t('Media cache');
+
+    if ($this->mediaCacheAccess()) {
+      $header['media_cache'] = $this->t('Media cache');
+    }
+
     $header['items'] = $this->t('Total Items');
     $header['fetch_next'] = $this->t('Next update');
     $header['in_keep'] = $this->t('Feed/keep');
@@ -57,7 +72,11 @@ class MicrosubSourceListBuilder extends EntityListBuilder {
     /** @var \Drupal\indieweb_microsub\Entity\MicrosubSourceInterface $entity */
     $row['label'] = $entity->label();
     $row['status'] = $entity->getStatus() ? t('Enabled') : t('Disabled');
-    $row['media_cache'] = $entity->disableImageCache() ? t('Disabled') : t('Enabled');
+
+    if ($this->mediaCacheAccess()) {
+      $row['media_cache'] = $entity->disableImageCache() ? t('Disabled') : t('Enabled');
+    }
+
     $row['items'] = $entity->getItemCount();
 
     $next = $entity->getNextFetch();
@@ -83,7 +102,30 @@ class MicrosubSourceListBuilder extends EntityListBuilder {
     return $row + parent::buildRow($entity);
   }
 
-    /**
+  /**
+   * {@inheritdoc}
+   */
+  protected function getDefaultOperations(EntityInterface $entity) {
+    $operations = [];
+    if ($entity->access('update') && $entity->hasLinkTemplate('edit-form')) {
+      $operations['edit'] = [
+        'title' => $this->t('Edit'),
+        'weight' => 10,
+        'url' => $this->ensureDestination(Url::fromRoute('entity.indieweb_microsub_source.edit_form', ['indieweb_microsub_source' => $entity->id(), 'user' => $this->user->id()])),
+      ];
+    }
+    if ($entity->access('delete') && $entity->hasLinkTemplate('delete-form')) {
+      $operations['delete'] = [
+        'title' => $this->t('Delete'),
+        'weight' => 100,
+        'url' => $this->ensureDestination(Url::fromRoute('entity.indieweb_microsub_source.delete_form', ['indieweb_microsub_source' => $entity->id(), 'user' => $this->user->id()])),
+      ];
+    }
+
+    return $operations;
+  }
+
+  /**
    * {@inheritdoc}
    */
   public function buildOperations(EntityInterface $entity) {
@@ -92,16 +134,25 @@ class MicrosubSourceListBuilder extends EntityListBuilder {
     $operations['#links']['reset_next_fetch'] =  [
       'title' => $this->t('Reset next update'),
       'weight' => 10,
-      'url' => $this->ensureDestination($entity->toUrl('reset-next-fetch')),
+      'url' => $this->ensureDestination(Url::fromRoute('entity.indieweb_microsub_source.reset_next_fetch', ['indieweb_microsub_source' => $entity->id(), 'user' => $this->user->id()])),
     ];
 
     $operations['#links']['delete_items'] =  [
       'title' => $this->t('Delete items'),
       'weight' => 11,
-      'url' => $this->ensureDestination($entity->toUrl('delete-items')),
+      'url' => $this->ensureDestination(Url::fromRoute('entity.indieweb_microsub_source.delete_items', ['indieweb_microsub_source' => $entity->id(), 'user' => $this->user->id()])),
     ];
 
     return $operations;
+  }
+
+  /**
+   * Has media cache access.
+   *
+   * @return bool
+   */
+  protected function mediaCacheAccess() {
+    return \Drupal::moduleHandler()->moduleExists('indieweb_cache') && $this->user->hasPermission('disable image cache on source');
   }
 
 }

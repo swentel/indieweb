@@ -1,0 +1,21 @@
+<?php
+
+/**
+ * @file
+ * IndieWeb Feed install file.
+ */
+
+use Drupal\Core\Field\BaseFieldDefinition;
+
+/**
+ * Installs the uid field.
+ */
+function indieweb_feed_update_8001() {
+  $field_storage_definition = BaseFieldDefinition::create('integer')
+    ->setLabel(t('Owner of the content'))
+    ->setRequired(FALSE)
+    ->setDefaultValue(0);
+
+  \Drupal::entityDefinitionUpdateManager()
+    ->installFieldStorageDefinition('uid', 'indieweb_feed_item', 'indieweb_feed', $field_storage_definition);
+}

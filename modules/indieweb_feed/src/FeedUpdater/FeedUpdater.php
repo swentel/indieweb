@@ -20,7 +20,7 @@ class FeedUpdater implements FeedUpdaterInterface {
 
     /** @var \Drupal\indieweb_feed\Entity\FeedInterface $feed */
     foreach (\Drupal::entityTypeManager()->getStorage('indieweb_feed')->loadMultiple() as $feed) {
-      if ($entity->getOwnerId() == $feed->getOwnerId() && in_array($entity->getEntityTypeId() . '|' . $entity->bundle(), $feed->getBundles())) {
+      if ($entity->getOwnerId() > 0 && ($entity->getOwnerId() == $feed->getOwnerId() || $feed->getOwnerId() === 0) && in_array($entity->getEntityTypeId() . '|' . $entity->bundle(), $feed->getBundles())) {
         $this->insertItemIntoFeed($entity, $feed);
         Cache::invalidateTags(['indieweb_feed:' . $feed->id()]);
       }
@@ -48,12 +48,17 @@ class FeedUpdater implements FeedUpdaterInterface {
       $entityType = \Drupal::entityTypeManager()->getDefinition($entity_type);
       $bundle_key = $entityType->getKey('bundle');
 
-      $ids = \Drupal::entityQuery($entity_type)
+      $query = \Drupal::entityQuery($entity_type)
         ->condition($bundle_key, $bundle)
         ->sort('created', 'DESC')
-        ->condition('uid', $feed->getOwnerId())
-        ->range(0, $feed->getLimit())
-        ->execute();
+        ->range(0, $feed->getLimit());
+
+      if ($feed->getOwnerId()) {
+        $query->condition('uid', $feed->getOwnerId());
+      }
+
+      $ids = $query->execute();
+
       if (!empty($ids)) {
         foreach (\Drupal::entityTypeManager()->getStorage($entity_type)->loadMultiple($ids) as $entity) {
           $this->insertItemIntoFeed($entity, $feed);

@@ -7,6 +7,8 @@
 
 use Drupal\comment\CommentInterface;
 use Drupal\comment\Entity\CommentType;
+use Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException;
+use Drupal\Component\Plugin\Exception\PluginNotFoundException;
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
 use Drupal\Core\Entity\EntityInterface;
@@ -15,6 +17,7 @@ use Drupal\Core\Template\Attribute;
 use Drupal\Core\Url;
 use Drupal\node\Entity\NodeType;
 use Drupal\node\NodeInterface;
+use Drupal\user\UserInterface;
 
 define('INDIEWEB_WEBMENTION_QUEUE', 'indieweb_webmention');
 
@@ -524,14 +527,22 @@ function indieweb_webmention_entity_extra_field_info() {
  * Implements hook_ENTITY_TYPE_view() for node entities.
  */
 function indieweb_webmention_node_view(array &$build, NodeInterface $node, EntityViewDisplayInterface $display) {
-  _indieweb_webmention_extra_fields_display($build, $node, $display);
+  try {
+    _indieweb_webmention_extra_fields_display($build, $node, $display);
+  }
+  catch (InvalidPluginDefinitionException $ignored) {}
+  catch (PluginNotFoundException $ignored) {}
 }
 
 /**
  * Implements hook_ENTITY_TYPE_view() for comment entities.
  */
 function indieweb_webmention_comment_view(array &$build, CommentInterface $comment, EntityViewDisplayInterface $display) {
-  _indieweb_webmention_extra_fields_display($build, $comment, $display);
+  try {
+    _indieweb_webmention_extra_fields_display($build, $comment, $display);
+  }
+  catch (InvalidPluginDefinitionException $ignored) {}
+  catch (PluginNotFoundException $ignored) {}
 }
 
 /**
@@ -593,4 +604,57 @@ function _indieweb_webmention_extra_fields_display(array &$build, EntityInterfac
       ];
     }
   }
+}
+
+/**
+ * Implements hook_indieweb_settings_user_override().
+ */
+function indieweb_webmention_indieweb_settings_user_override(UserInterface $user) {
+  $return = [];
+
+  // Override blocked domains for webmentions.
+  if ($user->hasPermission('override blocked domains')) {
+    $return['blocked_domains'] = [
+      'module' => 'indieweb_webmention',
+      'form_element' => [
+        '#title' => t('Blocked domains'),
+        '#type' => 'textarea',
+        '#default_value' => \Drupal::service('user.data')->get('indieweb_webmention', $user->id(), 'blocked_domains'),
+        '#description' => t('Block domains from sending webmentions or pingbacks. Enter domains line per line.'),
+      ]
+    ];
+  }
+
+  // Override trusted domains for comments.
+  if (\Drupal::config('indieweb_webmention.comment')->get('comment_create_enable') && $user->hasPermission('override trusted domains')) {
+    $return['comment_create_whitelist_domains'] = [
+      'module' => 'indieweb_webmention',
+      'form_element' => [
+        '#title' => t('Trusted domains'),
+        '#type' => 'textarea',
+        '#default_value' => \Drupal::service('user.data')->get('indieweb_webmention', $user->id(), 'comment_create_whitelist_domains'),
+        '#description' => t('Automatically approve webmention comments from these domains. Enter domains line per line.'),
+      ]
+    ];
+  }
+
+  return $return;
+}
+
+/**
+ * Implements hook_user_cancel().
+ */
+function indieweb_webmention_user_cancel($edit, UserInterface $account, $method) {
+  _indieweb__user_cancel($edit, $account, $method, 'indieweb_webmention');
+  _indieweb__user_cancel($edit, $account, $method, 'indieweb_webmention_send');
+  _indieweb__user_cancel($edit, $account, $method, 'indieweb_syndication');
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_predelete() for user entities.
+ */
+function indieweb_webmention_user_predelete($account) {
+  _indieweb_user_predelete($account, 'indieweb_webmention');
+  _indieweb_user_predelete($account, 'indieweb_webmention_send');
+  _indieweb_user_predelete($account, 'indieweb_syndication');
 }

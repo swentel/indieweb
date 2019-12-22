@@ -21,11 +21,11 @@ use Drupal\Core\Field\BaseFieldDefinition;
  *       "delete" = "Drupal\indieweb_microsub\Form\MicrosubChannelDeleteForm"
  *     },
  *     "route_provider" = {
- *       "html" = "Drupal\Core\Entity\Routing\AdminHtmlRouteProvider",
+ *       "html" = "Drupal\Core\Entity\Routing\DefaultHtmlRouteProvider",
  *     },
  *   },
  *   base_table = "microsub_channel",
- *   admin_permission = "administer indieweb",
+ *   admin_permission = "manage channels and sources",
  *   entity_keys = {
  *     "id" = "id",
  *     "label" = "title",
@@ -35,9 +35,9 @@ use Drupal\Core\Field\BaseFieldDefinition;
  *     "uid" = "uid"
  *   },
  *   links = {
- *     "add-form" = "/admin/config/services/indieweb/microsub/channels/add-channel",
- *     "edit-form" = "/admin/config/services/indieweb/microsub/channels/{indieweb_microsub_channel}/edit",
- *     "delete-form" = "/admin/config/services/indieweb/microsub/channels/{indieweb_microsub_channel}/delete"
+ *     "add-form" = "/user/{user}/microsub/add-channel",
+ *     "edit-form" = "/user/{user}/microsub/channels/{indieweb_microsub_channel}/edit",
+ *     "delete-form" = "/user/{user}/microsub/channels/{indieweb_microsub_channel}/delete"
  *   }
  * )
  */

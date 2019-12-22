@@ -43,6 +43,7 @@ class MicrosubSettingsForm extends ConfigFormBase {
       '#title' => $this->t('Use built-in microsub endpoint'),
       '#default_value' => $config->get('microsub_internal'),
       '#description' => $this->t('The endpoint is available at <strong>https://@domain/indieweb/microsub</strong>', ['@domain' => \Drupal::request()->getHttpHost()]),
+      '#disabled' => indieweb_is_multi_user(),
     ];
 
     $form['microsub']['microsub_internal_cleanup_items'] = [
@@ -78,14 +79,14 @@ class MicrosubSettingsForm extends ConfigFormBase {
       '#type' => 'checkbox',
       '#title' => $this->t('Expose microsub endpoint link tag'),
       '#default_value' => $config->get('microsub_expose_link_tag'),
-      '#description' => $this->t('This link will be added on the front page. You can also add this manually to html.html.twig.<br /><div class="indieweb-highlight-code">&lt;link rel="microsub" href="https://@domain/indieweb/microsub" /&gt;</div>', ['@domain' => \Drupal::request()->getHttpHost()]),
+      '#description' => indieweb_is_multi_user() ? $this->t('The link tag will be added on the user page.') : $this->t('The link tag will be added on the front page. You can also add this manually to html.html.twig.<br /><div class="indieweb-highlight-code">&lt;link rel="microsub" href="https://@domain/indieweb/microsub" /&gt;</div>', ['@domain' => \Drupal::request()->getHttpHost()]),
     ];
 
     $form['microsub']['microsub_expose_link_header'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('Expose microsub endpoint header link'),
       '#default_value' => $config->get('microsub_expose_link_header'),
-      '#description' => $this->t('The link tag will be added on in response headers of the front page.'),
+      '#description' => indieweb_is_multi_user() ? $this->t('The link tag will be added in the response headers of the user page.') : $this->t('The link tag will be added in the response headers of the front page.'),
     ];
 
     $form['microsub']['microsub_endpoint'] = [

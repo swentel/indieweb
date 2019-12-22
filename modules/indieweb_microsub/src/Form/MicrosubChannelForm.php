@@ -70,6 +70,40 @@ class MicrosubChannelForm extends ContentEntityForm {
   /**
    * {@inheritdoc}
    */
+  protected function actions(array $form, FormStateInterface $form_state) {
+    // @todo Consider renaming the action key from submit to save. The impacts
+    //   are hard to predict. For example, see
+    //   \Drupal\language\Element\LanguageConfiguration::processLanguageConfiguration().
+    $actions['submit'] = [
+      '#type' => 'submit',
+      '#value' => $this->t('Save'),
+      '#submit' => ['::submitForm', '::save'],
+    ];
+
+    if (!$this->entity->isNew() && $this->entity->hasLinkTemplate('delete-form')) {
+      $route_info = Url::fromRoute('entity.indieweb_microsub_channel.delete_form', ['user' => $this->currentUser()->id(), 'indieweb_microsub_channel' => $this->entity->id()]);
+      if ($this->getRequest()->query->has('destination')) {
+        $query = $route_info->getOption('query');
+        $query['destination'] = $this->getRequest()->query->get('destination');
+        $route_info->setOption('query', $query);
+      }
+      $actions['delete'] = [
+        '#type' => 'link',
+        '#title' => $this->t('Delete'),
+        '#access' => $this->entity->access('delete'),
+        '#attributes' => [
+          'class' => ['button', 'button--danger'],
+        ],
+      ];
+      $actions['delete']['#url'] = $route_info;
+    }
+
+    return $actions;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function save(array $form, FormStateInterface $form_state) {
     $channel = $this->entity;
 

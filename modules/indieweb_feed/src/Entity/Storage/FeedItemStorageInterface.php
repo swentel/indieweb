@@ -37,11 +37,13 @@ interface FeedItemStorageInterface extends ContentEntityStorageInterface {
    *   The feed ID to filter by.
    * @param int $limit
    *   (optional) The number of items to return. Defaults to 20.
+   * @param int $uid
+   *   (optional) The user id.
    *
    * @return \Drupal\Core\Entity\EntityInterface[]
    *   An array of the entities.
    */
-  public function loadItemsByFeed($feed_id, $limit = 20);
+  public function loadItemsByFeed($feed_id, $limit = 20, $uid = 0);
 
   /**
    * Removes all items for a feed.

@@ -5,7 +5,12 @@
  * IndieWeb functionality.
  */
 
+use Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException;
+use Drupal\Component\Plugin\Exception\PluginNotFoundException;
+use Drupal\Core\Entity\EntityStorageException;
+use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
+use Drupal\user\UserInterface;
 
 /**
  * Implements hook_help().
@@ -112,4 +117,169 @@ function indieweb_get_path($url) {
     $path = "/";
   }
   return $path;
+}
+
+/**
+ * Returns whether the site is multi user or not.
+ *
+ * @return bool
+ */
+function indieweb_is_multi_user() {
+  return (bool) \Drupal::config('indieweb.settings')->get('multi_user');
+}
+
+/**
+ * Returns whether to expose an endpoint or not.
+ *
+ * @param bool $allow_front_and_user_pages
+ *   Whether endpoints can live on front and user pages.
+ *
+ * @return bool
+ */
+function indieweb_expose_endpoint($allow_front_and_user_pages = FALSE) {
+
+  if ($allow_front_and_user_pages) {
+    return \Drupal::service('path.matcher')->isFrontPage() || \Drupal::routeMatch()->getRouteName() == 'entity.user.canonical';
+  }
+  else {
+    if (indieweb_is_multi_user()) {
+      return \Drupal::routeMatch()->getRouteName() == 'entity.user.canonical';
+    }
+    else {
+      return \Drupal::service('path.matcher')->isFrontPage();
+    }
+  }
+
+}
+
+/**
+ * Implements hook_entity_extra_field_info().
+ */
+function indieweb_entity_extra_field_info() {
+  $fields = [];
+
+  if (indieweb_is_multi_user()) {
+    $fields['user']['user']['form']['indieweb'] = [
+      'label' => t('IndieWeb settings'),
+      'description' => t('IndieWeb module user form element.'),
+      'weight' => 5,
+    ];
+  }
+
+  return $fields;
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter.
+ *
+ * @param $form
+ * @param \Drupal\Core\Form\FormStateInterface $form_state
+ * @param $form_id
+ */
+function indieweb_form_user_form_alter(&$form, FormStateInterface $form_state, $form_id) {
+
+  if (!indieweb_is_multi_user()) {
+    return;
+  }
+
+  /** @var \Drupal\user\UserInterface $account */
+  $account = $form_state->getFormObject()->getEntity();
+  if ($account->id() && !$account->isNew()) {
+
+    $indieweb_user_override_elements = \Drupal::moduleHandler()->invokeAll('indieweb_settings_user_override', [$account]);
+
+    if (!empty($indieweb_user_override_elements)) {
+
+      $form['indieweb'] = [
+        '#type' => 'details',
+        '#title' => t('IndieWeb settings'),
+        '#open' => TRUE,
+        '#weight' => 5,
+      ];
+
+      foreach ($indieweb_user_override_elements as $key => $info) {
+        $form['indieweb'][$key] = $info['form_element'];
+      }
+
+      $form['indieweb_user_override_elements'] = [
+        '#type' => 'value',
+        '#value' => $indieweb_user_override_elements,
+      ];
+
+      $form['actions']['submit']['#submit'][] = 'indieweb_user_profile_form_submit';
+    }
+
+  }
+}
+
+/**
+ * IndieWeb override elements submit.
+ *
+ * @see indieweb_form_user_form_alter()
+ *
+ * @param $form
+ * @param \Drupal\Core\Form\FormStateInterface $form_state
+ */
+function indieweb_user_profile_form_submit($form, FormStateInterface $form_state) {
+  /** @var \Drupal\user\UserInterface $account */
+  $account = $form_state->getFormObject()->getEntity();
+  if ($account->id()) {
+    $indieweb_user_override_elements = $form_state->getValue('indieweb_user_override_elements', []);
+    foreach ($indieweb_user_override_elements as $key => $info) {
+      $value = $form_state->getValue($key);
+      if (!empty($value)) {
+        \Drupal::service('user.data')->set($info['module'], $account->id(), $key, $value);
+      }
+    }
+  }
+}
+
+/**
+ * Helper function to unpublish entities when a user account is delete.
+ *
+ * @param $edit
+ * @param \Drupal\user\UserInterface $account
+ * @param $method
+ * @param $entity_type_id
+ */
+function _indieweb__user_cancel($edit, UserInterface $account, $method, $entity_type_id) {
+  switch ($method) {
+    // Resassigning our entities to user 0 is a bit weird, so just unpublish.
+    case 'user_cancel_reassign':
+    case 'user_cancel_block_unpublish':
+      try {
+        $entities = \Drupal::entityTypeManager()
+          ->getStorage($entity_type_id)
+          ->loadByProperties(['uid' => $account->id()]);
+        foreach ($entities as $entity) {
+          $entity->setUnpublished();
+          $entity->save();
+        }
+      }
+      catch (InvalidPluginDefinitionException $ignored) {}
+      catch (PluginNotFoundException $ignored) {}
+      catch (EntityStorageException $ignored) {}
+    break;
+  }
+}
+
+/**
+ * Helper function to delete entities when a user account is delete.
+ *
+ * @param $account
+ * @param $entity_type_id
+ */
+function _indieweb_user_predelete($account, $entity_type_id) {
+  $entity_query = \Drupal::entityQuery($entity_type_id);
+  $entity_query->condition('uid', $account->id());
+  $ids = $entity_query->execute();
+  try {
+    $storage_handler = \Drupal::entityTypeManager()
+      ->getStorage($entity_type_id);
+    $entities = $storage_handler->loadMultiple($ids);
+    $storage_handler->delete($entities);
+  }
+  catch (InvalidPluginDefinitionException $ignored) {}
+  catch (PluginNotFoundException $ignored) {}
+  catch (EntityStorageException $ignored) {}
 }

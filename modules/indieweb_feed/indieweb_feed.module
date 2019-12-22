@@ -14,11 +14,18 @@ use Drupal\Core\Url;
  */
 function indieweb_feed_page_attachments_alter(array &$attachments) {
 
-  // Add header link tags on front page.
-  if (\Drupal::service('path.matcher')->isFrontPage()) {
+  if (indieweb_expose_endpoint(TRUE)) {
 
     /** @var \Drupal\indieweb_feed\Entity\FeedInterface $feed */
     foreach (\Drupal::entityTypeManager()->getStorage('indieweb_feed')->loadMultiple() as $feed) {
+
+      // Check feed per user setting.
+      if ($feed->isFeedPerUser() && \Drupal::service('path.matcher')->isFrontPage()) {
+        continue;
+      }
+      elseif (!$feed->isFeedPerUser() && !\Drupal::service('path.matcher')->isFrontPage()) {
+        continue;
+      }
 
       // Microformats2 feed.
       if ($feed->exposeRelLinkTag()) {
@@ -35,12 +42,18 @@ function indieweb_feed_page_attachments_alter(array &$attachments) {
 
       // JF2 feed.
       if ($feed->exposeJf2Feed() && $feed->exposeJf2LinkTag()) {
+        $path = str_replace('/', '-', $feed->getPath());
+
+        if ($feed->isFeedPerUser()) {
+          $path = 'user/' . \Drupal::routeMatch()->getRawParameter('user') . '/' . $path;
+        }
+
         $link = [
           '#tag' => 'link',
           '#attributes' => [
             'rel' => 'alternate',
             'type' => 'application/jf2feed+json',
-            'href' => Url::fromUri('internal:/' . str_replace('/', '-', $feed->getPath()) . '.jf2', ['absolute' => TRUE])->toString(),
+            'href' => Url::fromUri('internal:/' . $path . '.jf2', ['absolute' => TRUE])->toString(),
           ],
         ];
 

@@ -16,6 +16,9 @@ indieweb_feed.indieweb_feed.*:
     author:
       type: string
       label: 'The feed author'
+    feedPerUser:
+      type: boolean
+      label: 'Feed per user'
     jf2:
       type: boolean
       label: 'Whether to expose a JF2 feed'

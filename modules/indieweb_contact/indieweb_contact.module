@@ -1,0 +1,22 @@
+<?php
+
+/**
+ * @file
+ * IndieWeb Contacts module.
+ */
+
+use Drupal\user\UserInterface;
+
+/**
+ * Implements hook_user_cancel().
+ */
+function indieweb_contact_user_cancel($edit, UserInterface $account, $method) {
+  _indieweb__user_cancel($edit, $account, $method, 'indieweb_contact');
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_predelete() for user entities.
+ */
+function indieweb_contact_user_predelete($account) {
+  _indieweb_user_predelete($account, 'indieweb_contact');
+}

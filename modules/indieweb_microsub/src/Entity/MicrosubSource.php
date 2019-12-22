@@ -28,7 +28,7 @@ use Drupal\Core\Field\BaseFieldDefinition;
  *     },
  *   },
  *   base_table = "microsub_source",
- *   admin_permission = "administer indieweb",
+ *   admin_permission = "manage channels and sources",
  *   entity_keys = {
  *     "id" = "id",
  *     "label" = "url",
@@ -37,11 +37,11 @@ use Drupal\Core\Field\BaseFieldDefinition;
  *     "uid" = "uid",
  *   },
  *   links = {
- *     "add-form" = "/admin/config/services/indieweb/microsub/sources/add-source",
- *     "edit-form" = "/admin/config/services/indieweb/microsub/sources/{indieweb_microsub_source}/edit",
- *     "delete-form" = "/admin/config/services/indieweb/microsub/sources/{indieweb_microsub_source}/delete",
- *     "reset-next-fetch" = "/admin/config/services/indieweb/microsub/sources/{indieweb_microsub_source}/reset-next-fetch",
- *     "delete-items" = "/admin/config/services/indieweb/microsub/sources/{indieweb_microsub_source}/delete-items",
+ *     "add-form" = "/user/{user}/microsub/add-source",
+ *     "edit-form" = "/user/{user}/microsub/sources/{indieweb_microsub_source}/edit",
+ *     "delete-form" = "/user/{user}/microsub/sources/{indieweb_microsub_source}/delete",
+ *     "reset-next-fetch" = "/user/{user}/microsub/sources/{indieweb_microsub_source}/reset-next-fetch",
+ *     "delete-items" = "/user/{user}/microsub/sources/{indieweb_microsub_source}/delete-items",
  *   }
  * )
  */

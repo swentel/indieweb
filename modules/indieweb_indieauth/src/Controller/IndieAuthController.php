@@ -68,6 +68,7 @@ class IndieAuthController extends ControllerBase {
    * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
    * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    * @throws \Drupal\Core\Entity\EntityStorageException
+   * @throws \Drupal\Core\Entity\EntityMalformedException
    */
   public function auth(Request $request) {
 
@@ -218,6 +219,17 @@ class IndieAuthController extends ControllerBase {
       return ['#markup' => 'Invalid request, missing parameters', '#cache' => ['max-age' => 0]];
     }
 
+    if (indieweb_is_multi_user()) {
+      $search = ['http://', 'https://'];
+      $me_url = str_replace($search, '', rtrim($params['me'], '/'));
+      $user_url = str_replace($search, '', rtrim(Url::fromRoute('entity.user.canonical', ['user' => $this->currentUser()->id(), ['absolute' => TRUE]])->toString()));
+      if ($me_url != $user_url) {
+        unset($_SESSION['indieauth']);
+        $this->getLogger('indieweb_indieauth')->notice('Me param and user url are not equal: "@me" vs "@url"', ['@me' => $me_url, '@url' => $user_url]);
+        return ['#markup' => 'Invalid request, missing parameters', '#cache' => ['max-age' => 0]];
+      }
+    }
+
     // ------------------------------------------------------------------------
     // Good to go, show the authorize form.
     // ------------------------------------------------------------------------
@@ -330,6 +342,7 @@ class IndieAuthController extends ControllerBase {
    * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
    * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    * @throws \Drupal\Core\Entity\EntityStorageException
+   * @throws \Drupal\Core\Entity\EntityMalformedException
    */
   public function token(Request $request) {
 
@@ -354,7 +367,7 @@ class IndieAuthController extends ControllerBase {
       $response = '';
       $response_code = 404;
       if ($indieAuthClient->isValidToken($auth_header)) {
-        if ($uid = $indieAuthClient->checkAuthor()) {
+        if ($uid = $indieAuthClient->getAuthor()) {
           $response_code = 200;
           $token = $indieAuthClient->getToken();
           $response = (object) [
@@ -626,6 +639,7 @@ class IndieAuthController extends ControllerBase {
    *
    * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
    * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
+   * @throws \Drupal\Core\Entity\EntityMalformedException
    */
   protected function getProfile($uid) {
     $profile = ['type' => 'card'];
@@ -635,7 +649,13 @@ class IndieAuthController extends ControllerBase {
 
     if ($account) {
       $profile['name'] = $account->getAccountName();
-      $profile['url'] = \Drupal::request()->getSchemeAndHttpHost();
+
+      if (indieweb_is_multi_user()) {
+        $profile['url'] = $account->toUrl('canonical', ['absolute' => TRUE])->toString();
+      }
+      else {
+        $profile['url'] = \Drupal::request()->getSchemeAndHttpHost();
+      }
 
       // Avatar.
       if (!empty($account->user_picture)) {

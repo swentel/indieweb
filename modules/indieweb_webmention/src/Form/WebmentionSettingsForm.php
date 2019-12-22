@@ -41,7 +41,8 @@ class WebmentionSettingsForm extends ConfigFormBase {
       '#title' => $this->t('Use built-in webmention endpoint'),
       '#type' => 'checkbox',
       '#default_value' => $config->get('webmention_internal'),
-      '#description' => $this->t("Use the internal webmention endpoint to receive webmentions. The endpoint is available at <strong>https://@domain/webmention/receive</strong>", ['@domain' => \Drupal::request()->getHttpHost()])
+      '#description' => $this->t("Use the internal webmention endpoint to receive webmentions. The endpoint is available at <strong>https://@domain/webmention/receive</strong>", ['@domain' => \Drupal::request()->getHttpHost()]),
+      '#disabled' => indieweb_is_multi_user(),
     ];
 
     $form['webmention']['webmention_internal_handler'] = [
@@ -96,7 +97,7 @@ class WebmentionSettingsForm extends ConfigFormBase {
       '#title' => $this->t('Expose webmention link tag'),
       '#type' => 'checkbox',
       '#default_value' => $config->get('webmention_expose_link_tag'),
-      '#description' => $this->t('The link tag will be added on all non admin pages. Exposing a link tag is necessary so you can start receiving webmentions. You can also manually add to html.html.twig. e.g.<br /><div class="indieweb-highlight-code">&lt;link rel="webmention" href="https://webmention.io/@domain/webmention" /&gt;</div>', ['@domain' => \Drupal::request()->getHttpHost()]),
+      '#description' => indieweb_is_multi_user() ? $this->t('The link tag will be added on all non admin pages') : $this->t('The link tag will be added on all non admin pages. Exposing a link tag is necessary so you can start receiving webmentions. You can also manually add to html.html.twig. e.g.<br /><div class="indieweb-highlight-code">&lt;link rel="webmention" href="https://webmention.io/@domain/webmention" /&gt;</div>', ['@domain' => \Drupal::request()->getHttpHost()]),
     ];
 
     $form['webmention']['webmention_expose_link_header'] = [
@@ -200,13 +201,14 @@ class WebmentionSettingsForm extends ConfigFormBase {
     $form['other']['blocked_domains'] = [
       '#type' => 'textarea',
       '#title' => $this->t('Block domains'),
-      '#description' => $this->t('Block domains from sending webmentions or pingbacks. Enter domains line per line.'),
+      '#description' => $this->t('Block domains from sending webmentions or pingbacks. Enter domains line per line.') . '<br />' . $this->t('In case of multi-user site, users can override this setting.'),
       '#default_value' => $config->get('blocked_domains'),
     ];
 
     $form['other']['webmention_uid'] = [
       '#type' => 'number',
-      '#title' => $this->t('The user id which will own the collected webmentions'),
+      '#title' => $this->t('User ID'),
+      '#description' => $this->t('The user id which will own the collected webmentions. In case of multi-user site, this will be the owner too for pages that can not be attributed to a user.'),
       '#default_value' => $config->get('webmention_uid'),
     ];
 

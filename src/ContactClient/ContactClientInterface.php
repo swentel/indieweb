@@ -7,18 +7,21 @@ interface ContactClientInterface {
   /**
    * Get all contacts.
    *
+   * @param $uid
+   *
    * @return array
    */
-  public function getAllContacts();
+  public function getAllContacts($uid = 0);
 
   /**
    * Search contacts.
    *
    * @param $search
+   * @param $uid
    *
    * @return mixed
    */
-  public function searchContacts($search);
+  public function searchContacts($search, $uid = 0);
 
   /**
    * Store a contact.

@@ -6,6 +6,7 @@ use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Url;
 use Drupal\indieweb_microsub\Entity\MicrosubChannelInterface;
 use Drupal\indieweb_microsub\Entity\MicrosubSourceInterface;
+use Drupal\user\UserInterface;
 use p3k\XRay;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -442,7 +443,7 @@ class MicrosubController extends ControllerBase {
     $name = $this->request->get('name');
     if (!empty($name)) {
       $uid = 1;
-      if ($token_uid = $this->indieAuth->checkAuthor()) {
+      if ($token_uid = $this->indieAuth->getAuthor()) {
         $uid = $token_uid;
       }
       $values = ['title' => $name, 'uid' => $uid];
@@ -595,7 +596,7 @@ class MicrosubController extends ControllerBase {
       if ($channel) {
 
         $uid = 1;
-        if ($token_uid = $this->indieAuth->checkAuthor()) {
+        if ($token_uid = $this->indieAuth->getAuthor()) {
           $uid = $token_uid;
         }
 
@@ -832,21 +833,24 @@ class MicrosubController extends ControllerBase {
   /**
    * Microsub channel overview.
    *
+   * @param \Drupal\user\UserInterface $user
+   *
    * @return array
    */
-  public function channelOverview() {
-    return $this->entityTypeManager()->getListBuilder('indieweb_microsub_channel')->render();
+  public function channelOverview(UserInterface $user) {
+    return $this->entityTypeManager()->getListBuilder('indieweb_microsub_channel')->render($user);
   }
 
   /**
    * Microsub sources overview.
    *
+   * @param \Drupal\user\UserInterface $user
    * @param \Drupal\indieweb_microsub\Entity\MicrosubChannelInterface $indieweb_microsub_channel
    *
    * @return array
    */
-  public function sourcesOverview(MicrosubChannelInterface $indieweb_microsub_channel) {
-    return $this->entityTypeManager()->getListBuilder('indieweb_microsub_source')->render($indieweb_microsub_channel);
+  public function sourcesOverview(UserInterface $user, MicrosubChannelInterface $indieweb_microsub_channel) {
+    return $this->entityTypeManager()->getListBuilder('indieweb_microsub_source')->render($user, $indieweb_microsub_channel);
   }
 
   /**

@@ -9,6 +9,7 @@ micropub_media_enable: false
 micropub_enable_category: false
 micropub_enable_contact: false
 micropub_category_vocabulary: ''
+micropub_private_taxonomy: false
 micropub_log_payload: false
 note_create_node: false
 note_status: 1

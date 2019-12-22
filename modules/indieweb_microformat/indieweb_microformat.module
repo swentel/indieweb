@@ -5,6 +5,9 @@
  * IndieWeb Microformats2.
  */
 
+use Drupal\Core\Url;
+use Drupal\user\UserInterface;
+
 /**
  * Implements hook_theme().
  */
@@ -109,13 +112,18 @@ function indieweb_microformat_preprocess_node(&$variables) {
     if (\Drupal::config('indieweb_microformat.settings')->get('post_metadata')) {
       $date = \Drupal::service('date.formatter')->format($variables['node']->getCreatedTime(), 'custom', 'c');
 
+      $author_url = '/';
+      if (indieweb_is_multi_user() && $variables['node']->getOwnerId() > 0) {
+        $author_url = Url::fromRoute('entity.user.canonical', ['user' => $variables['node']->getOwnerId()], ['absolute' => TRUE])->toString();
+      }
+
       $exclude_p_name_node_type = \Drupal::config('indieweb_microformat.settings')->get('p_name_exclude_node_type');
       if ($exclude_p_name_node_type && $variables['node']->bundle() == $exclude_p_name_node_type) {
         $metadata = '<span class="hidden">
           <a href="' . $variables['node']->toUrl('canonical', ['absolute' => TRUE])->toString() . '" class="u-url">
             <span class="dt-published">' . $date . '</span>
           </a>
-          <a href="/" class="u-author"></a>
+          <a href="' . $author_url . '" class="u-author"></a>
         </span>
         ';
       }
@@ -125,7 +133,7 @@ function indieweb_microformat_preprocess_node(&$variables) {
             <span class="p-name">' . $variables['node']->getTitle() . '</span>
             <span class="dt-published">' . $date . '</span>
           </a>
-          <a href="/" class="u-author"></a>
+          <a href="' . $author_url . '" class="u-author"></a>
         </span>';
       }
 
@@ -199,11 +207,16 @@ function indieweb_microformat_preprocess_comment(&$variables) {
       $date = \Drupal::service('date.formatter')
         ->format($variables['elements']['#comment']->getCreatedTime(), 'custom', 'c');
 
+      $author_url = '/';
+      if (indieweb_is_multi_user() && $variables['elements']['#comment']->getOwnerId() > 0) {
+        $author_url = Url::fromRoute('entity.user.canonical', ['user' => $variables['elements']['#comment']->getOwnerId()], ['absolute' => TRUE])->toString();
+      }
+
       $metadata = '<span class="hidden">
         <a href="' . $variables['elements']['#comment']->toUrl('canonical', ['absolute' => TRUE])->toString() . '" class="u-url">
           <span class="dt-published">' . $date . '</span>
         </a>
-        <a href="/" class="u-author"></a>
+        <a href="' . $author_url . '" class="u-author"></a>
       </span>';
 
       // Attach it to content.
@@ -358,4 +371,26 @@ function indieweb_microformat_ds_pre_render_alter(array &$layout_render_array, a
     $variables['view_mode'] = $context['view_mode'];
     indieweb_microformat_preprocess_node($variables);
   }
+}
+
+/**
+ * Implements hook_indieweb_settings_user_override().
+ */
+function indieweb_microformat_indieweb_settings_user_override(UserInterface $user) {
+  $return = [];
+
+  // Override blocked domains for webmentions.
+  if ($user->hasPermission('set author note')) {
+    $return['note'] = [
+      'module' => 'indieweb_microformat',
+      'form_element' => [
+        '#title' => t('Note'),
+        '#type' => 'textarea',
+        '#default_value' => \Drupal::service('user.data')->get('indieweb_microformat', $user->id(), 'note'),
+        '#description' => t('Enter information about yourself.'),
+      ]
+    ];
+  }
+
+  return $return;
 }

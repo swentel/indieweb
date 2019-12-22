@@ -33,6 +33,9 @@ indieweb_micropub.settings:
     micropub_category_vocabulary:
       type: string
       label: 'The vocabulary to get the terms for'
+    micropub_private_taxonomy:
+      type: boolean
+      label: 'Whether to use private taxonomy or not'
     micropub_media_enable:
       type: boolean
       label: 'Enable micropub media endpoint'

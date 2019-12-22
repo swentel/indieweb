@@ -50,6 +50,9 @@ class FeedItem extends ContentEntityBase implements FeedItemInterface {
       ->setDescription('The entity type id of the entity')
       ->setSetting('max_length', 40);
 
+    $fields['uid'] = BaseFieldDefinition::create('integer')
+      ->setLabel('The owner of the entity');
+
     $fields['published'] = BaseFieldDefinition::create('integer')
       ->setLabel('The published status of the entity');
 

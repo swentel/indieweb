@@ -32,6 +32,7 @@ markup after you\'ve done the configuration with this module (and optionally mor
       'https://www.drupal.org/project/geofield' => 'Geofield',
       'https://www.drupal.org/project/geocoder' => 'Geocoder',
       'https://www.drupal.org/project/prepopulate' => 'Prepopulate',
+      'https://www.drupal.org/project/private_taxonomy' => 'Private taxonomy terms'
     ];
 
     foreach ($modules as $url => $label) {

@@ -18,8 +18,12 @@ class FeedItemStorage extends SqlContentEntityStorage implements FeedItemStorage
    * {@inheritdoc}
    */
   public function insertItemIntoFeed(EntityInterface $entity, FeedInterface $feed) {
+
     // Assume yes if isPublished does not exist.
     $published = method_exists($entity, 'isPublished') ? $entity->isPublished() : 1;
+
+    // Set uid to 1 if owner id does not exists.
+    $uid = method_exists($entity, 'getOwnerId') ? $entity->getOwnerId() : 1;
 
     $this->database
       ->merge('indieweb_feed_item')
@@ -27,6 +31,7 @@ class FeedItemStorage extends SqlContentEntityStorage implements FeedItemStorage
       ->key('entity_type_id', $entity->getEntityTypeId())
       ->key('feed_id', $feed->id())
       ->fields([
+        'uid' => $uid,
         'published' => (int) $published,
         'timestamp' => $entity->getCreatedTime(),
       ])
@@ -45,7 +50,7 @@ class FeedItemStorage extends SqlContentEntityStorage implements FeedItemStorage
   /**
    * {@inheritdoc}
    */
-  public function loadItemsByFeed($feed_id, $limit = 20) {
+  public function loadItemsByFeed($feed_id, $limit = 20, $uid = 0) {
     $entities = [];
 
     $query = $this->database
@@ -54,6 +59,11 @@ class FeedItemStorage extends SqlContentEntityStorage implements FeedItemStorage
     $query->fields('ifi');
     $query->condition('feed_id', $feed_id);
     $query->condition('published', 1);
+
+    if ($uid) {
+      $query->condition('uid', $uid);
+    }
+
     $records = $query
       ->limit($limit)
       ->orderBy('timestamp', 'DESC')

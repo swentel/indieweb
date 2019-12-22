@@ -1,14 +1,15 @@
 # IndieWeb integration for Drupal 8
 
-<img src="https://www.drupal.org/files/styles/grid-3-2x/public/project-images/indieweb-drupal-logo.png?itok=YPcU0OBf" />
+<img alt="IndieWeb for Drupal" src="https://www.drupal.org/files/styles/grid-3-2x/public/project-images/indieweb-drupal-logo.png?itok=YPcU0OBf" />
 
 ## About this module
 
 Integrates the philosophy of IndieWeb in your Drupal website.
 For more information about IndieWeb, see https://indieweb.org/.
 
-Current functionality:
+Available features:
 
+- The site can be used for one or multiple users.
 - Receive webmentions and pingbacks via Webmention.io or internal endpoint
 - Send webmentions and syndicate content, likes etc via [brid.gy](https://brid.gy), store syndications
 - Configure a content domain for sending and receiving webmentions (static generators or decoupled setup)
@@ -23,6 +24,7 @@ Current functionality:
   - q=geo to query for location
   - Delete a node, comment or webmention
   - store location coordinates
+  - Category and tags also integrate with private taxonomy
 - Auto-create comments from 'in-reply-to'
 - Reply on comments and send webmention
 - Feeds: microformats and jf2
@@ -59,6 +61,7 @@ Additional useful modules
 - https://www.drupal.org/project/imagecache_external
 - https://www.drupal.org/project/cdn
 - https://www.drupal.org/project/prepopulate
+- https://www.drupal.org/project/private_taxonomy
 
 More information is in this README
 
@@ -77,6 +80,12 @@ Another good tool is http://xray.p3k.io, which displays the results in JSON.
 
 ## To install
 
+Which release to select:
+
+- 8.x-1.x on drupal.org and master on GitHub: single user site.
+- 8.x-2.x on drupal.org and multiuser on GitHub: support for multiple users on one site. This branch has an upgrade path
+if you are upgrading from 8.x-1.x. This is still in development and is not recommended for production.
+
 composer packages:
 
 - composer require indieweb/mention-client
@@ -86,7 +95,7 @@ composer packages:
 - composer require p3k/websub
 - composer require lcobucci/jwt
 
-- go to admin/modules and toggle 'IndieWeb' to enable the module.
+- go to admin/modules and toggle the modules you want to enable.
 
 ## Webmentions / Webmention.io
 
@@ -334,6 +343,9 @@ Because content can be nodes, comments, etc. it isn't possible to use views. How
 multiple feeds which aggregates all these content in a page and/or feed. The feeds are controlled by the
 'access content' permission.
 
+Feeds can be configured to contain posts from all users and then be exposed on user/x/{feed_path}. This is useful in a
+multiple user environment.
+
 Configuration is at /admin/config/services/indieweb/feeds
 
 For more information see
@@ -353,8 +365,7 @@ For more information see
 - https://indieweb.org/Microsub-spec
 
 This module allows you to expose a microsub header link which can either be the built-in microsub server or set to an
-external service. Channels and sources for the built-in server are managed at
-admin/config/services/indieweb/microsub/channels.
+external service. Channels and sources for the built-in server are managed at your user profile on user/x/microsub.
 
 Microsub actions implemented:
 
@@ -464,6 +475,35 @@ entity exist on the site, but then returns a 410 response.
 Install https://www.drupal.org/project/rabbit_hole and the option will be available globally or per entity.
 
 For more background, see https://github.com/snarfed/bridgy-fed/issues/30 and https://indieweb.org/deleted
+
+## Multi-user
+
+The site can be configured for one user or multiple users at admin/config/services/indieweb/settings.
+
+Impact of enabling this feature:
+
+- Endpoint discovery of Webmention, IndieAuth, Micropub and Microsub will happen on
+https://example.com/user/x or the alias of the user. No discovery on the homepage.
+- All internal endpoints will be used so users can be discovered easily when posting etc.
+- The u-author URL in Microformats will be set to the user profile URL.
+- The Microformats author block becomes multi user aware and only renders itself on the user profile page.
+- Users will be able to override global settings on their profile if they have permission and if the "IndieWeb settings"
+element is visible on the user edit page.
+  - Trusted webmention domains
+  - Blocked webmention domains
+  - Allow to set a note for the Microformat Author Block.
+
+Several (disabled) views are available to expose for users. They resemble the views that exist for administrators
+but use the current user route context and a different permission.
+
+- Webmentions
+- Syndications
+- Contacts
+- WebSubPub
+
+Useful modules for multiple users: Private taxonomy, Real name.
+
+Be sure to check all permissions that are available for all modules.
 
 ## Drush commands
 
