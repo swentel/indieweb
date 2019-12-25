@@ -1,0 +1,90 @@
+<?php
+
+/**
+ * @file
+ * IndieWeb comment module.
+ */
+
+use Drupal\comment\CommentInterface;
+use Drupal\Core\Access\AccessResult;
+use Drupal\Core\Database\Query\AlterableInterface;
+use Drupal\Core\Field\FieldDefinitionInterface;
+use Drupal\Core\Field\FieldItemListInterface;
+use Drupal\Core\Session\AccountInterface;
+
+/**
+ * Implements hook_ENTITY_TYPE_access().
+ */
+function indieweb_comment_comment_access(CommentInterface $comment, $operation, AccountInterface $account) {
+
+  // Check for approve access of a comment on own nodes.
+  if ($operation == 'approve') {
+    /** @var \Drupal\node\NodeInterface $node */
+    $node = $comment->getCommentedEntity();
+    if ($node && $node->getOwnerId() == $account->id() && $node->getOwner()->hasPermission('publish or unpublish comments on own content')) {
+      return AccessResult::allowed();
+    }
+  }
+
+  // Check for delete access of a comment on own nodes.
+  if ($operation == 'delete') {
+    /** @var \Drupal\node\NodeInterface $node */
+    $node = $comment->getCommentedEntity();
+    if ($node && $node->getOwnerId() == $account->id() && $node->getOwner()->hasPermission('delete comments on own content')) {
+      return AccessResult::allowed();
+    }
+  }
+
+  // Check for view access of a comment on own nodes.
+  if ($operation == 'view') {
+    /** @var \Drupal\node\NodeInterface $node */
+    $node = $comment->getCommentedEntity();
+    if ($node && $node->getOwnerId() == $account->id() && $node->getOwner()->hasPermission('view unpublished comments on own content')) {
+      return AccessResult::allowed();
+    }
+  }
+
+  // Check for approve access of a comment on own nodes.
+  if ($operation == 'update') {
+    /** @var \Drupal\node\NodeInterface $node */
+    $node = $comment->getCommentedEntity();
+    if ($node && $node->getOwnerId() == $account->id() && $node->getOwner()->hasPermission('publish or unpublish comments on own content')) {
+      return AccessResult::allowed();
+    }
+  }
+
+  return AccessResult::neutral();
+}
+
+/**
+ * Implements hook_entity_field_access().
+ */
+function indieweb_comment_entity_field_access($operation, FieldDefinitionInterface $field_definition, AccountInterface $account, FieldItemListInterface $items = NULL) {
+
+  if ($items && $field_definition->getName() == 'status') {
+    $entity = $items->getEntity();
+    if ($entity->getEntityTypeId() == 'comment') {
+      /** @var \Drupal\node\NodeInterface $node */
+      $node = $entity->getCommentedEntity();
+      if ($node && $node->getOwnerId() == $account->id() && $node->getOwner()->hasPermission('publish or unpublish comments on own content')) {
+        return AccessResult::allowed();
+      }
+    }
+  }
+
+  return AccessResult::neutral();
+}
+
+/**
+ * Implements hook_query_TAG_alter().
+ */
+function indieweb_comment_query_comment_filter_alter(AlterableInterface $query) {
+  if (\Drupal::currentUser()->id() == $query->getMetaData('entity')->getOwnerId() && \Drupal::currentUser()->hasPermission('view unpublished comments on own content')) {
+    $conditions = &$query->conditions();
+    foreach ($conditions as $key => $condition) {
+      if ($condition['field'] == 'c.status') {
+        unset($conditions[$key]);
+      }
+    }
+  }
+}

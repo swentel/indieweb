@@ -1,0 +1,9 @@
+name: Comment
+type: module
+description: Allow users to manage comments created on their own content.
+core: 8.x
+core_version_requirement: ^8 || ^9
+package: IndieWeb
+dependencies:
+  - drupal:comment
+  - drupal:node

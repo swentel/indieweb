@@ -2,7 +2,6 @@
 
 namespace Drupal\indieweb_webmention\Controller;
 
-use Drupal\Core\Cache\Cache;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Url;
 use Drupal\indieweb_webmention\Entity\WebmentionInterface;

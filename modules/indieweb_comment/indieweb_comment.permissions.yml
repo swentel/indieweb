@@ -1,0 +1,8 @@
+view overview of comments on own content:
+  title: 'Access the comments view on user/x/comments'
+view unpublished comments on own content:
+  title: 'View unpublished comments on own content'
+delete comments on own content:
+  title: 'Delete comments on own content'
+publish or unpublish comments on own content:
+  title: 'Publish or unpublish comments on own content'

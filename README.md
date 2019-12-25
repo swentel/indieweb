@@ -35,6 +35,7 @@ Available features:
 - Blocks for rendering webmentions, RSVP, signing in
 - Fediverse integration via https://fed.brid.gy/
 - Caching of image files
+- Enhanced permissions of comments
 
 The functionality is split into several modules:
 
@@ -49,6 +50,7 @@ The functionality is split into several modules:
 - Media cache: store images locally for internal webmention and microsub endpoint
 - WebSub: WebSub PuSH 0.4 for publishing and subscribing
 - Contacts: store contacts for Micropub contact query
+- Comment: enhancements for core comments.
 
 Additional useful modules
 
@@ -327,6 +329,9 @@ Configuration still in settings.php
   $settings['indieweb_comment_authors'] = ['Your name' => 3];
   ```
 
+The IndieWeb comment module enhances core permissions with a couple of permissions for users to manage comments which
+are created on their own content. This module is only useful if the multi-user feature is enabled.
+
 ## Feeds
 
 Generate feeds in Microformats2 , JF2.
@@ -512,7 +517,6 @@ Don't forget to pass on your domain in the drush commands as it's important for 
 
 ```
 drush -l https://example.com indieweb-send-webmentions
-
 ```
 
 - indieweb-send-webmentions: handles the queue for sending webmentions.
