@@ -62,7 +62,7 @@ function indieweb_help($route_name, RouteMatchInterface $route_match) {
       'text' => '<p>' . t('Stores contacts optionally on incoming webmentions. Contacts can be managed at admin/content/contacts.') . '</p>'
     ],
     'indieweb.admin.websub_settings' => [
-      'title' => 'Contacts',
+      'title' => 'WebSub',
       'text' => '<p>' . t('Allows to notify hubs when you publish content. You can subscribe to WebSub enabled feeds in all Microsub sources.') . '</p>'
     ],
     'indieweb.fediverse' => [
