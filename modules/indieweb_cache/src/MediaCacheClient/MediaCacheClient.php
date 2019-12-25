@@ -71,10 +71,15 @@ class MediaCacheClient extends MediaCacheClientDefault {
         $style = ImageStyle::load($image_style);
         if ($style) {
           if ($style->supportsUri($filename)) {
-            $filename = $style->buildUri($filename);
+            $filename = $style->buildUrl($filename);
+          }
+          else {
+            $filename = file_create_url($filename);
           }
         }
-        $filename = file_create_url($filename);
+        else {
+          $filename = file_create_url($filename);
+        }
       }
     }
 
