@@ -1455,17 +1455,24 @@ class MicropubController extends ControllerBase {
 
     foreach (indieweb_micropub_post_types() as $type) {
       if ($this->config->get($type . '_create_node')) {
-        $post_types[] = (object) array(
+        $post_types[] = (object) [
           'type' => $type,
           'name' => ucfirst($type),
-        );
+        ];
       }
+    }
+
+    if (\Drupal::moduleHandler()->moduleExists('indieweb_contact') && $this->config->get('micropub_enable_contact')) {
+      $post_types[] = (object) [
+        'type' => 'venue',
+        'name' => $this->t('Venue'),
+      ];
     }
 
     if (\Drupal::moduleHandler()->moduleExists('comment')) {
       $post_types[] = (object) array(
         'type' => 'comment',
-        'name' => t('Commments'),
+        'name' => $this->t('Commments'),
       );
     }
 
