@@ -101,7 +101,7 @@ class AuthorBlock extends BlockBase {
           /** @var \Drupal\file\FileInterface $file */
           $file = $account->get('user_picture')->entity;
           if ($file) {
-            $image = file_create_url($file->getFileUri());
+            $image = indieweb_generate_author_image_url($file->getFileUri());
           }
         }
 

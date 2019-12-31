@@ -24,7 +24,7 @@ class WebmentionHtmlRouteProvider extends AdminHtmlRouteProvider {
         '_controller' => '\Drupal\indieweb_webmention\Controller\WebmentionController::reprocess',
         '_title' => 'Update items',
       ])
-      ->setRequirement('_permission', 'administer indieweb')
+      ->setRequirement('_permission', 'reprocess webmention')
       ->setRequirement('indieweb_webmention', '\S+');
     $collection->add('entity.indieweb_webmention.reprocess', $route);
 

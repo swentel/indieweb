@@ -13,11 +13,13 @@ interface WebSubClientInterface {
    * Generates a queue item.
    *
    * @param string $entity_id
-   *   (optional) The entity id
+   *   The entity id
    * @param string $entity_type_id
-   *   (optional) The entity type id
+   *   The entity type id
+   * @param $uid
+   *   The user id.
    */
-  public function createQueueItem($entity_id, $entity_type_id);
+  public function createQueueItem($entity_id, $entity_type_id, $uid);
 
   /**
    * Resubscribe to WebSub subscriptions.

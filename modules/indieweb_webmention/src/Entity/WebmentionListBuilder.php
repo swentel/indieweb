@@ -59,7 +59,7 @@ class WebmentionListBuilder extends EntityListBuilder {
   public function getDefaultOperations(EntityInterface $entity) {
     $operations = parent::getDefaultOperations($entity);
 
-    if (\Drupal::config('indieweb_webmention.settings')->get('webmention_internal')) {
+    if (\Drupal::config('indieweb_webmention.settings')->get('webmention_internal') && \Drupal::currentUser()->hasPermission('reprocess webmention')) {
       $operations['reprocess'] = [
         'title' => $this->t('Reprocess'),
         'weight' => 20,

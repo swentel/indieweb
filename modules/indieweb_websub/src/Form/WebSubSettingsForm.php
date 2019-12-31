@@ -47,12 +47,12 @@ class WebSubSettingsForm extends ConfigFormBase {
       '#title' => $this->t('Discovery'),
       '#type' => 'textarea',
       '#default_value' => $config->get('pages'),
-      '#description' => $this->t('Specify pages by using their paths to which people can subscribe to. Enter one path per line and do not use wildcards. / is the frontpage.<br />You can also include RSS pages managed by Views using the "RSS Feed with WebSub discovery" format and disabling the views cache.'),
+      '#description' => $this->t('Specify pages by using their paths to which people can subscribe to. Enter one path per line. / is the frontpage.<br />You can also include RSS pages managed by Views using the "RSS Feed with WebSub discovery" format and disabling the views cache.'),
       '#required' => TRUE,
     ];
 
     if (indieweb_is_multi_user()) {
-      $form['general']['pages']['#description'] .= '<br />' . $this->t('The site is set to multiple users, so if you have a feed that is configured for multiple users, the path will be appended to the user page. e.g "/timeline" automatically becomes "/user/x/timeline" and will be exposed on the user page.');
+      $form['general']['pages']['#description'] .= '<br />' . $this->t('The site is set to multiple users, so if you have a feed that is configured for multiple users, you can use wildcards. e.g "/user/*/timeline".');
     }
 
     $form['general']['expose_link_tag'] = [
@@ -111,8 +111,14 @@ class WebSubSettingsForm extends ConfigFormBase {
       '#default_value' => $config->get('micropub_publish_to_hub'),
     ];
 
+    $form['general']['microsub_subscribe'] = [
+      '#title' => $this->t('Send a subscribe request when managing feeds through UI.'),
+      '#type' => 'checkbox',
+      '#default_value' => $config->get('microsub_subscribe'),
+    ];
+
     $form['general']['microsub_api_subscribe'] = [
-      '#title' => $this->t('Send a subscribe or unsubscribe request when managing feeds through the Microsub API.'),
+      '#title' => $this->t('Send a subscribe request when managing feeds through the Microsub API.'),
       '#type' => 'checkbox',
       '#default_value' => $config->get('microsub_api_subscribe'),
     ];
@@ -141,6 +147,7 @@ class WebSubSettingsForm extends ConfigFormBase {
       ->set('send_pub_handler', $form_state->getValue('send_pub_handler'))
       ->set('resubscribe_handler', $form_state->getValue('resubscribe_handler'))
       ->set('micropub_publish_to_hub', $form_state->getValue('micropub_publish_to_hub'))
+      ->set('microsub_subscribe', $form_state->getValue('microsub_subscribe'))
       ->set('microsub_api_subscribe', $form_state->getValue('microsub_api_subscribe'))
       ->save();
 

@@ -18,7 +18,7 @@ Available features:
 - Built-in IndieAuth Authorization and Authentication API, or use external service
 - Microsub built-in server or use external service
 - Micropub
-  - Create content note, article, event, rsvp, reply, like, repost, bookmark, checkin, geocache and issue
+  - Create content note, article, event, rsvp, reply, like, repost, bookmark, checkin, geocache, trip and issue
   - Updating content is currently limited to changing the published status, title and body of nodes and comments
   - q=category can be configured and q=source is also experimentally available to get a list of posts
   - q=geo to query for location
@@ -415,6 +415,8 @@ More configuration is at configuration at admin/config/services/indieweb/websub.
 
 You need https://github.com/swentel/p3k-websub/commit/4310388f712082e4ee310eb7de462d140023a388 as a patch on the
 p3k-websub package so all self and hub links are found.
+
+When using the internal Microsub endpoint, you can configure to subscribe to WebSub when managing feeds.
 
 ## Post contexts
 

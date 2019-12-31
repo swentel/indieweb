@@ -5,3 +5,6 @@ indieweb.settings:
     multi_user:
       type: boolean
       label: 'Whether the site site is multi-user or not.'
+    author_image_style:
+      type: string
+      label: 'Author image style'

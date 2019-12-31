@@ -79,6 +79,11 @@ class MicropubSettingsForm extends ConfigFormBase {
         'optional_body' => TRUE,
         'geo_field' => TRUE,
       ],
+      'trip' => [
+        'description' => $this->t("A trip request contains 'route' which is an collection of Geo URI 's. 'Content is optional and the 'h' value is 'entry'.") . '<br /><strong>Note: experimental, will not work with some clients.</strong>',
+        'optional_body' => TRUE,
+        'geo_field' => TRUE,
+      ],
     ];
   }
 

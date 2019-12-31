@@ -62,7 +62,7 @@ class FeedController extends ControllerBase {
       /** @var \Drupal\file\FileInterface $file */
       $file = $user->get('user_picture')->entity;
       if ($file) {
-        $author_h_card .= '<img src="' . file_create_url($file->getFileUri()) . '" class="u-photo hidden" alt="' . $user->getAccountName() . '">';
+        $author_h_card .= '<img src="' . indieweb_generate_author_image_url($file->getFileUri()) . '" class="u-photo hidden" alt="' . $user->getAccountName() . '">';
       }
 
       $build['author'] = [

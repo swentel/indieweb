@@ -588,6 +588,22 @@ class MicropubController extends ControllerBase {
         }
       }
 
+      // trip support.
+      if ($this->createNodeFromPostType('trip') && $this->hasRequiredInput(['route']) && $this->isHEntry()) {
+
+        $trip_title = 'Trip';
+        if (!empty($this->input['name'])) {
+          $trip_title = $this->input['name'];
+        }
+
+        $this->createNode($trip_title, 'trip');
+        $this->handleGeoPoints('trip_geo_field', 'route');
+        $response = $this->saveNode();
+        if ($response instanceof Response) {
+          return $response;
+        }
+      }
+
       // Event support.
       if ($this->createNodeFromPostType('event') && $this->isHEvent() && $this->hasRequiredInput(['start', 'end', 'name'])) {
         $this->createNode($this->input['name'], 'event');
@@ -1407,6 +1423,49 @@ class MicropubController extends ControllerBase {
   }
 
   /**
+   * Handle geo points.
+   *
+   * @param $config_key
+   * @param $input_name
+   */
+  protected function handleGeoPoints($config_key, $input_name) {
+    $geo_field_name = $this->config->get($config_key);
+    if ($geo_field_name && $this->node->hasField($geo_field_name) && !empty($this->input[$input_name])) {
+
+      $values = [];
+      foreach ($this->input[$input_name] as $point) {
+        $geo = explode(':', $point);
+        if (!empty($geo[0]) && $geo[0] == 'geo' && !empty($geo[1])) {
+          $lat_lon = explode(',', $geo[1]);
+          if (!empty((float) $lat_lon[0]) && !empty((float) $lat_lon[1])) {
+            $lat = trim($lat_lon[0]);
+            $lon = trim($lat_lon[1]);
+            if (!empty($lat) && !empty($lon)) {
+              try {
+                $service = \Drupal::service('geofield.wkt_generator');
+                if ($service) {
+                  $value = $service->wktBuildPoint([$lon, $lat]);
+                  if (!empty($value)) {
+                    $values[] = $value;
+                  }
+                }
+              }
+              catch (\Exception $e) {
+                $this->getLogger('indieweb_micropub')->notice('Error saving geo point: @message', ['@message' => $e->getMessage()]);
+              }
+            }
+          }
+        }
+      }
+
+      if (!empty($values)) {
+        $this->node->set($geo_field_name, $values);
+      }
+
+    }
+  }
+
+  /**
    * Syndicate to for nodes.
    *
    * @throws \Drupal\Core\Entity\EntityMalformedException
@@ -1455,17 +1514,24 @@ class MicropubController extends ControllerBase {
 
     foreach (indieweb_micropub_post_types() as $type) {
       if ($this->config->get($type . '_create_node')) {
-        $post_types[] = (object) array(
+        $post_types[] = (object) [
           'type' => $type,
           'name' => ucfirst($type),
-        );
+        ];
       }
+    }
+
+    if (\Drupal::moduleHandler()->moduleExists('indieweb_contact') && $this->config->get('micropub_enable_contact')) {
+      $post_types[] = (object) [
+        'type' => 'venue',
+        'name' => $this->t('Venue'),
+      ];
     }
 
     if (\Drupal::moduleHandler()->moduleExists('comment')) {
       $post_types[] = (object) array(
         'type' => 'comment',
-        'name' => t('Commments'),
+        'name' => $this->t('Commments'),
       );
     }
 

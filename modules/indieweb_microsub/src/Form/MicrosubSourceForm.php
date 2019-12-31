@@ -71,23 +71,11 @@ class MicrosubSourceForm extends ContentEntityForm {
     ];
 
     // WebSub integration.
-    if (\Drupal::moduleHandler()->moduleExists('indieweb_websub')) {
-      if ($source->usesWebSub()) {
-        $form['websub_unsubscribe'] = [
-          '#type' => 'checkbox',
-          '#title' => $this->t('Unsubscribe WebSub'),
-          '#default_value' => FALSE,
-          '#weight' => 11,
-          '#description' => $this->t('This source is updated via WebSub notifications. Click to unsubscribe and start polling again.')
-        ];
-      }
-      else {
+    if (\Drupal::moduleHandler()->moduleExists('indieweb_websub') && $this->config('indieweb_websub.settings')->get('microsub_subscribe')) {
+      if (!$source->usesWebSub()) {
         $form['websub_subscribe'] = [
-          '#type' => 'checkbox',
-          '#title' => $this->t('Subscribe WebSub'),
-          '#default_value' => FALSE,
-          '#weight' => 11,
-          '#description' => $this->t('If the feed supports WebSub, updates will come in via PuSH notifications.<br />A subscribe request will be send after submit.')
+          '#type' => 'value',
+          '#value' => TRUE,
         ];
       }
     }
@@ -141,20 +129,6 @@ class MicrosubSourceForm extends ContentEntityForm {
     // Save
     $status = parent::save($form, $form_state);
 
-    // Unsubscribe WebSub
-    if ($form_state->hasValue('websub_unsubscribe') && $form_state->getValue('websub_unsubscribe')) {
-
-      /** @var \Drupal\indieweb_websub\WebSubClient\WebSubClientInterface $websub_service */
-      $websub_service = \Drupal::service('indieweb.websub.client');
-      if ($info = $websub_service->discoverHub($source->label())) {
-        $this->messenger()->addStatus($this->t('An unsubscribe request has been send.'));
-        $websub_service->subscribe($info['self'], $info['hub'],'unsubscribe');
-      }
-      else {
-        $this->messenger()->addStatus($this->t('No hub was found for this feed.'));
-      }
-    }
-
     // Subscribe WebSub
     if ($form_state->hasValue('websub_subscribe') && $form_state->getValue('websub_subscribe')) {
       /** @var \Drupal\indieweb_websub\WebSubClient\WebSubClientInterface $websub_service */
@@ -162,10 +136,6 @@ class MicrosubSourceForm extends ContentEntityForm {
       if ($info = $websub_service->discoverHub($source->label())) {
         $source->set('url', $info['self'])->save();
         $websub_service->subscribe($info['self'], $info['hub'],'subscribe');
-        $this->messenger()->addStatus($this->t('A subscribe request has been send.'));
-      }
-      else {
-        $this->messenger()->addStatus($this->t('No hub was found for this feed.'));
       }
     }
 

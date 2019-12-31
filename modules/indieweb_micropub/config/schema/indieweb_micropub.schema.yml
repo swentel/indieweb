@@ -411,3 +411,33 @@ indieweb_micropub.settings:
     geocache_geocache_field:
       type: string
       label: 'The node geocache field for the log type'
+    trip_create_node:
+      type: boolean
+      label: 'Enable trip'
+    trip_status:
+      type: integer
+      label: 'Whether the trip is published or not'
+    trip_node_type:
+      type: string
+      label: 'The node type for the trip'
+    trip_content_field:
+      type: string
+      label: 'The node content field for the trip'
+    trip_tags_field:
+      type: string
+      label: 'The node tags field for the trip'
+    trip_geo_field:
+      type: string
+      label: 'The node geo field for the trip'
+    trip_upload_field:
+      type: string
+      label: 'The node image field for the trip'
+    trip_audio_field:
+      type: string
+      label: 'The node image field for the trip'
+    trip_video_field:
+      type: string
+      label: 'The node video field for the trip'
+    trip_uid:
+      type: integer
+      label: 'The user id of the trip'

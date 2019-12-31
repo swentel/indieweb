@@ -17,10 +17,14 @@ class WebSubClient implements WebSubClientInterface {
     $config = \Drupal::config('indieweb_websub.settings');
 
     $pages = [];
+    $wildcard = FALSE;
     $config_pages = explode("\n", $config->get('pages'));
     foreach ($config_pages as $page) {
       $page = trim($page);
       if (!empty($page)) {
+        if (strpos($page, '*') !== FALSE) {
+          $wildcard = TRUE;
+        }
         $pages[] = \Drupal::request()->getSchemeAndHttpHost() . $page;
       }
     }
@@ -28,23 +32,32 @@ class WebSubClient implements WebSubClientInterface {
     while (time() < $end && ($item = \Drupal::queue(INDIEWEB_WEBSUB_QUEUE)->claimItem())) {
       $data = $item->data;
 
-      if (!empty($data['entity_id']) && !empty($data['entity_type_id']) && !empty($pages)) {
+      if (!empty($data['entity_id']) && !empty($data['entity_type_id']) && !empty($data['uid']) && !empty($pages)) {
 
+        $uid = $data['uid'];
         $entity_id = $data['entity_id'];
         $entity_type_id = $data['entity_type_id'];
+
+        // We assume that a wildcard is for a uid.
+        $pages_to_send = $pages;
+        if ($wildcard) {
+          foreach ($pages as $key => $page) {
+            $pages_to_send[$key] = str_replace('*', $uid, $page);
+          }
+        }
 
         // Send request.
         $options = [
           'form_params' => [
             'hub.mode' => 'publish',
-            'hub.url' => $pages,
+            'hub.url' => $pages_to_send,
           ]
         ];
         $client = \Drupal::httpClient();
         $response = $client->post($config->get('hub_endpoint'), $options);
 
         try {
-          $websubpub = \Drupal::entityTypeManager()->getStorage('indieweb_websubpub')->create(['entity_id' => $entity_id, 'entity_type_id' => $entity_type_id]);
+          $websubpub = \Drupal::entityTypeManager()->getStorage('indieweb_websubpub')->create(['uid' => $uid, 'entity_id' => $entity_id, 'entity_type_id' => $entity_type_id]);
           $websubpub->save();
         }
         catch (\Exception $e) {
@@ -64,10 +77,11 @@ class WebSubClient implements WebSubClientInterface {
   /**
    * {@inheritdoc}
    */
-  public function createQueueItem($entity_id, $entity_type_id) {
+  public function createQueueItem($entity_id, $entity_type_id, $uid) {
     $data = [
       'entity_id' => $entity_id,
       'entity_type_id' => $entity_type_id,
+      'uid' => $uid,
     ];
     try {
       \Drupal::queue(INDIEWEB_WEBSUB_QUEUE)->createItem($data);

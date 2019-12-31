@@ -31,3 +31,6 @@ send webmentions:
 
 allow rsvp:
   title: 'Allow users to RSVP on an event'
+
+reprocess webmention:
+  title: 'Reprocess a webmention'

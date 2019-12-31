@@ -662,7 +662,7 @@ class IndieAuthController extends ControllerBase {
         /** @var \Drupal\file\FileInterface $file */
         $file = $account->get('user_picture')->entity;
         if ($file) {
-          $profile['photo'] = file_create_url($file->getFileUri());
+          $profile['photo'] = indieweb_generate_author_image_url($file->getFileUri());
         }
       }
     }
