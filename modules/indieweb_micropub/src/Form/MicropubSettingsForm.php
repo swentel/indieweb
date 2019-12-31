@@ -15,7 +15,7 @@ class MicropubSettingsForm extends ConfigFormBase {
    * @return array
    */
   protected function getPostTypes() {
-    $post_types = [
+    return [
       'article' => [
         'geo_field' => TRUE,
         'description' => $this->t("An article request contains 'content', 'name' and the 'h' value is 'entry'. Think of it as a blog post."),
@@ -79,9 +79,12 @@ class MicropubSettingsForm extends ConfigFormBase {
         'optional_body' => TRUE,
         'geo_field' => TRUE,
       ],
+      'trip' => [
+        'description' => $this->t("A trip request contains 'route' which is an collection of Geo URI 's. 'Content is optional and the 'h' value is 'entry'.") . '<br /><strong>Note: experimental, will not work with some clients.</strong>',
+        'optional_body' => TRUE,
+        'geo_field' => TRUE,
+      ],
     ];
-
-    return $post_types;
   }
 
   /**

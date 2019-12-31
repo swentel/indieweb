@@ -111,3 +111,11 @@ geocache_geo_field: ''
 geocache_link_field: ''
 geocache_upload_field: ''
 geocache_uid: 1
+trip_create_node: false
+trip_status: 1
+trip_node_type: ''
+trip_content_field: ''
+trip_tags_field: ''
+trip_geo_field: ''
+trip_upload_field: ''
+trip_uid: 1

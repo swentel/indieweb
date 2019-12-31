@@ -17,7 +17,7 @@ Available features:
 - Built-in IndieAuth Authorization and Authentication API, or use external service
 - Microsub built-in server or use external service
 - Micropub
-  - Create content note, article, event, rsvp, reply, like, repost, bookmark, checkin, geocache and issue
+  - Create content note, article, event, rsvp, reply, like, repost, bookmark, checkin, geocache, trip and issue
   - Updating content is currently limited to changing the published status, title and body of nodes and comments
   - q=category can be configured and q=source is also experimentally available to get a list of posts
   - q=geo to query for location
