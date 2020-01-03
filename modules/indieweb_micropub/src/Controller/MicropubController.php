@@ -1315,7 +1315,7 @@ class MicropubController extends ControllerBase {
               ];
             }
             else {
-              $file_values[] = $file->id();
+              $file_values[] = ['target_id' => $file->id(), 'display' => TRUE];
             }
 
             // Set owner of file.
