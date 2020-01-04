@@ -915,7 +915,7 @@ class MicropubController extends ControllerBase {
       else {
 
         $response_code = 200;
-        $extensions = 'jpg jpeg gif png';
+        $extensions = 'jpg jpeg gif png mp3 mp4 ogg avi wav mp2 ogv';
         $validators['file_validate_extensions'] = [];
         $validators['file_validate_extensions'][0] = $extensions;
         $sub_directory = date('Y') . '/' . date('m');
