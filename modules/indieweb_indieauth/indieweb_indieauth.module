@@ -105,7 +105,9 @@ function indieweb_indieauth_user_authenticated_with_domain_on_edit_form() {
   if (\Drupal::hasService($externalAuthMapId)) {
     /** @var \Drupal\externalauth\AuthmapInterface $externalAuthMap */
     $externalAuthMap = \Drupal::service($externalAuthMapId);
-    $externalAuthMap->get($account->id(), 'indieweb');
+    if ($externalAuthMap->get($account->id(), 'indieweb')) {
+      return TRUE;
+    }
   }
 
   return FALSE;
