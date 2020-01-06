@@ -7,10 +7,46 @@ use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Routing\TrustedRedirectResponse;
 use Drupal\Core\Url;
+use Drupal\externalauth\AuthmapInterface;
 use IndieAuth\Client;
 use p3k\HTTP;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
+/**
+ * Class IndieAuthLoginForm.
+ *
+ * @package Drupal\indieweb_indieauth\Form
+ */
 class IndieAuthLoginForm extends FormBase {
+
+  /**
+   * The external auth authmap service.
+   *
+   * Note: this may be NULL when the service is not available.
+   *
+   * @var \Drupal\externalauth\AuthmapInterface
+   */
+  protected $externalAuthMap;
+
+  /**
+   * Set the authmap service.
+   *
+   * @param \Drupal\externalauth\AuthmapInterface $externalAuthMap
+   *   The authmap service.
+   */
+  public function setExternalAuthMap(AuthmapInterface $externalAuthMap) {
+    $this->externalAuthMap = $externalAuthMap;
+  }
+
+  /**
+   * Get the configuration for the indieauth module.
+   *
+   * @return \Drupal\Core\Config\ImmutableConfig
+   *   The module's configuration.
+   */
+  protected function configuration() {
+    return $this->configFactory()->get('indieweb_indieauth.settings');
+  }
 
   /**
    * {@inheritdoc}
@@ -25,12 +61,10 @@ class IndieAuthLoginForm extends FormBase {
   public function buildForm(array $form, FormStateInterface $form_state) {
     $form = [];
 
-    if (\Drupal::config('indieweb_indieauth.settings')->get('login_enable')) {
+    if ($this->configuration()->get('login_enable') && !empty($this->externalAuthMap)) {
 
       if ($this->currentUser()->isAuthenticated()) {
-        /** @var \Drupal\externalauth\AuthmapInterface $external_auth */
-        $external_authmap = \Drupal::service('externalauth.authmap');
-        if ($external_authmap && $external_authmap->get($this->currentUser()->id(), 'indieweb')) {
+        if ($this->externalAuthMap->get($this->currentUser()->id(), 'indieweb')) {
           return [];
         }
         else {
@@ -109,6 +143,24 @@ class IndieAuthLoginForm extends FormBase {
     else {
       $this->messenger()->addMessage($this->t('No authorization endpoint found.'));
     }
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container) {
+    /** @var \Drupal\indieweb_indieauth\Form\IndieAuthLoginForm $form */
+    $form = parent::create($container);
+
+    $authMapId = 'externalauth.authmap';
+    if ($container->has($authMapId)) {
+      $externalAuthMap = $container->get($authMapId);
+      $form->setExternalAuthMap($externalAuthMap);
+    }
+
+    $form->setConfigFactory($container->get('config.factory'));
+
+    return $form;
   }
 
 }

@@ -81,15 +81,32 @@ function indieweb_indieauth_form_user_form_alter(&$form, FormStateInterface $for
  * @return bool
  */
 function indieweb_indieauth_user_authenticated_with_domain_on_edit_form() {
-  $authenticated = FALSE;
-
-  if (\Drupal::routeMatch()->getRouteName() == 'entity.user.edit_form' && ($account = \Drupal::routeMatch()->getParameter('user')) && \Drupal::currentUser()->id() == $account->id()) {
-    // Check if login is enabled and current user is authenticated with domain
-    // and has no administer users permission.
-    if (\Drupal::config('indieweb_indieauth.settings')->get('login_enable') && \Drupal::service('externalauth.authmap')->get($account->id(), 'indieweb') && !\Drupal::currentUser()->hasPermission('administer users')) {
-      $authenticated = TRUE;
-    }
+  if (\Drupal::routeMatch()->getRouteName() != 'entity.user.edit_form') {
+    return FALSE;
+  }
+  $account = \Drupal::routeMatch()->getParameter('user');
+  if (\Drupal::currentUser()->id() != $account->id()) {
+    return FALSE;
   }
 
-  return $authenticated;
+  // Check if login is enabled.
+  if (!\Drupal::config('indieweb_indieauth.settings')->get('login_enable')) {
+    return FALSE;
+  }
+
+  // If the user has the administer user permission we do not care on the edit
+  // form how they are authenticated, we should leave it alone.
+  if (\Drupal::currentUser()->hasPermission('administer users')) {
+    return FALSE;
+  }
+
+  // Check if the user was authenticated with their domain through IndieAuth.
+  $externalAuthMapId = 'externalauth.authmap';
+  if (\Drupal::hasService($externalAuthMapId)) {
+    /** @var \Drupal\externalauth\AuthmapInterface $externalAuthMap */
+    $externalAuthMap = \Drupal::service($externalAuthMapId);
+    $externalAuthMap->get($account->id(), 'indieweb');
+  }
+
+  return FALSE;
 }
