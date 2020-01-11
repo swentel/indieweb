@@ -110,6 +110,11 @@ class MicropubSettingsForm extends ConfigFormBase {
 
     $config = $this->config('indieweb_micropub.settings');
 
+    $filter_formats = [];
+    foreach (filter_formats() as $key => $format) {
+      $filter_formats[$key] = $format->label();
+    }
+
     $form['micropub'] = [
       '#type' => 'vertical_tabs',
     ];
@@ -491,6 +496,21 @@ class MicropubSettingsForm extends ConfigFormBase {
             ),
           ),
         ];
+
+        $form[$post_type][$post_type . '_content_format'] = [
+          '#type' => 'select',
+          '#title' => $this->t('Text format'),
+          '#description' => $this->t('Select the text format used for the content.'),
+          '#options' => $filter_formats,
+          '#default_value' => $config->get($post_type . '_content_format'),
+          '#states' => array(
+            'visible' => array(
+              ':input[name="micropub_enable"]' => array('checked' => TRUE),
+              ':input[name="' . $post_type . '_create_node"]' => array('checked' => TRUE),
+              ':input[name="' . $post_type . '_content_field"]' => array('!value' => ''),
+            ),
+          ),
+        ];
       }
 
       // Image field.
@@ -614,7 +634,12 @@ class MicropubSettingsForm extends ConfigFormBase {
         ->set($post_type . '_tags_field', $form_state->getValue($post_type . '_tags_field'));
 
       if (!isset($configuration['no_body'])) {
+        $text_format = '';
         $config->set($post_type . '_content_field', $form_state->getValue($post_type . '_content_field'));
+        if (!empty($form_state->getValue($post_type . '_content_field'))) {
+          $text_format = $form_state->getValue($post_type . '_content_format');
+        }
+        $config->set($post_type . '_content_format', $text_format);
       }
 
       if (isset($configuration['link_field'])) {

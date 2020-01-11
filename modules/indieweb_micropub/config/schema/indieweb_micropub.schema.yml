@@ -51,6 +51,9 @@ indieweb_micropub.settings:
     note_content_field:
       type: string
       label: 'The node content field for the note'
+    note_content_format:
+      type: string
+      label: 'The text format for the content'
     note_upload_field:
       type: string
       label: 'The node image field for the note'
@@ -81,6 +84,9 @@ indieweb_micropub.settings:
     article_content_field:
       type: string
       label: 'The node content field for the article'
+    article_content_format:
+      type: string
+      label: 'The text format for the content'
     article_upload_field:
       type: string
       label: 'The node image field for the article'
@@ -111,6 +117,9 @@ indieweb_micropub.settings:
     like_content_field:
       type: string
       label: 'The node content field for the like'
+    like_content_format:
+      type: string
+      label: 'The text format for the content'
     like_link_field:
       type: string
       label: 'The node link field for the like'
@@ -144,6 +153,9 @@ indieweb_micropub.settings:
     reply_content_field:
       type: string
       label: 'The node content field for the reply'
+    reply_content_format:
+      type: string
+      label: 'The text format for the content'
     reply_link_field:
       type: string
       label: 'The node link field for the reply'
@@ -195,6 +207,9 @@ indieweb_micropub.settings:
     repost_content_field:
       type: string
       label: 'The node content field for the repost'
+    repost_content_format:
+      type: string
+      label: 'The text format for the content'
     repost_video_field:
       type: string
       label: 'The node video field for the repost'
@@ -213,6 +228,9 @@ indieweb_micropub.settings:
     bookmark_content_field:
       type: string
       label: 'The node content field for the bookmark'
+    bookmark_content_format:
+      type: string
+      label: 'The text format for the content'
     bookmark_link_field:
       type: string
       label: 'The node link field for the repost'
@@ -246,6 +264,9 @@ indieweb_micropub.settings:
     event_content_field:
       type: string
       label: 'The node content field for the event'
+    event_content_format:
+      type: string
+      label: 'The text format for the content'
     event_date_field:
       type: string
       label: 'The node link field for the event'
@@ -282,6 +303,9 @@ indieweb_micropub.settings:
     rsvp_content_field:
       type: string
       label: 'The node content field for the RSVP'
+    rsvp_content_format:
+      type: string
+      label: 'The text format for the content'
     rsvp_link_field:
       type: string
       label: 'The node link field for the RSVP'
@@ -318,6 +342,9 @@ indieweb_micropub.settings:
     issue_content_field:
       type: string
       label: 'The node content field for the issue'
+    issue_content_format:
+      type: string
+      label: 'The text format for the content'
     issue_link_field:
       type: string
       label: 'The node link field for the issue'
@@ -351,6 +378,9 @@ indieweb_micropub.settings:
     checkin_content_field:
       type: string
       label: 'The node content field for the checkin'
+    checkin_content_format:
+      type: string
+      label: 'The text format for the content'
     checkin_tags_field:
       type: string
       label: 'The node tags field for the checkin'
@@ -384,6 +414,9 @@ indieweb_micropub.settings:
     geocache_content_field:
       type: string
       label: 'The node content field for the geocache'
+    geocache_content_format:
+      type: string
+      label: 'The text format for the content'
     geocache_tags_field:
       type: string
       label: 'The node tags field for the geocache'
@@ -420,6 +453,9 @@ indieweb_micropub.settings:
     trip_content_field:
       type: string
       label: 'The node content field for the trip'
+    trip_content_format:
+      type: string
+      label: 'The text format for the content'
     trip_tags_field:
       type: string
       label: 'The node tags field for the trip'

@@ -1098,7 +1098,13 @@ class MicropubController extends ControllerBase {
     // Content.
     $content_field_name = $this->config->get($post_type . '_content_field');
     if (!empty($this->input['content'][0]) && $this->node->hasField($content_field_name)) {
-      $this->node->set($content_field_name, $this->input['content']);
+      $content_value = [
+        'value' => $this->input['content'][0],
+      ];
+      if ($text_format = $this->config->get($post_type . '_content_format')) {
+        $content_value['format'] = $text_format;
+      }
+      $this->node->set($content_field_name, $content_value);
     }
 
     // Link.
