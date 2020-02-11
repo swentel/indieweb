@@ -2,6 +2,7 @@
 
 namespace Drupal\indieweb_microsub\MicrosubClient;
 
+use Drupal\Core\Site\Settings;
 use Drupal\Core\Url;
 use Drupal\indieweb_microsub\Entity\MicrosubItem;
 use Drupal\indieweb_webmention\Entity\WebmentionInterface;
@@ -340,9 +341,11 @@ class MicrosubClient implements MicrosubClientInterface {
 
           // Remove media, it isn't really necessary to see those back in the
           // notification channel.
-          foreach (['photo', 'video', 'audio'] as $key) {
-            if (isset($item[$key])) {
-              unset($item[$key]);
+          if (Settings::get('notification_remove_media', FALSE)) {
+            foreach (['photo', 'video', 'audio'] as $key) {
+              if (isset($item[$key])) {
+                unset($item[$key]);
+              }
             }
           }
 
