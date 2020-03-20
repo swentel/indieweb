@@ -1,4 +1,4 @@
-# IndieWeb integration for Drupal 8
+# IndieWeb integration for Drupal
 
 <img alt="IndieWeb for Drupal" src="https://www.drupal.org/files/styles/grid-3-2x/public/project-images/indieweb-drupal-logo.png?itok=YPcU0OBf" />
 

@@ -61,22 +61,28 @@ class CommentSettingsForm extends ConfigFormBase {
     ];
 
     // Collect fields.
-    $reference_fields = $node_comment_fields = [];
+    $reference_fields = $node_comment_fields = $image_fields = ['' => $this->t('Do not store an image')];
     $node_fields = \Drupal::service('entity_field.manager')->getFieldStorageDefinitions('node');
+    $field_types = \Drupal::service('plugin.manager.field.field_type')->getDefinitions();
     /** @var \Drupal\Core\Field\FieldStorageDefinitionInterface $field */
     foreach ($node_fields as $key => $field) {
       if (in_array($field->getType(), ['comment'])) {
-        $node_comment_fields[$key] = $field->getName();
+        $node_comment_fields[$key] = $field_types[$field->getType()]['label'] . ': ' . $field->getName();
       }
     }
     $comment_fields = \Drupal::service('entity_field.manager')->getFieldStorageDefinitions('comment');
     /** @var \Drupal\Core\Field\FieldStorageDefinitionInterface $field */
     foreach ($comment_fields as $key => $field) {
+
       if (in_array($field->getType(), ['entity_reference'])) {
         $settings = $field->getSettings();
         if (isset($settings['target_type']) && $settings['target_type'] == 'indieweb_webmention') {
-          $reference_fields[$key] = $field->getName();
+          $reference_fields[$key] = $field_types[$field->getType()]['label'] . ': ' . $field->getName();
         }
+      }
+
+      if (in_array($field->getType(), ['image'])) {
+        $image_fields[$key] = $field_types[$field->getType()]['label'] . ': ' . $field->getName();
       }
     }
 
@@ -101,6 +107,20 @@ class CommentSettingsForm extends ConfigFormBase {
       '#description' => $this->t('Select the field which will store the reference to the webmention.'),
       '#options' => $reference_fields,
       '#default_value' => $config->get('comment_create_webmention_reference_field'),
+      '#states' => array(
+        'visible' => array(
+          ':input[name="comment_create_enable"]' => array('checked' => TRUE),
+        ),
+      ),
+    ];
+
+    // Comment image  field.
+    $form['comment_create']['comment_create_image_field'] = [
+      '#type' => 'select',
+      '#title' => $this->t('Image field'),
+      '#description' => $this->t('Select the field which can store an image, used in Micropub.'),
+      '#options' => $image_fields,
+      '#default_value' => $config->get('comment_create_image_field'),
       '#states' => array(
         'visible' => array(
           ':input[name="comment_create_enable"]' => array('checked' => TRUE),
@@ -153,6 +173,7 @@ class CommentSettingsForm extends ConfigFormBase {
       ->set('comment_create_enable', $form_state->getValue('comment_create_enable'))
       ->set('comment_create_default_status', $form_state->getValue('comment_create_default_status'))
       ->set('comment_create_comment_type', $form_state->getValue('comment_create_comment_type'))
+      ->set('comment_create_image_field', $form_state->getValue('comment_create_image_field'))
       ->set('comment_create_webmention_reference_field', $form_state->getValue('comment_create_webmention_reference_field'))
       ->set('comment_create_node_comment_field', $form_state->getValue('comment_create_node_comment_field'))
       ->set('comment_create_mail_notification', $form_state->getValue('comment_create_mail_notification'))

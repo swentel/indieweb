@@ -772,6 +772,18 @@ class MicropubController extends ControllerBase {
                 // Create comment.
                 $this->comment = Comment::create($values);
 
+                // Check if there's an image field.
+                $comment_image_field = $comment_config->get('comment_create_image_field');
+                if ($comment_image_field && $this->comment->hasField($comment_image_field)) {
+                  $files = $this->saveUpload('photo');
+                  if ($files) {
+                    // Get first file as $files is an array.
+                    /** @var \Drupal\file\FileInterface $file */
+                    $file = $files[0];
+                    $this->comment->set($comment_image_field, ['target_id' => $file->id()]);
+                  }
+                }
+
                 // Check link field.
                 if (!empty($link_field_url)) {
                   $link_fields_string = \Drupal::config('indieweb_webmention.settings')->get('send_link_fields');

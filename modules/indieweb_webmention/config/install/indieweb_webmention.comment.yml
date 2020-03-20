@@ -2,6 +2,7 @@ comment_create_enable: false
 comment_create_default_status: 0
 comment_create_comment_type: ''
 comment_create_webmention_reference_field: ''
+comment_create_image_field: ''
 comment_create_node_comment_field: ''
 comment_create_mail_notification: ''
 comment_create_whitelist_domains: ''
