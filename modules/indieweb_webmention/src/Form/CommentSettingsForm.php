@@ -61,7 +61,8 @@ class CommentSettingsForm extends ConfigFormBase {
     ];
 
     // Collect fields.
-    $reference_fields = $node_comment_fields = $image_fields = ['' => $this->t('Do not store an image')];
+    $reference_fields = $node_comment_fields = [];
+    $image_fields = ['' => $this->t('Do not store an image')];
     $node_fields = \Drupal::service('entity_field.manager')->getFieldStorageDefinitions('node');
     $field_types = \Drupal::service('plugin.manager.field.field_type')->getDefinitions();
     /** @var \Drupal\Core\Field\FieldStorageDefinitionInterface $field */
