@@ -15,6 +15,9 @@ indieweb_webmention.comment:
     comment_create_webmention_reference_field:
       type: string
       label: 'The webmention reference field on the comment type'
+    comment_create_image_field:
+      type: string
+      label: 'The image field'
     comment_create_node_comment_field:
       type: string
       label: 'The comment field on the node type'
