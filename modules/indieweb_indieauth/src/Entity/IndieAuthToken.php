@@ -19,6 +19,8 @@ use Drupal\Core\Field\BaseFieldDefinition;
  *     "storage_schema" = "Drupal\indieweb_indieauth\Entity\Storage\IndieAuthTokenStorageSchema",
  *     "list_builder" = "Drupal\indieweb_indieauth\Entity\IndieAuthTokenListBuilder",
  *     "form" = {
+ *       "add" = "Drupal\indieweb_indieauth\Form\TokenForm",
+ *       "edit" = "Drupal\indieweb_indieauth\Form\TokenForm",
  *       "delete" = "Drupal\Core\Entity\ContentEntityDeleteForm",
  *     },
  *     "route_provider" = {
@@ -35,6 +37,7 @@ use Drupal\Core\Field\BaseFieldDefinition;
  *     "uid" = "uid",
  *   },
  *   links = {
+ *     "add-form" = "/admin/config/services/indieweb/indieauth/tokens/add",
  *     "collection" = "/admin/config/services/indieweb/indieauth/tokens",
  *     "delete-form" = "/admin/config/services/indieweb/indieauth/tokens/{indieweb_indieauth_token}/delete",
  *     "change-status" = "/admin/config/services/indieweb/indieauth/tokens/{indieweb_indieauth_token}/status"

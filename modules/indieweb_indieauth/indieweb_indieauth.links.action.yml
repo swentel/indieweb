@@ -1,0 +1,5 @@
+indieweb.indieauth.token.add_form:
+  route_name: entity.indieweb_indieauth_token.add_form
+  title: 'Add token'
+  appears_on:
+    - entity.indieweb_indieauth_token.collection
