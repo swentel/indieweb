@@ -520,6 +520,12 @@ class MicrosubClient implements MicrosubClientInterface {
           ];
         }
       }
+      elseif (strpos($url, 'instagram.com') !== FALSE) {
+        $feeds[] = [
+          'url' => $url,
+          'type' => 'microformats'
+        ];
+      }
       else {
 
         $mf2 = \mf2\Parse($body, $url);
