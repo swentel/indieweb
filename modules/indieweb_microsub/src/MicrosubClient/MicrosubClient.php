@@ -213,6 +213,11 @@ class MicrosubClient implements MicrosubClientInterface {
       'post_type' => isset($item['post-type']) ? $item['post-type'] : 'unknown',
     ];
 
+    // Set is read to 1 in case of anonymous requests.
+    if (Settings::get('indieweb_microsub_anonymous', FALSE)) {
+      $values['is_read'] = 1;
+    }
+
     if (isset($item['published'])) {
       $values['timestamp'] = strtotime($item['published']);
       if (empty($values['timestamp']) || !$values['timestamp'] || (is_numeric($values['timestamp']) && $values['timestamp'] < 0)) {

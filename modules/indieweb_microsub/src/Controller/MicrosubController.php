@@ -32,6 +32,35 @@ class MicrosubController extends ControllerBase {
   protected $indieAuth;
 
   /**
+   * Whether this is an authenticated request or not.
+   *
+   * @var bool
+   */
+  protected $isAuthenticatedRequest = FALSE;
+
+  /**
+   * Whether anonymous requests on the Microsub endpoint are allowed or not.
+   *
+   * This allows getting channels and the posts in that channel. Write
+   * operations (like managing channels, subscribing, search, marking (un)read
+   * etc) will not be allowed when enabled and the request is anonymous.
+   *
+   * @return boolean
+   */
+  private function allowAnonymousRequest() {
+    return Settings::get('indieweb_microsub_anonymous', FALSE);
+  }
+
+  /**
+   * Whether this is an authenticated request or not.
+   *
+   * @return bool
+   */
+  private function isAuthenticatedRequest() {
+    return $this->isAuthenticatedRequest;
+  }
+
+  /**
    * Microsub endpoint.
    *
    * @param \Symfony\Component\HttpFoundation\Request $request
@@ -62,7 +91,7 @@ class MicrosubController extends ControllerBase {
 
     // Get authorization header, response early if none found.
     $auth_header = $this->indieAuth->getAuthorizationHeader();
-    if (!$auth_header) {
+    if (!$auth_header && !$this->allowAnonymousRequest()) {
       return new JsonResponse('', 401);
     }
 
@@ -81,8 +110,20 @@ class MicrosubController extends ControllerBase {
       $scope = 'read';
     }
 
-    if (!$this->indieAuth->isValidToken($auth_header, $scope)) {
+    // Validate token.
+    if (!$this->indieAuth->isValidToken($auth_header, $scope) && !$this->allowAnonymousRequest()) {
       return new JsonResponse('', 403);
+    }
+
+    // Return 401 in case scope is not set to read or this is a POST request.
+    if ($this->allowAnonymousRequest() && ($scope != 'read' || $request_method == 'POST')) {
+      return new JsonResponse('', 401);
+    }
+
+    // If we get to here, this is an authenticated request in case allow
+    // anonymous is not set.
+    if (!$this->allowAnonymousRequest()) {
+      $this->isAuthenticatedRequest = TRUE;
     }
 
     // ---------------------------------------------------------
@@ -224,25 +265,30 @@ class MicrosubController extends ControllerBase {
     $channels_list = $this->entityTypeManager()->getStorage('indieweb_microsub_channel')->loadMultiple($ids);
 
     // Notifications channel.
-    $notifications = \Drupal::entityTypeManager()->getStorage('indieweb_microsub_item')->getUnreadCountByChannel(0);
-    $channels[] = (object) [
-      'uid' => 'notifications',
-      'name' => 'Notifications',
-      'unread' => (int) $notifications,
-    ];
+    if ($this->isAuthenticatedRequest()) {
+      $notifications = \Drupal::entityTypeManager()->getStorage('indieweb_microsub_item')->getUnreadCountByChannel(0);
+      $channels[] = (object) [
+        'uid' => 'notifications',
+        'name' => 'Notifications',
+        'unread' => (int) $notifications,
+      ];
+    }
 
     /** @var \Drupal\indieweb_microsub\Entity\MicrosubChannelInterface $channel */
     foreach ($channels_list as $channel) {
       $unread = [];
 
       // Unread can either an int, boolean or omitted.
-      if ($indicator = $channel->getReadIndicator()) {
+      if (($indicator = $channel->getReadIndicator()) && $this->isAuthenticatedRequest()) {
         if ($indicator == MicrosubChannelInterface::readIndicatorCount) {
           $unread['unread'] = (int) $channel->getUnreadCount();
         }
         elseif ($indicator == MicrosubChannelInterface::readIndicatorNew) {
           $unread['unread'] = (bool) $channel->getUnreadCount();
         }
+      }
+      else {
+        $unread['unread'] = 0;
       }
 
       $channels[] = (object) ([
@@ -293,7 +339,7 @@ class MicrosubController extends ControllerBase {
     // ---------------------------------------------------------
 
     // Notifications is stored as channel 0.
-    if ($channel == 'notifications') {
+    if ($channel == 'notifications' && $this->isAuthenticatedRequest()) {
       $channel = 0;
     }
 
@@ -354,7 +400,7 @@ class MicrosubController extends ControllerBase {
 
         $entry = $data;
         $entry->_id = $item->id();
-        $entry->_is_read = $item->isRead();
+        $entry->_is_read = $this->isAuthenticatedRequest() ? $item->isRead() : TRUE;
         $entry->_source = $item->getSourceId();
 
         // Channel information.

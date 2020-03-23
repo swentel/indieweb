@@ -38,6 +38,20 @@ use Drupal\Core\Entity\EntityStorageInterface;
  *     "delete-form" = "/admin/config/services/indieweb/feeds/{indieweb_feed}/delete",
  *     "collection" = "/admin/config/services/indieweb/feeds",
  *     "update-items" = "/admin/config/services/indieweb/feeds/{indieweb_feed}/update-items"
+ *   },
+ *   config_export = {
+ *     "id",
+ *     "label",
+ *     "path",
+ *     "limit",
+ *     "author",
+ *     "feedTitle",
+ *     "excludeIndexing",
+ *     "jf2",
+ *     "feedLinkTag",
+ *     "jf2LinkTag",
+ *     "bundles",
+ *     "ownerId"
  *   }
  * )
  */

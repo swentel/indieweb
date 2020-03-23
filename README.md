@@ -385,6 +385,21 @@ by this site. The canonical example is to label that channel name as "Notificati
 webmentions on readers like Monocle or Indigenous. Following webmentions are send: likes, reposts, bookmarks, mentions
 and replies.
 
+**Anonymous**
+
+Allow for anonymous requests on the Microsub endpoint. This allows getting channels and the posts in that channel.
+Write operations (like managing channels, subscribing, search, marking (un)read etc) will not be allowed when enabled
+and the request is anonymous.
+
+This is ideal for showcasing an endpoint in a reader for instance. You can enable this feature only via settings.php:
+
+```
+$settings['indieweb_microsub_anonymous'] = TRUE;
+```
+
+Note: You can still have authenticated requests too, but items will always be marked unread because of the anonymous
+requests. This will be fixed when multi user support is coming.
+
 ## WebSub
 
 WebSub (previously known as PubSubHubbub or PuSH, and briefly PubSub) is a notification-based protocol for web
@@ -457,7 +472,9 @@ impact on request is minimal.
 By default, imagecache_external stores all files in public://externals. If you want to make it more dynamic,
 for instance, by year and month, add following line to settings.php
 
+```
 $config['imagecache_external.settings']['imagecache_directory'] = 'externals/' . date('Y') . '/' . date('m');
+```
 
 Note that media in the notifications channel in microsub is never cached.
 
