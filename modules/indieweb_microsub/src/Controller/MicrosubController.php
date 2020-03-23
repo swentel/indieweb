@@ -3,6 +3,7 @@
 namespace Drupal\indieweb_microsub\Controller;
 
 use Drupal\Core\Controller\ControllerBase;
+use Drupal\Core\Site\Settings;
 use Drupal\Core\Url;
 use Drupal\indieweb_microsub\Entity\MicrosubChannelInterface;
 use Drupal\indieweb_microsub\Entity\MicrosubSourceInterface;
@@ -613,7 +614,8 @@ class MicrosubController extends ControllerBase {
             'uid' => $uid,
             'url' => $url,
             'channel_id' => $channel_id,
-            'fetch_interval' => 86400,
+            'fetch_interval' => Settings::get('microsub_api_subscribe_interval', 86400),
+            'items_to_keep' => Settings::get('microsub_api_subscribe_keep', 20),
           ];
           $source = $this->entityTypeManager()->getStorage('indieweb_microsub_source')->create($values);
           $source->save();
