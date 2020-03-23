@@ -116,7 +116,7 @@ class MicrosubController extends ControllerBase {
     }
 
     // Return 401 in case scope is not set to read or this is a POST request.
-    if ($this->allowAnonymousRequest() && ($scope != 'read' || $request_method == 'POST')) {
+    if ($this->allowAnonymousRequest() && ($scope != 'read' || $request_method != 'GET')) {
       return new JsonResponse('', 401);
     }
 
