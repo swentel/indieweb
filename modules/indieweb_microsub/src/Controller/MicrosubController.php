@@ -89,12 +89,6 @@ class MicrosubController extends ControllerBase {
       'code' => 400,
     ];
 
-    // Get authorization header, response early if none found.
-    $auth_header = $this->indieAuth->getAuthorizationHeader();
-    if (!$auth_header && !$this->allowAnonymousRequest()) {
-      return new JsonResponse('', 401);
-    }
-
     // Determine scope.
     $scope = NULL;
     $request_method = $request->getMethod();
@@ -110,21 +104,40 @@ class MicrosubController extends ControllerBase {
       $scope = 'read';
     }
 
+    // Get authorization header, response early if none found.
+    $auth_header = $this->indieAuth->getAuthorizationHeader();
+    if (!$auth_header) {
+
+      $response_code = 401;
+      $response_message = '';
+
+      // Check anonymous requests.
+      if ($this->allowAnonymousRequest() && $scope == 'read' && $request_method == 'GET' && in_array($action, ['channels', 'timeline'])) {
+          switch ($action) {
+
+            case 'channels':
+              $response = $this->getChannelList();
+              break;
+
+            case 'timeline':
+              $response = $this->getTimeline();
+              break;
+          }
+
+          $response_message = isset($response['response']) ? $response['response'] : '';
+          $response_code = isset($response['code']) ? $response['code'] : 200;
+        }
+
+      return new JsonResponse($response_message, $response_code);
+    }
+
     // Validate token.
-    if (!$this->indieAuth->isValidToken($auth_header, $scope) && !$this->allowAnonymousRequest()) {
+    if (!$this->indieAuth->isValidToken($auth_header, $scope)) {
       return new JsonResponse('', 403);
     }
 
-    // Return 401 in case scope is not set to read or this is a POST request.
-    if ($this->allowAnonymousRequest() && ($scope != 'read' || $request_method != 'GET')) {
-      return new JsonResponse('', 401);
-    }
-
-    // If we get to here, this is an authenticated request in case allow
-    // anonymous is not set.
-    if (!$this->allowAnonymousRequest()) {
-      $this->isAuthenticatedRequest = TRUE;
-    }
+    // If we get to here, this is an authenticated request.
+    $this->isAuthenticatedRequest = TRUE;
 
     // ---------------------------------------------------------
     // GET actions.
