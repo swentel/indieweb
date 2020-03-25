@@ -1573,7 +1573,7 @@ class MicropubController extends ControllerBase {
             'name' => $name,
           ];
 
-          if (in_array($url, $targets['default'])) {
+          if (isset($target['default']) && in_array($url, $targets['default'])) {
             $target['checked'] = TRUE;
           }
 
