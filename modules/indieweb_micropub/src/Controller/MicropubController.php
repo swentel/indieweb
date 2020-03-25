@@ -1565,13 +1565,19 @@ class MicropubController extends ControllerBase {
     $syndication_targets = [];
 
     if (\Drupal::moduleHandler()->moduleExists('indieweb_webmention')) {
-      $targets = indieweb_get_syndication_targets();
+      $targets = indieweb_get_syndication_targets(TRUE);
       if (!empty($targets)) {
-        foreach ($targets as $url => $name) {
-          $syndication_targets[] = [
+        foreach ($targets['options'] as $url => $name) {
+          $target = [
             'uid' => $url,
             'name' => $name,
           ];
+
+          if (in_array($url, $targets['default'])) {
+            $target['checked'] = TRUE;
+          }
+
+          $syndication_targets[] = $target;
         }
       }
     }
