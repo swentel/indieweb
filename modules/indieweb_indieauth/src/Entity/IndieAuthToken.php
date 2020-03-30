@@ -38,6 +38,7 @@ use Drupal\Core\Field\BaseFieldDefinition;
  *   },
  *   links = {
  *     "add-form" = "/admin/config/services/indieweb/indieauth/tokens/add",
+ *     "view-jwt" = "/admin/config/services/indieweb/indieauth/tokens/{indieweb_indieauth_token}/jwt",
  *     "collection" = "/admin/config/services/indieweb/indieauth/tokens",
  *     "delete-form" = "/admin/config/services/indieweb/indieauth/tokens/{indieweb_indieauth_token}/delete",
  *     "change-status" = "/admin/config/services/indieweb/indieauth/tokens/{indieweb_indieauth_token}/status"
@@ -124,6 +125,13 @@ class IndieAuthToken extends ContentEntityBase implements IndieAuthTokenInterfac
    */
   public function getMe() {
     return $this->get('me')->value;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getCreated() {
+    return $this->get('created')->value;
   }
 
   /**

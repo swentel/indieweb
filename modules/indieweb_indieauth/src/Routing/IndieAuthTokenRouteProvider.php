@@ -28,6 +28,15 @@ class IndieAuthTokenRouteProvider extends AdminHtmlRouteProvider {
       ->setRequirement('indieweb_indieauth_token', '\S+');
     $collection->add('entity.indieweb_indieauth_token.change_status', $route);
 
+    $route = (new Route('/admin/config/services/indieweb/indieauth/tokens/{indieweb_indieauth_token}/view-jwt'))
+      ->addDefaults([
+        '_controller' => '\Drupal\indieweb_indieauth\Controller\IndieAuthController::viewJWT',
+        '_title' => 'View JWT token',
+      ])
+      ->setRequirement('_permission', 'administer indieweb')
+      ->setRequirement('indieweb_indieauth_token', '\S+');
+    $collection->add('entity.indieweb_indieauth_token.view_jwt', $route);
+
     return $collection;
   }
 

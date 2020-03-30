@@ -48,6 +48,12 @@ class IndieAuthTokenListBuilder extends EntityListBuilder {
       'url' => $this->ensureDestination($entity->toUrl('change-status')),
     ];
 
+    $operations['#links']['jwt'] =  [
+      'title' => $this->t('View JWT token'),
+      'weight' => 10,
+      'url' => $entity->toUrl('view-jwt'),
+    ];
+
     return $operations;
   }
 

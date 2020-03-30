@@ -333,7 +333,7 @@ class IndieAuthController extends ControllerBase {
    */
   public function token(Request $request) {
 
-    $config = \Drupal::config('indieweb_indieauth.settings');
+    $config = $this->config('indieweb_indieauth.settings');
     $auth_enabled = $config->get('auth_internal');
 
     // Early return when internal server is not enabled.
@@ -615,6 +615,39 @@ class IndieAuthController extends ControllerBase {
     $indieweb_indieauth_token->save();
     $this->messenger()->addMessage($this->t('Changed status for %token', ['%token' => $indieweb_indieauth_token->label()]));
     return new RedirectResponse($indieweb_indieauth_token->toUrl('collection')->toString());
+  }
+
+  /**
+   * View JWT token.
+   *
+   * @param \Drupal\indieweb_indieauth\Entity\IndieAuthTokenInterface $indieweb_indieauth_token
+   *
+   * @return array
+   */
+  public function viewJWT(IndieAuthTokenInterface $indieweb_indieauth_token) {
+    $build = [];
+
+    $build['info'] = [
+      '#markup' => '<p>' . $this->t('Copy this string which can be used for requests to the Micropub or Microsub endpoint.') . '</p>',
+    ];
+
+    $signer = new Sha512();
+
+    $JWT = (new Builder())
+      ->issuedBy(\Drupal::request()->getSchemeAndHttpHost())
+      ->permittedFor($indieweb_indieauth_token->getClientId())
+      ->identifiedBy($indieweb_indieauth_token->getAccessToken(), true)
+      ->issuedAt($indieweb_indieauth_token->getCreated())
+      ->withClaim('uid', $indieweb_indieauth_token->getOwnerId())
+      ->getToken($signer,  new Key(file_get_contents($this->config('indieweb_indieauth.settings')->get('private_key'))));
+
+    $build['token'] = [
+      '#type' => 'textarea',
+      '#title' => 'JWT token',
+      '#value' => (string) $JWT,
+    ];
+
+    return $build;
   }
 
   /**

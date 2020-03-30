@@ -85,6 +85,13 @@ interface IndieAuthTokenInterface extends ContentEntityInterface {
   public function getClientId();
 
   /**
+   * Returns the created time.
+   *
+   * @return integer
+   */
+  public function getCreated();
+
+  /**
    * Returns the changed time.
    *
    * @return integer

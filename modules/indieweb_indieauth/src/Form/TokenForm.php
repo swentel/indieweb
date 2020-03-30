@@ -62,6 +62,7 @@ class TokenForm extends ContentEntityForm {
     if ($token->isNew()) {
       $random = new Random();
       $access_token = $random->name(128);
+      $token->set('expire', 0);
       $token->set('access_token', $access_token);
       $token->set('changed', 0);
     }
