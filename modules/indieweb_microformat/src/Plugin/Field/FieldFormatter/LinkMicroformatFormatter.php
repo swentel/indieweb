@@ -79,7 +79,12 @@ class LinkMicroformatFormatter extends LinkFormatter {
       foreach ($element as $delta => $item) {
 
         if ($settings['microformat_class'] == 'u-repost-of') {
-          if (empty($item['#title']) || $item['#title'] == $item['#url']->getUri()) {
+          $entity = $items->getEntity();
+          $has_body = FALSE;
+          if (isset($entity->body) && !empty($entity->body->value)) {
+            $has_body = TRUE;
+          }
+          if ($has_body && (empty($item['#title']) || $item['#title'] == $item['#url']->getUri())) {
             drupal_static('indieweb_quotation_' . $items->getEntity()->getEntityTypeId() . '_' . $items->getEntity()->id(), $this->fieldDefinition->getFieldStorageDefinition()->getName());
             $element[$delta]['#title'] = $item['#url']->toString();
             $element[$delta]['#options']['attributes']['class'][] = 'u-url';
