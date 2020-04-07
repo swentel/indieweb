@@ -53,7 +53,7 @@ class MicrosubItemStorage extends SqlContentEntityStorage implements MicrosubIte
   public function changeReadStatus($channel_id, $status, $entries = NULL) {
 
     // Do not execute in case the channel id is global and there are no entries.
-    if (empty($entries) && $channel_id == 'global') {
+    if (empty($entries) && $channel_id === 'global') {
       return;
     }
 
