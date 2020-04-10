@@ -811,7 +811,7 @@ class WebmentionTest extends IndiewebBrowserTestBase {
     // otherwise we bleed into the live site, and possibly start pinging
     // webmention.io.
     $class = \Drupal::service('indieweb.webmention.client');
-    self::assertTrue($class instanceof WebmentionClientTest);
+    self::assertNotEmpty($class instanceof WebmentionClientTest);
 
     $test_endpoint = Url::fromRoute('indieweb_test.webmention_endpoint', [], ['absolute' => TRUE])->toString();
     $this->drupalLogin($this->adminUser);
@@ -980,8 +980,8 @@ class WebmentionTest extends IndiewebBrowserTestBase {
     $records = \Drupal::database()->query($query, [':name' => INDIEWEB_WEBMENTION_QUEUE]);
     foreach ($records as $record) {
       $data = unserialize($record->data);
-      $this->assertTrue($data['source'] == $edit['source']);
-      $this->assertTrue(strpos($data['target'], 'node/1') !== FALSE);
+      $this->assertNotEmpty($data['source'] == $edit['source']);
+      $this->assertNotEmpty(strpos($data['target'], 'node/1') !== FALSE);
     }
 
     // Use internal endpoint, should create a webmention immediately.
@@ -1087,9 +1087,9 @@ class WebmentionTest extends IndiewebBrowserTestBase {
       if ($fuzzy) {
         if ($check_host) {
           $host = \Drupal::request()->getSchemeAndHttpHost();
-          self::assertTrue(strpos($actual, $host) === FALSE, "checking $host in $actual to be false");
+          self::assertNotEmpty(strpos($actual, $host) === FALSE, "checking $host in $actual to be false");
         }
-        self::assertTrue(strpos($actual, $expected_value) !== FALSE, "searching $expected_value in $actual");
+        self::assertNotEmpty(strpos($actual, $expected_value) !== FALSE, "searching $expected_value in $actual");
       }
       else {
         self::assertEquals($expected_value, $actual, "$field is equal");

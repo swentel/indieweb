@@ -9,6 +9,8 @@ namespace Drupal\Tests\indieweb\Functional;
  */
 class GoneTest extends IndiewebBrowserTestBase {
 
+  protected $defaultTheme = 'stark';
+
   /**
    * Modules to enable for this test.
    *

@@ -128,7 +128,7 @@ class MediaCacheClient extends MediaCacheClientDefault {
     }
 
     if (empty($directory)) {
-      $default_scheme = file_default_scheme();
+      $default_scheme = \Drupal::config('system.file')->get('default_scheme');
       $directory = $default_scheme . '://' . $config->get('imagecache_directory');
     }
 

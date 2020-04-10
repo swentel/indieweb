@@ -139,12 +139,12 @@ class CommentTest extends IndiewebBrowserTestBase {
     }
     else {
       // Explicit failure.
-      $this->assertTrue($cid, 'No comment found');
+      $this->assertNotEmpty($cid, 'No comment found');
     }
 
     // We should not have a notification.
     $captured_emails = \Drupal::state()->get('system.test_mail_collector');
-    $this->assertFalse($captured_emails, 'No notification mail for comment.');
+    $this->assertEmpty($captured_emails, 'No notification mail for comment.');
 
     // Publish the comment.
     $comment->setPublished();
@@ -189,16 +189,16 @@ class CommentTest extends IndiewebBrowserTestBase {
     }
     else {
       // Explicit failure.
-      $this->assertTrue($cid, 'No comment found');
+      $this->assertNotEmpty($cid, 'No comment found');
     }
 
     // We should have a mail notification.
     $captured_emails = \Drupal::state()->get('system.test_mail_collector');
     $notification = end($captured_emails);
-    self::assertTrue($notification && $notification['id'] == 'indieweb_webmention_webmention_comment_created', 'Notification mail found for comment.');
+    self::assertNotEmpty($notification && $notification['id'] == 'indieweb_webmention_webmention_comment_created', 'Notification mail found for comment.');
     self::assertEquals('Comment created on "' . $this->title_text . '" via webmention', $notification['subject']);
-    self::assertTrue(strpos($notification['body'], $notification['params']['comment_webmention_body']) !== FALSE);
-    self::assertTrue(strpos($notification['body'], "The comment is unpublished, so check the approval queue at") !== FALSE);
+    self::assertNotEmpty(strpos($notification['body'], $notification['params']['comment_webmention_body']) !== FALSE);
+    self::assertNotEmpty(strpos($notification['body'], "The comment is unpublished, so check the approval queue at") !== FALSE);
 
     // Publish the comment.
     $comment->setPublished();
@@ -296,7 +296,7 @@ class CommentTest extends IndiewebBrowserTestBase {
     }
     else {
       // Explicit failure.
-      $this->assertTrue($cid, 'No comment found');
+      $this->assertNotEmpty($cid, 'No comment found');
     }
     $comment->setPublished();
     $comment->save();
@@ -323,7 +323,7 @@ class CommentTest extends IndiewebBrowserTestBase {
     }
     else {
       // Explicit failure.
-      $this->assertTrue($cid, 'No comment found');
+      $this->assertNotEmpty($cid, 'No comment found');
     }
 
     $this->drupalGet('node/' . $article->id());
@@ -347,7 +347,7 @@ class CommentTest extends IndiewebBrowserTestBase {
     }
     else {
       // Explicit failure.
-      $this->assertTrue($cid, 'No comment found');
+      $this->assertNotEmpty($cid, 'No comment found');
     }
 
     $this->drupalGet('node/' . $article->id());
@@ -377,7 +377,7 @@ class CommentTest extends IndiewebBrowserTestBase {
     }
     else {
       // Explicit failure.
-      $this->assertTrue($cid, 'No comment found');
+      $this->assertNotEmpty($cid, 'No comment found');
     }
 
     $this->drupalGet('node/' . $article->id());
@@ -409,7 +409,7 @@ class CommentTest extends IndiewebBrowserTestBase {
     }
     else {
       // Explicit failure.
-      $this->assertTrue($nid, 'No like found');
+      $this->assertNotEmpty($nid, 'No like found');
     }
 
     $this->assertWebmentionQueueItems(['https://brid.gy/publish/twitter'], $node->id());

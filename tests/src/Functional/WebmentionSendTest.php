@@ -60,7 +60,7 @@ class WebmentionSendTest extends IndiewebBrowserTestBase {
     foreach ($posted_syndication_targets as $line) {
       $line = trim($line);
       list($label, $url) = explode('|', $line);
-      $this->assertTrue(isset($syndication_targets[$url]) && $syndication_targets[$url] == $label);
+      $this->assertNotEmpty(isset($syndication_targets[$url]) && $syndication_targets[$url] == $label);
     }
 
     // Go to manage display and verify the fields are there.

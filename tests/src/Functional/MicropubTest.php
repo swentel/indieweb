@@ -174,7 +174,7 @@ class MicropubTest extends IndiewebBrowserTestBase {
     $this->assertNodeCount(1, 'article');
     $nid = $this->getLastNid('article');
     $node = \Drupal::entityTypeManager()->getStorage('node')->load($nid);
-    self::assertTrue(!empty($node->field_image->target_id));
+    self::assertNotEmpty($node->field_image->target_id);
 
     // Set cardinality to 2.
     $edit = ['cardinality' => 'number', 'cardinality_number' => 2];
@@ -360,7 +360,7 @@ class MicropubTest extends IndiewebBrowserTestBase {
     }
     else {
       // Explicit failure.
-      $this->assertTrue($nid, 'No page node found');
+      $this->assertNotEmpty($nid, 'No page node found');
     }
 
     // ----------------------------------------------------------------
@@ -410,7 +410,7 @@ class MicropubTest extends IndiewebBrowserTestBase {
     $code = $this->sendMicropubRequest($update, 'is_valid', FALSE, 'json');
     self::assertEquals(200, $code);
     $node_unpublished = \Drupal::entityTypeManager()->getStorage('node')->loadUnchanged($nid);
-    self::assertFalse($node_unpublished->isPublished());
+    self::assertEmpty($node_unpublished->isPublished());
     self::assertEquals('An updated title', $node_unpublished->label());
     self::assertEquals('Fixing content', $node_unpublished->get('body')->value);
 
@@ -418,7 +418,7 @@ class MicropubTest extends IndiewebBrowserTestBase {
     $code = $this->sendMicropubRequest($update, 'is_valid', FALSE, 'json');
     self::assertEquals(200, $code);
     $node_published_again = \Drupal::entityTypeManager()->getStorage('node')->loadUnchanged($nid);
-    self::assertTrue($node_published_again->isPublished());
+    self::assertNotEmpty($node_published_again->isPublished());
 
     // ----------------------------------------------------------------
     // all post types
@@ -450,12 +450,12 @@ class MicropubTest extends IndiewebBrowserTestBase {
       self::assertEquals(2, count($tags));
       foreach ($tags as $tag) {
         $term = \Drupal::entityTypeManager()->getStorage('taxonomy_term')->load($tag['target_id']);
-        self::assertTrue(in_array($term->label(), $this->article['category']));
+        self::assertNotEmpty(in_array($term->label(), $this->article['category']));
       }
     }
     else {
       // Explicit failure.
-      $this->assertTrue($nid, 'No article node found');
+      $this->assertNotEmpty($nid, 'No article node found');
     }
 
     // Test event.
@@ -483,7 +483,7 @@ class MicropubTest extends IndiewebBrowserTestBase {
     }
     else {
       // Explicit failure.
-      $this->assertTrue($nid, 'No event node found');
+      $this->assertNotEmpty($nid, 'No event node found');
     }
 
     // Test likes.
@@ -515,7 +515,7 @@ class MicropubTest extends IndiewebBrowserTestBase {
     }
     else {
       // Explicit failure.
-      $this->assertTrue($nid, 'No like node found');
+      $this->assertNotEmpty($nid, 'No like node found');
     }
 
     // Clear the queue.
@@ -564,7 +564,7 @@ class MicropubTest extends IndiewebBrowserTestBase {
     }
     else {
       // Explicit failure.
-      $this->assertTrue($nid, 'No bookmark node found');
+      $this->assertNotEmpty($nid, 'No bookmark node found');
     }
 
     // Clear the queue.
@@ -605,7 +605,7 @@ class MicropubTest extends IndiewebBrowserTestBase {
     }
     else {
       // Explicit failure.
-      $this->assertTrue($nid, 'No repost node found');
+      $this->assertNotEmpty($nid, 'No repost node found');
     }
 
     // Clear the queue.
@@ -647,7 +647,7 @@ class MicropubTest extends IndiewebBrowserTestBase {
     }
     else {
       // Explicit failure.
-      $this->assertTrue($nid, 'No reply node found');
+      $this->assertNotEmpty($nid, 'No reply node found');
     }
 
     // Clear the queue.
@@ -695,7 +695,7 @@ class MicropubTest extends IndiewebBrowserTestBase {
     }
     else {
       // Explicit failure.
-      $this->assertTrue($nid, 'No rsvp node found');
+      $this->assertNotEmpty($nid, 'No rsvp node found');
     }
 
     // Clear the queue.
@@ -746,7 +746,7 @@ class MicropubTest extends IndiewebBrowserTestBase {
     }
     else {
       // Explicit failure.
-      $this->assertTrue($nid, 'No page node found');
+      $this->assertNotEmpty($nid, 'No page node found');
     }
 
     $post = $this->article;
@@ -763,7 +763,7 @@ class MicropubTest extends IndiewebBrowserTestBase {
     }
     else {
       // Explicit failure.
-      $this->assertTrue($nid, 'No article node found');
+      $this->assertNotEmpty($nid, 'No article node found');
     }
 
     // Add content to the like too, use access token in post.
@@ -781,7 +781,7 @@ class MicropubTest extends IndiewebBrowserTestBase {
     }
     else {
       // Explicit failure.
-      $this->assertTrue($nid, 'No like node found');
+      $this->assertNotEmpty($nid, 'No like node found');
     }
     $this->assertWebmentionQueueItems();
 
@@ -800,7 +800,7 @@ class MicropubTest extends IndiewebBrowserTestBase {
     }
     else {
       // Explicit failure.
-      $this->assertTrue($nid, 'No bookmark node found');
+      $this->assertNotEmpty($nid, 'No bookmark node found');
     }
     $this->assertWebmentionQueueItems();
 
@@ -821,7 +821,7 @@ class MicropubTest extends IndiewebBrowserTestBase {
     }
     else {
       // Explicit failure.
-      $this->assertTrue($nid, 'No repost node found');
+      $this->assertNotEmpty($nid, 'No repost node found');
     }
     $this->assertWebmentionQueueItems();
 
@@ -840,7 +840,7 @@ class MicropubTest extends IndiewebBrowserTestBase {
     }
     else {
       // Explicit failure.
-      $this->assertTrue($nid, 'No reply node found');
+      $this->assertNotEmpty($nid, 'No reply node found');
     }
     $this->assertWebmentionQueueItems();
 
@@ -859,7 +859,7 @@ class MicropubTest extends IndiewebBrowserTestBase {
     }
     else {
       // Explicit failure.
-      $this->assertTrue($nid, 'No rsvp node found');
+      $this->assertNotEmpty($nid, 'No rsvp node found');
     }
     $this->assertWebmentionQueueItems();
 
@@ -878,7 +878,7 @@ class MicropubTest extends IndiewebBrowserTestBase {
     }
     else {
       // Explicit failure.
-      $this->assertTrue($nid, 'No event node found');
+      $this->assertNotEmpty($nid, 'No event node found');
     }
 
     // ----------------------------------------------------------------
@@ -911,7 +911,7 @@ class MicropubTest extends IndiewebBrowserTestBase {
     }
     else {
       // Explicit failure.
-      $this->assertTrue($nid, 'No page node found');
+      $this->assertNotEmpty($nid, 'No page node found');
     }
 
     // A json post.
@@ -926,7 +926,7 @@ class MicropubTest extends IndiewebBrowserTestBase {
     }
     else {
       // Explicit failure.
-      $this->assertTrue($nid, 'No page node found');
+      $this->assertNotEmpty($nid, 'No page node found');
     }
 
     // A post with random properties.
@@ -942,7 +942,7 @@ class MicropubTest extends IndiewebBrowserTestBase {
     }
     else {
       // Explicit failure.
-      $this->assertTrue($nid, 'No page node found');
+      $this->assertNotEmpty($nid, 'No page node found');
     }
 
     // Test that nothing comes in the queue as the note is unpublished.
@@ -983,7 +983,7 @@ class MicropubTest extends IndiewebBrowserTestBase {
     }
     else {
       // Explicit failure.
-      $this->assertTrue($nid, 'No page node found');
+      $this->assertNotEmpty($nid, 'No page node found');
     }
 
     // More tags tests.
@@ -999,12 +999,12 @@ class MicropubTest extends IndiewebBrowserTestBase {
       self::assertEquals(3, count($tags));
       foreach ($tags as $tag) {
         $term = \Drupal::entityTypeManager()->getStorage('taxonomy_term')->load($tag['target_id']);
-        self::assertTrue(in_array($term->label(), $post['category']));
+        self::assertNotEmpty(in_array($term->label(), $post['category']));
       }
     }
     else {
       // Explicit failure.
-      $this->assertTrue($nid, 'No article node found');
+      $this->assertNotEmpty($nid, 'No article node found');
     }
 
     // ----------------------------------------------------------------
@@ -1061,11 +1061,11 @@ class MicropubTest extends IndiewebBrowserTestBase {
     self::assertEquals(403, $code);
 
     $nid = \Drupal::database()->query("SELECT nid FROM {node_field_data} WHERE nid = :nid", [':nid' => $nid])->fetchField();
-    self::assertTrue($nid);
+    self::assertNotEmpty($nid);
     $code = $this->sendMicropubRequest($delete, 'is_valid', FALSE, 'json');
     self::assertEquals(200, $code);
     $nid = \Drupal::database()->query("SELECT nid FROM {node_field_data} WHERE nid = :nid", [':nid' => $nid])->fetchField();
-    self::assertFalse($nid);
+    self::assertEmpty($nid);
 
     // ----------------------------------------------------------------
     // Delete node type.
@@ -1074,11 +1074,11 @@ class MicropubTest extends IndiewebBrowserTestBase {
     $article->delete();
 
     $node_type_name = \Drupal::config('indieweb_micropub.settings')->get('article_node_type');
-    self::assertTrue(empty($node_type_name));
+    self::assertEmpty($node_type_name);
     $node_type_name = \Drupal::config('indieweb_micropub.settings')->get('note_node_type');
-    self::assertTrue($node_type_name == 'page');
+    self::assertNotEmpty($node_type_name == 'page');
     $node_type_name = \Drupal::config('indieweb_micropub.settings')->get('like_node_type');
-    self::assertTrue($node_type_name == 'like');
+    self::assertNotEmpty($node_type_name == 'like');
 
     // Test creating an article now, should not create a node.
     $code = $this->sendMicropubRequest($this->article);

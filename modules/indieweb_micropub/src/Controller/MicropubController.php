@@ -341,7 +341,7 @@ class MicropubController extends ControllerBase {
       }
 
       $response_message = '';
-      $response_code = 404;
+      $response_code = 400;
 
       $path = indieweb_get_path($this->object_url);
       try {
@@ -661,7 +661,7 @@ class MicropubController extends ControllerBase {
         // the url of the webmention and replace the like-of value.
         $like = $this->input['like-of'][0];
         $like = indieweb_get_path($like);
-        $path = \Drupal::service('path.alias_manager')->getPathByAlias($like);
+        $path = \Drupal::service('path_alias.manager')->getPathByAlias($like);
         try {
           $params = Url::fromUri("internal:" . $path)->getRouteParameters();
           if (!empty($params) && key($params) == 'indieweb_webmention') {
@@ -701,7 +701,7 @@ class MicropubController extends ControllerBase {
           $link_field_url = '';
           $reply = $this->input['in-reply-to'][0];
           $reply = indieweb_get_path($reply);
-          $path = \Drupal::service('path.alias_manager')->getPathByAlias($reply);
+          $path = \Drupal::service('path_alias.manager')->getPathByAlias($reply);
           try {
             $params = Url::fromUri("internal:" . $path)->getRouteParameters();
 

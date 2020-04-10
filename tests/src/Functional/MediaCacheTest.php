@@ -35,15 +35,15 @@ class MediaCacheTest extends IndiewebBrowserTestBase {
     /** @var \Drupal\indieweb\MediaCacheClient\MediaCacheClientInterface $client */
     $client = \Drupal::service('indieweb.media_cache.client');
 
-    $string = 'This is content with an <img alt="something" src="' . $filename . '" /> in it which will be rewritten. 
+    $string = 'This is content with an <img alt="something" src="' . $filename . '" /> in it which will be rewritten.
       This one will be rewritten too: <img title="test" src="' . $filename2 . '" width="300">';
 
     $string = $client->replaceImagesInString($string);
 
-    self::assertTrue(strpos($string, 'images/indieweb-building-blocks.png') === FALSE);
-    self::assertTrue(strpos($string, 'images/indieweb-building-blocks.jpg') !== FALSE);
-    self::assertTrue(strpos($string, 'images/indieauth-monocle.png') === FALSE);
-    self::assertTrue(strpos($string, 'images/indieauth-monocle.jpg') !== FALSE);
+    self::assertNotEmpty(strpos($string, 'images/indieweb-building-blocks.png') === FALSE);
+    self::assertNotEmpty(strpos($string, 'images/indieweb-building-blocks.jpg') !== FALSE);
+    self::assertNotEmpty(strpos($string, 'images/indieauth-monocle.png') === FALSE);
+    self::assertNotEmpty(strpos($string, 'images/indieauth-monocle.jpg') !== FALSE);
   }
 
 }

@@ -431,7 +431,7 @@ class WebmentionClient implements WebmentionClientInterface {
       !empty($webmention->get('content_text')->value)) {
 
         $pid = 0;
-        $path = \Drupal::service('path.alias_manager')->getPathByAlias($webmention->get('target')->value);
+        $path = \Drupal::service('path_alias.manager')->getPathByAlias($webmention->get('target')->value);
         try {
           $params = Url::fromUri("internal:" . $path)->getRouteParameters();
 
@@ -559,7 +559,7 @@ class WebmentionClient implements WebmentionClientInterface {
    * @param $target
    */
   public function clearCache($target) {
-    $path = \Drupal::service('path.alias_manager')->getPathByAlias($target);
+    $path = \Drupal::service('path_alias.manager')->getPathByAlias($target);
     try {
       $params = Url::fromUri("internal:" . $path)->getRouteParameters();
       if (!empty($params)) {

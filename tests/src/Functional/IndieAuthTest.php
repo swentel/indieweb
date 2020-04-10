@@ -30,6 +30,8 @@ class IndieAuthTest extends IndiewebBrowserTestBase {
     'indieweb_micropub',
   ];
 
+  protected $defaultTheme = 'stark';
+
   /**
    * An indieweb authorized user.
    *
@@ -166,7 +168,7 @@ class IndieAuthTest extends IndiewebBrowserTestBase {
 
     /** @var \Drupal\user\UserInterface $account */
     $account = \Drupal::entityTypeManager()->getStorage('user')->load(3);
-    self::assertTrue(empty($account->getEmail()));
+    self::assertNotEmpty(empty($account->getEmail()));
 
     // Normal user can change it.
     $this->drupalLogout();
@@ -363,14 +365,14 @@ class IndieAuthTest extends IndiewebBrowserTestBase {
     $response = $this->postToUrl($params, $token_path);
     $body_response = $response->getBody()->__toString();
     $body = @json_decode($body_response);
-    self::assertTrue(isset($body->access_token));
+    self::assertNotEmpty(isset($body->access_token));
     self::assertEquals($this->indiewebAuthorizedUser->getAccountName(), $body->profile->name);
     self::assertEquals(200, $response->getStatusCode());
 
     // Verify the authorization code is gone.
     /** @var \Drupal\indieweb_indieauth\Entity\IndieAuthAuthorizationCodeInterface $authorization_code */
     $authorization_code = \Drupal::entityTypeManager()->getStorage('indieweb_indieauth_code')->getIndieAuthAuthorizationCode($params['code']);
-    self::assertFalse($authorization_code);
+    self::assertEmpty($authorization_code);
 
     // Verify the token.
     $response = $this->verifyTokenRequest('invalid', $token_path);
@@ -519,14 +521,14 @@ class IndieAuthTest extends IndiewebBrowserTestBase {
     $response = $this->postToUrl($params, $auth_path);
     $body_response = $response->getBody()->__toString();
     $body = @json_decode($body_response);
-    self::assertTrue(isset($body->me) && $body->me == $me);
+    self::assertNotEmpty(isset($body->me) && $body->me == $me);
     self::assertEquals($this->indiewebAuthorizedUser->getAccountName(), $body->profile->name);
     self::assertEquals(200, $response->getStatusCode());
 
     // Verify the authorization code is gone.
     /** @var \Drupal\indieweb_indieauth\Entity\IndieAuthAuthorizationCodeInterface $authorization_code */
     $authorization_code = \Drupal::entityTypeManager()->getStorage('indieweb_indieauth_code')->getIndieAuthAuthorizationCode($params['code']);
-    self::assertFalse($authorization_code);
+    self::assertEmpty($authorization_code);
   }
 
   /**

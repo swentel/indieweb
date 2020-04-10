@@ -9,6 +9,8 @@ namespace Drupal\Tests\indieweb\Functional;
  */
 class FeedTest extends IndiewebBrowserTestBase {
 
+  protected $defaultTheme = 'stark';
+
   /**
    * Modules to enable for this test.
    *
@@ -111,7 +113,7 @@ class FeedTest extends IndiewebBrowserTestBase {
     $this->assertSession()->responseNotContains($this->header_jfd_link_tag);
 
     $this->drupalGet($this->timeline_path);
-    $this->assertSession()->responseContains('<h1 class="page-title">Timeline</h1>');
+    $this->assertSession()->responseContains('<h1>Timeline</h1>');
     $this->assertSession()->responseContains($edit['author']);
     $this->assertSession()->responseContains('noindex, nofollow');
 

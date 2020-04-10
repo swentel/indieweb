@@ -543,7 +543,7 @@ abstract class IndiewebBrowserTestBase extends BrowserTestBase {
   protected function assertWebmentionQueueItems($urls = [], $id = NULL, $domain = NULL) {
     if ($urls) {
       $count = \Drupal::queue(INDIEWEB_WEBMENTION_QUEUE)->numberOfItems();
-      $this->assertTrue($count == count($urls), 'Items in queue: ' . $count . ' - total passed: ' . count($urls));
+      $this->assertNotEmpty($count == count($urls), 'Items in queue: ' . $count . ' - total passed: ' . count($urls));
 
       // We use a query here, don't want to use a while loop. When there's
       // nothing in the queue yet, the table won't exist, so the query will
@@ -554,7 +554,7 @@ abstract class IndiewebBrowserTestBase extends BrowserTestBase {
         foreach ($records as $record) {
           $data = unserialize($record->data);
           if (!empty($data['source']) && !empty($data['target']) && $id) {
-            $this->assertTrue(in_array($data['target'], $urls), 'Found ' . $data['target'] . ' in ' . print_r($urls, 1));
+            $this->assertNotEmpty(in_array($data['target'], $urls), 'Found ' . $data['target'] . ' in ' . print_r($urls, 1));
             if ($data['entity_type_id'] == 'node') {
               if (!empty($domain)) {
                 $this->assertEquals($domain . '/node/' . $id, $data['source']);
@@ -572,7 +572,7 @@ abstract class IndiewebBrowserTestBase extends BrowserTestBase {
     }
     else {
       $count = \Drupal::queue(INDIEWEB_WEBMENTION_QUEUE)->numberOfItems();
-      $this->assertFalse($count);
+      $this->assertEmpty($count);
     }
   }
 
@@ -642,7 +642,7 @@ abstract class IndiewebBrowserTestBase extends BrowserTestBase {
   protected function assertPostContextQueueItems($urls = [], $id = NULL) {
     if ($urls) {
       $count = \Drupal::queue(INDIEWEB_POST_CONTEXT_QUEUE)->numberOfItems();
-      $this->assertTrue($count == count($urls));
+      $this->assertNotEmpty($count == count($urls));
 
       // We use a query here, don't want to use a while loop. When there's
       // nothing in the queue yet, the table won't exist, so the query will
@@ -652,8 +652,8 @@ abstract class IndiewebBrowserTestBase extends BrowserTestBase {
         $records = \Drupal::database()->query($query, [':name' => INDIEWEB_POST_CONTEXT_QUEUE]);
         foreach ($records as $record) {
           $data = unserialize($record->data);
-          $this->assertTrue(in_array($data['url'], $urls));
-          $this->assertTrue($data['id'] == $id);
+          $this->assertNotEmpty(in_array($data['url'], $urls));
+          $this->assertNotEmpty($data['id'] == $id);
         }
       }
       catch (\Exception $ignored) {
@@ -662,7 +662,7 @@ abstract class IndiewebBrowserTestBase extends BrowserTestBase {
     }
     else {
       $count = \Drupal::queue(INDIEWEB_POST_CONTEXT_QUEUE)->numberOfItems();
-      $this->assertFalse($count);
+      $this->assertEmpty($count);
     }
   }
 
@@ -680,10 +680,10 @@ abstract class IndiewebBrowserTestBase extends BrowserTestBase {
     if ($type == 'node') {
       $entry = \Drupal::database()->query('SELECT content FROM {indieweb_post_context} WHERE entity_id = :id', [':id' => $id])->fetchField();
       if ($found) {
-        self::assertTrue($entry);
+        self::assertNotEmpty($entry);
       }
       else {
-        self::assertFalse($entry);
+        self::assertEmpty($entry);
       }
     }
   }
@@ -731,7 +731,7 @@ abstract class IndiewebBrowserTestBase extends BrowserTestBase {
     }
     else {
       // explicit fail
-      $this->assertTrue($object, 'no send item found');
+      $this->assertNotEmpty($object, 'no send item found');
     }
   }
 
@@ -742,7 +742,7 @@ abstract class IndiewebBrowserTestBase extends BrowserTestBase {
    */
   protected function assertNoSendItem($id) {
     $false = \Drupal::database()->query('SELECT * FROM {webmention_send} WHERE id = :id', [':id' => $id])->fetchObject();
-    self::assertTrue($false === FALSE);
+    self::assertNotEmpty($false === FALSE);
   }
 
   /**
@@ -758,7 +758,7 @@ abstract class IndiewebBrowserTestBase extends BrowserTestBase {
     }
     else {
       // explicit fail
-      $this->assertTrue($object, 'no syndication found');
+      $this->assertNotEmpty($object, 'no syndication found');
     }
   }
 
@@ -769,7 +769,7 @@ abstract class IndiewebBrowserTestBase extends BrowserTestBase {
    */
   protected function assertNoSyndication($entity_id) {
     $false = \Drupal::database()->query('SELECT * FROM {webmention_syndication} WHERE entity_id = :id', [':id' => $entity_id])->fetchField();
-    self::assertTrue($false === FALSE);
+    self::assertNotEmpty($false === FALSE);
   }
 
   /**

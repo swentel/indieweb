@@ -290,7 +290,7 @@ class MicrosubTest extends IndiewebBrowserTestBase {
     $this->assertPostContextQueueItems();
     /** @var \Drupal\indieweb_microsub\Entity\MicrosubItemInterface $item */
     $item = \Drupal::entityTypeManager()->getStorage('indieweb_microsub_item')->loadUnchanged($id);
-    self::assertTrue(!empty($item->getContext()));
+    self::assertNotEmpty(!empty($item->getContext()));
     $context_data = $item->getContext();
     $url = $page->toUrl('canonical', ['absolute' => TRUE])->toString();
     self::assertEquals($page->get('body')->value, $context_data->{$url}->content);
@@ -298,10 +298,10 @@ class MicrosubTest extends IndiewebBrowserTestBase {
     $query = ['action' => 'timeline', 'channel' => 1];
     $response = $this->sendMicrosubRequest($query);
     $body = json_decode($response['body']);
-    self::assertTrue(isset($body->items[0]->refs));
-    self::assertTrue(isset($body->items[0]->refs->{$url}));
+    self::assertNotEmpty(isset($body->items[0]->refs));
+    self::assertNotEmpty(isset($body->items[0]->refs->{$url}));
     self::assertEquals($page->get('body')->value, $body->items[0]->refs->{$url}->content);
-    self::assertTrue(!isset($body->items[1]->refs));
+    self::assertNotEmpty(!isset($body->items[1]->refs));
 
     // Exclude articles from channel.
     $this->drupalLogin($this->adminUser);
@@ -319,9 +319,9 @@ class MicrosubTest extends IndiewebBrowserTestBase {
     $query = ['action' => 'timeline', 'channel' => 1];
     $response = $this->sendMicrosubRequest($query);
     $body = json_decode($response['body']);
-    self::assertTrue(count($body->items) == 1);
+    self::assertNotEmpty(count($body->items) == 1);
     $type = 'post-type';
-    self::assertTrue($body->items[0]->{$type} == 'reply');
+    self::assertNotEmpty($body->items[0]->{$type} == 'reply');
 
     // Test disabled source.
     $this->drupalLogin($this->adminUser);
@@ -345,7 +345,7 @@ class MicrosubTest extends IndiewebBrowserTestBase {
 
     /** @var \Drupal\indieweb_microsub\Entity\MicrosubChannelInterface $channel */
     $channel = \Drupal::entityTypeManager()->getStorage('indieweb_microsub_channel')->loadUnchanged(2);
-    self::assertTrue($channel->getStatus() === FALSE);
+    self::assertNotEmpty($channel->getStatus() === FALSE);
 
     $this->microsubClear('item');
     $this->assertMicrosubItemCount('item', 0);
@@ -357,7 +357,7 @@ class MicrosubTest extends IndiewebBrowserTestBase {
     $this->drupalPostForm('admin/config/services/indieweb/microsub/channels/2/edit', ['status' => TRUE], 'Save');
     // Load so caches are cleared - weird testbot.
     $channel = \Drupal::entityTypeManager()->getStorage('indieweb_microsub_channel')->loadUnchanged(2);
-    self::assertTrue($channel->getStatus() === TRUE);
+    self::assertNotEmpty($channel->getStatus() === TRUE);
 
     $this->resetNextFetch(1);
     $this->resetNextFetch(2);
@@ -642,10 +642,10 @@ class MicrosubTest extends IndiewebBrowserTestBase {
     $channel = $query->execute()->fetchField();
 
     if ($exists) {
-      self::assertTrue($channel);
+      self::assertNotEmpty($channel);
     }
     else {
-      self::assertFalse($channel);
+      self::assertEmpty($channel);
     }
   }
 
@@ -674,10 +674,10 @@ class MicrosubTest extends IndiewebBrowserTestBase {
     $source = $query->execute()->fetchField();
 
     if ($exists) {
-      self::assertTrue($source);
+      self::assertNotEmpty($source);
     }
     else {
-      self::assertFalse($source);
+      self::assertEmpty($source);
     }
   }
 
