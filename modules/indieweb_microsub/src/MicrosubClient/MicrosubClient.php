@@ -130,9 +130,9 @@ class MicrosubClient implements MicrosubClientInterface {
               $items_to_keep += 5;
               // We use two queries as not all mysql servers understand limits
               // in sub queries when the main query is a delete.
-              $timestamp = \Drupal::entityTypeManager()->getStorage('indieweb_microsub_item')->getTimestampByRangeAndSource($items_to_keep, $source_id);
+              $timestamp = \Drupal::entityTypeManager()->getStorage('indieweb_microsub_item')->getTimestampByRangeSourceAndChannel($items_to_keep, $channel_id, $source_id);
               if ($timestamp) {
-                \Drupal::entityTypeManager()->getStorage('indieweb_microsub_item')->removeItemsBySourceOlderThanTimestamp($timestamp, $source_id, $guids);
+                \Drupal::entityTypeManager()->getStorage('indieweb_microsub_item')->removeItemsBySourceAndChannelOlderThanTimestamp($timestamp, $channel_id, $source_id, $guids);
               }
             }
           }

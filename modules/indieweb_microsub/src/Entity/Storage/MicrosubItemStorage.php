@@ -225,11 +225,12 @@ class MicrosubItemStorage extends SqlContentEntityStorage implements MicrosubIte
   /**
    * {@inheritdoc}
    */
-  public function getTimestampByRangeAndSource($start, $source_id) {
+  public function getTimestampByRangeSourceAndChannel($start, $channel_id, $source_id) {
     return $this->database
       ->select('microsub_item', 'm')
       ->fields('m', ['timestamp'])
       ->range(($start - 1), 1)
+      ->condition('channel_id', $channel_id)
       ->condition('source_id', $source_id)
       ->orderBy('timestamp', 'DESC')
       ->execute()
@@ -239,10 +240,11 @@ class MicrosubItemStorage extends SqlContentEntityStorage implements MicrosubIte
   /**
    * {@inheritdoc}
    */
-  public function removeItemsBySourceOlderThanTimestamp($timestamp, $source_id, $guids) {
+  public function removeItemsBySourceAndChannelOlderThanTimestamp($timestamp, $channel_id, $source_id, $guids) {
     $this->database
       ->delete('microsub_item')
       ->condition('timestamp', $timestamp, '<')
+      ->condition('channel_id', $channel_id)
       ->condition('source_id', $source_id)
       ->condition('is_read', 1)
       ->condition('guid', $guids, 'NOT IN')
