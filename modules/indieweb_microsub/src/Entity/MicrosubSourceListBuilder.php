@@ -47,6 +47,7 @@ class MicrosubSourceListBuilder extends EntityListBuilder {
     $header['items'] = $this->t('Total Items');
     $header['fetch_next'] = $this->t('Next update');
     $header['in_keep'] = $this->t('Feed/keep');
+    $header['changed'] = $this->t('Last update');
     return $header + parent::buildHeader();
   }
 
@@ -80,6 +81,7 @@ class MicrosubSourceListBuilder extends EntityListBuilder {
 
     $row['fetch_next'] = $fetch_next;
     $row['in_keep'] = $entity->getItemsInFeed() . '/' . $entity->getKeepItemsInFeed();
+    $row['changed'] = $entity->getChanged() ? \Drupal::service('date.formatter')->format($entity->getChanged()) : '/';
     return $row + parent::buildRow($entity);
   }
 

@@ -32,3 +32,29 @@ function indieweb_microsub_update_8002() {
     }
   }
 }
+
+/**
+ * Installs the changed field for sources.
+ */
+function indieweb_microsub_update_8003() {
+  $field_storage_definition = BaseFieldDefinition::create('integer')
+    ->setLabel(t('Changed'))
+    ->setDescription(t('The time that the feed was last updated.'))
+    ->setRevisionable(FALSE)
+    ->setTranslatable(FALSE);
+
+  \Drupal::entityDefinitionUpdateManager()
+    ->installFieldStorageDefinition('changed', 'indieweb_microsub_source', 'indieweb_microsub', $field_storage_definition);
+}
+
+/**
+ * Set all changed values to 0.
+ */
+function indieweb_microsub_update_8004() {
+  /** @var \Drupal\indieweb_microsub\Entity\MicrosubSourceInterface[] $sources */
+  $sources = \Drupal::entityTypeManager()->getStorage('indieweb_microsub_source')->loadMultiple();
+  foreach ($sources as $source) {
+    $source->set('changed', 0);
+    $source->save();
+  }
+}

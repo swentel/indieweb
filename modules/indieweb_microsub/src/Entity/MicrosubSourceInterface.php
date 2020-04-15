@@ -100,6 +100,20 @@ interface MicrosubSourceInterface extends ContentEntityInterface {
   public function getNextFetch();
 
   /**
+   * Returns the changed timestamp.
+   *
+   * @return integer
+   */
+  public function getChanged();
+
+  /**
+   * Sets the changed timestamp.
+   *
+   * @param $changed
+   */
+  public function setChanged($changed);
+
+  /**
    * Get number of tries
    *
    * @return integer

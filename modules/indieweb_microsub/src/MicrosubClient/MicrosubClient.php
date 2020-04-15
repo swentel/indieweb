@@ -137,6 +137,9 @@ class MicrosubClient implements MicrosubClientInterface {
             }
           }
 
+          // Set changed.
+          $source->setChanged(\Drupal::time()->getRequestTime());
+
           // Set new hash.
           $source->setHash($hash);
         }

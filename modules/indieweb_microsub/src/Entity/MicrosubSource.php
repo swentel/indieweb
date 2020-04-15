@@ -138,6 +138,20 @@ class MicrosubSource extends ContentEntityBase implements MicrosubSourceInterfac
   /**
    * {@inheritdoc}
    */
+  public function getChanged() {
+    return $this->get('changed')->value;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setChanged($changed) {
+    $this->set('changed', $changed);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function getTries() {
     return $this->get('fetch_tries')->value;
   }
@@ -225,6 +239,13 @@ class MicrosubSource extends ContentEntityBase implements MicrosubSourceInterfac
       ->setRevisionable(TRUE)
       ->setSetting('target_type', 'user')
       ->setDefaultValueCallback('Drupal\indieweb_microsub\Entity\MicrosubSource::getCurrentUserId');
+
+    $fields['changed'] = BaseFieldDefinition::create('integer')
+      ->setLabel(t('Changed'))
+      ->setDescription(t('The time that the feed was last updated.'))
+      ->setRevisionable(FALSE)
+      ->setTranslatable(FALSE)
+      ->setDefaultValue(0);
 
     $fields['status'] = BaseFieldDefinition::create('integer')
       ->setLabel(t('Status of the source'))
