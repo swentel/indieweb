@@ -61,6 +61,44 @@ class MicrosubController extends ControllerBase {
   }
 
   /**
+   * Search feeds based on URL.
+   *
+   * @param \Symfony\Component\HttpFoundation\Request $request
+   *
+   * @return \Symfony\Component\HttpFoundation\JsonResponse
+   */
+  public function searchFeeds(Request $request) {
+    $results = [];
+
+    // Get the typed string from the URL, if it exists.
+    if (($input = $request->query->get('q')) && strlen($input) > 6) {
+
+      // Add a protocol if needed.
+      if ( $parts = parse_url($input) ) {
+        if ( !isset($parts["scheme"]) ) {
+          $input = "http://$input";
+        }
+      }
+
+      if (filter_var($input, FILTER_VALIDATE_URL) !== FALSE) {
+        /** @var \Drupal\indieweb_microsub\MicrosubClient\MicrosubClientInterface $microsubClient */
+        $microsubClient = \Drupal::service('indieweb.microsub.client');
+        $feeds = $microsubClient->searchFeeds($input);
+        if (!empty($feeds['feeds'])) {
+          foreach ($feeds['feeds'] as $feed) {
+            $results[] = (object) [
+              'value' => $feed['url'],
+              'label' => $feed['url'] . ' (' . $feed['type'] . ')',
+            ];
+          }
+        }
+      }
+    }
+
+    return new JsonResponse($results);
+  }
+
+  /**
    * Microsub endpoint.
    *
    * @param \Symfony\Component\HttpFoundation\Request $request

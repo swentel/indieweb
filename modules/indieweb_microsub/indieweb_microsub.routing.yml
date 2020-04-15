@@ -30,3 +30,11 @@ indieweb.microsub.endpoint:
    _title: 'Microsub endpoint'
   requirements:
    _access: 'TRUE'
+
+indieweb_microsub.source_search:
+  path: '/admin/config/services/indieweb/microsub/sources/search-feeds'
+  defaults:
+    _controller: '\Drupal\indieweb_microsub\Controller\MicrosubController::searchFeeds'
+    _format: json
+  requirements:
+    _permission: 'administer indieweb'
