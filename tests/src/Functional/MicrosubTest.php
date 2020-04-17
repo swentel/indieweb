@@ -249,9 +249,8 @@ class MicrosubTest extends IndiewebBrowserTestBase {
     $this->resetNextFetch(1);
     $this->resetNextFetch(2);
     $this->fetchItems();
-    $this->assertMicrosubItemCount('item', 3, 1);
-    $this->assertMicrosubItemCount('item', 1, 0);
-    $this->assertMicrosubItemCount('item', 4);
+    $this->assertMicrosubItemCount('item', 4, 1);
+    $this->assertMicrosubItemCount('item', 0, 0);
 
     // Test post context.
     $page = $this->createNode(['uid' => 1, 'type' => 'page', 'title' => 'microsub page', 'body' => ['value' => 'This should be a context for a microsub item']]);
