@@ -115,6 +115,11 @@ interface MicrosubItemStorageInterface extends ContentEntityStorageInterface {
   public function removeItem($id);
 
   /**
+   * Purge the deleted items.
+   */
+  public function purgeDeletedItems();
+
+  /**
    * Removes all items by source.
    *
    * @param $source_id
@@ -156,7 +161,7 @@ interface MicrosubItemStorageInterface extends ContentEntityStorageInterface {
    * @param $timestamp
    *   The microsub item created time
    * @param $channel_id
-   *   The source id
+   *   The channel id
    * @param $source_id
    *   The source id
    * @param $guids

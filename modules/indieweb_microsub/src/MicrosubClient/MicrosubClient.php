@@ -21,6 +21,9 @@ class MicrosubClient implements MicrosubClientInterface {
     $post_context_handler = \Drupal::config('indieweb_context.settings')->get('handler');
     $post_context_enabled = !empty($post_context_handler) && $post_context_handler != 'disabled';
 
+    // Purge deleted items.
+    \Drupal::entityTypeManager()->getStorage('indieweb_microsub_item')->purgeDeletedItems();
+
     // Cleanup old items.
     $cleanup_old_items = \Drupal::config('indieweb_microsub.settings')->get('microsub_internal_cleanup_items');
 
