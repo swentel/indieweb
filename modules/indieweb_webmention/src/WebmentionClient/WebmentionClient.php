@@ -31,10 +31,19 @@ class WebmentionClient implements WebmentionClientInterface {
       $data['source'] = str_replace(\Drupal::request()->getSchemeAndHttpHost(), $content_domain, $data['source']);
     }
 
-    // Bail out when target is one of the silos, but not actually the webmention
-    // endpoint. This can happen with reply urls to twitter for example.
+    // Check if this is a silo url. In case it is, swap with a potential
+    // syndication target like Brid.gy. At the moment the silo url only
+    // returns for twitter, so check https://brid.gy/publish/twitter.
     if ($this->isSiloURL($target)) {
-      return;
+      $targets = indieweb_get_syndication_targets();
+      if (isset($targets['https://brid.gy/publish/twitter'])) {
+        $data['target'] = 'https://brid.gy/publish/twitter';
+      }
+      else {
+        // No need to go through because Twitter doesn't support webmentions
+        // anyway.
+        return;
+      }
     }
 
     try {

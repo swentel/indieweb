@@ -356,7 +356,7 @@ class CommentTest extends IndiewebBrowserTestBase {
     // Micropub reply request with 'in-reply-to' set to previous webmention.
     $reply['content'] = 'Reply with webmention target';
     $reply['in-reply-to'] = '/admin/content/webmention/5';
-    $reply['mp-syndicate-to'] = ['https://brid.gy/publish/twitter'];
+    //$reply['mp-syndicate-to'] = ['https://brid.gy/publish/twitter'];
     $this->sendMicropubRequest($reply);
     $this->assertNodeCount(0, 'reply');
     $this->assertCommentCount(7);
@@ -389,7 +389,7 @@ class CommentTest extends IndiewebBrowserTestBase {
     $like = [
       'h' => 'entry',
       'like-of' => '/admin/content/webmention/5',
-      'mp-syndicate-to' => ['https://brid.gy/publish/twitter'],
+      //'mp-syndicate-to' => ['https://brid.gy/publish/twitter'],
     ];
 
     $this->sendMicropubRequest($like);
