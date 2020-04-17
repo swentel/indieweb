@@ -521,11 +521,14 @@ class MicropubTest extends IndiewebBrowserTestBase {
     // Clear the queue.
     $this->clearQueue();
 
-    // Do not send when like url is from a silo.
+    // Swap to brid.gy
     $code = $this->sendMicropubRequest($this->like_silo);
     self::assertEquals(201, $code);
     $this->assertNodeCount(2, 'like');
-    $this->assertWebmentionQueueItems();
+    $this->assertWebmentionQueueItems(['https://brid.gy/publish/twitter']);
+
+    // Clear the queue.
+    $this->clearQueue();
 
     // Configure to not auto send a webmention.
     $this->drupalLogin($this->adminUser);
