@@ -16,6 +16,7 @@ use Drupal\node\Entity\Node;
 use Drupal\node\Entity\NodeType;
 use Drupal\node\NodeInterface;
 use Drupal\taxonomy\Entity\Term;
+use p3k\XRay;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -1637,10 +1638,54 @@ class MicropubController extends ControllerBase {
             $properties = [];
             switch ($entity->getEntityTypeId()) {
               case 'node':
-                $properties = $this->getNodeProperties($entity);
+                $path = Url::fromUri('internal:/node/' . $entity->id(), ['absolute' => TRUE])->toString();
+                try {
+                  $properties = [];
+                  $build = $this->entityTypeManager()->getViewBuilder('node')->view($entity, 'indieweb_microformat');
+                  $body = ltrim(\Drupal::service('renderer')->render($build));
+                  $xray = new XRay();
+                  $data = $xray->parse($path, $body, []);
+                  if (!empty($data['data'])) {
+                    foreach ($data['data'] as $key => $value) {
+                      if (is_string($value)) {
+                        $data['data'][$key] = [$value];
+                      }
+                      elseif (in_array($key, ['content', 'author'])) {
+                        $data['data'][$key] = [$value];
+                      }
+                    }
+                    $properties = $data['data'];
+                    $properties['url'] = [$entity->toUrl('canonical', ['absolute' => TRUE])->toString()];
+                    $properties['post-status'] = [($entity->isPublished() ? 'published' : 'draft')];                  }
+                }
+                catch (\Exception $e) {
+                  $this->getLogger('indieweb_micropub')->notice('Error parsing node for source: @message', ['@message' => $e->getMessage()]);
+                }
                 break;
               case 'comment':
-                $properties = $this->getCommentProperties($entity);
+                $path = Url::fromUri('internal:/comment/indieweb/' . $entity->id(), ['absolute' => TRUE])->toString();
+                try {
+                  $properties = [];
+                  $build = $this->entityTypeManager()->getViewBuilder('comment')->view($entity, 'indieweb_microformat');
+                  $body = ltrim(\Drupal::service('renderer')->render($build));
+                  $xray = new XRay();
+                  $data = $xray->parse($path, $body, []);
+                  if (!empty($data['data'])) {
+                    foreach ($data['data'] as $key => $value) {
+                      if (is_string($value)) {
+                        $data['data'][$key] = [$value];
+                      }
+                      elseif (in_array($key, ['content', 'author'])) {
+                        $data['data'][$key] = [$value];
+                      }
+                    }
+                    $properties = $data['data'];
+                    $properties['url'] = [$entity->toUrl('canonical', ['absolute' => TRUE])->toString()];
+                    $properties['post-status'] = [($entity->isPublished() ? 'published' : 'draft')];                  }
+                }
+                catch (\Exception $e) {
+                  $this->getLogger('indieweb_micropub')->notice('Error parsing node for source: @message', ['@message' => $e->getMessage()]);
+                }
                 break;
             }
             $return = ['properties' => (object) $properties];
@@ -1849,7 +1894,7 @@ class MicropubController extends ControllerBase {
     $content = '';
     if ($comment->hasField('comment_body')) {
       if (!empty($comment->comment_body->value)) {
-        $comment->get('comment_body')->value;
+        $content = $comment->get('comment_body')->value;
       }
     }
     // Check if a webmention is connected, if so, get the text from in
