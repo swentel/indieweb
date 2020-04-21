@@ -532,6 +532,12 @@ class MicrosubClient implements MicrosubClientInterface {
         }
       }
       elseif (strpos($url, 'instagram.com') !== FALSE) {
+
+        // Add ending slash.
+        if (substr($url, -1) != '/') {
+          $url .= '/';
+        }
+
         $feeds[] = [
           'url' => $url,
           'type' => 'microformats'

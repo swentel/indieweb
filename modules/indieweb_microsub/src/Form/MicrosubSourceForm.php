@@ -24,7 +24,7 @@ class MicrosubSourceForm extends ContentEntityForm {
       '#default_value' => $source->label(),
       '#required' => TRUE,
       '#autocomplete_route_name' => 'indieweb_microsub.source_search',
-      '#description' => $this->t('Enter a URL or use a suggestion from the autocomplete.<br />Some feeds might not return suggestions, like Instagram, but will still work fine.'),
+      '#description' => $this->t('Enter a URL or use a suggestion from the autocomplete.<br />Some feeds might not return suggestions, like Instagram, but will still work fine.<br />An Instagram URL needs an ending slash too!'),
     ];
 
     $form['status'] = [

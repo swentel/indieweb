@@ -919,7 +919,8 @@ class MicropubController extends ControllerBase {
           /** @var \Drupal\file\FileInterface $file */
           $file = $this->entityTypeManager()->getStorage('file')->load($file_id);
           if ($file) {
-            $response_message = ['url' => file_create_url($file->getFileUri())];
+            $url = file_create_url($file->getFileUri());
+            $response_message = ['url' => $url];
           }
         }
 
