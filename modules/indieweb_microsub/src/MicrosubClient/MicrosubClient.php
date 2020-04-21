@@ -27,6 +27,9 @@ class MicrosubClient implements MicrosubClientInterface {
     // Cleanup old items.
     $cleanup_old_items = \Drupal::config('indieweb_microsub.settings')->get('microsub_internal_cleanup_items');
 
+    // Mark unread on first import.
+    $mark_unread_on_first_import = \Drupal::config('indieweb_microsub.settings')->get('microsub_internal_mark_unread_on_first_import');
+
     /** @var \Drupal\indieweb_microsub\Entity\MicrosubSourceInterface[] $sources */
     if ($url) {
       $set_next_fetch = FALSE;
@@ -46,6 +49,9 @@ class MicrosubClient implements MicrosubClientInterface {
       $tries = $source->getTries();
       $item_count = $source->getItemCount();
       $empty = $item_count == 0;
+      if ($mark_unread_on_first_import && $empty) {
+        $empty = FALSE;
+      }
       $source_id = $source->id();
       $channel_id = $source->getChannelId();
       $disable_image_cache = $source->disableImageCache();

@@ -200,6 +200,32 @@ class MicrosubTest extends IndiewebBrowserTestBase {
 
     $this->fetchItems();
     $this->assertMicrosubItemCount('item', 3);
+    $this->assertMicrosubItemCount('item', 3, NULL, NULL, NULL, 1);
+
+    // Test mark items unread on first import.
+    $this->drupalLogin($this->adminUser);
+    $edit = ['microsub_internal_mark_unread_on_first_import' => TRUE];
+    $this->drupalPostForm('admin/config/services/indieweb/microsub', $edit, 'Save configuration');
+    $this->drupalLogout();
+
+    $this->microsubClear('item');
+    $this->resetNextFetch(1);
+    $this->resetNextFetch(2);
+    $this->fetchItems();
+    $this->assertMicrosubItemCount('item', 3);
+    $this->assertMicrosubItemCount('item', 3, NULL, NULL, NULL, 0);
+
+    // Reset again.
+    $this->drupalLogin($this->adminUser);
+    $edit = ['microsub_internal_mark_unread_on_first_import' => FALSE];
+    $this->drupalPostForm('admin/config/services/indieweb/microsub', $edit, 'Save configuration');
+    $this->drupalLogout();
+
+    $this->microsubClear('item');
+    $this->resetNextFetch(1);
+    $this->resetNextFetch(2);
+    $this->fetchItems();
+    $this->assertMicrosubItemCount('item', 3, NULL, NULL, NULL, 1);
 
     // ----------------------------------------------------------------
     // channels, timeline and post contexts.

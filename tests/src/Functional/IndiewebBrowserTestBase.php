@@ -589,8 +589,10 @@ abstract class IndiewebBrowserTestBase extends BrowserTestBase {
    *   The channel id.
    * @param $channel_id
    *   The channel id.
+   * @param $is_read
+   *   Whether to check for is read or not.
    */
-  protected function assertMicrosubItemCount($type, $expected_total, $status = NULL, $source_id = NULL, $channel_id = NULL) {
+  protected function assertMicrosubItemCount($type, $expected_total, $status = NULL, $source_id = NULL, $channel_id = NULL, $is_read = NULL) {
     $table = 'microsub_' . $type;
     $query = \Drupal::database()
       ->select($table, 't');
@@ -602,6 +604,9 @@ abstract class IndiewebBrowserTestBase extends BrowserTestBase {
     }
     if (is_integer($source_id)) {
       $query->condition('source_id', $source_id);
+    }
+    if (isset($is_read)) {
+      $query->condition('is_read', $is_read);
     }
     $total = $query->countQuery()->execute()->fetchField();
     self::assertEquals($expected_total, (int) $total);

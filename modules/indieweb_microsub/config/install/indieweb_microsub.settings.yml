@@ -1,6 +1,7 @@
 microsub_internal: false
 microsub_internal_handler: 'disabled'
 microsub_internal_cleanup_items: false
+microsub_internal_mark_unread_on_first_import: false
 microsub_endpoint: ''
 microsub_expose_link_tag: false
 microsub_expose_link_header: false

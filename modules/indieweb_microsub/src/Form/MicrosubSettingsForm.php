@@ -57,6 +57,18 @@ class MicrosubSettingsForm extends ConfigFormBase {
       ),
     ];
 
+    $form['microsub']['microsub_internal_mark_unread_on_first_import'] = [
+      '#title' => $this->t('Mark items unread on first import'),
+      '#type' => 'checkbox',
+      '#description' => $this->t('On a first import of a feed, items are marked as read. Toggle this setting to still mark them as unread.'),
+      '#default_value' => $config->get('microsub_internal_mark_unread_on_first_import'),
+      '#states' => array(
+        'visible' => array(
+          ':input[name="microsub_internal"]' => array('checked' => TRUE),
+        ),
+      ),
+    ];
+
     $form['microsub']['microsub_internal_handler'] = [
       '#title' => $this->t('Fetch items'),
       '#type' => 'radios',
@@ -158,6 +170,7 @@ class MicrosubSettingsForm extends ConfigFormBase {
       ->set('microsub_internal', $form_state->getValue('microsub_internal'))
       ->set('microsub_internal_handler', $form_state->getValue('microsub_internal_handler'))
       ->set('microsub_internal_cleanup_items', $form_state->getValue('microsub_internal_cleanup_items'))
+      ->set('microsub_internal_mark_unread_on_first_import', $form_state->getValue('microsub_internal_mark_unread_on_first_import'))
       ->set('microsub_endpoint', $form_state->getValue('microsub_endpoint'))
       ->set('microsub_expose_link_tag', $form_state->getValue('microsub_expose_link_tag'))
       ->set('microsub_expose_link_header', $form_state->getValue('microsub_expose_link_header'))
