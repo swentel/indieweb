@@ -17,6 +17,7 @@ class MicrosubClient implements MicrosubClientInterface {
   public function fetchItems($url = '', $content = '') {
     $xray = new XRay();
     $set_next_fetch = TRUE;
+    $parse_options = ['expect' => 'feed'];
 
     $post_context_handler = \Drupal::config('indieweb_context.settings')->get('handler');
     $post_context_enabled = !empty($post_context_handler) && $post_context_handler != 'disabled';
@@ -29,6 +30,11 @@ class MicrosubClient implements MicrosubClientInterface {
 
     // Mark unread on first import.
     $mark_unread_on_first_import = \Drupal::config('indieweb_microsub.settings')->get('microsub_internal_mark_unread_on_first_import');
+
+    // Allow video
+    if (\Drupal::config('indieweb_microsub.settings')->get('microsub_allow_vimeo_youtube')) {
+      $parse_options['allowIframeVideo'] = TRUE;
+    }
 
     /** @var \Drupal\indieweb_microsub\Entity\MicrosubSourceInterface[] $sources */
     if ($url) {
@@ -80,7 +86,8 @@ class MicrosubClient implements MicrosubClientInterface {
         if ($source->getHash() != $hash) {
 
           // Parse the body.
-          $parsed = $xray->parse($url, $body, ['expect' => 'feed']);
+
+          $parsed = $xray->parse($url, $body, $parse_options);
           if ($parsed && isset($parsed['data']['type']) && $parsed['data']['type'] == 'feed') {
 
             $context = $post_context_enabled ? $source->getPostContext() : [];

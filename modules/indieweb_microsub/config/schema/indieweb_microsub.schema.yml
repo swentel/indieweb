@@ -15,6 +15,9 @@ indieweb_microsub.settings:
     microsub_internal_mark_unread_on_first_import:
       type: boolean
       label: 'Mark items as unread on first import'
+    microsub_allow_vimeo_youtube:
+      type: boolean
+      label: 'Allow YouTube and Vimeo in feed content'
     microsub_endpoint:
       type: string
       label: 'Microsub endpoint'

@@ -69,6 +69,18 @@ class MicrosubSettingsForm extends ConfigFormBase {
       ),
     ];
 
+    $form['microsub']['microsub_allow_vimeo_youtube'] = [
+      '#title' => $this->t('Allow Vimeo and Video in feeds'),
+      '#type' => 'checkbox',
+      '#description' => $this->t('By default videos embedded with an iframe in content are stripped. Toggle this setting to allow YouTube and Vimeo in content.'),
+      '#default_value' => $config->get('microsub_allow_vimeo_youtube'),
+      '#states' => array(
+        'visible' => array(
+          ':input[name="microsub_internal"]' => array('checked' => TRUE),
+        ),
+      ),
+    ];
+
     $form['microsub']['microsub_internal_handler'] = [
       '#title' => $this->t('Fetch items'),
       '#type' => 'radios',
@@ -171,6 +183,7 @@ class MicrosubSettingsForm extends ConfigFormBase {
       ->set('microsub_internal_handler', $form_state->getValue('microsub_internal_handler'))
       ->set('microsub_internal_cleanup_items', $form_state->getValue('microsub_internal_cleanup_items'))
       ->set('microsub_internal_mark_unread_on_first_import', $form_state->getValue('microsub_internal_mark_unread_on_first_import'))
+      ->set('microsub_allow_vimeo_youtube', $form_state->getValue('microsub_allow_vimeo_youtube'))
       ->set('microsub_endpoint', $form_state->getValue('microsub_endpoint'))
       ->set('microsub_expose_link_tag', $form_state->getValue('microsub_expose_link_tag'))
       ->set('microsub_expose_link_header', $form_state->getValue('microsub_expose_link_header'))
