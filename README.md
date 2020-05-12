@@ -28,7 +28,7 @@ Available features:
 - Feeds: microformats and jf2
 - Contacts: store contacts, allowing for autocomplete
 - Send a micropub post to Aperture on incoming webmentions
-- WebSub PuSH 0.4 for publishing and subscribing
+- WebSub PuSH 0.4 for publishing and subscribing, with Microsub support
 - Fetch post context for content or microsub items
 - Blocks for rendering webmentions, RSVP, signing in
 - Fediverse integration via https://fed.brid.gy/
@@ -45,7 +45,7 @@ The functionality is split into several modules:
 - Feeds: create Microformats2 and JF2 feeds
 - Post context: store context for content and microsub items
 - Media cache: store images locally for internal webmention and microsub endpoint
-- WebSub: WebSub PuSH 0.4 for publishing and subscribing
+- WebSub: WebSub PuSH 0.4 for publishing and subscribing, integrates with Microsub for feed subscription
 - Contacts: store contacts for Micropub contact query
 
 Additional useful modules

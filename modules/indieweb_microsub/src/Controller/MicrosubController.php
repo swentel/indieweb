@@ -408,7 +408,7 @@ class MicrosubController extends ControllerBase {
       $filter_by_channel = ($channel || $channel === 0) ? $channel : NULL;
       $microsub_items = $this->entityTypeManager()
         ->getStorage('indieweb_microsub_item')
-        ->searchItems($search, $filter_by_channel, $is_read);
+        ->searchItems(json_encode($search), $filter_by_channel, $is_read);
     }
 
     // ---------------------------------------------------------
