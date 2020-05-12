@@ -306,6 +306,8 @@ class MicrosubController extends ControllerBase {
   protected function getChannelList() {
     $channels = [];
 
+    $tree = $this->request->get('method') === 'tree';
+
     $ids = $this->entityTypeManager()
       ->getStorage('indieweb_microsub_channel')
       ->getQuery()
@@ -327,7 +329,7 @@ class MicrosubController extends ControllerBase {
 
     /** @var \Drupal\indieweb_microsub\Entity\MicrosubChannelInterface $channel */
     foreach ($channels_list as $channel) {
-      $unread = [];
+      $unread = $sources = [];
 
       // Unread can either an int, boolean or omitted.
       if (($indicator = $channel->getReadIndicator()) && $this->isAuthenticatedRequest()) {
@@ -342,10 +344,17 @@ class MicrosubController extends ControllerBase {
         $unread['unread'] = 0;
       }
 
+      if ($tree) {
+        $channel_sources = $this->getSources($channel->id());
+        if (!empty($channel_sources['response']->items)) {
+          $sources = ['sources' => $channel_sources['response']->items];
+        }
+      }
+
       $channels[] = (object) ([
         'uid' => $channel->id(),
         'name' => $channel->label(),
-      ] + $unread);
+      ] + $unread + $sources);
 
     }
 
@@ -777,15 +786,20 @@ class MicrosubController extends ControllerBase {
   /**
    * Get sources.
    *
+   * @param null $channel_id
+   *
    * @return array
    *
    * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
    * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    */
-  protected function getSources() {
+  protected function getSources($channel_id = NULL) {
     $return = ['response' => [], 'code' => 400];
 
-    $channel_id = $this->request->get('channel');
+    if (!isset($channel_id)) {
+      $channel_id = $this->request->get('channel');
+    }
+
     if (!empty($channel_id)) {
       /** @var \Drupal\indieweb_microsub\Entity\MicrosubSourceInterface[] $sources */
       $sources = $this->entityTypeManager()->getStorage('indieweb_microsub_source')->loadByProperties(['channel_id' => $channel_id]);
@@ -796,6 +810,7 @@ class MicrosubController extends ControllerBase {
             'type' => 'feed',
             'url' => $source->label(),
             'name' => !empty($source->getName()) ? $source->getName() : "",
+            'last_update' => $source->getChanged() ? \Drupal::service('date.formatter')->format($source->getChanged(), 'custom', 'Y-m-d\TH:i:s') : NULL,
           ];
         }
         $return = ['response' => (object) ['items' => $source_list], 'code' => 200];
