@@ -50,6 +50,13 @@ class MicrosubSource extends ContentEntityBase implements MicrosubSourceInterfac
   /**
    * {@inheritdoc}
    */
+  public function getName() {
+    return $this->get('name')->value;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function getStatus() {
     return $this->get('status')->value;
   }
@@ -231,6 +238,11 @@ class MicrosubSource extends ContentEntityBase implements MicrosubSourceInterfac
     $fields['url'] = BaseFieldDefinition::create('string')
       ->setLabel(t('URL'))
       ->setRequired(TRUE)
+      ->setSetting('max_length', 255);
+
+    $fields['name'] = BaseFieldDefinition::create('string')
+      ->setLabel(t('Name'))
+      ->setDescription(t('The name for the feed.'))
       ->setSetting('max_length', 255);
 
     $fields['uid'] = BaseFieldDefinition::create('entity_reference')

@@ -10,6 +10,13 @@ use Drupal\Core\Entity\ContentEntityInterface;
 interface MicrosubSourceInterface extends ContentEntityInterface {
 
   /**
+   * Returns the feed name.
+   *
+   * @return string
+   */
+  public function getName();
+
+  /**
    * Returns the status.
    *
    * @return integer

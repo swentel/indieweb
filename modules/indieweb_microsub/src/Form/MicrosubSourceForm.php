@@ -27,6 +27,14 @@ class MicrosubSourceForm extends ContentEntityForm {
       '#description' => $this->t('Enter a URL or use a suggestion from the autocomplete.<br />Some feeds might not return suggestions, like Instagram, but will still work fine.<br />An Instagram URL needs an ending slash too!'),
     ];
 
+    $form['name'] = [
+      '#type' => 'textfield',
+      '#title' => $this->t('Name'),
+      '#maxlength' => 255,
+      '#default_value' => $source->getName(),
+      '#description' => $this->t('A name for this feed.'),
+    ];
+
     $form['status'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('Enabled'),

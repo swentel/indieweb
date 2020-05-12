@@ -787,6 +787,7 @@ class MicrosubController extends ControllerBase {
 
     $channel_id = $this->request->get('channel');
     if (!empty($channel_id)) {
+      /** @var \Drupal\indieweb_microsub\Entity\MicrosubSourceInterface[] $sources */
       $sources = $this->entityTypeManager()->getStorage('indieweb_microsub_source')->loadByProperties(['channel_id' => $channel_id]);
       if (!empty($sources)) {
         $source_list = [];
@@ -794,6 +795,7 @@ class MicrosubController extends ControllerBase {
           $source_list[] = (object) [
             'type' => 'feed',
             'url' => $source->label(),
+            'name' => !empty($source->getName()) ? $source->getName() : "",
           ];
         }
         $return = ['response' => (object) ['items' => $source_list], 'code' => 200];

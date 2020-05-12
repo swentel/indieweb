@@ -58,3 +58,17 @@ function indieweb_microsub_update_8004() {
     $source->save();
   }
 }
+
+/**
+ * Installs the name field for sources.
+ */
+function indieweb_microsub_update_8005() {
+  $field_storage_definition = BaseFieldDefinition::create('string')
+    ->setLabel(t('Name'))
+    ->setDescription(t('The name for the feed.'))
+    ->setRevisionable(FALSE)
+    ->setTranslatable(FALSE);
+
+  \Drupal::entityDefinitionUpdateManager()
+    ->installFieldStorageDefinition('name', 'indieweb_microsub_source', 'indieweb_microsub', $field_storage_definition);
+}

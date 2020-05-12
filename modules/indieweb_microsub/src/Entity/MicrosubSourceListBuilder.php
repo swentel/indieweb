@@ -2,6 +2,7 @@
 
 namespace Drupal\indieweb_microsub\Entity;
 
+use Drupal\Component\Utility\Unicode;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityListBuilder;
 
@@ -56,7 +57,10 @@ class MicrosubSourceListBuilder extends EntityListBuilder {
    */
   public function buildRow(EntityInterface $entity) {
     /** @var \Drupal\indieweb_microsub\Entity\MicrosubSourceInterface $entity */
-    $row['label'] = $entity->label();
+    $row['label'] = Unicode::truncate($entity->label(), 80, FALSE, TRUE);
+    if (!empty($entity->getName())) {
+      $row['label'] .= ' (' . $entity->getName() . ')';
+    }
     $row['status'] = $entity->getStatus() ? t('Enabled') : t('Disabled');
     $row['media_cache'] = $entity->disableImageCache() ? t('Disabled') : t('Enabled');
     $row['items'] = $entity->getItemCount();
