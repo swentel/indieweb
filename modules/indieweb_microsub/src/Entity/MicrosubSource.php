@@ -85,6 +85,13 @@ class MicrosubSource extends ContentEntityBase implements MicrosubSourceInterfac
   /**
    * {@inheritdoc}
    */
+  public function getUnreadCount() {
+    return \Drupal::entityTypeManager()->getStorage('indieweb_microsub_item')->getUnreadCountBySource($this->id());
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function setHash($hash) {
     return $this->set('hash', $hash);
   }

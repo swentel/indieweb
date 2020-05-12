@@ -61,12 +61,10 @@ class MicrosubChannel extends ContentEntityBase implements MicrosubChannelInterf
    * {@inheritdoc}
    */
   public function getSources() {
-    $sources = \Drupal::entityTypeManager()->getStorage('indieweb_microsub_source')
+    return \Drupal::entityTypeManager()->getStorage('indieweb_microsub_source')
       ->getQuery()
       ->condition('channel_id', $this->id())
       ->execute();
-
-    return $sources;
   }
 
   /**

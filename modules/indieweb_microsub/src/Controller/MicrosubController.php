@@ -345,7 +345,7 @@ class MicrosubController extends ControllerBase {
       }
 
       if ($tree) {
-        $channel_sources = $this->getSources($channel->id());
+        $channel_sources = $this->getSources($channel->id(), TRUE);
         if (!empty($channel_sources['response']->items)) {
           $sources = ['sources' => $channel_sources['response']->items];
         }
@@ -787,13 +787,14 @@ class MicrosubController extends ControllerBase {
    * Get sources.
    *
    * @param null $channel_id
+   * @param bool $include_unread
    *
    * @return array
    *
    * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
    * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    */
-  protected function getSources($channel_id = NULL) {
+  protected function getSources($channel_id = NULL, $include_unread = FALSE) {
     $return = ['response' => [], 'code' => 400];
 
     if (!isset($channel_id)) {
@@ -806,11 +807,26 @@ class MicrosubController extends ControllerBase {
       if (!empty($sources)) {
         $source_list = [];
         foreach ($sources as $source) {
+
+          $unread = 0;
+          if ($include_unread) {
+            // Unread can either an int, boolean or omitted.
+            if (($channel = $source->getChannel()) && ($indicator = $channel->getReadIndicator()) && $this->isAuthenticatedRequest()) {
+              if ($indicator == MicrosubChannelInterface::readIndicatorCount) {
+                $unread['unread'] = (int) $source->getUnreadCount();
+              }
+              elseif ($indicator == MicrosubChannelInterface::readIndicatorNew) {
+                $unread = (bool) $source->getUnreadCount();
+              }
+            }
+          }
+
           $source_list[] = (object) [
             'type' => 'feed',
             'url' => $source->label(),
             'name' => !empty($source->getName()) ? $source->getName() : "",
             'last_update' => $source->getChanged() ? \Drupal::service('date.formatter')->format($source->getChanged(), 'custom', 'Y-m-d\TH:i:s') : NULL,
+            'unread' => $unread,
           ];
         }
         $return = ['response' => (object) ['items' => $source_list], 'code' => 200];

@@ -38,6 +38,13 @@ interface MicrosubSourceInterface extends ContentEntityInterface {
   public function getChannel();
 
   /**
+   * Get the number of unread items.
+   *
+   * @return int $count
+   */
+  public function getUnreadCount();
+
+  /**
    * Returns the hash of the source.
    *
    * @return string

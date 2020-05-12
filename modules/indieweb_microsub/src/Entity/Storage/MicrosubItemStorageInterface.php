@@ -20,6 +20,16 @@ interface MicrosubItemStorageInterface extends ContentEntityStorageInterface {
   public function getUnreadCountByChannel($channel_id);
 
   /**
+   * Get the unread items for a source.
+   *
+   * @param int $source_id
+   *   The source id.
+   *
+   * @return integer
+   */
+  public function getUnreadCountBySource($source_id);
+
+  /**
    * Returns the count of the items in a source.
    *
    * @param $channel_id

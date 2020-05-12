@@ -28,6 +28,18 @@ class MicrosubItemStorage extends SqlContentEntityStorage implements MicrosubIte
   /**
    * {@inheritdoc}
    */
+  public function getUnreadCountBySource($source_id) {
+    $query = \Drupal::entityQuery('indieweb_microsub_item')
+      ->condition('source_id', $source_id)
+      ->condition('status', 1)
+      ->condition('is_read', 0);
+    $query->count();
+    return $query->execute();
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function getItemCountByChannel($channel_id) {
     $query = \Drupal::entityQuery('indieweb_microsub_item')
       ->condition('channel_id', $channel_id)
