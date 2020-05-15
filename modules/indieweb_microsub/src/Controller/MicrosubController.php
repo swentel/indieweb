@@ -813,7 +813,7 @@ class MicrosubController extends ControllerBase {
             // Unread can either an int, boolean or omitted.
             if (($channel = $source->getChannel()) && ($indicator = $channel->getReadIndicator()) && $this->isAuthenticatedRequest()) {
               if ($indicator == MicrosubChannelInterface::readIndicatorCount) {
-                $unread['unread'] = (int) $source->getUnreadCount();
+                $unread = (int) $source->getUnreadCount();
               }
               elseif ($indicator == MicrosubChannelInterface::readIndicatorNew) {
                 $unread = (bool) $source->getUnreadCount();
