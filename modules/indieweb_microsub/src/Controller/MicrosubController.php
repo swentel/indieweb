@@ -803,7 +803,7 @@ class MicrosubController extends ControllerBase {
 
     if (!empty($channel_id)) {
       /** @var \Drupal\indieweb_microsub\Entity\MicrosubSourceInterface[] $sources */
-      $sources = $this->entityTypeManager()->getStorage('indieweb_microsub_source')->loadByProperties(['channel_id' => $channel_id]);
+      $sources = $this->entityTypeManager()->getStorage('indieweb_microsub_source')->loadByProperties(['channel_id' => $channel_id, 'status' => 1]);
       if (!empty($sources)) {
         $source_list = [];
         foreach ($sources as $source) {
