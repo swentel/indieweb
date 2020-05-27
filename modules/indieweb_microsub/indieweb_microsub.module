@@ -5,6 +5,7 @@
  * IndieWeb Microsub module.
  */
 
+use Drupal\Core\Site\Settings;
 use Drupal\Core\Url;
 
 /**
@@ -109,4 +110,13 @@ function indieweb_microsub_indieweb_websub_notification($url, $content) {
  */
 function indieweb_microsub_indieweb_websub_needs_resubscribe() {
   return \Drupal::entityTypeManager()->getStorage('indieweb_microsub_source')->getSourcesToResubscribe();
+}
+
+/**
+ * Returns the default user agent when calling feeds.
+ *
+ * @return mixed|null
+ */
+function indieweb_microsub_http_client_user_agent() {
+  return Settings::get('indieweb_microsub_http_client_user_agent', 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/57.0.2987.133 Safari/537.36');
 }

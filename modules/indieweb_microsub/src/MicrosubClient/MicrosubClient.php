@@ -78,7 +78,8 @@ class MicrosubClient implements MicrosubClientInterface {
         }
         else {
           // Get content.
-          $response = \Drupal::httpClient()->get($url);
+          $options = ['headers' => ['User-Agent' => indieweb_microsub_http_client_user_agent()]];
+          $response = \Drupal::httpClient()->get($url, $options);
           $body = ltrim($response->getBody()->getContents());
         }
 
@@ -339,7 +340,8 @@ class MicrosubClient implements MicrosubClientInterface {
 
         // Get content if parsed is not set.
         if (!isset($parsed)) {
-          $response = \Drupal::httpClient()->get($url);
+          $options = ['headers' => ['User-Agent' => indieweb_microsub_http_client_user_agent()]];
+          $response = \Drupal::httpClient()->get($url, $options);
           $body = $response->getBody()->getContents();
           $parsed = $xray->parse($url, $body);
         }
@@ -514,7 +516,8 @@ class MicrosubClient implements MicrosubClientInterface {
 
       $contentType = '';
       if (!isset($body)) {
-        $response = \Drupal::httpClient()->get($url);
+        $options = ['headers' => ['User-Agent' => indieweb_microsub_http_client_user_agent()]];
+        $response = \Drupal::httpClient()->get($url, $options);
         $body = $response->getBody()->getContents();
         $contentType = $response->getHeader('Content-Type');
         if (!empty($contentType) && is_array($contentType)) {

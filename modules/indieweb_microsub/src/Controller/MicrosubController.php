@@ -903,7 +903,8 @@ class MicrosubController extends ControllerBase {
     if (!empty($url)) {
       try {
         $xray = new XRay();
-        $response = \Drupal::httpClient()->get($url);
+        $options = ['headers' => ['User-Agent' => indieweb_microsub_http_client_user_agent()]];
+        $response = \Drupal::httpClient()->get($url, $options);
         $body = $response->getBody()->getContents();
         $parsed = $xray->parse($url, $body, ['expect' => 'feed']);
         if ($parsed && isset($parsed['data']['type']) && $parsed['data']['type'] == 'feed') {
