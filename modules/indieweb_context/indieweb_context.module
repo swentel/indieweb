@@ -292,7 +292,7 @@ function indieweb_context_node_view(array &$build, NodeInterface $node, EntityVi
  * @param \Drupal\Core\Entity\Display\EntityViewDisplayInterface $display
  */
 function _indieweb_extra_fields_display(array &$build, EntityInterface $entity, EntityViewDisplayInterface $display) {
-  if ($display->getComponent('indieweb_post_context')) {
+  if ($display->getComponent('indieweb_post_context') && \Drupal::currentUser()->hasPermission('view indieweb context')) {
     $node_type = NodeType::load($entity->bundle());
     $post_type_class = $node_type->getThirdPartySetting('indieweb_context', 'post_context_post_type');
     $suggestion = str_replace(['in-', '-to', '-of', 'u-'], '', $post_type_class);

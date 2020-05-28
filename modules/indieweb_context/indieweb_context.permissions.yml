@@ -1,6 +1,9 @@
 refresh post context:
   title: 'Refresh post context'
   description: 'Allow users to to queue links for a node to get or refresh the post context'
+view indieweb context:
+  title: 'View context in posts'
+  description: 'Allow users to view the complete context attached to a post.'
 view indieweb context images:
   title: 'View images in contexts'
   description: 'Allow users to view images in the context attached to a post'

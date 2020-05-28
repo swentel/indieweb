@@ -426,7 +426,7 @@ p3k-websub package so all self and hub links are found.
 When you create a post with a link which is a reply, like, repost or bookmark of an external post, you can fetch content
 from that URL so you can render more context. To enable this feature for node types, go to the node type settings screen
 and select a link field. Then on the manage display pages, you can add the post context field to the display.
-For microsub items, you can configure this per source.
+For microsub items, you can configure this per source. Permissions are available to view the context on posts.
 
 The content for post contexts is fetched either by cron or drush. It's stored in the queue so it can be handled later.
 This can be configured at /admin/config/services/indieweb/post-context.

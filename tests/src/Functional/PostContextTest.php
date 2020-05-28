@@ -130,7 +130,6 @@ class PostContextTest extends IndiewebBrowserTestBase {
     $this->assertSession()->responseContains($page->get('body')->value);
     $this->assertSession()->responseContains('u-in-reply-to');
 
-    $this->drupalLogin($this->adminUser);
     $edit = ['title[0][value]' => 'update title'];
     $this->drupalPostForm('node/' . $reply->id() . '/edit', $edit, 'Save');
     $this->assertPostContextQueueItems();
@@ -143,6 +142,11 @@ class PostContextTest extends IndiewebBrowserTestBase {
     $content = file_get_contents(drupal_get_path('module', 'indieweb_test') . '/pages/twitter-canonical.html');
     $reference = \Drupal::service('indieweb.post_context.client')->parseTwitter($content);
     self::assertEquals($expected, $reference['content']['text']);
+
+    // Test permissions.
+    $this->drupalLogout();
+    $this->drupalGet('node/' . $reply->id());
+    $this->assertSession()->responseNotContains($page->get('body')->value);
   }
 
 }
