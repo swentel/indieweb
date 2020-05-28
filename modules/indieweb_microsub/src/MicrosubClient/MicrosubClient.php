@@ -598,7 +598,10 @@ class MicrosubClient implements MicrosubClientInterface {
           }
         }
 
-        $parsed = Formats\HTML::parse(NULL, ['body' => $body, 'url' => $url, 'code' => 200], ['expect' => 'feed']);
+        // Insert our empty HTTP client so XRay doesn't start getting the
+        // json URL's.
+        $emptyHttpClient = new EmptyHTTP();
+        $parsed = Formats\HTML::parse($emptyHttpClient, ['body' => $body, 'url' => $url, 'code' => 200], ['expect' => 'feed']);
         if ($parsed && isset($parsed['data']['type']) && $parsed['data']['type'] == 'feed') {
           $feeds[] = [
             'url' => $url,

@@ -40,4 +40,17 @@ class MicrosubCommands extends DrushCommands {
     print_r($parsed);
   }
 
+  /**
+   * Test Xray feed discovery on a URL.
+   *
+   * @param $url
+   *
+   * @command indieweb:microsub-test-xray-discovery
+   * @aliases imtxd
+   */
+  public function testXrayFeedDiscovery($url) {
+    $microsubClient = \Drupal::service('indieweb.microsub.client');
+    $feeds = $microsubClient->searchFeeds($url);
+    print_r($feeds);
+  }
 }
