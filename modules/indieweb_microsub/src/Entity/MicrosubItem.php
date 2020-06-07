@@ -52,14 +52,14 @@ class MicrosubItem extends ContentEntityBase implements MicrosubItemInterface {
    */
   public function getSourceIdForTimeline($author, $urls = []) {
     $return = $this->getSourceId();
-    $url = $this->getSource()->label();
 
-    foreach ($urls as $u) {
-      if (strpos($url, $u) !== FALSE) {
-        $search = '';
-
-        $return = $this->getSourceId() . ':' . $author;
-        break;
+    if ($this->getChannelId() > 0) {
+      $url = $this->getSource()->label();
+      foreach ($urls as $u) {
+        if (strpos($url, $u) !== FALSE) {
+          $return = $this->getSourceId() . ':' . $author;
+          break;
+        }
       }
     }
 

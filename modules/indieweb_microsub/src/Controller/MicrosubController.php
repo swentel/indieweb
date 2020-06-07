@@ -470,8 +470,12 @@ class MicrosubController extends ControllerBase {
           }
         }
 
+        $channel_id = $item->getChannelId();
+
         // Check author name.
-        $author_name = $item->getSource()->label();
+        if ($channel_id > 0) {
+          $author_name = $item->getSource()->label();
+        }
         if (!empty($data->author->name)) {
           $author_name = $data->author->name;
         }
@@ -490,7 +494,6 @@ class MicrosubController extends ControllerBase {
         $entry->_source = $item->getSourceIdForTimeline($author_name, $this->aggregated_feeds);
 
         // Channel information.
-        $channel_id = $item->getChannelId();
         if ($channel_id > 0) {
           $channel = $item->getSource()->getChannel()->label();
         }
