@@ -5,6 +5,7 @@ microsub_internal_mark_unread_on_first_import: false
 microsub_endpoint: ''
 microsub_expose_link_tag: false
 microsub_expose_link_header: false
+microsub_aggregated_feeds: "https://news.indieweb.org\r\nhttps://stream.indieweb.org\r\nhttps://granary.io\r\nhttps://unicyclic.com/indieweb\r\nhttps://drupal.org/planet\r\nhttps://fdroid.gitlab.io/planet\r\nhttps://indieweb.xyz\r\nhttps://planet.wordpress.org\r\nhttps://planet.mozilla.org"
 aperture_enable_micropub: false
 aperture_api_key: ''
 push_notification_indigenous: false

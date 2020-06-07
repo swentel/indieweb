@@ -26,6 +26,16 @@ interface MicrosubItemInterface extends ContentEntityInterface {
   public function getSourceId();
 
   /**
+   * Returns the value for the source id for a timeline.
+   *
+   * @param string $author
+   * @param array $urls
+   *
+   * @return mixed
+   */
+  public function getSourceIdForTimeline($author, $urls = []);
+
+  /**
    * Returns the source of microsub item.
    *
    * @return \Drupal\indieweb_microsub\Entity\MicrosubSourceInterface

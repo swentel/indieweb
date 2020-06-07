@@ -124,6 +124,18 @@ class MicrosubSettingsForm extends ConfigFormBase {
       ),
     ];
 
+    $form['microsub']['microsub_aggregated_feeds'] = [
+      '#title' => $this->t('Aggregated feeds'),
+      '#type' => 'textarea',
+      '#default_value' => $config->get('microsub_aggregated_feeds'),
+      '#description' => $this->t('Some readers support viewing feeds per author (source), but this will not work in case of aggregated feeds.<br />Enter the base url\'s line by line which, in case they match will trigger a search instead internally on the author name so the response will work.'),
+      '#states' => array(
+        'visible' => array(
+          ':input[name="microsub_internal"]' => array('checked' => TRUE),
+        ),
+      ),
+    ];
+
     $form['aperture'] = [
       '#type' => 'fieldset',
       '#title' => $this->t('Aperture'),
@@ -185,6 +197,7 @@ class MicrosubSettingsForm extends ConfigFormBase {
       ->set('microsub_internal_mark_unread_on_first_import', $form_state->getValue('microsub_internal_mark_unread_on_first_import'))
       ->set('microsub_allow_vimeo_youtube', $form_state->getValue('microsub_allow_vimeo_youtube'))
       ->set('microsub_endpoint', $form_state->getValue('microsub_endpoint'))
+      ->set('microsub_aggregated_feeds', $form_state->getValue('microsub_aggregated_feeds'))
       ->set('microsub_expose_link_tag', $form_state->getValue('microsub_expose_link_tag'))
       ->set('microsub_expose_link_header', $form_state->getValue('microsub_expose_link_header'))
       ->set('aperture_enable_micropub', $form_state->getValue('aperture_enable_micropub'))

@@ -20,6 +20,13 @@ class MicrosubController extends ControllerBase {
   protected $config;
 
   /**
+   * A collection of urls for aggregated feeds.
+   *
+   * @var array
+   */
+  protected $aggregated_feeds;
+
+  /**
    * Request object.
    *
    * @var \Symfony\Component\HttpFoundation\Request $request
@@ -375,6 +382,13 @@ class MicrosubController extends ControllerBase {
   protected function getTimeline($search = NULL) {
     $response = ['items' => []];
 
+    foreach (explode("\n", $this->config->get('microsub_aggregated_feeds')) as $u) {
+      $u = trim($u);
+      if (!empty($u)) {
+        $this->aggregated_feeds[] = $u;
+      }
+    }
+
     $items = [];
     $paging = [];
 
@@ -413,6 +427,14 @@ class MicrosubController extends ControllerBase {
     // Search in a channel.
     // ---------------------------------------------------------
 
+    $is_source_search = FALSE;
+
+    // Check source as it may be a compound variable which triggers a search.
+    if ($source && strpos($source, ':') !== FALSE) {
+      list($source, $search) = explode(':', $source);
+      $is_source_search = TRUE;
+    }
+
     if (!empty($search)) {
       $filter_by_channel = ($channel || $channel === 0) ? $channel : NULL;
       $microsub_items = $this->entityTypeManager()
@@ -424,7 +446,7 @@ class MicrosubController extends ControllerBase {
     // Get items from a source.
     // ---------------------------------------------------------
 
-    if ($source) {
+    if ($source && !$is_source_search) {
       $microsub_items = $this->entityTypeManager()
         ->getStorage('indieweb_microsub_item')
         ->loadBySource($source, $is_read);
@@ -449,8 +471,12 @@ class MicrosubController extends ControllerBase {
         }
 
         // Check author name.
-        if ($source && !empty($data->author->name)) {
+        $author_name = $item->getSource()->label();
+        if (!empty($data->author->name)) {
           $author_name = $data->author->name;
+        }
+        elseif (!empty($data->author->url)) {
+          $author_name = $data->author->url;
         }
 
         // Apply media cache.
@@ -461,7 +487,7 @@ class MicrosubController extends ControllerBase {
         $entry = $data;
         $entry->_id = $item->id();
         $entry->_is_read = $this->isAuthenticatedRequest() ? $item->isRead() : TRUE;
-        $entry->_source = $item->getSourceId();
+        $entry->_source = $item->getSourceIdForTimeline($author_name, $this->aggregated_feeds);
 
         // Channel information.
         $channel_id = $item->getChannelId();
@@ -491,7 +517,7 @@ class MicrosubController extends ControllerBase {
 
       $response = ['paging' => (object) $paging, 'items' => $items];
 
-      if ($source) {
+      if ($source || $is_source_search) {
         $microsub_source = $this->entityTypeManager()->getStorage('indieweb_microsub_source')->load($source);
         if ($microsub_source) {
           $source_name = $microsub_source->label();

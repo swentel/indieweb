@@ -50,6 +50,25 @@ class MicrosubItem extends ContentEntityBase implements MicrosubItemInterface {
   /**
    * {@inheritdoc}
    */
+  public function getSourceIdForTimeline($author, $urls = []) {
+    $return = $this->getSourceId();
+    $url = $this->getSource()->label();
+
+    foreach ($urls as $u) {
+      if (strpos($url, $u) !== FALSE) {
+        $search = '';
+
+        $return = $this->getSourceId() . ':' . $author;
+        break;
+      }
+    }
+
+    return $return;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function getSource() {
     return $this->get('source_id')->entity;
   }
