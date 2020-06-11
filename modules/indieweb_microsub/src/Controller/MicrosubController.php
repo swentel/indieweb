@@ -439,7 +439,7 @@ class MicrosubController extends ControllerBase {
       $filter_by_channel = ($channel || $channel === 0) ? $channel : NULL;
       $microsub_items = $this->entityTypeManager()
         ->getStorage('indieweb_microsub_item')
-        ->searchItems(json_encode($search), $filter_by_channel, $is_read);
+        ->searchItems($this->escape($search), $filter_by_channel, $is_read);
     }
 
     // ---------------------------------------------------------
@@ -1024,6 +1024,20 @@ class MicrosubController extends ControllerBase {
     $indieweb_microsub_source->setNextFetch(0)->save();
     $this->messenger()->addMessage($this->t('Next update reset for %source', ['%source' => $indieweb_microsub_source->label()]));
     return new RedirectResponse(Url::fromRoute('indieweb.admin.microsub_sources', ['indieweb_microsub_channel' => $indieweb_microsub_source->getChannelId()])->toString());
+  }
+
+  /**
+   * Escape a string.
+   *
+   * @param $string
+   *
+   * @return false|string
+   */
+  protected function escape($string) {
+    $s = json_encode($string);
+    $s = substr_replace($s, '', 0, 1);
+    $s = substr_replace($s, '', -1, 1);
+    return $s;
   }
 
 }
