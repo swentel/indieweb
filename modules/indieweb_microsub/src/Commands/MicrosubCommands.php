@@ -34,6 +34,7 @@ class MicrosubCommands extends DrushCommands {
   public function testXray($url) {
     $xray = new XRay();
     $options = ['headers' => ['User-Agent' => indieweb_microsub_http_client_user_agent()]];
+    \Drupal::moduleHandler()->alter('microsub_pre_request', $options, $url);
     $response = \Drupal::httpClient()->get($url, $options);
     $body = ltrim($response->getBody()->getContents());
     $parsed = $xray->parse($url, $body, ['expect' => 'feed']);
