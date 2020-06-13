@@ -852,6 +852,7 @@ class MicrosubController extends ControllerBase {
 
           $source_list[] = (object) [
             'type' => 'feed',
+            'uid' => $source->id(),
             'url' => $source->label(),
             'name' => !empty($source->getName()) ? $source->getName() : "",
             'last_update' => $source->getChanged() ? \Drupal::service('date.formatter')->format($source->getChanged(), 'custom', 'Y-m-d\TH:i:s') : NULL,
