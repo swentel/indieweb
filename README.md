@@ -462,6 +462,9 @@ content types or comments where needed. Posts, replies, likes, boosts and follow
 - Check https://fed.brid.gy/#setup for additional setup for .htaccess.
 - If you use a microsub server, you can subscribe to fediverse users through the microformats feed.
 
+If you want to interact with the Fediverse using Drupal itself, you can also install the ActivityPub module
+for Drupal: https://drupal.org/project/activitypub.
+
 ## Caching of image files
 
 When using the built-in webmention/microsub endpoint or contacts, a lot of file urls are stored to external images. If
