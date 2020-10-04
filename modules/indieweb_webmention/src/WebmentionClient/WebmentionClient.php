@@ -17,6 +17,12 @@ class WebmentionClient implements WebmentionClientInterface {
    * {@inheritdoc}
    */
   public function createQueueItem($source, $target, $entity_id = '', $entity_type_id = '') {
+
+    // If the target is not a URL, don't send.
+    if (!filter_var($target, FILTER_VALIDATE_URL)) {
+      return;
+    }
+
     $data = [
       'source' => $source,
       'target' => $target,

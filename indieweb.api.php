@@ -13,7 +13,7 @@ use Drupal\user\UserInterface;
  *
  * When a micropub post request comes in and a node will be created, you can
  * alter the values just before. In this example, we're changing the node type.
- * Switching the node type during hook_node_presave() is too late for pathauto
+ * Switching the node type during hook_node_presave() is to late for pathauto
  * for instance.
  *
  * @param array $values
@@ -38,7 +38,7 @@ function hook_indieweb_micropub_node_pre_create_alter(&$values, &$payload) {
  *   'micropub_payload' which is the payload from the micropub request so you
  *   can inspect it here to see the original submitted values.
  * @param array $values
- *   The values that where submitted to Node::created(). These could have been
+ *   The values that where submitted to Node::create(). These could have been
  *   altered in hook_indieweb_micropub_node_pre_create_alter().
  * @param $payload
  *   The payload entered in the micropub request. This could also have been

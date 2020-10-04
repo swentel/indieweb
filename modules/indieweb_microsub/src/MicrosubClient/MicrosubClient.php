@@ -16,7 +16,6 @@ class MicrosubClient implements MicrosubClientInterface {
    */
   public function fetchItems($url = '', $content = '') {
     $xray = new XRay();
-    $instagram = FALSE;
     $set_next_fetch = TRUE;
     $parse_options = ['expect' => 'feed'];
 
@@ -53,13 +52,6 @@ class MicrosubClient implements MicrosubClientInterface {
       }
 
       $url = $source->label();
-      if (Settings::get('indieweb_microsub_instagram_throttle', TRUE) && strpos($url, 'instagram.com') !== FALSE) {
-        if ($instagram) {
-          continue;
-        }
-        $instagram = TRUE;
-      }
-
       $tries = $source->getTries();
       $item_count = $source->getItemCount();
       $empty = $item_count == 0;
