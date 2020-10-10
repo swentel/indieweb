@@ -160,6 +160,11 @@ class CommentSettingsForm extends ConfigFormBase {
       '#title' => $this->t('Trusted domains'),
       '#description' => $this->t('Automatically approve webmention comments from these domains. Enter domains line per line.'),
       '#default_value' => $config->get('comment_create_whitelist_domains'),
+      '#states' => array(
+        'visible' => array(
+          ':input[name="comment_create_enable"]' => array('checked' => TRUE),
+        ),
+      ),
     ];
 
     return parent::buildForm($form, $form_state);
