@@ -72,6 +72,12 @@ abstract class IndiewebBrowserTestBase extends BrowserTestBase {
   protected $httpClient;
 
   /**
+   * The default theme to use.
+   *
+   * @var string
+   */
+  protected $defaultTheme = 'classy';
+  /**
    * {@inheritdoc}
    */
   public function setUp() {

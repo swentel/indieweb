@@ -2,6 +2,7 @@
 
 namespace Drupal\indieweb_websub\Controller;
 
+use function IndieWeb\http_rels;
 use Drupal\Core\Controller\ControllerBase;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -31,7 +32,7 @@ class WebSubController extends ControllerBase {
       // Check link header.
       try {
         // Note: we don't check on hub since not all hubs send that header.
-        $result = \IndieWeb\http_rels($request->headers);
+        $result = http_rels($request->headers);
         if (!empty($result['self'])) {
           $url = $result['self'][0];
         }

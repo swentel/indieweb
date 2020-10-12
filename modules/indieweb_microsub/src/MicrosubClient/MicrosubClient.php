@@ -2,6 +2,8 @@
 
 namespace Drupal\indieweb_microsub\MicrosubClient;
 
+use p3k\XRay\Formats\HTML;
+use function mf2\Parse;
 use Drupal\Core\Site\Settings;
 use Drupal\Core\Url;
 use Drupal\indieweb_microsub\Entity\MicrosubItem;
@@ -562,7 +564,7 @@ class MicrosubClient implements MicrosubClientInterface {
       }
       else {
 
-        $mf2 = \mf2\Parse($body, $url);
+        $mf2 = Parse($body, $url);
         if (isset($mf2['rel-urls'])) {
           foreach ($mf2['rel-urls'] as $rel => $info) {
 
@@ -602,7 +604,7 @@ class MicrosubClient implements MicrosubClientInterface {
         // Insert our empty HTTP client so XRay doesn't start getting the
         // json URL's.
         $emptyHttpClient = new EmptyHTTP();
-        $parsed = Formats\HTML::parse($emptyHttpClient, ['body' => $body, 'url' => $url, 'code' => 200], ['expect' => 'feed']);
+        $parsed = HTML::parse($emptyHttpClient, ['body' => $body, 'url' => $url, 'code' => 200], ['expect' => 'feed']);
         if ($parsed && isset($parsed['data']['type']) && $parsed['data']['type'] == 'feed') {
           $feeds[] = [
             'url' => $url,
