@@ -17,6 +17,7 @@ class WebmentionClient implements WebmentionClientInterface {
    * {@inheritdoc}
    */
   public function createQueueItem($source, $target, $entity_id = '', $entity_type_id = '') {
+    static $seen = [];
 
     // If the target is not a URL, don't send.
     if (!filter_var($target, FILTER_VALIDATE_URL)) {
@@ -51,6 +52,16 @@ class WebmentionClient implements WebmentionClientInterface {
         return;
       }
     }
+
+    // Calculate hash.
+    $hash = md5(implode(",", $data));
+
+    // No need to it the queue more than once.
+    if (isset($seen[$hash])) {
+      return;
+    }
+
+    $seen[$hash] = $hash;
 
     try {
       \Drupal::queue(INDIEWEB_WEBMENTION_QUEUE)->createItem($data);
