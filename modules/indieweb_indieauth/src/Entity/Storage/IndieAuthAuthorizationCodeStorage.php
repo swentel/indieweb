@@ -2,9 +2,7 @@
 
 namespace Drupal\indieweb_indieauth\Entity\Storage;
 
-use Drupal\Core\Entity\Query\QueryInterface;
 use Drupal\Core\Entity\Sql\SqlContentEntityStorage;
-use Drupal\indieweb\Entity\MicrosubSourceInterface;
 
 /**
  * Controller class for IndieAuth tokens.
@@ -19,8 +17,7 @@ class IndieAuthAuthorizationCodeStorage extends SqlContentEntityStorage implemen
    */
   public function getIndieAuthAuthorizationCode($code) {
     $codes = $this->loadByProperties(['code' => $code]);
-    $indieAuthAuthorizationCode = count($codes) == 1 ? array_shift($codes) : FALSE;
-    return $indieAuthAuthorizationCode;
+    return count($codes) == 1 ? array_shift($codes) : FALSE;
   }
 
 }

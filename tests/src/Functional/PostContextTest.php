@@ -2,11 +2,7 @@
 
 namespace Drupal\Tests\indieweb\Functional;
 
-use Drupal\Core\Url;
-use Drupal\indieweb_test\WebmentionClient\WebmentionClientTest;
 use Drupal\node\Entity\NodeType;
-use Drupal\user\Entity\Role;
-use Drupal\user\RoleInterface;
 
 /**
  * Tests integration of post context.

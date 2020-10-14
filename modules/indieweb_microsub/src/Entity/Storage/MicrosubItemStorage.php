@@ -2,7 +2,6 @@
 
 namespace Drupal\indieweb_microsub\Entity\Storage;
 
-use Drupal\Core\Entity\Query\QueryInterface;
 use Drupal\Core\Entity\Sql\SqlContentEntityStorage;
 
 /**

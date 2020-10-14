@@ -2,15 +2,9 @@
 
 namespace Drupal\indieweb_webmention\Plugin\Action;
 
-use Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException;
-use Drupal\Component\Plugin\Exception\PluginNotFoundException;
 use Drupal\Component\Utility\Number;
 use Drupal\Core\Action\ActionBase;
-use Drupal\Core\Entity\EntityStorageException;
-use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Session\AccountInterface;
-use Drupal\Core\TempStore\PrivateTempStoreFactory;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Reset a comments thread for a node.

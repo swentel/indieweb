@@ -2,10 +2,8 @@
 
 namespace Drupal\indieweb_webmention\Form;
 
-use Drupal\Component\Utility\UrlHelper;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\indieweb_webmention\Entity\Webmention;
 
 class RSVPForm extends FormBase {
 

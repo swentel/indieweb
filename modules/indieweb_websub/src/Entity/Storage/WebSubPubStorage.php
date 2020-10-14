@@ -2,7 +2,6 @@
 
 namespace Drupal\indieweb_websub\Entity\Storage;
 
-use Drupal\Core\Database\Database;
 use Drupal\Core\Entity\Sql\SqlContentEntityStorage;
 
 /**

@@ -2,11 +2,9 @@
 
 namespace Drupal\indieweb_feed\Form;
 
-use Drupal\Core\Cache\Cache;
 use Drupal\Core\Entity\ContentEntityTypeInterface;
 use Drupal\Core\Entity\EntityForm;
 use Drupal\Core\Form\FormStateInterface;
-use Exception;
 
 class FeedForm extends EntityForm {
 

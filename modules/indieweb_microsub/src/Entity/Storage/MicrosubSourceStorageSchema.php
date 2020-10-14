@@ -4,7 +4,6 @@ namespace Drupal\indieweb_microsub\Entity\Storage;
 
 use Drupal\Core\Entity\ContentEntityTypeInterface;
 use Drupal\Core\Entity\Sql\SqlContentEntityStorageSchema;
-use Drupal\Core\Field\FieldStorageDefinitionInterface;
 
 /**
  * Defines the microsub source schema handler.

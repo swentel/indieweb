@@ -4,7 +4,6 @@ namespace Drupal\indieweb_indieauth\Entity;
 
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityListBuilder;
-use Drupal\indieweb\Entity\MicrosubChannelInterface;
 
 /**
  * Defines a class to build a listing of IndieAuth authorization code entities.

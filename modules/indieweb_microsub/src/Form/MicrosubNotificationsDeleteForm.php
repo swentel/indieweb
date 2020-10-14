@@ -5,7 +5,6 @@ namespace Drupal\indieweb_microsub\Form;
 use Drupal\Core\Form\ConfirmFormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
-use Drupal\indieweb_microsub\Entity\MicrosubSourceInterface;
 
 class MicrosubNotificationsDeleteForm extends ConfirmFormBase {
 

@@ -2,7 +2,6 @@
 
 namespace Drupal\indieweb_microformat\Plugin\Field\FieldFormatter;
 
-use Drupal\Core\Field\AllowedTagsXssTrait;
 use Drupal\Core\Field\FieldFilteredMarkup;
 use Drupal\Core\Field\FormatterBase;
 use Drupal\Core\Field\FieldItemListInterface;
