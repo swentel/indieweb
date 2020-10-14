@@ -30,6 +30,11 @@ class WebSubSettingsForm extends ConfigFormBase {
 
     $config = $this->config('indieweb_websub.settings');
 
+    $total = \Drupal::queue(INDIEWEB_WEBSUB_QUEUE)->numberOfItems() + \Drupal::queue(INDIEWEB_WEBSUB_NOTIFICATION_QUEUE)->numberOfItems();
+    $form['queue'] = [
+      '#markup' => '<p>' . $this->t('Items in queue: @count', ['@count' => $total]) . '</p>',
+    ];
+
     $form['general'] = [
       '#type' => 'fieldset',
       '#title' => $this->t('General'),
@@ -101,6 +106,18 @@ class WebSubSettingsForm extends ConfigFormBase {
       '#description' => $this->t('Subscriptions are active for a limited time, usually not more than two weeks.<br />This allows you to automatically resubscribe, leave disabled if you do not have any WebSub subscriptions.<br />The drush command is <strong>indieweb-websub-resubscribe</strong>')
     ];
 
+    $form['general']['notification_handler'] = [
+      '#title' => $this->t('Handle content notifications from hubs'),
+      '#type' => 'radios',
+      '#options' => [
+        'disabled' => $this->t('Disabled'),
+        'cron' => $this->t('On cron run'),
+        'drush' => $this->t('With drush'),
+      ],
+      '#default_value' => $config->get('notification_handler'),
+      '#description' => $this->t('Incoming notifications from hubs with content your are subscribed to are not saved immediately but stored in a queue.<br />The drush command is <strong>indieweb-websub-notifications</strong>')
+    ];
+
     $form['general']['micropub_publish_to_hub'] = [
       '#title' => $this->t('Publish to the hub when you create a post with Micropub.'),
       '#type' => 'checkbox',
@@ -136,6 +153,7 @@ class WebSubSettingsForm extends ConfigFormBase {
       ->set('pages', $form_state->getValue('pages'))
       ->set('send_pub_handler', $form_state->getValue('send_pub_handler'))
       ->set('resubscribe_handler', $form_state->getValue('resubscribe_handler'))
+      ->set('notification_handler', $form_state->getValue('notification_handler'))
       ->set('micropub_publish_to_hub', $form_state->getValue('micropub_publish_to_hub'))
       ->set('microsub_api_subscribe', $form_state->getValue('microsub_api_subscribe'))
       ->save();

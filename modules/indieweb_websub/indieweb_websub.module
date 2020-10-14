@@ -10,6 +10,7 @@ use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Form\FormStateInterface;
 
 define('INDIEWEB_WEBSUB_QUEUE', 'indieweb_websub');
+define('INDIEWEB_WEBSUB_NOTIFICATION_QUEUE', 'indieweb_websub_notification');
 
 /**
  * Implements hook_page_attachments_alter().
@@ -122,9 +123,10 @@ function indieweb_websub_cron() {
   if (\Drupal::config('indieweb_websub.settings')->get('send_pub_handler') == 'cron') {
     \Drupal::service('indieweb.websub.client')->handleQueue();
   }
-
   if (\Drupal::config('indieweb_websub.settings')->get('resubscribe_handler') == 'cron') {
     \Drupal::service('indieweb.websub.client')->resubscribe();
   }
-
+  if (\Drupal::config('indieweb_websub.settings')->get('notification_handler') == 'cron') {
+    \Drupal::service('indieweb.websub.client')->handleNotificationQueue();
+  }
 }

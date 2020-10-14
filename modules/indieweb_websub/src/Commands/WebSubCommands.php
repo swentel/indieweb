@@ -10,7 +10,7 @@ use Drush\Commands\DrushCommands;
 class WebSubCommands extends DrushCommands {
 
   /**
-   * WebSub publish.
+   * WebSub publish
    *
    * @command indieweb:websub-publish
    * @aliases iwp,indieweb-websub-publish
@@ -18,6 +18,18 @@ class WebSubCommands extends DrushCommands {
   public function webSubPublish() {
     if (\Drupal::config('indieweb_websub.settings')->get('send_pub_handler') == 'drush') {
       \Drupal::service('indieweb.websub.client')->handleQueue();
+    }
+  }
+
+  /**
+   * Handle the notifications
+   *
+   * @command indieweb:websub-notifications
+   * @aliases iwsn,indieweb-websub-notifications
+   */
+  public function webSubNotifications() {
+    if (\Drupal::config('indieweb_websub.settings')->get('notification_handler') == 'drush') {
+      \Drupal::service('indieweb.websub.client')->handleNotificationQueue();
     }
   }
 
@@ -36,7 +48,7 @@ class WebSubCommands extends DrushCommands {
   }
 
   /**
-   * Command to test hub discovery.
+   * Command to test hub discovery
    *
    * @param $url
    *

@@ -12,6 +12,22 @@ class WebSubClient implements WebSubClientInterface {
   /**
    * {@inheritdoc}
    */
+  public function createQueueItem($entity_id, $entity_type_id) {
+    $data = [
+      'entity_id' => $entity_id,
+      'entity_type_id' => $entity_type_id,
+    ];
+    try {
+      \Drupal::queue(INDIEWEB_WEBSUB_QUEUE)->createItem($data);
+    }
+    catch (\Exception $e) {
+      \Drupal::logger('indieweb_queue')->notice('Error creating queue item: @message', ['@message' => $e->getMessage()]);
+    }
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function handleQueue() {
     $end = time() + 15;
     $config = \Drupal::config('indieweb_websub.settings');
@@ -64,16 +80,35 @@ class WebSubClient implements WebSubClientInterface {
   /**
    * {@inheritdoc}
    */
-  public function createQueueItem($entity_id, $entity_type_id) {
-    $data = [
-      'entity_id' => $entity_id,
-      'entity_type_id' => $entity_type_id,
-    ];
+  public function createNotificationQueueItem($url, $content) {
     try {
-      \Drupal::queue(INDIEWEB_WEBSUB_QUEUE)->createItem($data);
+      $data = [
+        'url' => $url,
+        'content' => $content,
+      ];
+      \Drupal::queue(INDIEWEB_WEBSUB_NOTIFICATION_QUEUE)->createItem($data);
     }
     catch (\Exception $e) {
-      \Drupal::logger('indieweb_queue')->notice('Error creating queue item: @message', ['@message' => $e->getMessage()]);
+      \Drupal::logger('indieweb_queue')->notice('Error creating notification queue item: @message', ['@message' => $e->getMessage()]);
+    }
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function handleNotificationQueue() {
+    $end = time() + 15;
+    while (time() < $end && ($item = \Drupal::queue(INDIEWEB_WEBSUB_NOTIFICATION_QUEUE)->claimItem())) {
+      $data = $item->data;
+
+      if (!empty($data['url']) && !empty($data['content'])) {
+        $url = $data['url'];
+        $content = $data['content'];
+        \Drupal::moduleHandler()->invokeAll('indieweb_websub_notification', [$url, $content]);
+      }
+
+      // Always delete.
+      \Drupal::queue(INDIEWEB_WEBSUB_NOTIFICATION_QUEUE)->deleteItem($item);
     }
   }
 

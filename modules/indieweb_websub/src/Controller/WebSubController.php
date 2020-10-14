@@ -44,11 +44,9 @@ class WebSubController extends ControllerBase {
       }
       catch (\Exception $ignored) {}
 
-
       if (!empty($url) && hash_equals($websub_hash, $websub_client->getHash($url))) {
+        \Drupal::service('indieweb.websub.client')->createNotificationQueueItem($url, (string) $request->getContent());
         $status = 200;
-        $content = $request->getContent();
-        \Drupal::moduleHandler()->invokeAll('indieweb_websub_notification', [$url, $content]);
       }
 
       // Log payload.

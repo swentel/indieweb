@@ -20,6 +20,19 @@ interface WebSubClientInterface {
   public function createQueueItem($entity_id, $entity_type_id);
 
   /**
+   * Generates a queue item on incoming notification.
+   *
+   * @param $url
+   * @param $content
+   */
+  public function createNotificationQueueItem($url, $content);
+
+  /**
+   * Handles the notification queue.
+   */
+  public function handleNotificationQueue();
+
+  /**
    * Resubscribe to WebSub subscriptions.
    *
    * @param $debug

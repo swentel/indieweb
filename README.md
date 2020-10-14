@@ -416,6 +416,9 @@ To publish your content to the hub via drush, run the following command: 'indiew
 To resubscribe to your WebSub subscriptions via drush, run the following command: 'indieweb-websub-resubscribe'
 Once a day is fine for the latter. Don't forget to add the -l param with your domain as well.
 
+When you receive a notification from a hub, the content is stored in a queue first and handled afterwards by either
+drush or cron. This makes sure no duplicate items are saved for instance to microsub.
+
 More configuration is at configuration at admin/config/services/indieweb/websub.
 
 You need https://github.com/swentel/p3k-websub/commit/4310388f712082e4ee310eb7de462d140023a388 as a patch on the
@@ -493,7 +496,7 @@ For more background, see https://github.com/snarfed/bridgy-fed/issues/30 and htt
 
 ## Drush commands
 
-Note you need drush 8 or later to run these commands, although legacy commands in indieweb.drush.inc are available too.
+Note: you need drush 8 or later to run these commands, although legacy commands in indieweb.drush.inc are available too.
 Don't forget to pass on your domain in the drush commands as it's important for some functionality to work.
 
 ```
@@ -503,12 +506,12 @@ drush -l https://example.com indieweb-send-webmentions
 - indieweb-send-webmentions: handles the queue for sending webmentions.
 - indieweb-process-webmentions: process the webmention received on the internal endpoint
 - indieweb-replace-avatar: replaces author avatars in webmentions
-- indieweb-external-auth-map: maps an existing user account with a domain.
-- indieweb-microsub-fetch-items: fetch items for the built-in microsub server.
+- indieweb-external-auth-map: maps an existing user account with a domain
+- indieweb-microsub-fetch-items: fetch items for the built-in microsub server
 - indieweb-fetch-post-contexts: fetches context for a post
 - indieweb-websub-publish: sends a request to the configured hub
 - indieweb-websub-resubscribe: resubscribes your websub subscriptions
-
+- indieweb-websub-notifications: handles the notifications from hubs
 
 ## Hooks
 
