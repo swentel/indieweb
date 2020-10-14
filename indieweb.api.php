@@ -156,14 +156,3 @@ function hook_indieweb_websub_notification($url, $content) {
 function hook_indieweb_websub_needs_resubscribe() {
   return ['url1', 'url2'];
 }
-
-/**
- * Alter the options for the Guzzle request just before a request is made to
- * get the contents of a feed.
- *
- * @param $options
- * @param $url
- */
-function hook_microsub_pre_request_alter(&$options, $url) {
-
-}

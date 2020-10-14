@@ -72,3 +72,27 @@ function indieweb_microsub_update_8005() {
   \Drupal::entityDefinitionUpdateManager()
     ->installFieldStorageDefinition('name', 'indieweb_microsub_source', 'indieweb_microsub', $field_storage_definition);
 }
+
+/**
+ * Installs the etag field for sources.
+ */
+function indieweb_microsub_update_8006() {
+  $field_storage_definition = BaseFieldDefinition::create('string')
+    ->setLabel(t('Etag'))
+    ->setDescription(t('Entity tag HTTP response header, used for validating cache.'));
+
+  \Drupal::entityDefinitionUpdateManager()
+    ->installFieldStorageDefinition('etag', 'indieweb_microsub_source', 'indieweb_microsub', $field_storage_definition);
+}
+
+/**
+ * Installs the modified field for sources.
+ */
+function indieweb_microsub_update_8007() {
+  $field_storage_definition = BaseFieldDefinition::create('timestamp')
+    ->setLabel(t('Modified'))
+    ->setDescription(t('When the feed was last modified, as a Unix timestamp.'));
+
+  \Drupal::entityDefinitionUpdateManager()
+    ->installFieldStorageDefinition('modified', 'indieweb_microsub_source', 'indieweb_microsub', $field_storage_definition);
+}

@@ -2,6 +2,7 @@
 
 namespace Drupal\indieweb_microsub\Entity;
 
+use Drupal\aggregator\FeedInterface;
 use Drupal\Core\Entity\ContentEntityInterface;
 
 /**
@@ -55,6 +56,9 @@ interface MicrosubSourceInterface extends ContentEntityInterface {
    * Sets the hash of the source.
    *
    * @param string $hash
+   *
+   * @return $this
+   *   The class instance that this method is called on.
    */
   public function setHash($hash);
 
@@ -64,6 +68,7 @@ interface MicrosubSourceInterface extends ContentEntityInterface {
    * @param $total
    *
    * @return $this
+   *   The class instance that this method is called on.
    */
   public function setItemsInFeed($total);
 
@@ -80,6 +85,7 @@ interface MicrosubSourceInterface extends ContentEntityInterface {
    * @param $total
    *
    * @return $this
+   *   The class instance that this method is called on.
    */
   public function setKeepItemsInFeed($total);
 
@@ -103,6 +109,7 @@ interface MicrosubSourceInterface extends ContentEntityInterface {
    * @param $next_fetch
    *
    * @return $this
+   *   The class instance that this method is called on.
    */
   public function setNextFetch($next_fetch = NULL);
 
@@ -124,6 +131,9 @@ interface MicrosubSourceInterface extends ContentEntityInterface {
    * Sets the changed timestamp.
    *
    * @param $changed
+   *
+   * @return $this
+   *   The class instance that this method is called on.
    */
   public function setChanged($changed);
 
@@ -138,6 +148,9 @@ interface MicrosubSourceInterface extends ContentEntityInterface {
    * Set the value of tries.
    *
    * @param $value
+   *
+   * @return $this
+   *   The class instance that this method is called on.
    */
   public function setTries($value);
 
@@ -168,5 +181,43 @@ interface MicrosubSourceInterface extends ContentEntityInterface {
    * @return bool
    */
   public function usesWebSub();
+
+  /**
+   * Returns the entity tag HTTP response header, used for validating cache.
+   *
+   * @return string
+   *   The entity tag HTTP response header.
+   */
+  public function getEtag();
+
+  /**
+   * Sets the entity tag HTTP response header, used for validating cache.
+   *
+   * @param string $etag
+   *   A string containing the entity tag HTTP response header.
+   *
+   * @return $this
+   *   The class instance that this method is called on.
+   */
+  public function setEtag($etag);
+
+  /**
+   * Return when the feed was modified last time.
+   *
+   * @return int
+   *   The timestamp of the last time the feed was modified.
+   */
+  public function getLastModified();
+
+  /**
+   * Sets the last modification of the feed.
+   *
+   * @param int $modified
+   *   The timestamp when the feed was modified.
+   *
+   * @return $this
+   *   The class instance that this method is called on.
+   */
+  public function setLastModified($modified);
 
 }

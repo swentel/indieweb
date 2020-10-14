@@ -2,16 +2,38 @@
 
 namespace Drupal\indieweb_microsub\MicrosubClient;
 
+use Drupal\Component\Datetime\DateTimePlus;
+use Drupal\Core\Http\ClientFactory;
+use GuzzleHttp\Psr7\Request;
 use p3k\XRay\Formats\HTML;
+use Psr\Http\Message\RequestInterface;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\UriInterface;
 use function mf2\Parse;
 use Drupal\Core\Site\Settings;
 use Drupal\Core\Url;
 use Drupal\indieweb_microsub\Entity\MicrosubItem;
 use Drupal\indieweb_webmention\Entity\WebmentionInterface;
 use p3k\XRay;
-use p3k\XRay\Formats;
 
 class MicrosubClient implements MicrosubClientInterface {
+
+  /**
+   * The HTTP client to fetch the feed data with.
+   *
+   * @var \Drupal\Core\Http\ClientFactory
+   */
+  protected $httpClientFactory;
+
+  /**
+   * Constructs a MicrosubClient object.
+   *
+   * @param \Drupal\Core\Http\ClientFactory $http_client_factory
+   *   A Guzzle client object.
+   */
+  public function __construct(ClientFactory $http_client_factory) {
+    $this->httpClientFactory = $http_client_factory;
+  }
 
   /**
    * {@inheritdoc}
@@ -73,24 +95,53 @@ class MicrosubClient implements MicrosubClientInterface {
       }
 
       try {
+        $parse = TRUE;
 
         // Body can already be supplied, e.g. via WebSub.
         if (!empty($content)) {
           $body = ltrim($content);
         }
         else {
-          // Get content.
-          $options = ['headers' => ['User-Agent' => indieweb_microsub_http_client_user_agent()]];
-          \Drupal::moduleHandler()->alter('microsub_pre_request', $options, $url);
-          $response = \Drupal::httpClient()->get($url, $options);
+
+          $request = new Request('GET', $url);
+          // Generate conditional GET headers.
+          if ($source->getEtag()) {
+            $request = $request->withAddedHeader('If-None-Match', $source->getEtag());
+          }
+          if ($source->getLastModified()) {
+            $request = $request->withAddedHeader('If-Modified-Since', gmdate(DateTimePlus::RFC7231, $source->getLastModified()));
+          }
+          $request->withAddedHeader('User-Agent', indieweb_microsub_http_client_user_agent());
+
+          $actual_uri = NULL;
+          $response = $this->httpClientFactory->fromOptions([
+            'allow_redirects' => [
+              'on_redirect' => function (RequestInterface $request, ResponseInterface $response, UriInterface $uri) use (&$actual_uri) {
+                $actual_uri = (string) $uri;
+              },
+            ],
+          ])->send($request);
+
+          if ($response->hasHeader('ETag')) {
+            $source->setEtag($response->getHeaderLine('ETag'));
+          }
+          if ($response->hasHeader('Last-Modified')) {
+            $source->setLastModified(strtotime($response->getHeaderLine('Last-Modified')));
+          }
+
           $body = ltrim($response->getBody()->getContents());
+
+          // In case of a 304 Not Modified, there is no new content, so return
+          // FALSE.
+          if ($response->getStatusCode() == 304) {
+            $parse = FALSE;
+          }
         }
 
         $hash = md5($body);
-        if ($source->getHash() != $hash) {
+        if ($parse && $source->getHash() != $hash) {
 
           // Parse the body.
-
           $parsed = $xray->parse($url, $body, $parse_options);
           if ($parsed && isset($parsed['data']['type']) && $parsed['data']['type'] == 'feed') {
 
@@ -157,7 +208,7 @@ class MicrosubClient implements MicrosubClientInterface {
             }
           }
 
-          // Set changed.
+          // Set changed
           $source->setChanged(\Drupal::time()->getRequestTime());
 
           // Set new hash.

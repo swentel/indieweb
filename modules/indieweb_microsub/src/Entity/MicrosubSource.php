@@ -93,7 +93,8 @@ class MicrosubSource extends ContentEntityBase implements MicrosubSourceInterfac
    * {@inheritdoc}
    */
   public function setHash($hash) {
-    return $this->set('hash', $hash);
+    $this->set('hash', $hash);
+    return $this;
   }
 
   /**
@@ -118,7 +119,8 @@ class MicrosubSource extends ContentEntityBase implements MicrosubSourceInterfac
    * {@inheritdoc}
    */
   public function setItemsInFeed($total) {
-    return $this->set('items_in_feed', $total);
+    $this->set('items_in_feed', $total);
+    return $this;
   }
 
   /**
@@ -161,6 +163,7 @@ class MicrosubSource extends ContentEntityBase implements MicrosubSourceInterfac
    */
   public function setChanged($changed) {
     $this->set('changed', $changed);
+    return $this;
   }
 
   /**
@@ -175,6 +178,7 @@ class MicrosubSource extends ContentEntityBase implements MicrosubSourceInterfac
    */
   public function setTries($value) {
     $this->set('fetch_tries', $value);
+    return $this;
   }
 
   /**
@@ -215,6 +219,36 @@ class MicrosubSource extends ContentEntityBase implements MicrosubSourceInterfac
    */
   public function usesWebSub() {
     return (bool) $this->get('websub')->value;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getEtag() {
+    return $this->get('etag')->value;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getLastModified() {
+    return $this->get('modified')->value;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setEtag($etag) {
+    $this->set('etag', $etag);
+    return $this;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setLastModified($modified) {
+    $this->set('modified', $modified);
+    return $this;
   }
 
   /**
@@ -261,7 +295,7 @@ class MicrosubSource extends ContentEntityBase implements MicrosubSourceInterfac
 
     $fields['changed'] = BaseFieldDefinition::create('integer')
       ->setLabel(t('Changed'))
-      ->setDescription(t('The time that the feed was last updated.'))
+      ->setDescription(t('The time that the feed was last checked.'))
       ->setRevisionable(FALSE)
       ->setTranslatable(FALSE)
       ->setDefaultValue(0);
@@ -333,6 +367,16 @@ class MicrosubSource extends ContentEntityBase implements MicrosubSourceInterfac
         'weight' => 10,
       ])
       ->setDisplayConfigurable('form', TRUE);
+
+    $fields['etag'] = BaseFieldDefinition::create('string')
+      ->setLabel(t('Etag'))
+      ->setDescription(t('Entity tag HTTP response header, used for validating cache.'));
+
+    // This is updated by the fetcher and not when the feed is saved, therefore
+    // it's a timestamp and not a changed field.
+    $fields['modified'] = BaseFieldDefinition::create('timestamp')
+      ->setLabel(t('Modified'))
+      ->setDescription(t('When the feed was last modified, as a Unix timestamp.'));
 
     return $fields;
   }
