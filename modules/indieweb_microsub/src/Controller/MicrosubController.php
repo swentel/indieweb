@@ -515,7 +515,7 @@ class MicrosubController extends ControllerBase {
       $pager = \Drupal::service('pager.manager')->getPager();
       $pager_total = $pager->getTotalPages();
       $page++;
-      if (isset($pager_total[0]) && $pager_total[0] > $page) {
+      if (isset($pager_total) && is_numeric($pager_total) && $pager_total > $page) {
         $paging = ['after' => $page];
       }
 
