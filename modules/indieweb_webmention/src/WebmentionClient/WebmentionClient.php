@@ -310,10 +310,12 @@ class WebmentionClient implements WebmentionClientInterface {
           // Property. 'mention-of' is the default if we can't detect anything
           // specific. In case rsvp is set, set $data['url'] to 'in-reply-to'.
           $property = 'mention-of';
+          $urls = [];
           $properties = ['rsvp', 'like-of', 'repost-of', 'in-reply-to', 'mention-of', 'bookmark-of', 'follow-of'];
           foreach ($properties as $p) {
             if (isset($data[$p]) && !empty($data[$p])) {
               $property = $p;
+              $urls = $data[$p];
               break;
             }
           }
@@ -341,6 +343,32 @@ class WebmentionClient implements WebmentionClientInterface {
             if ($comment && $comment->getCommentedEntityTypeId() == 'node' && ($parent_target_id = $comment->getCommentedEntityId())) {
               $parent_target = Url::fromRoute('entity.node.canonical', ['node' => $parent_target_id])->toString();
               $webmention->set('parent_target', $parent_target);
+            }
+          }
+
+          // Check the urls in case of in-reply-to. When there are at least two,
+          // and there is a twitter url, then it comes from brid.gy which sends
+          // back to all parents. Catch the deepest level by checking the
+          // syndication storage.
+          if ($property == 'in-reply-to' && count($urls) > 1 && strpos($webmention->getSource(), 'brid-gy.appspot') !== FALSE) {
+            foreach ($urls as $u) {
+              if ($this->isSiloURL($u)) {
+                /** @var \Drupal\indieweb_webmention\Entity\SyndicationInterface[] $syndications */
+                $syndications = \Drupal::entityTypeManager()->getStorage('indieweb_syndication')->loadByProperties(['url' => $u]);
+                if (!empty($syndications)) {
+                  $syndication = array_shift($syndications);
+                  try {
+                    $syndication_source_url = Url::fromRoute('entity.' . $syndication->getSourceEntityTypeId() . '.canonical', [$syndication->getSourceEntityTypeId() => $syndication->getSourceEntityId()])->toString();
+                    if ($syndication_source_url != $target) {
+                      $error = TRUE;
+                      $parsed['error'] = 'duplicate';
+                      $parsed['error_description'] = strtr('Syndication url @syndication_url does not point to @target.', ['@syndication_url' => $syndication_source_url, '@target' => $target]);
+                      break;
+                    }
+                  }
+                  catch (\Exception $ignored) {}
+                }
+              }
             }
           }
 
