@@ -34,7 +34,6 @@ class MicrosubCommands extends DrushCommands {
   public function testXray($url) {
     $xray = new XRay();
     $options = ['headers' => ['User-Agent' => indieweb_microsub_http_client_user_agent()]];
-    \Drupal::moduleHandler()->alter('microsub_pre_request', $options, $url);
     $response = \Drupal::httpClient()->get($url, $options);
     $body = ltrim($response->getBody()->getContents());
     $parsed = $xray->parse($url, $body, ['expect' => 'feed']);
@@ -54,4 +53,48 @@ class MicrosubCommands extends DrushCommands {
     $feeds = $microsubClient->searchFeeds($url);
     print_r($feeds);
   }
+
+  /**
+   * Test XRay application/activity+json parsing.
+   *
+   * @command indieweb:microsub-test-activity-parsing
+   *
+   * @param $activityId
+   * @param int $send
+   *
+   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
+   */
+  public function testActivityParsing($activityId, $send = 0) {
+    /** @var \Drupal\activitypub\Entity\ActivityPubActivityInterface $activity */
+    $activity = \Drupal::entityTypeManager()->getStorage('activitypub_activity')->load($activityId);
+    if (!$activity) {
+      echo "No activity found";
+      return;
+    }
+
+    $xray = new XRay();
+    /** @var \Drupal\indieweb_microsub\MicrosubClient\MicrosubClientInterface $microsubClient */
+    $microsubClient = \Drupal::service('indieweb.microsub.client');
+
+    $json = @json_decode($activity->getPayLoad(), TRUE);
+    $parsed = $xray->parse($json['id'], $json);
+    print_r($parsed);
+
+    $target = 'https://realize.be';
+    if (!empty($json['object']['inReplyTo'])) {
+      $target = $json['object']['inReplyTo'];
+    }
+    $values = [
+      'source' => $json['id'],
+      'target' => $target,
+    ];
+
+    if ($send) {
+      /** @var \Drupal\indieweb_webmention\Entity\WebmentionInterface $webmention */
+      $webmention = \Drupal::entityTypeManager()->getStorage('indieweb_webmention')->create($values);
+      $microsubClient->sendNotification($webmention, $parsed);
+    }
+  }
+
 }

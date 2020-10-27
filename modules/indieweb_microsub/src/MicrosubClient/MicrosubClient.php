@@ -388,7 +388,12 @@ class MicrosubClient implements MicrosubClientInterface {
     if ($microsub->get('microsub_internal')) {
       $xray = new XRay();
       $url = $webmention->get('source')->value;
-      $target = \Drupal::request()->getSchemeAndHttpHost() . $webmention->get('target')->value;
+      if ($webmention->id()) {
+        $target = \Drupal::request()->getSchemeAndHttpHost() . $webmention->get('target')->value;
+      }
+      else {
+        $target = $webmention->get('target')->value;
+      }
 
       try {
 
@@ -415,7 +420,7 @@ class MicrosubClient implements MicrosubClientInterface {
           // Set url to canonical webmention for in-reply-to. This makes sure
           // that you can  reply to it from a reader as the micropub endpoint
           // will get the right node or comment.
-          if (isset($item['in-reply-to']) && !empty($item['in-reply-to'][0])) {
+          if (isset($item['in-reply-to']) && !empty($item['in-reply-to'][0]) && $webmention->id()) {
             $item['url'] = $webmention->toUrl('canonical', ['absolute' => TRUE])->toString();
           }
 
