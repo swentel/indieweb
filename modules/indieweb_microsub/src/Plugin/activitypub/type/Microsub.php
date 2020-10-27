@@ -4,7 +4,6 @@ namespace Drupal\indieweb_microsub\Plugin\activitypub\type;
 
 use Drupal\activitypub\Entity\ActivityPubActivityInterface;
 use Drupal\activitypub\Services\Type\TypePluginBase;
-use p3k\HTTP;
 use p3k\XRay;
 
 /**
@@ -27,7 +26,7 @@ class Microsub extends TypePluginBase {
   /**
    * {@inheritdoc}
    */
-  public function onActivitySave(ActivityPubActivityInterface $activity, $update = TRUE) {
+  public function onActivityPostSave(ActivityPubActivityInterface $activity, $update = TRUE) {
     if (!$update && $activity->getCollection() == 'inbox' && ($channel_id = $this->configFactory->get('indieweb_microsub.settings')->get('activitypub_channel')) && is_numeric($channel_id)) {
       $json = @json_decode($activity->getPayLoad(), TRUE);
       $xray = new XRay();
