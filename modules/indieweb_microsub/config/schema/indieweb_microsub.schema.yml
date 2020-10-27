@@ -42,3 +42,9 @@ indieweb_microsub.settings:
     push_notification_indigenous_key:
       type: string
       label: 'Push notification Indigenous API key'
+    activitypub_channel:
+      type: string
+      label: 'The channel ID to save an incoming activity to'
+    activitypub_items_in_feed:
+      type: integer
+      label: 'The number of items to keep in this channel'

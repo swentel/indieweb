@@ -181,6 +181,34 @@ class MicrosubSettingsForm extends ConfigFormBase {
       '#default_value' => $config->get('push_notification_indigenous_key'),
     ];
 
+    $form['activitypub'] = [
+      '#type' => 'fieldset',
+      '#title' => $this->t('Activitypub'),
+      '#description' => $this->t('If you use the <a href="https://www.drupal.org/project/activitypub" target="_blank">ActivityPub</a> module, you can save incoming activities to a Microsub channel.<br />It will save posts, replies etc and push notifications will be sent too if configured.'),
+      '#states' => array(
+        'visible' => array(
+          ':input[name="microsub_internal"]' => array('checked' => TRUE),
+        ),
+      ),
+      '#access' => \Drupal::moduleHandler()->moduleExists('activitypub'),
+    ];
+
+    $form['activitypub']['activitypub_channel'] = [
+      '#title' => $this->t('Channel ID'),
+      '#description' => $this->t('The channel ID to save to. Leave empty to disable this feature.'),
+      '#type' => 'number',
+      '#min' => 0,
+      '#default_value' => $config->get('activitypub_channel'),
+    ];
+
+    $form['activitypub']['activitypub_items_in_feed'] = [
+      '#title' => $this->t('Items to keep'),
+      '#description' => $this->t('Number of read items to keep in the feed. Set to 0 to keep all.'),
+      '#type' => 'number',
+      '#min' => 0,
+      '#default_value' => $config->get('activitypub_items_in_feed'),
+    ];
+
     return parent::buildForm($form, $form_state);
   }
 
@@ -203,6 +231,8 @@ class MicrosubSettingsForm extends ConfigFormBase {
       ->set('aperture_api_key', $form_state->getValue('aperture_api_key'))
       ->set('push_notification_indigenous', $form_state->getValue('push_notification_indigenous'))
       ->set('push_notification_indigenous_key', $form_state->getValue('push_notification_indigenous_key'))
+      ->set('activitypub_channel', $form_state->getValue('activitypub_channel'))
+      ->set('activitypub_items_in_feed', $form_state->getValue('activitypub_items_in_feed'))
       ->save();
 
     Cache::invalidateTags(['rendered']);

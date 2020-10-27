@@ -36,6 +36,14 @@ interface MicrosubItemInterface extends ContentEntityInterface {
   public function getSourceIdForTimeline($author, $urls = []);
 
   /**
+   * Returns the channel of microsub item.
+   *
+   * @return \Drupal\indieweb_microsub\Entity\MicrosubChannelInterface
+   *   The source id.
+   */
+  public function getChannel();
+
+  /**
    * Returns the source of microsub item.
    *
    * @return \Drupal\indieweb_microsub\Entity\MicrosubSourceInterface

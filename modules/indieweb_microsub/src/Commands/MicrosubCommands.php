@@ -55,17 +55,17 @@ class MicrosubCommands extends DrushCommands {
   }
 
   /**
-   * Test XRay application/activity+json parsing.
+   * Test Microsub ActivityPub plugin.
    *
-   * @command indieweb:microsub-test-activity-parsing
+   * @command indieweb:microsub-test-activity-plugin
    *
    * @param $activityId
-   * @param int $send
    *
    * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+   * @throws \Drupal\Component\Plugin\Exception\PluginException
    * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    */
-  public function testActivityParsing($activityId, $send = 0) {
+  public function testActivityParsing($activityId) {
     /** @var \Drupal\activitypub\Entity\ActivityPubActivityInterface $activity */
     $activity = \Drupal::entityTypeManager()->getStorage('activitypub_activity')->load($activityId);
     if (!$activity) {
@@ -73,28 +73,9 @@ class MicrosubCommands extends DrushCommands {
       return;
     }
 
-    $xray = new XRay();
-    /** @var \Drupal\indieweb_microsub\MicrosubClient\MicrosubClientInterface $microsubClient */
-    $microsubClient = \Drupal::service('indieweb.microsub.client');
-
-    $json = @json_decode($activity->getPayLoad(), TRUE);
-    $parsed = $xray->parse($json['id'], $json);
-    print_r($parsed);
-
-    $target = 'https://realize.be';
-    if (!empty($json['object']['inReplyTo'])) {
-      $target = $json['object']['inReplyTo'];
-    }
-    $values = [
-      'source' => $json['id'],
-      'target' => $target,
-    ];
-
-    if ($send) {
-      /** @var \Drupal\indieweb_webmention\Entity\WebmentionInterface $webmention */
-      $webmention = \Drupal::entityTypeManager()->getStorage('indieweb_webmention')->create($values);
-      $microsubClient->sendNotification($webmention, $parsed);
-    }
+    /** @var \Drupal\activitypub\Services\Type\TypePluginInterface $object */
+    $object = $activity->getTypePluginManager()->createInstance('activitypub_microsub');
+    $object->onActivitySave($activity, FALSE);
   }
 
 }

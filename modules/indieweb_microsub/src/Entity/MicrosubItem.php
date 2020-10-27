@@ -53,7 +53,7 @@ class MicrosubItem extends ContentEntityBase implements MicrosubItemInterface {
   public function getSourceIdForTimeline($author, $urls = []) {
     $return = $this->getSourceId();
 
-    if ($this->getChannelId() > 0) {
+    if ($this->getChannelId() > 0 && $return > 0) {
       $url = $this->getSource()->label();
       foreach ($urls as $u) {
         if (strpos($url, $u) !== FALSE) {
@@ -64,6 +64,13 @@ class MicrosubItem extends ContentEntityBase implements MicrosubItemInterface {
     }
 
     return $return;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getChannel() {
+    return $this->get('channel_id')->entity;
   }
 
   /**

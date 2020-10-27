@@ -11,7 +11,7 @@ class MicrosubClientTest extends MicrosubClient {
   /**
    * {@inheritdoc}
    */
-  public function sendNotification(WebmentionInterface $webmention, $parsed = NULL) {
+  public function sendNotification(WebmentionInterface $webmention, $parsed = NULL, $channel_id = 0) {
 
     $url = $webmention->get('url')->value;
     if (empty($url)) {

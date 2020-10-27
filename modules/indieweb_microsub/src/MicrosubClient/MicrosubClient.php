@@ -372,7 +372,7 @@ class MicrosubClient implements MicrosubClientInterface {
   /**
    * {@inheritdoc}
    */
-  public function sendNotification(WebmentionInterface $webmention, $parsed = NULL) {
+  public function sendNotification(WebmentionInterface $webmention, $parsed = NULL, $channel_id = 0) {
     $microsub = \Drupal::config('indieweb_microsub.settings');
 
     // Send to aperture.
@@ -434,7 +434,8 @@ class MicrosubClient implements MicrosubClientInterface {
             }
           }
 
-          $this->saveItem($item);
+          $tries = 0;
+          $this->saveItem($item, $tries, 0, $channel_id);
         }
 
       }

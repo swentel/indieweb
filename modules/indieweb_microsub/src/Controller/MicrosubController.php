@@ -473,7 +473,7 @@ class MicrosubController extends ControllerBase {
         $channel_id = $item->getChannelId();
 
         // Check author name.
-        if ($channel_id > 0) {
+        if ($channel_id > 0 && $item->getSourceId() > 0) {
           $author_name = $item->getSource()->label();
         }
         if (!empty($data->author->name)) {
@@ -484,7 +484,11 @@ class MicrosubController extends ControllerBase {
         }
 
         // Apply media cache.
-        if ($channel > 0 && !$item->getSource()->disableImageCache()) {
+        $apply_cache = TRUE;
+        if ($item->getSourceId() > 0 && $item->getSource()->disableImageCache()) {
+          $apply_cache = FALSE;
+        }
+        if ($channel > 0 && $apply_cache) {
           $this->applyCache($data);
         }
 
@@ -494,8 +498,11 @@ class MicrosubController extends ControllerBase {
         $entry->_source = $item->getSourceIdForTimeline($author_name, $this->aggregated_feeds);
 
         // Channel information.
-        if ($channel_id > 0) {
+        if ($channel_id > 0 && $item->getSourceId() > 0) {
           $channel = $item->getSource()->getChannel()->label();
+        }
+        elseif ($channel_id > 0) {
+          $channel = $item->getChannel()->label();
         }
         else {
           $channel = 'Notifications';

@@ -10,3 +10,5 @@ aperture_enable_micropub: false
 aperture_api_key: ''
 push_notification_indigenous: false
 push_notification_indigenous_key: ''
+activitypub_channel: ''
+activitypub_items_in_feed: 100

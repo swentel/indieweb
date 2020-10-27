@@ -451,7 +451,7 @@ More info at https://indieweb.org/nicknames-cache.
 
 There is no code to autocomplete contacts in a textarea. Pull requests are welcome.
 
-## Fediverse via Bridgy Fed
+## Fediverse via Bridgy Fed or ActivityPub module
 
 Bridgy Fed lets you interact with federated social networks like Mastodon and Hubzilla from your IndieWeb site. It
 translates replies, likes, and reposts from webmentions to federated social networking protocols like ActivityPub and
@@ -466,7 +466,9 @@ content types or comments where needed. Posts, replies, likes, boosts and follow
 - If you use a microsub server, you can subscribe to fediverse users through the microformats feed.
 
 If you want to interact with the Fediverse using Drupal itself, you can also install the ActivityPub module
-for Drupal: https://drupal.org/project/activitypub.
+for Drupal: https://drupal.org/project/activitypub and then use the ActivityPub plugin in the Microsub module
+at admin/config/services/indieweb/microsub to read incoming content from users you follow or interactions
+on your content.
 
 ## Caching of image files
 
