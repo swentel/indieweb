@@ -75,7 +75,7 @@ class MicrosubCommands extends DrushCommands {
 
     /** @var \Drupal\activitypub\Services\Type\TypePluginInterface $object */
     $object = $activity->getTypePluginManager()->createInstance('activitypub_microsub');
-    $object->onActivitySave($activity, FALSE);
+    $object->onActivityPostSave($activity, FALSE);
   }
 
 }
